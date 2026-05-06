@@ -12,13 +12,12 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 - SpringDoc OpenAPI 2.8.6
 - JUnit 5 + Mockito + MockMvc + Testcontainers + JaCoCo
 
-## Skills (48)
+## Skills (46)
 
-### Project Initialization
+### Project Setup
 | Skill | Description |
 |-------|-------------|
-| `create-spring-boot-project` | Creates Spring Boot project skeleton |
-| `maven-dependencies` | Maven POM management |
+| `ddd-cola` | COLA DDD architecture + project scaffolding + POM dependencies |
 | `graalvm-native-image` | GraalVM Native Image builds |
 
 ### Data Access
@@ -90,7 +89,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 ### Architecture
 | Skill | Description |
 |-------|-------------|
-| `ddd-cola` | COLA DDD architecture patterns |
+| `ddd-cola` | COLA DDD architecture + project scaffolding |
 | `ddd-event-driven` | Event-driven DDD patterns |
 
 ### DevOps & Workflow

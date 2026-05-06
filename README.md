@@ -6,7 +6,7 @@ A modular plugin system for AI-powered development assistance, organized as inst
 
 | Plugin | Description | Skills | Agents | Commands | Rules |
 |--------|-------------|--------|--------|----------|-------|
-| developer-kit-java | Spring Boot + MyBatis-Plus + Spring Cloud Alibaba | 48 | 6 | 11 | 5 |
+| developer-kit-java | Spring Boot + MyBatis-Plus + Spring Cloud Alibaba | 46 | 6 | 11 | 5 |
 
 ## Installation
 
