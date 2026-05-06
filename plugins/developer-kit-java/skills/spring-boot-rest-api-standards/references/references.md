@@ -317,7 +317,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/v1/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Test\",\"price\":10.00}"))
-            .andExpect(status().isCreated())
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").exists());
     }
 }
@@ -343,10 +343,10 @@ class ProductIntegrationTest {
 
 ## Related Skills
 
-- **spring-boot-crud-patterns/SKILL.md** - CRUD operations following REST principles
-- **spring-boot-dependency-injection/SKILL.md** - Dependency injection in controllers
-- **spring-boot-test-patterns/SKILL.md** - Testing REST APIs
-- **spring-boot-exception-handling/SKILL.md** - Global error handling
+- **spring-boot-rest-api-standards** - CRUD operations following REST principles
+- **spring-boot-dependency-injection** - Dependency injection in controllers
+- **spring-boot-tdd** - Testing REST APIs
+- **spring-boot-exception-handling** - Global error handling
 
 ## External Resources
 

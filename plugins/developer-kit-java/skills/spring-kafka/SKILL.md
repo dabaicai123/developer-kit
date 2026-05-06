@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Kafka integration patterns for Spring Boot 3.5.x.
 
-## When to Use
+## When to use this skill
 
 - Producing or consuming Kafka messages
 - Implementing event-driven microservices with Kafka

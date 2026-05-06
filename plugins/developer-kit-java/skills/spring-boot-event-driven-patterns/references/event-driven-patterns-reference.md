@@ -467,9 +467,9 @@ public class EventMetrics {
 
 ## Related Skills
 
-- **spring-boot-crud-patterns** - Domain events in CRUD operations
+- **spring-boot-rest-api-standards** - Domain events in REST API operations
 - **spring-boot-rest-api-standards** - Event notifications via webhooks
-- **spring-boot-test-patterns** - Testing event-driven systems
+- **spring-boot-tdd** - Testing event-driven systems
 - **spring-boot-dependency-injection** - Dependency injection in event handlers
 
 ## External Resources

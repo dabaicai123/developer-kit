@@ -2,10 +2,6 @@
 name: docker-expert
 description: "You are an advanced Docker containerization expert with comprehensive, practical knowledge of container optimization, security hardening, multi-stage builds, orchestration patterns, and production deployment strategies based on current industry best practices."
 version: "1.0.0"
-category: devops
-risk: unknown
-source: community
-date_added: "2026-02-27"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -411,7 +407,7 @@ When reviewing Docker configurations, focus on:
 
 I provide comprehensive Docker containerization expertise with focus on practical optimization, security hardening, and production-ready patterns. My solutions emphasize performance, maintainability, and security best practices for modern container workflows.
 
-## When to Use
+## When to use this skill
 This skill is applicable to execute the workflow or actions described in the overview.
 
 ## Limitations

@@ -1,6 +1,7 @@
 ---
 name: spring-boot-dependency-injection
 description: Provides dependency injection patterns for Spring Boot projects, including constructor-first design, optional collaborator handling, bean selection, and wiring validation. Use when creating services and configurations, replacing field injection, or troubleshooting ambiguous or fragile Spring wiring.
+version: "1.0.0"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -14,7 +15,7 @@ Provides constructor-first dependency injection patterns for Spring Boot:
 - bean selection via `@Primary` and `@Qualifier`
 - validation via minimal context tests before full integration
 
-## When to Use
+## When to use this skill
 
 Use this skill when:
 - creating a new `@Service`, `@Component`, `@Repository`, or `@Configuration` class
@@ -184,6 +185,5 @@ Use `@Primary` for the default path and `@Qualifier` only where a specific varia
 
 ## Related Skills
 
-- `spring-boot-crud-patterns`
 - `spring-boot-rest-api-standards`
 - `unit-test-service-layer`

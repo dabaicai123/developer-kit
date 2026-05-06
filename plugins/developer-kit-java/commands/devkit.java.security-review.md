@@ -18,7 +18,7 @@ Reviews Spring Boot application security for vulnerabilities and compliance.
 ### Execution
 
 1. Invoke the `java-security-expert` agent
-2. Use the `springboot-security` and `spring-boot-security-jwt` skills
+2. Use the `spring-boot-security` and `spring-boot-security-jwt` skills
 3. Run security audit phases:
    - **Authentication**: JWT config, token storage, refresh rotation
    - **Authorization**: Endpoint access control, RBAC, method security

@@ -264,7 +264,7 @@ src/main/java/com/example/order/
 
 - 详细映射指南：`architecture-directory-mapping-guide.md`
 - 详细示例：`examples/architecture-directory-mapping.md`
-- COLA V5 权威参考：`../../ddd-cola/SKILL.md`
+- COLA V5 权威参考：`ddd-cola`
 - DDD 架构参考：`../ddd4j-project-creator/docs/1、DDD 经典分层架构目录结构.md`
 - 六边形架构参考：`../ddd4j-project-creator/docs/2、六边形架构详细目录结构参考.md`
 - 整洁架构参考：`../ddd4j-project-creator/docs/3、整洁架构详细目录结构参考.md`

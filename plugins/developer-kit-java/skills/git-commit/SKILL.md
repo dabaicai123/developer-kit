@@ -1,10 +1,17 @@
 ---
 name: git-commit
 description: 'Execute git commit with conventional commit message analysis, intelligent staging, and message generation. Use when user asks to commit changes, create a git commit, or mentions "/commit". Supports: (1) Auto-detecting type and scope from changes, (2) Generating conventional commit messages from diff, (3) Interactive commit with optional type/scope/description overrides, (4) Intelligent file staging for logical grouping'
-allowed-tools: Bash
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Git Commit with Conventional Commits
+
+## When to use this skill
+
+- Creating a git commit with a conventional commit message
+- Analyzing diffs to determine commit type, scope, and description
+- Staging files logically and generating semantic commit messages
 
 ## Overview
 

@@ -1,7 +1,8 @@
 ---
 name: unit-test-parameterized
 description: Provides parameterized testing patterns with JUnit 5, generates data-driven unit tests using @ParameterizedTest, @ValueSource, @CsvSource, @MethodSource. Creates tests that run the same logic with multiple input values. Use when writing data-driven Java tests, multiple test cases from single method, or boundary value analysis.
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Parameterized Unit Tests with JUnit 5
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 Provides patterns for parameterized unit tests in Java using JUnit 5. Covers `@ValueSource`, `@CsvSource`, `@MethodSource`, `@EnumSource`, `@ArgumentsSource`, and custom display names. Reduces test duplication by running the same test logic with multiple input values.
 
-## When to Use
+## When to use this skill
 
 - Writing JUnit tests with multiple input combinations
 - Implementing data-driven tests in Java

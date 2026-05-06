@@ -17,7 +17,6 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 ### Project Setup
 | Skill | Description |
 |-------|-------------|
-| `ddd-cola` | COLA DDD architecture + project scaffolding + POM dependencies |
 | `graalvm-native-image` | GraalVM Native Image builds |
 
 ### Data Access
@@ -41,7 +40,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 ### Security
 | Skill | Description |
 |-------|-------------|
-| `springboot-security` | Spring Security configuration |
+| `spring-boot-security` | Spring Security configuration |
 | `spring-boot-security-jwt` | JWT authentication with JJWT |
 
 ### Documentation & API
@@ -83,13 +82,13 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | `unit-test-scheduled-async` | Scheduled/async testing |
 | `unit-test-utility-methods` | Utility methods testing |
 | `unit-test-wiremock-rest-api` | WireMock REST API testing |
-| `springboot-tdd` | TDD workflow |
-| `springboot-verification` | Verification patterns |
+| `spring-boot-tdd` | TDD workflow |
+| `spring-boot-verification` | Verification patterns |
 
 ### Architecture
 | Skill | Description |
 |-------|-------------|
-| `ddd-cola` | COLA DDD architecture + project scaffolding |
+| `ddd-cola` | COLA DDD architecture + project scaffolding + POM dependencies |
 | `ddd-event-driven` | Event-driven DDD patterns |
 
 ### DevOps & Workflow

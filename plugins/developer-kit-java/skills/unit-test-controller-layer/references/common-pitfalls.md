@@ -74,7 +74,7 @@ mockMvc.perform(get("/api/users"))
 ```java
 // BAD
 mockMvc.perform(get("/users/1")).andExpect(status().isOk());
-mockMvc.perform(post("/users")).andExpect(status().isCreated());
+mockMvc.perform(post("/users")).andExpect(status().isOk());
 
 // GOOD - Extract to constants
 private static final String BASE_URL = "/api/users";

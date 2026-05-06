@@ -19,7 +19,7 @@ skills:
   - unit-test-config-properties
   - unit-test-utility-methods
   - unit-test-wiremock-rest-api
-  - springboot-tdd
+  - spring-boot-tdd
 ---
 
 # Spring Boot Unit Testing Expert
@@ -141,7 +141,7 @@ void removeById_withSoftDelete_setsDeletedAt() {
 | Security | `unit-test-security-authorization` |
 | Caching | `unit-test-caching` |
 | Parameterized | `unit-test-parameterized` |
-| TDD workflow | `springboot-tdd` |
+| TDD workflow | `spring-boot-tdd` |
 
 ---
 

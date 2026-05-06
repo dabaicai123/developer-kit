@@ -2,7 +2,7 @@
 name: jetcache
 description: "JetCache 二级缓存 + Redisson 分布式服务: Caffeine LOCAL + Redisson REMOTE (@Cached/@CacheInvalidate/@CacheUpdate), QuickConfig, syncLocal, auto refresh, penetration protect, RLock 分布式锁, RTopic Pub/Sub, RRateLimiter 限流, RedisUtils, DistributedLockUtils。Spring Boot 3.x Redis / spring-data-redis 一站式 skill，所有组件共用 Redisson 连接池。触发词: redis, spring-data-redis, RedisTemplate, 缓存, 分布式锁, JetCache, Redisson。"
 version: "1.0.0"
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # JetCache + Redisson 二级缓存与分布式服务
@@ -17,7 +17,7 @@ redisson-spring-boot-starter
 三者共用同一个 Redisson 连接池，只需配置一次 spring.data.redis.*
 ```
 
-## When to Use
+## When to use this skill
 
 - 给 Service 方法添加声明式缓存 (`@Cached`, `@CacheUpdate`, `@CacheInvalidate`)
 - 配置 Caffeine + Redisson 二级缓存，设置 TTL、area、syncLocal 策略

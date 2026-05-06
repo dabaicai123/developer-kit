@@ -2,11 +2,18 @@
 name: documentation-writer
 description: Creates high-quality documentation following Diátaxis framework including tutorials, how-to guides, reference, and explanations. Use when writing documentation, creating guides, or documenting APIs.
 version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Documentation Writer (Diátaxis)
 
 Create high-quality software documentation.
+
+## When to use this skill
+
+- Writing tutorials, how-to guides, reference docs, or explanations following the Diátaxis framework
+- Creating or updating project documentation, API references, or onboarding guides
+- Structuring documentation by audience and purpose (learning vs. problem-solving vs. information vs. understanding)
 
 ## Four Document Types
 

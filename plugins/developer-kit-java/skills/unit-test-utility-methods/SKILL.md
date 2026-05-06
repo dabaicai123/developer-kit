@@ -1,7 +1,8 @@
 ---
 name: unit-test-utility-methods
 description: Provides patterns for testing utility classes, static methods, and helper functions. Validates pure functions, null handling, edge cases, and boundary conditions. Generates AssertJ assertions and @ParameterizedTest for string utils, math utils, validators, and collection helpers. Use when testing utils, test helpers, helper functions, static methods, or verifying utility code correctness.
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing Utility Classes and Static Methods
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 This skill generates tests for utility classes with static helper methods and pure functions. It provides patterns for testing null handling, edge cases, boundary conditions, and common utilities like string manipulation, calculations, data validation, and collections. Pure functions require no mocking.
 
-## When to Use
+## When to use this skill
 
 Use this skill when:
 - Writing tests for utility/helper classes with static methods

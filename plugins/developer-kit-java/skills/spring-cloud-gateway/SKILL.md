@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 API gateway patterns for Spring Boot 3.5.x microservices.
 
-## When to Use
+## When to use this skill
 
 - Building an API gateway for microservices
 - Configuring routing, load balancing, or rate limiting

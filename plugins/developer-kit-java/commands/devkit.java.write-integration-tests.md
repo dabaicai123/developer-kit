@@ -26,7 +26,7 @@ Generates integration tests for Spring Boot using Testcontainers.
    - PostgreSQL container for database tests
    - Redis container for cache tests
 4. Generate integration tests:
-   - `@SpringBootTest` or `@DataJpaTest` + Testcontainers
+   - `@SpringBootTest` + Testcontainers (not JPA-specific test slice annotations, which are incompatible with MyBatis-Plus)
    - `@Testcontainers` + `@Container` annotations
    - `@Transactional(readOnly = true)` with auto-rollback
    - MyBatis-Plus mapper tests: verify actual SQL execution

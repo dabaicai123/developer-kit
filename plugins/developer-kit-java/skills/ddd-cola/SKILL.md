@@ -20,7 +20,7 @@ Use this skill whenever the user wants to:
 ```bash
 curl https://start.spring.io/starter.zip \
   -d artifactId=demo-java \
-  -d bootVersion=3.5.14 \
+  -d bootVersion=3.5.1 \
   -d dependencies=lombok,configuration-processor,web,postgresql,data-redis,validation,cache,testcontainers \
   -d javaVersion=21 \
   -d packageName=com.example \

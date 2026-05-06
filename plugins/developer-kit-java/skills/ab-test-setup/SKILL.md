@@ -2,9 +2,6 @@
 name: ab-test-setup
 description: "Structured guide for setting up A/B tests with mandatory gates for hypothesis, metrics, and execution readiness."
 version: "1.0.0"
-risk: unknown
-source: community
-date_added: "2026-02-27"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -236,7 +233,7 @@ It is about **learning the truth with confidence**.
 If you feel tempted to rush, simplify, or “just try it” —
 that is the signal to **slow down and re-check the design**.
 
-## When to Use
+## When to use this skill
 This skill is applicable to execute the workflow or actions described in the overview.
 
 ## Limitations

@@ -627,9 +627,9 @@ class UserControllerTest {
 - [Conditional Bean Registration](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-auto-configuration.condition-annotations)
 
 ### Related Skills
-- **spring-boot-crud-patterns/SKILL.md** - DI in CRUD applications
-- **spring-boot-test-patterns/SKILL.md** - Testing with DI
-- **spring-boot-rest-api-standards/SKILL.md** - REST layer with DI
+- **spring-boot-rest-api-standards** - DI in REST API applications
+- **spring-boot-tdd** - Testing with DI
+- **spring-boot-rest-api-standards** - REST layer with DI
 
 ### Books
 - "Spring in Action" (latest edition)

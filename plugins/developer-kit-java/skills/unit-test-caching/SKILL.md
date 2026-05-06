@@ -1,7 +1,8 @@
 ---
 name: unit-test-caching
 description: "Provides patterns for unit testing Spring Cache annotations (@Cacheable, @CachePut, @CacheEvict). Generates test code that mocks cache managers, verifies cache hit/miss behavior, tests cache key generation with SpEL expressions, validates eviction strategies, and checks conditional caching scenarios. Triggers: caching tests, test Spring cache, mock cache, Spring Boot caching, cache hit/miss verification, @Cacheable testing."
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing Spring Caching
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 This skill provides patterns for unit testing Spring caching annotations (`@Cacheable`, `@CacheEvict`, `@CachePut`) without full Spring context. It covers cache hits/misses, invalidation, key generation, and conditional caching using in-memory `ConcurrentMapCacheManager`.
 
-## When to Use
+## When to use this skill
 
 - Writing unit tests for `@Cacheable` method behavior
 - Verifying `@CacheEvict` cache invalidation works correctly
@@ -60,6 +61,8 @@ dependencies {
 
 ### Testing `@Cacheable` (Cache Hit/Miss)
 
+> **Important**: `@Cacheable` relies on Spring AOP proxying. Creating a service with `new UserService(userRepository)` bypasses the proxy, so caching annotations are silently ignored — the repository will be called on every invocation. Always use `@Autowired` to inject the service in a Spring context so the proxy wraps caching behavior correctly.
+
 ```java
 // Service
 @Service
@@ -76,17 +79,23 @@ public class UserService {
   }
 }
 
-// Test
+// Test - uses Spring context so @Cacheable proxy is active
+@SpringBootTest
+@EnableCaching
 class UserServiceCachingTest {
 
-  private UserRepository userRepository;
-  private UserService userService;
-
-  @BeforeEach
-  void setUp() {
-    userRepository = mock(UserRepository.class);
-    userService = new UserService(userRepository);
+  @Configuration
+  @EnableCaching
+  static class TestConfig {
+    @Bean
+    CacheManager cacheManager() {
+      return new ConcurrentMapCacheManager("users");
+    }
   }
+
+  @MockBean private UserRepository userRepository;
+  @Autowired private UserService userService;
+  @Autowired private CacheManager cacheManager;
 
   @Test
   void shouldCacheUserAfterFirstCall() {
@@ -95,7 +104,7 @@ class UserServiceCachingTest {
 
     // First call - hits database
     User firstCall = userService.getUserById(1L);
-    // Second call - hits cache
+    // Second call - hits cache (no additional repository call)
     User secondCall = userService.getUserById(1L);
 
     assertThat(firstCall).isEqualTo(secondCall);
@@ -103,18 +112,25 @@ class UserServiceCachingTest {
   }
 
   @Test
-  void shouldInvokeRepositoryOnCacheMiss() {
-    when(userRepository.findById(1L)).thenReturn(Optional.of(new User(1L, "Bob")));
+  void shouldCallRepositoryAgainAfterCacheEviction() {
+    User user = new User(1L, "Alice");
+    when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
     userService.getUserById(1L);
     userService.getUserById(1L);
+    verify(userRepository, times(1)).findById(1L); // Cached after first call
 
-    verify(userRepository, times(2)).findById(1L); // No caching occurred
+    // Evict cache manually and call again
+    cacheManager.getCache("users").clear();
+    userService.getUserById(1L);
+    verify(userRepository, times(2)).findById(1L); // Cache miss after eviction
   }
 }
 ```
 
 ### Testing `@CacheEvict`
+
+> **Important**: `@CacheEvict` relies on Spring AOP proxying. Creating a service with `new ProductService(productRepository)` bypasses the proxy, so eviction annotations are silently ignored. Always use `@Autowired` to inject the service in a Spring context so the proxy handles eviction correctly.
 
 ```java
 // Service
@@ -137,29 +153,39 @@ public class ProductService {
   }
 }
 
-// Test
+// Test - uses Spring context so @CacheEvict proxy is active
+@SpringBootTest
+@EnableCaching
 class ProductCacheEvictTest {
 
-  private ProductRepository productRepository;
-  private ProductService productService;
-
-  @BeforeEach
-  void setUp() {
-    productRepository = mock(ProductRepository.class);
-    productService = new ProductService(productRepository);
+  @Configuration
+  @EnableCaching
+  static class TestConfig {
+    @Bean
+    CacheManager cacheManager() {
+      return new ConcurrentMapCacheManager("products");
+    }
   }
+
+  @MockBean private ProductRepository productRepository;
+  @Autowired private ProductService productService;
 
   @Test
   void shouldEvictProductFromCacheWhenDeleted() {
     Product product = new Product(1L, "Laptop", 999.99);
     when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+    when(productRepository.findById(anyLong())).thenAnswer(i ->
+      Optional.of(new Product(i.getArgument(0), "Product", 10.0)));
 
     productService.getProductById(1L); // Cache the product
+    productService.getProductById(1L); // Cache hit - no extra repository call
+    verify(productRepository, times(1)).findById(1L);
+
     productService.deleteProduct(1L); // Evict from cache
 
     // Repository called again after eviction
     productService.getProductById(1L);
-    verify(productRepository, times(2)).findById(1L);
+    verify(productRepository, times(2)).findById(1L); // Cache miss after eviction
   }
 
   @Test
@@ -172,7 +198,7 @@ class ProductCacheEvictTest {
     productService.getProductById(1L);
     productService.getProductById(2L);
 
-    // Use reflection or clear() on ConcurrentMapCache
+    // Evict all entries - @CacheEvict(allEntries = true)
     productService.clearAllProducts();
 
     productService.getProductById(1L);
@@ -184,6 +210,8 @@ class ProductCacheEvictTest {
 ```
 
 ### Testing `@CachePut`
+
+> **Important**: `@CachePut` relies on Spring AOP proxying. Creating a service with `new OrderService(orderRepository)` bypasses the proxy, so cache update annotations are silently ignored. Always use `@Autowired` to inject the service in a Spring context so the proxy handles cache updates correctly.
 
 ```java
 @Service
@@ -205,16 +233,22 @@ public class OrderService {
   }
 }
 
+// Test - uses Spring context so @CachePut proxy is active
+@SpringBootTest
+@EnableCaching
 class OrderCachePutTest {
 
-  private OrderRepository orderRepository;
-  private OrderService orderService;
-
-  @BeforeEach
-  void setUp() {
-    orderRepository = mock(OrderRepository.class);
-    orderService = new OrderService(orderRepository);
+  @Configuration
+  @EnableCaching
+  static class TestConfig {
+    @Bean
+    CacheManager cacheManager() {
+      return new ConcurrentMapCacheManager("orders");
+    }
   }
+
+  @MockBean private OrderRepository orderRepository;
+  @Autowired private OrderService orderService;
 
   @Test
   void shouldUpdateCacheWhenOrderIsUpdated() {
@@ -224,12 +258,11 @@ class OrderCachePutTest {
     when(orderRepository.findById(1L)).thenReturn(Optional.of(original));
     when(orderRepository.save(updated)).thenReturn(updated);
 
-    orderService.getOrder(1L);
-    orderService.updateOrder(updated);
+    orderService.getOrder(1L); // Cache original order
+    orderService.updateOrder(updated); // @CachePut updates cache
 
-    // Next call returns updated version from cache
-    Order cachedOrder = orderService.getOrder(1L);
-    assertThat(cachedOrder.getStatus()).isEqualTo("Shipped");
+    // Next call returns updated version from cache (not repository)
+    verify(orderRepository, times(1)).findById(1L); // Only initial call hit repository
   }
 }
 ```

@@ -1,5 +1,5 @@
 ---
-name: springboot-verification
+name: spring-boot-verification
 description: "Verification loop for Spring Boot projects: build, static analysis, tests with coverage, security scans, and diff review before release or PR."
 version: "1.0.0"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Run before PRs, after major changes, and pre-deploy.
 
-## When to Activate
+## When to use this skill
 
 - Before opening a pull request for a Spring Boot service
 - After major refactoring or dependency upgrades
@@ -132,7 +132,7 @@ class UserControllerTest {
   @MockBean private UserService userService;
 
   @Test
-  void createUser_validInput_returns201() throws Exception {
+  void createUser_validInput_returns200() throws Exception {
     var user = new UserDto(1L, "Alice", "alice@example.com");
     when(userService.create(any())).thenReturn(user);
 
@@ -141,7 +141,7 @@ class UserControllerTest {
             .content("""
                 {"name": "Alice", "email": "alice@example.com"}
                 """))
-        .andExpect(status().isCreated())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Alice"));
   }
 

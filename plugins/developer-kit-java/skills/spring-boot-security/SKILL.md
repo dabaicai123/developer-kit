@@ -1,5 +1,5 @@
 ---
-name: springboot-security
+name: spring-boot-security
 description: Spring Security best practices for authn/authz, validation, CSRF, secrets, headers, rate limiting, and dependency security in Java Spring Boot services.
 version: "1.0.0"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Security best practices and checklist for Spring Boot services.
 
-## When to Activate
+## When to use this skill
 
 - Reviewing security posture before release
 - Configuring CORS, CSRF, or security headers

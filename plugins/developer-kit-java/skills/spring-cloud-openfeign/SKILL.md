@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Declarative HTTP client for Spring Boot 3.5.x microservices.
 
-## When to Use
+## When to use this skill
 
 - Making service-to-service HTTP calls
 - Replacing RestTemplate/WebClient with declarative clients

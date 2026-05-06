@@ -1,7 +1,8 @@
 ---
 name: unit-test-security-authorization
 description: Provides patterns for unit testing Spring Security with `@PreAuthorize`, `@Secured`, `@RolesAllowed`. Validates role-based access control and authorization policies. Use when testing security configurations and access control logic.
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing Security and Authorization
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 This skill provides patterns for unit testing Spring Security authorization logic using `@PreAuthorize`, `@Secured`, `@RolesAllowed`, and custom permission evaluators. It covers testing role-based access control (RBAC), expression-based authorization, custom permission evaluators, and verifying access denied scenarios without full Spring Security context.
 
-## When to Use
+## When to use this skill
 
 Use this skill when:
 - Testing `@PreAuthorize` and `@Secured` method-level security
@@ -151,7 +152,7 @@ See [references/basic-testing.md](references/basic-testing.md) for more basic pa
 4. **Test expression-based security** comprehensively
 5. **Mock external dependencies** (permission evaluators, etc.)
 6. **Test anonymous access separately** from authenticated access
-7. **Use `@EnableGlobalMethodSecurity`** in configuration for method-level security
+7. **Use `@EnableMethodSecurity`** in configuration for method-level security
 
 ## Common Pitfalls
 
@@ -164,7 +165,7 @@ See [references/basic-testing.md](references/basic-testing.md) for more basic pa
 ## Constraints and Warnings
 
 - **Method security requires proxy**: `@PreAuthorize` works via proxies; direct method calls bypass security
-- **`@EnableGlobalMethodSecurity`**: Must be enabled for `@PreAuthorize`, `@Secured` to work
+- **`@EnableMethodSecurity`**: Must be enabled for `@PreAuthorize`, `@Secured` to work
 - **Role prefix**: Spring adds "ROLE_" prefix automatically; use `hasRole('ADMIN')` not `hasRole('ROLE_ADMIN')`
 - **Authentication context**: Security context is thread-local; be careful with async tests
 - **`@WithMockUser` limitations**: Creates a simple Authentication; complex auth scenarios need custom setup

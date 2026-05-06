@@ -1,7 +1,8 @@
 ---
 name: unit-test-json-serialization
 description: Provides patterns for unit testing JSON serialization/deserialization with Jackson and `@JsonTest`. Validates JSON mapping, custom serializers, date formats, and polymorphic types. Use when testing JSON serialization, validating custom serializers, or writing JSON unit tests in Spring Boot applications.
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing JSON Serialization with `@JsonTest`
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 Provides patterns for unit testing JSON serialization and deserialization using Spring's `@JsonTest` and Jackson. Covers POJO mapping, custom serializers, field name mappings, nested objects, date/time formatting, and polymorphic types.
 
-## When to Use
+## When to use this skill
 
 - Testing JSON serialization/deserialization of DTOs
 - Verifying custom Jackson serializers/deserializers

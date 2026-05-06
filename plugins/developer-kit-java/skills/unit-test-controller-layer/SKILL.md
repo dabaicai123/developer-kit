@@ -1,7 +1,8 @@
 ---
 name: unit-test-controller-layer
 description: Provides patterns for unit testing REST controllers using MockMvc and @WebMvcTest. Generates controller tests that validates request/response mapping, validation, exception handling, and HTTP status codes. Use when testing web layer endpoints in isolation for API endpoint testing, Spring MVC tests, mock HTTP requests, or controller layer unit tests.
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing REST Controllers with MockMvc
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 Provides patterns for unit testing `@RestController` and `@Controller` classes using MockMvc. Covers request/response handling, HTTP status codes, request parameter binding, validation, content negotiation, response headers, and exception handling with mocked service dependencies.
 
-## When to Use
+## When to use this skill
 
 Use for: controller tests, API endpoint testing, Spring MVC tests, mock HTTP requests, unit testing web layer endpoints, verifying REST controllers in isolation.
 
@@ -96,14 +97,14 @@ class UserControllerTest {
 
 ```java
 @Test
-void shouldCreateUserAndReturn201() throws Exception {
+void shouldCreateUserAndReturn200() throws Exception {
   UserDto createdUser = new UserDto(1L, "Alice", "alice@example.com");
   when(userService.createUser(any())).thenReturn(createdUser);
 
   mockMvc.perform(post("/api/users")
       .contentType("application/json")
       .content("{\"name\":\"Alice\",\"email\":\"alice@example.com\"}"))
-    .andExpect(status().isCreated())
+    .andExpect(status().isOk())
     .andExpect(jsonPath("$.id").value(1))
     .andExpect(jsonPath("$.name").value("Alice"));
 
@@ -133,11 +134,11 @@ void shouldUpdateUserAndReturn200() throws Exception {
 
 ```java
 @Test
-void shouldDeleteUserAndReturn204() throws Exception {
+void shouldDeleteUserAndReturn200() throws Exception {
   doNothing().when(userService).deleteUser(1L);
 
   mockMvc.perform(delete("/api/users/1"))
-    .andExpect(status().isNoContent());
+    .andExpect(status().isOk());
 
   verify(userService).deleteUser(1L);
 }

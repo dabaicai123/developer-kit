@@ -47,11 +47,11 @@ dependencies {
 
 ## Enable Method Security
 
-Add the `@EnableGlobalMethodSecurity` annotation to your configuration:
+Add the `@EnableMethodSecurity` annotation to your configuration:
 
 ```java
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfig {
 
     // Other security configuration

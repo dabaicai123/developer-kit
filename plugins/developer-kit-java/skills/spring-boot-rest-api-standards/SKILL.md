@@ -1,6 +1,7 @@
 ---
 name: spring-boot-rest-api-standards
 description: Provides REST API design standards and best practices for Spring Boot projects. Use when creating or reviewing REST endpoints, DTOs, error handling, pagination, security headers, HATEOAS and architecture patterns.
+version: "1.0.0"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 REST API design standards for Spring Boot covering URL design, HTTP methods, status codes, DTOs, validation, error handling, pagination, and security headers.
 
-## When to Use
+## When to use this skill
 
 - Creating REST endpoints and API routes
 - Designing DTOs and API contracts
@@ -216,6 +217,5 @@ public class UserService {
 ## References
 
 - See `references/` directory for comprehensive reference material including HTTP status codes, Spring annotations, and detailed examples
-- Refer to the `developer-kit-java:spring-boot-code-review-expert` agent for code review guidelines
-- Review `spring-boot-dependency-injection/SKILL.md` for dependency injection patterns
-- Check `../spring-boot-test-patterns/SKILL.md` for testing REST APIs
+- Refer to the `spring-boot-code-review-expert` agent for code review guidelines
+- Review `spring-boot-dependency-injection` for dependency injection patterns

@@ -4,7 +4,7 @@ description: Expert in Java/Spring Boot security covering authentication, author
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 model: sonnet
 skills:
-  - springboot-security
+  - spring-boot-security
   - spring-boot-security-jwt
   - spring-boot-validation
 ---

@@ -1,7 +1,8 @@
 ---
 name: unit-test-wiremock-rest-api
 description: Provides patterns for unit testing external REST APIs using WireMock. Stubs API responses, verifies request details, simulates failures (timeouts, 4xx/5xx errors), and validates HTTP client behavior without real network calls. Use when testing service integrations with external APIs or mocking HTTP endpoints.
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing REST APIs with WireMock
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 Patterns for testing external REST API integrations with WireMock: stubbing responses, verifying requests, error scenarios, and fast tests without network dependencies.
 
-## When to Use
+## When to use this skill
 
 - Testing services calling external REST APIs
 - Stubbing HTTP responses for predictable test behavior

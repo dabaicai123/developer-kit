@@ -1,5 +1,5 @@
 ---
-name: springboot-tdd
+name: spring-boot-tdd
 description: Test-driven development for Spring Boot using JUnit 5, Mockito, MockMvc, Testcontainers, and JaCoCo. Use when adding features, fixing bugs, or refactoring.
 version: "1.0.0"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 TDD guidance for Spring Boot services with 80%+ coverage (unit + integration).
 
-## When to Use
+## When to use this skill
 
 - New features or endpoints
 - Bug fixes or refactors
@@ -58,7 +58,7 @@ class MarketControllerTest {
 
   @Test
   void returnsMarkets() throws Exception {
-    when(marketService.list(any())).thenReturn(Page.empty());
+    when(marketService.list(any())).thenReturn(Collections.emptyList());
 
     mockMvc.perform(get("/api/markets"))
         .andExpect(status().isOk())
@@ -83,28 +83,40 @@ class MarketIntegrationTest {
         .content("""
           {"name":"Test","description":"Desc","endDate":"2030-01-01T00:00:00Z","categories":["general"]}
         """))
-      .andExpect(status().isCreated());
+      .andExpect(status().isOk());
   }
 }
 ```
 
-## Persistence Tests (DataJpaTest)
+## Persistence Tests (MyBatis-Plus)
 
 ```java
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestContainersConfig.class)
-class MarketRepositoryTest {
-  @Autowired MarketRepository repo;
+@SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
+class MarketMapperTest {
+  @Autowired MarketMapper mapper;
+
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgres::getJdbcUrl);
+    registry.add("spring.datasource.username", postgres::getUsername);
+    registry.add("spring.datasource.password", postgres::getPassword);
+  }
+
+  @Container
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
   @Test
-  void savesAndFinds() {
+  void insertsAndSelects() {
     MarketEntity entity = new MarketEntity();
     entity.setName("Test");
-    repo.save(entity);
+    mapper.insert(entity);
 
-    Optional<MarketEntity> found = repo.findByName("Test");
-    assertThat(found).isPresent();
+    MarketEntity found = mapper.selectOne(
+        new LambdaQueryWrapper<MarketEntity>().eq(MarketEntity::getName, "Test"));
+    assertThat(found).isNotNull();
+    assertThat(found.getName()).isEqualTo("Test");
   }
 }
 ```

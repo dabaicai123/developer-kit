@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Logging configuration patterns for Spring Boot 3.5.x.
 
-## When to Use
+## When to use this skill
 
 - Configuring Logback for structured logging
 - Setting log levels per package or class

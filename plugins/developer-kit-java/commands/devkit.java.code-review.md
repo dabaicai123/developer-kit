@@ -28,7 +28,7 @@ Reviews Java/Spring Boot code for quality, security, and pattern compliance.
 1. Detect review scope from arguments or `git diff`
 2. Run the `spring-boot-code-review-expert` agent
 3. Apply the relevant skills based on review type:
-   - `full` → spring-boot-rest-api-standards, springboot-security, mybatis-plus-patterns, spring-boot-exception-handling
-   - `security` → springboot-security, spring-boot-security-jwt, spring-boot-validation
+   - `full` → spring-boot-rest-api-standards, spring-boot-security, mybatis-plus-patterns, spring-boot-exception-handling
+   - `security` → spring-boot-security, spring-boot-security-jwt, spring-boot-validation
    - `mybatis-plus` → mybatis-plus-patterns, jetcache
 4. Generate structured report with P0-P3 severity levels

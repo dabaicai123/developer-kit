@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Input validation patterns for Spring Boot 3.5.x.
 
-## When to Use
+## When to use this skill
 
 - Validating REST API request bodies and parameters
 - Creating custom validation annotations

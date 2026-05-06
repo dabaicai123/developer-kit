@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Production-ready observability for Spring Boot 3.5.x using Actuator endpoints and Micrometer.
 
-## When to Use
+## When to use this skill
 
 - Enable actuator endpoints / bootstrap monitoring for a service
 - Configure health probes for Kubernetes readiness/liveness

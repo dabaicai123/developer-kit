@@ -1,7 +1,8 @@
 ---
 name: unit-test-exception-handler
 description: Provides patterns for unit testing `@ExceptionHandler` and `@ControllerAdvice` in Spring Boot applications. Validates error response formatting, mocks exceptions, verifies HTTP status codes, tests field-level validation errors, and asserts custom error payloads. Use when writing Spring exception handler tests, REST API error tests, or mocking controller advice.
-allowed-tools: Read, Write, Bash, Glob, Grep
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing ExceptionHandler and ControllerAdvice
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep
 
 This skill provides patterns for writing unit tests for Spring Boot exception handlers. It covers testing `@ExceptionHandler` methods in `@ControllerAdvice` classes using MockMvc, including HTTP status assertions, JSON response validation, field-level validation error testing, and mocking handler dependencies.
 
-## When to Use
+## When to use this skill
 
 - Writing unit tests for `@ExceptionHandler` methods
 - Testing `@ControllerAdvice` global exception handling

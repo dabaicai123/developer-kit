@@ -1,7 +1,8 @@
 ---
 name: spring-boot-resilience4j
 description: Provides fault tolerance patterns for Spring Boot 3.x using Resilience4j. Use when implementing circuit breakers, handling service failures, adding retry logic with exponential backoff, configuring rate limiters, or protecting services from cascading failures. Generates circuit breaker, retry, rate limiter, bulkhead, time limiter, and fallback implementations. Validates resilience configurations through Actuator endpoints.
-allowed-tools: Read, Write, Edit, Bash
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Resilience4j Patterns
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Edit, Bash
 
 Provides Resilience4j patterns (circuit breaker, retry, rate limiter, bulkhead, time limiter, fallback) for Spring Boot 3.x fault tolerance with configuration and testing workflows.
 
-## When to Use
+## When to use this skill
 
 - Implementing fault tolerance and preventing cascading failures
 - Adding circuit breakers, retry logic, or rate limiting to service calls
@@ -95,7 +96,7 @@ resilience4j:
         baseConfig: default
 ```
 
-See @references/configuration-reference.md for complete circuit breaker configuration options.
+See references/configuration-reference.md for complete circuit breaker configuration options.
 
 ### 3. Retry Pattern
 
@@ -144,7 +145,7 @@ resilience4j:
         maxAttempts: 5
 ```
 
-See @references/configuration-reference.md for retry exception configuration.
+See references/configuration-reference.md for retry exception configuration.
 
 ### 4. Rate Limiter Pattern
 
@@ -360,7 +361,7 @@ Access monitoring endpoints:
 
 5. **Time Limiter**: Mock async delay beyond `timeoutDuration` → verify fallback triggers after timeout
 
-See @references/testing-patterns.md for unit and integration testing strategies.
+See references/testing-patterns.md for unit and integration testing strategies.
 
 ## Best Practices
 
@@ -411,8 +412,8 @@ public Order getOrder(Long orderId) {
     return orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
 }
 
-// AFTER: Retry with exponential backoff
-@Retry(name = "orderService", maxAttempts = 3, waitDuration = @WaitDuration(500L), fallbackMethod = "getOrderFallback")
+// AFTER: Retry with exponential backoff (maxAttempts and waitDuration configured in application.yml)
+@Retry(name = "orderService", fallbackMethod = "getOrderFallback")
 public Order getOrder(Long orderId) {
     return orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
 }
@@ -433,4 +434,4 @@ private Result<Void> rateLimitFallback(Exception ex) {
 }
 ```
 
-**See also:** [Configuration Reference](references/configuration-reference.md) · [Testing Patterns](references/testing-patterns.md) · [Examples](references/examples.md) · [Resilience4j Docs](https://resilience4j.readme.io/) · [Actuator Skill](../spring-boot-actuator/SKILL.md)
+**See also:** [Configuration Reference](references/configuration-reference.md) · [Testing Patterns](references/testing-patterns.md) · [Examples](references/examples.md) · [Resilience4j Docs](https://resilience4j.readme.io/) · [Actuator Skill](spring-boot-actuator)

@@ -1,7 +1,8 @@
 ---
 name: spring-boot-event-driven-patterns
 description: Provides Event-Driven Architecture (EDA) patterns for Spring Boot — creates domain events, configures ApplicationEvent and @TransactionalEventListener, sets up Kafka producers and consumers, and implements the transactional outbox pattern for reliable distributed messaging. Use when implementing event-driven systems in Spring Boot, setting up async messaging with Kafka, publishing domain events from DDD aggregates, or needing reliable event publishing with the outbox pattern.
-allowed-tools: Read, Write, Edit, Bash
+version: "1.0.0"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Event-Driven Patterns
@@ -10,7 +11,7 @@ allowed-tools: Read, Write, Edit, Bash
 
 Implement Event-Driven Architecture (EDA) patterns in Spring Boot 3.x using domain events, ApplicationEventPublisher, `@TransactionalEventListener`, and distributed messaging with Kafka and Spring Cloud Stream.
 
-## When to Use
+## When to use this skill
 
 - Implementing event-driven microservices with Kafka messaging
 - Publishing domain events from aggregate roots in DDD architectures
@@ -187,7 +188,7 @@ public void handleProductEvent(ProductCreatedEventDto event) {
 
 ### 7. Add Observability
 
-Enable Spring Cloud Sleuth for distributed tracing, monitor metrics.
+Enable Micrometer Tracing for distributed tracing, monitor metrics.
 
 ## Best Practices
 
@@ -229,6 +230,3 @@ Enable Spring Cloud Sleuth for distributed tracing, monitor metrics.
 ## Related Skills
 
 - `spring-boot-security-jwt` — JWT authentication for secure event publishing
-- `spring-boot-test-patterns` — Testing event-driven applications
-- `aws-sdk-java-v2-lambda` — Event-driven processing with AWS Lambda
-- `langchain4j-tool-function-calling-patterns` — AI-driven event processing

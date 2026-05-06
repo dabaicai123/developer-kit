@@ -2,14 +2,14 @@
 name: mybatis-plus-patterns
 description: MyBatis-Plus patterns for Spring Boot 3.5.x covering mapper, entity, service layer, pagination, soft delete, and field fill. Use for Java Spring Boot backend development with MyBatis-Plus as ORM.
 version: "1.0.0"
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # MyBatis-Plus Patterns
 
 MyBatis-Plus ORM patterns for Spring Boot 3.5.x with PostgreSQL.
 
-## When to Use
+## When to use this skill
 
 - Manually writing or editing a single Mapper/Entity/Service (not batch generation)
 - Configuring MyBatis-Plus pagination, soft delete, field fill

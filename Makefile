@@ -1,8 +1,8 @@
-.PLUGIN_DIR = plugins/developer-kit-java
-.SKILLS_DIR = .claude/skills
-.AGENTS_DIR = .claude/agents
-.COMMANDS_DIR = .claude/commands
-.RULES_DIR = .claude/rules
+PLUGIN_DIR = plugins/developer-kit-java
+SKILLS_DIR = .claude/skills
+AGENTS_DIR = .claude/agents
+COMMANDS_DIR = .claude/commands
+RULES_DIR = .claude/rules
 
 .PHONY: install list status uninstall
 

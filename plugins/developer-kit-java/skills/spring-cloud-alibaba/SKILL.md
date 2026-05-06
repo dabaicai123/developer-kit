@@ -7,6 +7,12 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Cloud Alibaba 开发指南
 
+## When to use this skill
+
+- Setting up Spring Cloud Alibaba components (Nacos, Sentinel, RocketMQ, Seata)
+- Implementing service discovery, configuration management, or flow control in microservices
+- Choosing between OpenFeign and Dubbo for inter-service communication
+
 ## 概述
 
 Spring Cloud Alibaba 是阿里巴巴提供的微服务解决方案，提供了 Nacos（服务注册与配置）、Sentinel（流量控制）、RocketMQ（消息队列）等组件。微服务间调用推荐使用 OpenFeign（声明式 HTTP 客户端），而非 Dubbo RPC。分布式事务请慎重评估 Seata，业务侵入重，优先考虑本地事务 + 事件驱动最终一致性。

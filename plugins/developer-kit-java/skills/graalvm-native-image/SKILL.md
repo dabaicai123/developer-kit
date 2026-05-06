@@ -1,6 +1,7 @@
 ---
 name: graalvm-native-image
 description: Provides expert guidance for building GraalVM Native Image executables from Java applications. Use when converting JVM applications to native binaries, optimizing cold start times, reducing memory footprint, configuring native build tools for Maven or Gradle, resolving reflection and resource issues in native builds, or implementing framework-specific native support for Spring Boot, Quarkus, and Micronaut. Triggers include "graalvm native image", "native executable java", "java cold start optimization", "native build tools", "ahead of time compilation java", "reflection config graalvm", "native image build failure".
+version: "1.0.0"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -14,7 +15,7 @@ GraalVM Native Image compiles Java applications ahead-of-time (AOT) into standal
 
 This skill provides a structured workflow to migrate JVM applications to native binaries, covering build tool configuration, framework-specific patterns, reflection metadata management, and an iterative approach to resolving native build failures.
 
-## When to Use
+## When to use this skill
 
 Use this skill when:
 - Converting a JVM-based Java application to a GraalVM native executable

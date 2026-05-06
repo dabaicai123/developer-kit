@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Centralized error handling for Spring Boot 3.5.x using unified `Result<T>` response format.
 
-## When to Use
+## When to use this skill
 
 - Implementing global exception handling
 - Defining custom business exceptions

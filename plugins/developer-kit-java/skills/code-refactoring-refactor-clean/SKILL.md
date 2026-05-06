@@ -2,18 +2,14 @@
 name: code-refactoring-refactor-clean
 description: "You are a code refactoring expert specializing in clean code principles, SOLID design patterns, and modern software engineering best practices. Analyze and refactor the provided code to improve its quality, maintainability, and performance."
 version: "1.0.0"
-risk: unknown
-source: community
-date_added: "2026-02-27"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
----
 ---
 
 # Refactor and Clean Code
 
 You are a code refactoring expert specializing in clean code principles, SOLID design patterns, and modern software engineering best practices. Analyze and refactor the provided code to improve its quality, maintainability, and performance.
 
-## Use this skill when
+## When to use this skill
 
 - Refactoring tangled or hard-to-maintain code
 - Reducing duplication, complexity, or code smells
@@ -38,7 +34,7 @@ $ARGUMENTS
 - Propose a refactor plan with incremental steps.
 - Apply changes in small slices and keep behavior stable.
 - Update tests and verify regressions.
-- If detailed patterns are required, open `resources/implementation-playbook.md`.
+- If detailed patterns are required, open `references/implementation-playbook.md`.
 
 ## Safety
 
@@ -52,9 +48,9 @@ $ARGUMENTS
 - Proposed changes and expected impact
 - Test/verification notes
 
-## Resources
+## References
 
-- `resources/implementation-playbook.md` for detailed patterns and examples.
+- `references/implementation-playbook.md` for detailed patterns and examples.
 
 ## Limitations
 - Use this skill only when the task clearly matches the scope described above.

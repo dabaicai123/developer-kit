@@ -2,18 +2,14 @@
 name: architecture-decision-records
 description: "Comprehensive patterns for creating, maintaining, and managing Architecture Decision Records (ADRs) that capture the context and rationale behind significant technical decisions."
 version: "1.0.0"
-risk: unknown
-source: community
-date_added: "2026-02-27"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
----
 ---
 
 # Architecture Decision Records
 
 Comprehensive patterns for creating, maintaining, and managing Architecture Decision Records (ADRs) that capture the context and rationale behind significant technical decisions.
 
-## Use this skill when
+## When to use this skill
 
 - Making significant architectural decisions
 - Documenting technology choices

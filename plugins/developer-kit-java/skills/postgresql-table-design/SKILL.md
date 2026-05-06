@@ -7,6 +7,12 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # PostgreSQL Table Design
 
+## When to use this skill
+
+- Designing or reviewing a PostgreSQL schema, tables, or data types
+- Choosing indexes, constraints, partitioning strategies, or soft-delete patterns
+- Evaluating PostgreSQL-specific gotchas and best practices for table creation
+
 ## Standard Business Columns
 
 Every business table must include these standard columns:
