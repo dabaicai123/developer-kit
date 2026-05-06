@@ -1,0 +1,339 @@
+# Async Method Patterns
+
+## @Async void return — fire-and-forget
+
+Use `@Async` with `void` return type for operations where the result is irrelevant: logging, analytics, notifications. The caller thread returns immediately; the async method runs on a background thread.
+
+```java
+@Service
+@RequiredArgsConstructor
+public class NotificationService {
+    private final EmailClient emailClient;
+
+    @Async
+    public void sendWelcomeEmail(String userId) {
+        // Runs in background — caller does not wait
+        User user = userRepository.findById(userId).orElseThrow();
+        emailClient.send(user.getEmail(), "Welcome!", "Welcome to our platform");
+    }
+}
+```
+
+**Key points:**
+- Exceptions in `@Async void` methods are NOT propagated to the caller — they go to `AsyncUncaughtExceptionHandler`
+- No way to check completion status from the caller
+- Suitable only for truly disposable operations
+
+## @Async CompletableFuture<T> return — composable
+
+Use `CompletableFuture` when you need to compose results, check completion, or handle errors from the caller.
+
+```java
+@Service
+public class ProductService {
+    @Async("productExecutor")
+    public CompletableFuture<ProductDTO> findProductAsync(String productId) {
+        Product product = productRepository.findById(productId).orElseThrow();
+        return CompletableFuture.completedFuture(ProductDTO.from(product));
+    }
+}
+```
+
+**Caller side:**
+
+```java
+CompletableFuture<ProductDTO> future = productService.findProductAsync("P001");
+ProductDTO result = future.get(5, TimeUnit.SECONDS);  // block with timeout
+```
+
+**Composition:**
+
+```java
+CompletableFuture<ProductDTO> productFuture = productService.findProductAsync("P001");
+CompletableFuture<List<ReviewDTO>> reviewFuture = reviewService.findReviewsAsync("P001");
+
+CompletableFuture<ProductPageDTO> pageFuture = productFuture.thenCombine(reviewFuture,
+    (product, reviews) -> new ProductPageDTO(product, reviews)
+);
+```
+
+## @Async ListenableFuture (deprecated)
+
+`ListenableFuture` was the original async return type in Spring 4.x. It is **deprecated since Spring 6.0** and replaced by `CompletableFuture`.
+
+```java
+// DEPRECATED — do not use in Spring Boot 3.x
+@Async
+public ListenableFuture<Product> findProduct(String id) {
+    return new AsyncResult<>(productRepository.findById(id).orElseThrow());
+}
+```
+
+**Migration:**
+
+```java
+// Use CompletableFuture instead
+@Async
+public CompletableFuture<Product> findProduct(String id) {
+    return CompletableFuture.completedFuture(
+        productRepository.findById(id).orElseThrow()
+    );
+}
+```
+
+## @Async with specific executor
+
+When multiple `ThreadPoolTaskExecutor` beans exist, specify which one to use with `@Async("beanName")`. See threadpool-taskexecutor-config.md for executor configuration.
+
+**Without `@Async("beanName")`**, Spring uses the default executor returned by `AsyncConfigurer.getAsyncExecutor()`, or `SimpleAsyncTaskExecutor` if no custom executor is configured.
+
+## @Async on class level vs method level
+
+Avoid class-level `@Async` — it makes all public methods async including ones that should be synchronous. Use method-level for explicit control.
+
+## Exception handling
+
+### AsyncUncaughtExceptionHandler for void methods
+
+Exceptions thrown by `@Async void` methods are NOT propagated to the caller. They must be caught by `AsyncUncaughtExceptionHandler`:
+
+```java
+@Slf4j
+@Configuration
+@EnableAsync
+public class AsyncConfig implements AsyncConfigurer {
+
+    @Override
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("async-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        executor.initialize();
+        return executor;
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return (ex, method, params) -> {
+            log.error("Uncaught async exception — method: {}, params: {}, message: {}",
+                method.getName(),
+                Arrays.toString(params),
+                ex.getMessage(),
+                ex);
+        };
+    }
+}
+```
+
+**Without this handler, `@Async void` method exceptions are silently lost — no logs, no stack traces, no alerts.**
+
+### try-catch for CompletableFuture methods
+
+For `@Async` methods returning `CompletableFuture`, exceptions are wrapped in the future and can be handled by the caller:
+
+```java
+// Producer — throw inside CompletableFuture
+@Async
+public CompletableFuture<OrderDTO> findOrderAsync(String orderId) {
+    try {
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        return CompletableFuture.completedFuture(OrderDTO.from(order));
+    } catch (Exception ex) {
+        return CompletableFuture.failedFuture(ex);
+    }
+}
+
+// Consumer — handle with exceptionally() or handle()
+CompletableFuture<OrderDTO> future = orderService.findOrderAsync("O001")
+    .exceptionally(ex -> {
+        log.warn("Failed to find order: {}", ex.getMessage());
+        return null;  // fallback value
+    })
+    .handle((result, ex) -> {
+        if (ex != null) {
+            log.error("Async error: {}", ex.getMessage(), ex);
+            return OrderDTO.empty();
+        }
+        return result;
+    });
+```
+
+### Manual try-catch inside @Async void methods
+
+For void methods needing targeted exception handling (e.g., retry queue), use manual try-catch before reaching the handler:
+
+```java
+@Async
+public void sendNotification(String userId, String message) {
+    try {
+        notificationClient.send(userId, message);
+    } catch (NotificationException ex) {
+        log.error("Notification failed for user {}: {}", userId, ex.getMessage());
+        // Optionally: save to retry queue, mark as failed in DB
+        notificationFailureRepository.save(new NotificationFailure(userId, message, ex.getMessage()));
+    }
+}
+```
+
+## Context propagation: TaskDecorator patterns
+
+Spring Security context, `RequestContextHolder`, and logging context are NOT automatically propagated to async threads. Use `TaskDecorator` to copy context from the caller thread to the async thread.
+
+### MdcTaskDecorator — propagate MDC (SLF4J/Logback, SpringBoot default)
+
+```java
+public class MdcTaskDecorator implements TaskDecorator {
+    @Override
+    public Runnable decorate(Runnable runnable) {
+        Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        return () -> {
+            try {
+                if (contextMap != null) {
+                    MDC.setContextMap(contextMap);
+                }
+                runnable.run();
+            } finally {
+                MDC.clear();
+            }
+        };
+    }
+}
+```
+
+### ThreadContextTaskDecorator — propagate ThreadContext (Log4j2)
+
+```java
+public class ThreadContextTaskDecorator implements TaskDecorator {
+    @Override
+    public Runnable decorate(Runnable runnable) {
+        // Capture ThreadContext from caller thread
+        Map<String, String> contextMap = ThreadContext.getContext();
+        return () -> {
+            try {
+                // Set ThreadContext in async thread
+                if (contextMap != null) {
+                    ThreadContext.putAll(contextMap);
+                }
+                runnable.run();
+            } finally {
+                // Clean up ThreadContext to prevent thread contamination
+                ThreadContext.clearAll();
+            }
+        };
+    }
+}
+```
+
+### Configure ThreadContextTaskDecorator on executor
+
+```java
+@Bean("ioExecutor")
+public Executor ioExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(8);
+    executor.setMaxPoolSize(16);
+    executor.setQueueCapacity(200);
+    executor.setThreadNamePrefix("io-async-");
+    executor.setTaskDecorator(new ThreadContextTaskDecorator());
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+    executor.setWaitForTasksToCompleteOnShutdown(true);
+    executor.setAwaitTerminationSeconds(30);
+    executor.initialize();
+    return executor;
+}
+```
+
+### Combined SecurityContext + ThreadContext TaskDecorator
+
+```java
+public class ContextPropagatingTaskDecorator implements TaskDecorator {
+    @Override
+    public Runnable decorate(Runnable runnable) {
+        Map<String, String> threadContext = ThreadContext.getContext();
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+
+        return () -> {
+            try {
+                if (threadContext != null) {
+                    ThreadContext.putAll(threadContext);
+                }
+                SecurityContextHolder.setContext(securityContext);
+                if (requestAttributes != null) {
+                    RequestContextHolder.setRequestAttributes(requestAttributes);
+                }
+                runnable.run();
+            } finally {
+                ThreadContext.clearAll();
+                SecurityContextHolder.clearContext();
+                RequestContextHolder.resetRequestAttributes();
+            }
+        };
+    }
+}
+```
+
+**Note:** Spring Framework 6.1+ provides `ContextPropagation` utilities for automatic context propagation. For Spring Security, `DelegatingSecurityContextRunnable` can be used instead of manual propagation. See Spring Framework docs for details.
+
+## Self-invocation warning — @Async silently ignored
+
+Calling an `@Async` method from within the same class bypasses the Spring AOP proxy — the method runs synchronously:
+
+```java
+@Service
+public class OrderService {
+    @Async
+    public void notifyCustomer(String orderId) { ... }
+
+    @Transactional
+    public void createOrder(OrderRequest request) {
+        orderRepository.save(Order.create(request));
+        // WRONG — self-invocation, @Async is ignored
+        this.notifyCustomer(request.getOrderId());  // runs synchronously!
+    }
+}
+```
+
+**Fix:** Inject a self-reference or move the async method to a separate service:
+
+```java
+// Option 1: Inject self-reference (works but not recommended)
+@Service
+@Lazy
+public class OrderService {
+    @Autowired @Lazy
+    private OrderService self;
+
+    @Async
+    public void notifyCustomer(String orderId) { ... }
+
+    @Transactional
+    public void createOrder(OrderRequest request) {
+        orderRepository.save(Order.create(request));
+        self.notifyCustomer(request.getOrderId());  // proxy invoked — @Async works
+    }
+}
+
+// Option 2: Separate service (recommended)
+@Service
+public class OrderService {
+    private final NotificationAsyncService notificationAsyncService;
+
+    @Transactional
+    public void createOrder(OrderRequest request) {
+        orderRepository.save(Order.create(request));
+        notificationAsyncService.notifyCustomer(request.getOrderId());  // different bean — proxy works
+    }
+}
+
+@Service
+public class NotificationAsyncService {
+    @Async
+    public void notifyCustomer(String orderId) { ... }
+}
+```
