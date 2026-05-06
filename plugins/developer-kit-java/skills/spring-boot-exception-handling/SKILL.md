@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
 
 ## See Also
 
-See `spring-boot-rest-api-standards/references/unified-result-pattern.md` for the complete `Result.java` and `Result.PageData` definition.
+See `spring-boot-rest-api-standards/references/unified-result-pattern.md` for the complete `Result.java` and `PageResult.java` definition.
 
 ## Best Practices
 

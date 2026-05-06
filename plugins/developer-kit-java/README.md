@@ -6,7 +6,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 
 - Java 21 + Spring Boot 3.5.x
 - MyBatis-Plus (ORM) + PostgreSQL
-- Spring Cloud Alibaba (Nacos, Sentinel, RocketMQ, Seata, Dubbo)
+- Spring Cloud Alibaba (Nacos, Sentinel, RocketMQ) + OpenFeign (prefer over Dubbo)
 - JetCache + Redisson (caching + distributed services)
 - Spring Security 6.x with JWT (JJWT 0.12.6)
 - SpringDoc OpenAPI 2.8.6

@@ -81,12 +81,12 @@ public class GlobalExceptionHandler {
 
 ### Result Wrapper Pattern
 
-Use the unified `Result<T>` with `PageData<T>` for all API responses. See `spring-boot-rest-api-standards/references/unified-result-pattern.md` for full definition.
+Use the unified `Result<T>` with `PageResult<T>` for all API responses. See `spring-boot-rest-api-standards/references/unified-result-pattern.md` for full definition.
 
 ```java
 // Standard response format: {"code": 200, "msg": "success", "data": ...}
 Result<UserVO> result = Result.success(userVO);           // single item
-Result<PageData<UserVO>> result = Result.success(pageData); // page query
+Result<PageResult<UserVO>> result = Result.success(pageData); // page query
 Result<Void> result = Result.success();                   // no data
 Result<Void> result = Result.fail(404, "User not found"); // error
 ```

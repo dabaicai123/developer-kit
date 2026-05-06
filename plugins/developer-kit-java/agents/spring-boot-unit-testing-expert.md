@@ -94,10 +94,10 @@ class UserServiceTest {
 
 ```java
 @Test
-void page_withValidParams_returnsPageData() {
+void page_withValidParams_returnsPageResult() {
     Page<UserEntity> page = new Page<>(1, 10);
     when(mapper.selectPage(page, any())).thenReturn(page);
-    Result.PageData<UserVO> result = service.page(1, 10);
+    PageResult<UserVO> result = service.page(1, 10);
     assertThat(result.getTotal()).isEqualTo(page.getTotal());
 }
 ```

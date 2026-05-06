@@ -31,7 +31,7 @@ You are an expert Spring Boot backend developer specializing in the MyBatis-Plus
 - **MyBatis-Plus 3.5.9** as ORM (not JPA/Hibernate)
 - **PostgreSQL** as primary database
 - **JetCache + Redisson** for caching and distributed services
-- **Spring Cloud Alibaba 2025.0.0.0** (Nacos, Sentinel, RocketMQ, Seata)
+- **Spring Cloud Alibaba 2025.0.0.0** (Nacos, Sentinel, RocketMQ) + OpenFeign (prefer over Dubbo)
 
 ## Development Workflow
 
@@ -67,7 +67,7 @@ Never use:
 - Use plural nouns for resources: `/api/v1/users`
 - Proper HTTP methods: GET (read), POST (create), PUT (update), DELETE (remove)
 - Consistent response format with `Result<T>` wrapper (`{"code":200,"msg":"success","data":...}`)
-- Pagination via `Result.PageData<T>` (inner class, no separate PageResult class)
+- Pagination via `Result<PageResult<T>>` (separate PageResult class, no inner class)
 - OpenAPI annotations on every endpoint
 
 ### 4. Architecture Patterns

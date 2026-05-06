@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 ## 概述
 
-Spring Cloud Alibaba 是阿里巴巴提供的微服务解决方案，提供了 Nacos（服务注册与配置）、Sentinel（流量控制）、RocketMQ（消息队列）、Seata（分布式事务）等组件。
+Spring Cloud Alibaba 是阿里巴巴提供的微服务解决方案，提供了 Nacos（服务注册与配置）、Sentinel（流量控制）、RocketMQ（消息队列）等组件。微服务间调用推荐使用 OpenFeign（声明式 HTTP 客户端），而非 Dubbo RPC。分布式事务请慎重评估 Seata，业务侵入重，优先考虑本地事务 + 事件驱动最终一致性。
 
 ## 核心组件
 
@@ -210,11 +210,14 @@ public class UserEventListener implements RocketMQListener<User> {
 }
 ```
 
-### 4. Seata（分布式事务）
+### 4. Seata（分布式事务）— 慎重使用
+
+> **注意**：Seata 业务侵入重（需要代理数据源、undo_log 表、全局事务锁），优先考虑 **本地事务 + RocketMQ 事件驱动最终一致性** 方案。仅在强一致性刚需场景下使用 Seata AT 模式。
 
 **依赖**：
 
 ```xml
+<!-- 仅在确认需要强一致性分布式事务时引入 -->
 <dependency>
     <groupId>com.alibaba.cloud</groupId>
     <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
@@ -268,14 +271,45 @@ public class OrderService {
 }
 ```
 
-### 5. Dubbo（RPC 框架）
+**推荐替代方案：事件驱动最终一致性**：
+
+```java
+@Service
+public class OrderService {
+    @Transactional  // 本地事务保证订单+事件同库写入
+    public void createOrder(Order order) {
+        orderRepository.save(order);
+        rocketMQTemplate.convertAndSend("order-created-topic", new OrderCreatedEvent(order));
+    }
+}
+
+// 各服务监听事件，本地事务处理
+@Component
+@RocketMQMessageListener(topic = "order-created-topic", consumerGroup = "stock-consumer-group")
+public class StockEventHandler implements RocketMQListener<OrderCreatedEvent> {
+    @Transactional
+    public void onMessage(OrderCreatedEvent event) {
+        stockRepository.reduceStock(event.getProductId(), event.getQuantity());
+    }
+}
+```
+
+### 5. OpenFeign（声明式 HTTP 客户端）— 推荐替代 Dubbo
+
+> **推荐使用 OpenFeign** 作为微服务间调用方案，而非 Dubbo RPC。OpenFeign 基于 HTTP，与 Spring Cloud 生态无缝集成，无需额外协议和端口管理。
 
 **依赖**：
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-dubbo</artifactId>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+
+<!-- 如需负载均衡 -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-loadbalancer</artifactId>
 </dependency>
 ```
 
@@ -284,43 +318,40 @@ public class OrderService {
 ```yaml
 spring:
   cloud:
-    dubbo:
-      application:
-        name: user-service
-      registry:
-        address: nacos://localhost:8848
-      protocol:
-        name: dubbo
-        port: 20880
-```
-
-**服务提供者**：
-
-```java
-@Service
-@org.apache.dubbo.config.annotation.Service
-public class UserServiceImpl implements UserService {
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElseThrow();
-    }
-}
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 10000
+          user-service:
+            url: http://user-service  # Nacos 服务名自动解析
 ```
 
 **服务消费者**：
 
 ```java
+@FeignClient(name = "user-service", path = "/api/v1/users")
+public interface UserServiceClient {
+    @GetMapping("/{id}")
+    Result<UserVO> getUser(@PathVariable("id") Long id);
+}
+
 @Service
 public class OrderService {
-    @org.apache.dubbo.config.annotation.Reference
-    private UserService userService;
+    private final UserServiceClient userServiceClient;
     
     public Order createOrder(Long userId, Order order) {
-        User user = userService.getUser(userId);
+        UserVO user = userServiceClient.getUser(userId).getData();
         // 创建订单逻辑
         return order;
     }
 }
 ```
+
+### 6. Dubbo（RPC 框架）— 不推荐
+
+> **不推荐使用 Dubbo** 作为微服务间调用方案。Dubbo 需要额外暴露 RPC 端口、管理二进制协议，与 Spring Cloud REST 生态不兼容。OpenFeign 更轻量、与 Nacos + Sentinel 集成更好。
 
 ## 微服务架构示例
 
@@ -380,8 +411,8 @@ spring:
 
 ### 4. 分布式事务
 
-- 使用 Seata 处理分布式事务
-- 合理使用 @GlobalTransactional
+- **优先方案**：本地事务 + RocketMQ 事件驱动最终一致性
+- **慎重使用** Seata AT 模式 — 业务侵入重，仅强一致性刚需场景
 - 避免长事务
 
 ## 常用依赖
@@ -424,10 +455,10 @@ spring:
     <artifactId>spring-cloud-starter-alibaba-rocketmq</artifactId>
 </dependency>
 
-<!-- Seata -->
+<!-- OpenFeign（推荐替代 Dubbo） -->
 <dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 ```
 
@@ -436,5 +467,6 @@ spring:
 - "如何使用 Spring Cloud Alibaba 构建微服务架构？"
 - "Nacos 如何配置服务注册和配置管理？"
 - "如何在 Spring Cloud Alibaba 中使用 Sentinel 进行流量控制？"
-- "Spring Cloud Alibaba 中如何使用 Seata 处理分布式事务？"
+- "Spring Cloud Alibaba 中分布式事务如何处理？优先最终一致性方案"
 - "如何配置 RocketMQ 消息队列？"
+- "微服务间调用推荐 OpenFeign 还是 Dubbo？"

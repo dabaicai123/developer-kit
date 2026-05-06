@@ -109,7 +109,7 @@ Use the unified `Result<T>` wrapper for all API responses. Outer structure is al
 
 ```java
 Result.success(userVO);                              // single item
-Result.success(pageData);                             // page query (Result.PageData<T>)
+Result.success(pageData);                             // page query (Result<PageResult<T>>)
 Result.success(list);                                 // list
 Result.success();                                     // no data
 Result.fail(404, "User not found");                   // error
@@ -117,7 +117,6 @@ Result.fail(404, "User not found");                   // error
 // Bad: Inconsistent formats
 return userVO;                              // WRONG: no Result wrapper
 return ResponseEntity.ok(userVO);           // WRONG: use Result instead
-```
 return Result.fail("NOT_FOUND", "msg");     // WRONG: String code, use int HTTP status
 ```
 
