@@ -12,7 +12,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 - SpringDoc OpenAPI 2.8.6
 - JUnit 5 + Mockito + MockMvc + Testcontainers + JaCoCo
 
-## Skills (47)
+## Skills (48)
 
 ### Project Setup
 | Skill | Description |
@@ -61,6 +61,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | Skill | Description |
 |-------|-------------|
 | `spring-boot-actuator` | Actuator endpoints and monitoring |
+| `spring-boot-load-testing` | k6 load testing (JWT auth, pagination, HikariCP, cache) |
 | `spring-boot-resilience4j` | Resilience4j patterns |
 
 ### Testing (17)

@@ -2,12 +2,7 @@ package ${package.Entity};
 
 import com.baomidou.mybatisplus.annotation.*;
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.media.Schema;
-</#if>
 </#if>
 <#if entityLombokModel>
 import lombok.Data;
@@ -45,11 +40,7 @@ import java.time.LocalDateTime;
 @TableName("${schemaName}${table.name}")
 </#if>
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@ApiModel(value = "${entity}对象", description = "${table.comment}")
-<#elseif swaggerVersion == "openapi3">
 @Schema(description = "${table.comment}")
-</#if>
 </#if>
 <#if superEntityClass??>
 public class ${entity} extends ${superEntityClass} {
@@ -79,11 +70,7 @@ public class ${entity} implements Serializable {
      */
 </#if>
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiModelProperty(value = "${field.comment}")
-<#elseif swaggerVersion == "openapi3">
     @Schema(description = "${field.comment}")
-</#if>
 </#if>
 <#if field.keyFlag>
     @TableId(value = "${field.name}", type = IdType.${keyStrategy})

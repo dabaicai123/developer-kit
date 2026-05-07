@@ -59,6 +59,7 @@
     "./skills/spring-boot-event-driven-patterns",
     "./skills/spring-boot-exception-handling",
     "./skills/spring-boot-file-handling",
+    "./skills/spring-boot-load-testing",
     "./skills/spring-boot-logging",
     "./skills/spring-boot-openapi-documentation",
     "./skills/spring-boot-resilience4j",
