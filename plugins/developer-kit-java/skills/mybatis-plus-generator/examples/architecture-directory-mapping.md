@@ -1,34 +1,34 @@
-# 架构目录映射示例
+# Architecture Directory Mapping Example
 
-本文档提供不同架构类型下，MyBatis-Plus Generator 生成代码的目录映射示例。
+This document provides directory mapping examples for MyBatis-Plus Generator generated code under different architecture types.
 
-## 示例场景
+## Example Scenario
 
-假设我们有一个 `user` 表，需要生成相关代码，基础包路径为 `com.example.order`。
+Assume we have a `user` table and need to generate related code, with a base package path of `com.example.order`.
 
-## 1. 传统 MVC 架构
+## 1. Traditional MVC Architecture
 
-### 目录结构
+### Directory Structure
 
 ```
 src/main/java/com/example/order/
 ├── entity/
-│   └── User.java                    # Entity 实体类
+│   └── User.java                    # Entity class
 ├── mapper/
-│   └── UserMapper.java             # Mapper 接口
+│   └── UserMapper.java             # Mapper interface
 ├── service/
-│   ├── UserService.java            # Service 接口
+│   ├── UserService.java            # Service interface
 │   └── impl/
-│       └── UserServiceImpl.java    # ServiceImpl 实现类
+│       └── UserServiceImpl.java    # ServiceImpl implementation class
 ├── controller/
-│   └── UserController.java         # Controller 控制器
+│   └── UserController.java         # Controller
 └── dto/
-    ├── UserCreateDTO.java          # 创建用户DTO
-    ├── UserUpdateDTO.java          # 更新用户DTO
-    └── UserQueryDTO.java           # 查询用户DTO
+    ├── UserCreateDTO.java          # Create user DTO
+    ├── UserUpdateDTO.java          # Update user DTO
+    └── UserQueryDTO.java           # Query user DTO
 ```
 
-### 文件路径示例
+### File Path Examples
 
 - Entity: `src/main/java/com/example/order/entity/User.java`
 - Mapper: `src/main/java/com/example/order/mapper/UserMapper.java`
@@ -37,30 +37,30 @@ src/main/java/com/example/order/
 - Controller: `src/main/java/com/example/order/controller/UserController.java`
 - DTO: `src/main/java/com/example/order/dto/UserCreateDTO.java`
 
-## 2. DDD (领域驱动设计) 架构
+## 2. DDD (Domain-Driven Design) Architecture
 
-### 目录结构
+### Directory Structure
 
 ```
 src/main/java/com/example/order/
-├── domain/                          # 领域层
+├── domain/                          # Domain layer
 │   ├── model/
 │   │   ├── aggregate/
 │   │   │   └── user/
-│   │   │       └── User.java       # 聚合根（领域实体）
+│   │   │       └── User.java       # Aggregate root (domain entity)
 │   │   └── valueobject/
 │   │       ├── UserId.java
 │   │       └── Email.java
 │   └── repository/
-│       └── UserRepository.java     # 仓储接口（Mapper接口）
-├── application/                     # 应用层
+│       └── UserRepository.java     # Repository interface (Mapper interface)
+├── application/                     # Application layer
 │   ├── service/
-│   │   ├── UserApplicationService.java      # 应用服务接口
+│   │   ├── UserApplicationService.java      # Application service interface
 │   │   └── impl/
-│   │       └── UserApplicationServiceImpl.java  # 应用服务实现
+│   │       └── UserApplicationServiceImpl.java  # Application service implementation
 │   └── dto/
-│       └── UserDTO.java            # 应用层DTO
-├── interfaces/                      # 接口层
+│       └── UserDTO.java            # Application layer DTO
+├── interfaces/                      # Interface layer
 │   └── web/
 │       ├── controller/
 │       │   └── UserController.java # Controller
@@ -69,20 +69,20 @@ src/main/java/com/example/order/
 │           │   ├── UserCreateRequest.java
 │           │   └── UserUpdateRequest.java
 │           └── response/
-│               └── UserResponse.java  # VO（视图对象）
+│               └── UserResponse.java  # VO (View Object)
 │       └── assembler/
-│           └── UserAssembler.java  # DTO装配器
-└── infrastructure/                  # 基础设施层
+│           └── UserAssembler.java  # DTO assembler
+└── infrastructure/                  # Infrastructure layer
     └── persistence/
         ├── repository/
-        │   └── JpaUserRepository.java  # 仓储实现
+        │   └── JpaUserRepository.java  # Repository implementation
         ├── mapper/
         │   └── UserMapper.java      # MyBatis Mapper
         └── entity/
-            └── UserEntity.java      # 持久化实体
+            └── UserEntity.java      # Persistence entity
 ```
 
-### 文件路径示例
+### File Path Examples
 
 - Domain Entity: `src/main/java/com/example/order/domain/model/aggregate/user/User.java`
 - Repository Interface: `src/main/java/com/example/order/domain/repository/UserRepository.java`
@@ -94,58 +94,58 @@ src/main/java/com/example/order/
 - Persistence Entity: `src/main/java/com/example/order/infrastructure/persistence/entity/UserEntity.java`
 - Mapper: `src/main/java/com/example/order/infrastructure/persistence/mapper/UserMapper.java`
 
-### 注意事项
+### Notes
 
-在 DDD 架构中：
-- **领域实体（User）** 是业务模型，放在 `domain/model/aggregate/` 或 `domain/model/entity/`
-- **持久化实体（UserEntity）** 是技术实现，放在 `infrastructure/persistence/entity/`
-- **Mapper 接口** 在领域层定义（`domain/repository/`），在基础设施层实现（`infrastructure/persistence/mapper/`）
+In DDD architecture:
+- **Domain entity (User)** is a business model, placed in `domain/model/aggregate/` or `domain/model/entity/`
+- **Persistence entity (UserEntity)** is a technical implementation, placed in `infrastructure/persistence/entity/`
+- **Mapper interface** is defined in the domain layer (`domain/repository/`) and implemented in the infrastructure layer (`infrastructure/persistence/mapper/`)
 
-## 3. 六边形架构 (Hexagonal Architecture)
+## 3. Hexagonal Architecture
 
-### 目录结构
+### Directory Structure
 
 ```
 src/main/java/com/example/order/
-├── application/                     # 应用层
+├── application/                     # Application layer
 │   ├── ports/
 │   │   ├── inbound/
-│   │   │   └── IUserService.java   # 入站端口（Service接口）
+│   │   │   └── IUserService.java   # Inbound port (Service interface)
 │   │   └── outbound/
-│   │       └── IUserRepository.java # 出站端口（Repository接口）
+│   │       └── IUserRepository.java # Outbound port (Repository interface)
 │   ├── services/
-│   │   └── UserServiceImpl.java    # 应用服务实现
+│   │   └── UserServiceImpl.java    # Application service implementation
 │   └── usecases/
 │       └── user/
 │           └── CreateUserUseCase.java
-├── domain/                          # 领域层
+├── domain/                          # Domain layer
 │   ├── model/
 │   │   ├── entity/
-│   │   │   └── User.java          # 领域实体
+│   │   │   └── User.java          # Domain entity
 │   │   └── valueobject/
 │   │       └── Email.java
 │   └── service/
 │       └── UserDomainService.java
-└── infrastructure/                  # 基础设施层
+└── infrastructure/                  # Infrastructure layer
     └── adapter/
-        ├── inbound/                 # 入站适配器
+        ├── inbound/                 # Inbound adapter
         │   └── web/
         │       ├── controller/
         │       │   └── UserController.java  # Controller
         │       └── dto/
         │           ├── CreateUserRequest.java
         │           └── UserResponse.java
-        └── outbound/                # 出站适配器
+        └── outbound/                # Outbound adapter
             └── persistence/
                 ├── repositoryimpl/
-                │   └── UserRepositoryImpl.java  # Repository实现
+                │   └── UserRepositoryImpl.java  # Repository implementation
                 ├── mapper/
                 │   └── UserMapper.java         # MyBatis Mapper
                 └── entity/
-                    └── UserEntity.java         # 持久化实体
+                    └── UserEntity.java         # Persistence entity
 ```
 
-### 文件路径示例
+### File Path Examples
 
 - Domain Entity: `src/main/java/com/example/order/domain/model/entity/User.java`
 - Inbound Port: `src/main/java/com/example/order/application/ports/inbound/IUserService.java`
@@ -156,22 +156,22 @@ src/main/java/com/example/order/
 - Mapper: `src/main/java/com/example/order/infrastructure/adapter/outbound/persistence/mapper/UserMapper.java`
 - Persistence Entity: `src/main/java/com/example/order/infrastructure/adapter/outbound/persistence/entity/UserEntity.java`
 
-## 4. 整洁架构 (Clean Architecture)
+## 4. Clean Architecture
 
-### 目录结构
+### Directory Structure
 
 ```
 src/main/java/com/example/order/
-├── domain/                          # 领域层（最内层）
+├── domain/                          # Domain layer (innermost layer)
 │   ├── entity/
-│   │   └── User.java               # 业务实体
+│   │   └── User.java               # Business entity
 │   ├── valueobject/
 │   │   └── Email.java
 │   ├── repository/
-│   │   └── UserRepository.java     # 仓储接口
+│   │   └── UserRepository.java     # Repository interface
 │   └── service/
 │       └── UserDomainService.java
-├── application/                     # 应用层
+├── application/                     # Application layer
 │   ├── usecase/
 │   │   └── user/
 │   │       ├── CreateUserUseCase.java
@@ -180,19 +180,19 @@ src/main/java/com/example/order/
 │   │   ├── input/
 │   │   │   └── UserInputPort.java
 │   │   └── output/
-│   │       └── UserOutputPort.java  # 输出端口（Repository接口）
+│   │       └── UserOutputPort.java  # Output port (Repository interface)
 │   ├── service/
-│   │   └── UserApplicationService.java  # 应用服务（ServiceImpl）
+│   │   └── UserApplicationService.java  # Application service (ServiceImpl)
 │   └── dto/
 │       └── UserDTO.java
-└── infrastructure/                  # 基础设施层（最外层）
+└── infrastructure/                  # Infrastructure layer (outermost layer)
     ├── persistence/
     │   ├── repository/
-    │   │   └── UserRepositoryImpl.java  # 仓储实现
+    │   │   └── UserRepositoryImpl.java  # Repository implementation
     │   ├── mapper/
     │   │   └── UserMapper.java         # MyBatis Mapper
     │   └── entity/
-    │       └── UserEntity.java         # 持久化实体
+    │       └── UserEntity.java         # Persistence entity
     └── web/
         ├── controller/
         │   └── UserController.java     # Controller
@@ -201,7 +201,7 @@ src/main/java/com/example/order/
             └── UserWebResponse.java
 ```
 
-### 文件路径示例
+### File Path Examples
 
 - Domain Entity: `src/main/java/com/example/order/domain/entity/User.java`
 - Repository Interface: `src/main/java/com/example/order/application/ports/output/UserOutputPort.java`
@@ -212,28 +212,28 @@ src/main/java/com/example/order/
 - Mapper: `src/main/java/com/example/order/infrastructure/persistence/mapper/UserMapper.java`
 - Persistence Entity: `src/main/java/com/example/order/infrastructure/persistence/entity/UserEntity.java`
 
-## 5. COLA V5 架构
+## 5. COLA V5 Architecture
 
-### 目录结构
+### Directory Structure
 
 ```
 src/main/java/com/example/order/
-├── domain/                          # 领域层
+├── domain/                          # Domain layer
 │   ├── model/
 │   │   ├── entity/
-│   │   │   └── User.java           # 实体
+│   │   │   └── User.java           # Entity
 │   │   └── valueobject/
 │   │       └── Email.java
 │   ├── repository/
-│   │   └── UserRepository.java     # 仓储接口（Mapper接口）
+│   │   └── UserRepository.java     # Repository interface (Mapper interface)
 │   ├── gateway/
 │   │   └── UserGateway.java
 │   ├── service/
 │   │   └── UserDomainService.java
 │   └── ability/
 │       └── UserAbility.java
-├── application/                     # 应用层
-│   ├── executor/                   # 执行器（CQRS）
+├── application/                     # Application layer
+│   ├── executor/                   # Executor (CQRS)
 │   │   ├── command/
 │   │   │   └── user/
 │   │   │       └── UserCreateCmdExe.java
@@ -241,9 +241,9 @@ src/main/java/com/example/order/
 │   │       └── user/
 │   │           └── UserGetQryExe.java
 │   ├── service/
-│   │   ├── UserAppService.java     # 应用服务接口
+│   │   ├── UserAppService.java     # Application service interface
 │   │   └── impl/
-│   │       └── UserAppServiceImpl.java  # 应用服务实现
+│   │       └── UserAppServiceImpl.java  # Application service implementation
 │   └── model/
 │       ├── command/
 │       │   └── UserCreateCmd.java
@@ -251,7 +251,7 @@ src/main/java/com/example/order/
 │       │   └── UserGetQry.java
 │       └── dto/
 │           └── UserDTO.java
-└── adapter/                        # 适配器层
+└── adapter/                        # Adapter layer
     └── web/
         ├── controller/
         │   └── UserController.java  # Controller
@@ -260,7 +260,7 @@ src/main/java/com/example/order/
             └── UserResponse.java
 ```
 
-### 文件路径示例
+### File Path Examples
 
 - Domain Entity: `src/main/java/com/example/order/domain/model/entity/User.java`
 - Repository Interface: `src/main/java/com/example/order/domain/repository/UserRepository.java`
@@ -271,83 +271,83 @@ src/main/java/com/example/order/
 - Controller: `src/main/java/com/example/order/adapter/web/controller/UserController.java`
 - DTO: `src/main/java/com/example/order/adapter/web/dto/UserCreateRequest.java`
 
-## 如何确定输出目录
+## How to Determine Output Directory
 
-### 步骤 1: 确认架构类型
+### Step 1: Confirm Architecture Type
 
-在 Step 2 中，用户已经选择了架构类型。根据选择，使用对应的目录映射。
+In Step 2, the user has already selected the architecture type. Based on the selection, use the corresponding directory mapping.
 
-### 步骤 2: 确认基础包路径
+### Step 2: Confirm Base Package Path
 
-询问用户：
+Ask the user:
 ```
-请提供项目的基础包路径（例如：com.example.order）
-```
-
-### 步骤 3: 确认项目结构
-
-如果项目结构不标准，询问用户：
-```
-请确认项目的目录结构，以便我将生成的代码放在正确的位置。
-
-例如：
-- 实体类应该放在哪个目录？
-- Controller 应该放在哪个目录？
-- Service 应该放在哪个目录？
+Please provide the project's base package path (e.g.: com.example.order)
 ```
 
-### 步骤 4: 构建完整路径
+### Step 3: Confirm Project Structure
 
-根据架构类型和基础包路径，构建完整的文件路径：
+If the project structure is non-standard, ask the user:
+```
+Please confirm the project's directory structure so that generated code is placed in the correct location.
 
-**示例：**
-- 架构：DDD
-- 基础包：`com.example.order`
-- 表名：`user`
-- Entity 路径：`src/main/java/com/example/order/domain/model/aggregate/user/User.java`
+Examples:
+- Which directory should entity classes be placed in?
+- Which directory should Controllers be placed in?
+- Which directory should Services be placed in?
+```
 
-### 步骤 5: 验证目录存在
+### Step 4: Build Complete Path
 
-在生成代码前，检查目录是否存在：
-- 如果目录不存在，创建目录
-- 如果目录已存在，确认是否覆盖现有文件
+Based on the architecture type and base package path, build the complete file path:
 
-## 常见问题
+**Example:**
+- Architecture: DDD
+- Base package: `com.example.order`
+- Table name: `user`
+- Entity path: `src/main/java/com/example/order/domain/model/aggregate/user/User.java`
 
-### Q1: 如何区分领域实体和持久化实体？
+### Step 5: Verify Directory Exists
+
+Before generating code, check whether the directory exists:
+- If the directory does not exist, create it
+- If the directory already exists, confirm whether to overwrite existing files
+
+## Common Questions
+
+### Q1: How to distinguish domain entities from persistence entities?
 
 **A**: 
-- **领域实体**：业务模型，包含业务逻辑，放在领域层（`domain/`）
-- **持久化实体**：数据库映射，放在基础设施层（`infrastructure/persistence/entity/`）
+- **Domain entity**: Business model, contains business logic, placed in the domain layer (`domain/`)
+- **Persistence entity**: Database mapping, placed in the infrastructure layer (`infrastructure/persistence/entity/`)
 
-在 DDD、六边形、整洁架构中，通常需要生成两种实体。
+In DDD, Hexagonal, and Clean architectures, both types of entities are typically generated.
 
-### Q2: Mapper 接口应该放在哪里？
+### Q2: Where should the Mapper interface be placed?
 
 **A**: 
 - **MVC**: `{package}/mapper/`
-- **DDD**: 仓储接口放在 `{package}/domain/repository/`，MyBatis Mapper 放在 `{package}/infrastructure/persistence/mapper/`
-- **六边形**: 端口接口放在 `{package}/application/ports/outbound/`，MyBatis Mapper 放在 `{package}/infrastructure/adapter/outbound/persistence/mapper/`
-- **整洁**: 输出端口放在 `{package}/application/ports/output/`，MyBatis Mapper 放在 `{package}/infrastructure/persistence/mapper/`
+- **DDD**: Repository interface in `{package}/domain/repository/`, MyBatis Mapper in `{package}/infrastructure/persistence/mapper/`
+- **Hexagonal**: Port interface in `{package}/application/ports/outbound/`, MyBatis Mapper in `{package}/infrastructure/adapter/outbound/persistence/mapper/`
+- **Clean**: Output port in `{package}/application/ports/output/`, MyBatis Mapper in `{package}/infrastructure/persistence/mapper/`
 - **COLA**: `{package}/domain/repository/`
 
-### Q3: 如何确定 DTO 的位置？
+### Q3: How to determine the location of DTOs?
 
 **A**: 
 - **MVC**: `{package}/dto/`
-- **DDD**: Request DTO 放在 `{package}/interfaces/web/dto/request/`，Response VO 放在 `{package}/interfaces/web/dto/response/`
-- **六边形**: `{package}/infrastructure/adapter/inbound/web/dto/`
-- **整洁**: `{package}/infrastructure/web/dto/` 或 `{package}/application/dto/`
-- **COLA**: `{package}/adapter/web/dto/` 或 `{package}/application/model/dto/`
+- **DDD**: Request DTO in `{package}/interfaces/web/dto/request/`, Response VO in `{package}/interfaces/web/dto/response/`
+- **Hexagonal**: `{package}/infrastructure/adapter/inbound/web/dto/`
+- **Clean**: `{package}/infrastructure/web/dto/` or `{package}/application/dto/`
+- **COLA**: `{package}/adapter/web/dto/` or `{package}/application/model/dto/`
 
-### Q4: 如果项目结构不标准怎么办？
+### Q4: What if the project structure is non-standard?
 
-**A**: 询问用户具体的目录结构，或者让用户提供项目的目录结构示例，然后根据实际情况调整。
+**A**: Ask the user for their specific directory structure, or have the user provide a project directory structure example, then adjust accordingly.
 
-## 参考文档
+## Reference Documentation
 
-详细的架构目录结构参考：
-- DDD 经典分层架构：`reference/ddd-architecture-directory-structure.md`
-- 六边形架构：`reference/hexagonal-architecture-directory-structure.md`
-- 整洁架构：`reference/clean-architecture-directory-structure.md`
-- COLA V5 架构：`reference/cola-v5-architecture-directory-structure.md`
+Detailed architecture directory structure references:
+- DDD classic layered architecture: `reference/ddd-architecture-directory-structure.md`
+- Hexagonal architecture: `reference/hexagonal-architecture-directory-structure.md`
+- Clean architecture: `reference/clean-architecture-directory-structure.md`
+- COLA V5 architecture: `reference/cola-v5-architecture-directory-structure.md`

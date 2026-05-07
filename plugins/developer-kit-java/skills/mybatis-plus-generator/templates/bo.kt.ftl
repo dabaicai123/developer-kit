@@ -1,30 +1,21 @@
 package ${package.BO}
 
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.ApiModel
-import io.swagger.annotations.ApiModelProperty
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.media.Schema
-</#if>
 </#if>
 import java.io.Serializable
 
 /**
- * <p>${table.comment}业务对象</p>
- * 
- * <p>封装${table.comment}的业务逻辑对象，包含业务规则和业务方法。
- * 本BO用于业务层处理，包含业务逻辑和业务规则验证。</p>
- * 
+ * <p>${table.comment} business object</p>
+ *
+ * <p>Business logic object that encapsulates ${table.comment}, containing business rules and business methods.
+ * This BO is used for business layer processing, including business logic and business rule validation.</p>
+ *
  * @author ${author}
  * @since ${date}
  */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@ApiModel(value = "${table.comment}BO", description = "${table.comment}业务对象")
-<#elseif swaggerVersion == "openapi3">
-@Schema(description = "${table.comment}业务对象")
-</#if>
+@Schema(description = "${table.comment} business object")
 </#if>
 <#if entityLombokModel>
 data class ${entity}BO(
@@ -37,14 +28,14 @@ class ${entity}BO : Serializable {
         private const val serialVersionUID: Long = 1L
     }
 </#if>
-## ----------  BEGIN BO 字段  ----------
+## ----------  BEGIN BO fields  ----------
 <#if entityLombokModel>
 <#list boFields as field>
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，用于业务逻辑处理</p>
+     *
+     * <p>${field.comment}, used for business logic processing</p>
      */
 <#else>
     /**
@@ -52,11 +43,7 @@ class ${entity}BO : Serializable {
      */
 </#if>
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiModelProperty(value = "${field.comment}")
-<#elseif swaggerVersion == "openapi3">
     @Schema(description = "${field.comment}")
-</#if>
 </#if>
     var ${field.propertyName}: ${field.propertyType}<#if field.propertyType == "String">?</#if> = null<#if field_has_next>,</#if>
 
@@ -67,8 +54,8 @@ class ${entity}BO : Serializable {
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，用于业务逻辑处理</p>
+     *
+     * <p>${field.comment}, used for business logic processing</p>
      */
 <#else>
     /**
@@ -76,17 +63,13 @@ class ${entity}BO : Serializable {
      */
 </#if>
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiModelProperty(value = "${field.comment}")
-<#elseif swaggerVersion == "openapi3">
     @Schema(description = "${field.comment}")
-</#if>
 </#if>
     var ${field.propertyName}: ${field.propertyType}<#if field.propertyType == "String">?</#if> = null
 
 </#list>
 </#if>
-## ----------  END BO 字段  ----------
+## ----------  END BO fields  ----------
 <#if !entityLombokModel>
 }
 </#if>

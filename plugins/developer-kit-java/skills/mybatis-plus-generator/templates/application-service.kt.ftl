@@ -5,23 +5,23 @@ import ${package.Application}.dto.${entity}DTO
 import java.util.List
 
 /**
- * <p>${table.comment}应用服务</p>
- * 
- * <p>${table.comment}的应用服务接口，位于应用层，负责协调领域对象完成业务用例。
- * 应用服务不包含业务逻辑，只负责编排领域服务和聚合根完成业务流程。</p>
- * 
- * <p>主要职责：
+ * <p>${table.comment} application service</p>
+ *
+ * <p>Application service interface for ${table.comment}, located in the application layer, responsible for coordinating domain objects to complete business use cases.
+ * Application services do not contain business logic; they only orchestrate domain services and aggregate roots to complete business processes.</p>
+ *
+ * <p>Primary responsibilities:
  * <ul>
- *   <li>协调领域对象完成业务用例</li>
- *   <li>处理事务边界</li>
- *   <li>DTO 与领域对象的转换</li>
- *   <li>调用领域服务和聚合根</li>
- *   <li>分页查询${table.comment}</li>
- *   <li>批量创建${table.comment}</li>
- *   <li>批量更新${table.comment}</li>
- *   <li>批量删除${table.comment}</li>
- *   <li>判断${table.comment}是否存在</li>
- *   <li>统计${table.comment}数量</li>
+ *   <li>Coordinate domain objects to complete business use cases</li>
+ *   <li>Handle transaction boundaries</li>
+ *   <li>Convert between DTOs and domain objects</li>
+ *   <li>Invoke domain services and aggregate roots</li>
+ *   <li>Query ${table.comment} with pagination</li>
+ *   <li>Batch create ${table.comment}</li>
+ *   <li>Batch update ${table.comment}</li>
+ *   <li>Batch delete ${table.comment}</li>
+ *   <li>Check if ${table.comment} exists</li>
+ *   <li>Count ${table.comment}</li>
 <#if customMethods??>
 <#list customMethods as method>
  *   <li>${method.description}</li>
@@ -29,129 +29,129 @@ import java.util.List
 </#if>
  * </ul>
  * </p>
- * 
- * <p>注意：应用服务不应包含业务逻辑，业务逻辑应在领域层实现。</p>
- * 
+ *
+ * <p>Note: Application services should not contain business logic; business logic should be implemented in the domain layer.</p>
+ *
  * @author ${author}
  * @since ${date}
  */
 interface ${entity}ApplicationService {
 
     /**
-     * <p>创建${table.comment}</p>
-     * 
-     * <p>创建新的${table.comment}聚合根，并返回DTO对象。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTO ${table.comment}DTO对象
-     * @return ${table.comment}DTO对象
+     * <p>Create ${table.comment}</p>
+     *
+     * <p>Create a new ${table.comment} aggregate root and return a DTO object.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTO ${table.comment} DTO object
+     * @return ${table.comment} DTO object
      */
     fun create${entity}(${entity?substring(0,1)?lower_case}${entity?substring(1)}DTO: ${entity}DTO): ${entity}DTO
 
     /**
-     * <p>根据ID查询${table.comment}</p>
-     * 
-     * <p>根据${table.comment}ID查询${table.comment}聚合根，并转换为DTO返回。</p>
-     * 
-     * @param id ${table.comment}ID
-     * @return ${table.comment}DTO对象
+     * <p>Query ${table.comment} by ID</p>
+     *
+     * <p>Query ${table.comment} aggregate root by ID and convert it to a DTO for return.</p>
+     *
+     * @param id ${table.comment} ID
+     * @return ${table.comment} DTO object
      */
     fun get${entity}ById(id: Long): ${entity}DTO?
 
     /**
-     * <p>更新${table.comment}</p>
-     * 
-     * <p>更新${table.comment}聚合根的信息。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTO ${table.comment}DTO对象
-     * @return ${table.comment}DTO对象
+     * <p>Update ${table.comment}</p>
+     *
+     * <p>Update ${table.comment} aggregate root information.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTO ${table.comment} DTO object
+     * @return ${table.comment} DTO object
      */
     fun update${entity}(${entity?substring(0,1)?lower_case}${entity?substring(1)}DTO: ${entity}DTO): ${entity}DTO
 
     /**
-     * <p>删除${table.comment}</p>
-     * 
-     * <p>根据${table.comment}ID删除${table.comment}聚合根。</p>
-     * 
-     * @param id ${table.comment}ID
+     * <p>Delete ${table.comment}</p>
+     *
+     * <p>Delete ${table.comment} aggregate root by ID.</p>
+     *
+     * @param id ${table.comment} ID
      */
     fun delete${entity}(id: Long)
 
     /**
-     * <p>查询所有${table.comment}</p>
-     * 
-     * <p>查询所有${table.comment}聚合根列表，并转换为DTO列表返回。</p>
-     * 
-     * @return ${table.comment}DTO列表
+     * <p>Query all ${table.comment}</p>
+     *
+     * <p>Query all ${table.comment} aggregate root list and convert to DTO list for return.</p>
+     *
+     * @return ${table.comment} DTO list
      */
     fun getAll${entity}s(): List<${entity}DTO>
 
     /**
-     * <p>分页查询${table.comment}</p>
-     * 
-     * <p>分页查询${table.comment}聚合根列表，并转换为DTO列表返回。</p>
-     * 
-     * @param pageNum 页码（从1开始）
-     * @param pageSize 每页数量
-     * @return ${table.comment}DTO分页列表
+     * <p>Query ${table.comment} with pagination</p>
+     *
+     * <p>Query ${table.comment} aggregate root list with pagination and convert to DTO list for return.</p>
+     *
+     * @param pageNum Page number (starting from 1)
+     * @param pageSize Number of items per page
+     * @return ${table.comment} DTO paginated list
      */
     fun get${entity}sByPage(pageNum: Int, pageSize: Int): List<${entity}DTO>
 
     /**
-     * <p>批量创建${table.comment}</p>
-     * 
-     * <p>批量创建新的${table.comment}聚合根，并返回DTO列表。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTOList ${table.comment}DTO列表
-     * @return ${table.comment}DTO列表
+     * <p>Batch create ${table.comment}</p>
+     *
+     * <p>Batch create new ${table.comment} aggregate roots and return a DTO list.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTOList ${table.comment} DTO list
+     * @return ${table.comment} DTO list
      */
     fun batchCreate${entity}s(${entity?substring(0,1)?lower_case}${entity?substring(1)}DTOList: List<${entity}DTO>): List<${entity}DTO>
 
     /**
-     * <p>批量更新${table.comment}</p>
-     * 
-     * <p>批量更新${table.comment}聚合根的信息。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTOList ${table.comment}DTO列表
-     * @return ${table.comment}DTO列表
+     * <p>Batch update ${table.comment}</p>
+     *
+     * <p>Batch update ${table.comment} aggregate root information.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}DTOList ${table.comment} DTO list
+     * @return ${table.comment} DTO list
      */
     fun batchUpdate${entity}s(${entity?substring(0,1)?lower_case}${entity?substring(1)}DTOList: List<${entity}DTO>): List<${entity}DTO>
 
     /**
-     * <p>批量删除${table.comment}</p>
-     * 
-     * <p>根据${table.comment}ID列表批量删除${table.comment}聚合根。</p>
-     * 
-     * @param ids ${table.comment}ID列表
+     * <p>Batch delete ${table.comment}</p>
+     *
+     * <p>Batch delete ${table.comment} aggregate roots by ID list.</p>
+     *
+     * @param ids ${table.comment} ID list
      */
     fun batchDelete${entity}s(ids: List<Long>)
 
     /**
-     * <p>判断${table.comment}是否存在</p>
-     * 
-     * <p>根据${table.comment}ID判断${table.comment}聚合根是否存在。</p>
-     * 
-     * @param id ${table.comment}ID
-     * @return Boolean 是否存在
+     * <p>Check if ${table.comment} exists</p>
+     *
+     * <p>Check if ${table.comment} aggregate root exists by ID.</p>
+     *
+     * @param id ${table.comment} ID
+     * @return Boolean whether it exists
      */
     fun exists${entity}(id: Long): Boolean
 
     /**
-     * <p>统计${table.comment}数量</p>
-     * 
-     * <p>统计${table.comment}聚合根的总数量。</p>
-     * 
-     * @return Long ${table.comment}数量
+     * <p>Count ${table.comment}</p>
+     *
+     * <p>Count the total number of ${table.comment} aggregate roots.</p>
+     *
+     * @return Long ${table.comment} count
      */
     fun count${entity}s(): Long
 <#if customMethods??>
 
-## ----------  BEGIN 自定义方法  ----------
+## ----------  BEGIN Custom methods  ----------
 <#list customMethods as method>
     /**
      * <p>${method.description}</p>
-     * 
+     *
      * <p>${method.detailDescription}</p>
-     * 
+     *
 <#list method.parameters as param>
      * @param ${param.name} ${param.type} ${param.description}
 </#list>
@@ -164,6 +164,6 @@ interface ${entity}ApplicationService {
      */
     fun ${method.name}(<#list method.parameters as param>${param.name}: ${param.type}<#if param_has_next>, </#if></#list>): ${method.returnType}
 </#list>
-## ----------  END 自定义方法  ----------
+## ----------  END Custom methods  ----------
 </#if>
 }

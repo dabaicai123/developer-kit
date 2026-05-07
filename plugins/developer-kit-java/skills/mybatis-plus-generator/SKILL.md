@@ -85,10 +85,7 @@ This skill follows a systematic 8-step workflow:
    - Output directory (default: `src/main/java`)
    - File override strategy (overwrite, skip, ask)
    - Enable Lombok (yes/no)
-   - Enable API documentation (yes/no)
-   - **API Documentation Type** (if enabled):
-     - Swagger 2 (`io.swagger.annotations.*`)
-     - OpenAPI 3 (`io.swagger.v3.oas.annotations.*`)
+   - Enable API documentation (yes/no) — uses OpenAPI 3 annotations
    - Enable validation annotations (yes/no)
 
 3. **Package Configuration:**
@@ -108,25 +105,16 @@ This skill follows a systematic 8-step workflow:
    - Field naming strategy
    - Primary key strategy (AUTO, UUID, etc.)
 
-**IMPORTANT: API Documentation Type Selection:**
-
-When user enables API documentation, you MUST ask:
+**IMPORTANT: When user enables API documentation, OpenAPI 3 annotations are used by default:**
 
 ```
-Select API documentation type:
-- [ ] Swagger 2
-  - Annotations: @ApiModel, @ApiModelProperty, @Api, @ApiOperation
-  - Dependencies: springfox-swagger2, springfox-swagger-ui
-  - For: Spring Boot 2.x projects
-- [ ] OpenAPI 3
-  - Annotations: @Schema, @Tag, @Operation, @Parameter
-  - Dependencies: springdoc-openapi-ui
-  - For: Spring Boot 2.2+ and Spring Boot 3.x projects
+API documentation uses OpenAPI 3 (springdoc-openapi):
+- Annotations: @Schema, @Tag, @Operation, @Parameter
+- Dependencies: springdoc-openapi-ui
+- For: Spring Boot 2.2+ and Spring Boot 3.x projects
 ```
 
-**Wait for user confirmation** before proceeding.
-
-**Output**: A configuration summary showing all collected information, including API documentation type.
+**Output**: A configuration summary showing all collected information.
 
 #### Step 2: Determine Architecture
 
@@ -382,7 +370,7 @@ For each table, generate a structured todo list:
 #### Code Generation Standards
 - `references/code-generation-standards.md` - Detailed comment standards, template usage, and code quality requirements
 - `references/template-variables.md` - Complete list of template variables
-- `references/swagger-annotations-guide.md` - Swagger 2 vs OpenAPI 3 annotation comparison
+- `references/swagger-annotations-guide.md` - OpenAPI 3 annotation reference
 
 #### Progress & Statistics
 - `references/progress-and-statistics-formats.md` - Progress update and statistics output formats
@@ -397,7 +385,7 @@ See the `examples/` directory for complete examples:
 - `examples/ddd-architecture-example.md` - DDD architecture generation example
 - `examples/full-workflow-example.md` - Complete workflow example
 - `examples/architecture-directory-mapping.md` - Directory mapping examples for different architectures
-- `examples/swagger-annotations-example.md` - Swagger 2 vs OpenAPI 3 annotation examples
+- `examples/swagger-annotations-example.md` - OpenAPI 3 annotation examples
 
 ### Templates
 
@@ -443,7 +431,7 @@ All DDD templates are located in `templates/` root directory, supporting both Ja
 - `assembler.java.ftl` / `assembler.kt.ftl` - DTO assembler template
 
 **Template Features:**
-- Support for Swagger 2 and OpenAPI 3 annotations
+- Support for OpenAPI 3 annotations
 - Intelligent comments based on table structure
 - Custom method generation support
 - Kotlin-specific features (data classes, null safety, etc.)

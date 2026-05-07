@@ -6,11 +6,7 @@ import ${package.Service}.${table.serviceName}
 import ${superServiceImplClassPackage}
 import org.springframework.stereotype.Service
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.Api
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.tags.Tag
-</#if>
 </#if>
 
 /**
@@ -37,11 +33,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
  * @since ${date}
  */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@Api(value = "${table.comment}服务实现类", tags = "${table.comment}管理")
-<#elseif swaggerVersion == "openapi3">
 @Tag(name = "${table.comment}管理", description = "${table.comment}服务实现类")
-</#if>
 </#if>
 @Service
 class ${table.serviceImplName} : ${superServiceImplClass}<${table.mapperName}, ${entity}>(), ${table.serviceName} {

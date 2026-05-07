@@ -1,116 +1,116 @@
-# 架构目录快速参考
+# Architecture Directory Quick Reference
 
-本文档提供不同架构类型下，各种对象类型的快速目录映射参考。
+This document provides a quick directory mapping reference for various object types under different architecture types.
 
-> **COLA V5 映射与 `ddd-cola` skill 保持一致**，遵循 COLA V5 官方命名约定（`app`、`gateway`、`adapter/controller`）。
+> **COLA V5 mapping is consistent with the `ddd-cola` skill**, following COLA V5 official naming conventions (`app`, `gateway`, `adapter/controller`).
 
-## 快速查找表
+## Quick Lookup Table
 
-### Entity（实体类）
+### Entity (Entity Classes)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/entity/` |
-| DDD | `{package}/domain/model/aggregate/{entity}/` 或 `{package}/domain/model/entity/` |
-| 六边形 | `{package}/domain/model/entity/` |
-| 整洁 | `{package}/domain/entity/` |
+| DDD | `{package}/domain/model/aggregate/{entity}/` or `{package}/domain/model/entity/` |
+| Hexagonal | `{package}/domain/model/entity/` |
+| Clean | `{package}/domain/entity/` |
 | COLA | `{package}/domain/model/entity/` |
 
-### Mapper（数据访问接口）
+### Mapper (Data Access Interfaces)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/mapper/` |
-| DDD | `{package}/domain/repository/`（仓储接口）<br>`{package}/infrastructure/persistence/mapper/`（MyBatis Mapper） |
-| 六边形 | `{package}/application/ports/outbound/`（端口接口）<br>`{package}/infrastructure/adapter/outbound/persistence/mapper/`（MyBatis Mapper） |
-| 整洁 | `{package}/application/ports/output/` 或 `{package}/domain/repository/`（接口）<br>`{package}/infrastructure/persistence/mapper/`（MyBatis Mapper） |
-| COLA | `{package}/domain/gateway/`（网关接口，COLA 使用 gateway 不是 repository）<br>`{package}/infrastructure/persistence/mapper/`（MyBatis Mapper 实现） |
+| DDD | `{package}/domain/repository/` (repository interfaces)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper) |
+| Hexagonal | `{package}/application/ports/outbound/` (port interfaces)<br>`{package}/infrastructure/adapter/outbound/persistence/mapper/` (MyBatis Mapper) |
+| Clean | `{package}/application/ports/output/` or `{package}/domain/repository/` (interfaces)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper) |
+| COLA | `{package}/domain/gateway/` (gateway interfaces, COLA uses gateway not repository)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper implementations) |
 
-### Service（服务接口）
+### Service (Service Interfaces)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/service/` |
 | DDD | `{package}/application/service/` |
-| 六边形 | `{package}/application/ports/inbound/` |
-| 整洁 | `{package}/application/usecase/{entity}/` |
-| COLA | `{package}/app/service/`（COLA V5 使用 app 不是 application） |
+| Hexagonal | `{package}/application/ports/inbound/` |
+| Clean | `{package}/application/usecase/{entity}/` |
+| COLA | `{package}/app/service/` (COLA V5 uses app, not application) |
 
-### ServiceImpl（服务实现类）
+### ServiceImpl (Service Implementation Classes)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/service/impl/` |
 | DDD | `{package}/application/service/impl/` |
-| 六边形 | `{package}/application/services/` |
-| 整洁 | `{package}/application/service/` |
-| COLA | `{package}/app/service/impl/`（COLA V5 使用 app 不是 application） |
+| Hexagonal | `{package}/application/services/` |
+| Clean | `{package}/application/service/` |
+| COLA | `{package}/app/service/impl/` (COLA V5 uses app, not application) |
 
-### Controller（控制器）
+### Controller (Controllers)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/controller/` |
 | DDD | `{package}/interfaces/web/controller/` |
-| 六边形 | `{package}/infrastructure/adapter/inbound/web/controller/` |
-| 整洁 | `{package}/infrastructure/web/controller/` |
-| COLA | `{package}/adapter/controller/`（COLA V5 直接在 adapter 下，不是 adapter/web/） |
+| Hexagonal | `{package}/infrastructure/adapter/inbound/web/controller/` |
+| Clean | `{package}/infrastructure/web/controller/` |
+| COLA | `{package}/adapter/controller/` (COLA V5 places directly under adapter, not adapter/web/) |
 
-### DTO（数据传输对象）
+### DTO (Data Transfer Objects)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/dto/` |
 | DDD | Request: `{package}/interfaces/web/dto/request/`<br>Response: `{package}/interfaces/web/dto/response/` |
-| 六边形 | `{package}/infrastructure/adapter/inbound/web/dto/` |
-| 整洁 | `{package}/infrastructure/web/dto/` 或 `{package}/application/dto/` |
-| COLA | `{package}/adapter/dto/` 或 `{package}/app/model/dto/` |
+| Hexagonal | `{package}/infrastructure/adapter/inbound/web/dto/` |
+| Clean | `{package}/infrastructure/web/dto/` or `{package}/application/dto/` |
+| COLA | `{package}/adapter/dto/` or `{package}/app/model/dto/` |
 
-### VO（视图对象）
+### VO (View Objects)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/vo/` |
 | DDD | `{package}/interfaces/web/dto/response/` |
-| 六边形 | `{package}/infrastructure/adapter/inbound/web/dto/` |
-| 整洁 | `{package}/infrastructure/web/dto/` |
+| Hexagonal | `{package}/infrastructure/adapter/inbound/web/dto/` |
+| Clean | `{package}/infrastructure/web/dto/` |
 | COLA | `{package}/adapter/dto/` |
 
-### BO（业务对象）
+### BO (Business Objects)
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | MVC | `{package}/bo/` |
 | DDD | `{package}/application/dto/` |
-| 六边形 | `{package}/application/dto/` |
-| 整洁 | `{package}/application/dto/` |
-| COLA | `{package}/app/model/` 或 `{package}/app/executor/`（COLA V5 使用 app 不是 application） |
+| Hexagonal | `{package}/application/dto/` |
+| Clean | `{package}/application/dto/` |
+| COLA | `{package}/app/model/` or `{package}/app/executor/` (COLA V5 uses app, not application) |
 
-### Persistence Entity（持久化实体）
+### Persistence Entity
 
-**注意**：仅在 DDD、六边形、整洁、COLA 架构中需要区分领域实体和持久化实体。
+**Note**: Only in DDD, Hexagonal, Clean, and COLA architectures is it necessary to distinguish between domain entities and persistence entities.
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | DDD | `{package}/infrastructure/persistence/entity/` |
-| 六边形 | `{package}/infrastructure/adapter/outbound/persistence/entity/` |
-| 整洁 | `{package}/infrastructure/persistence/entity/` |
+| Hexagonal | `{package}/infrastructure/adapter/outbound/persistence/entity/` |
+| Clean | `{package}/infrastructure/persistence/entity/` |
 | COLA | `{package}/infrastructure/persistence/entity/` |
 
-### Repository/Gateway Implementation（仓储/网关实现）
+### Repository/Gateway Implementation
 
-| 架构类型 | 目录路径 |
+| Architecture Type | Directory Path |
 |:--------|:---------|
 | DDD | `{package}/infrastructure/persistence/repository/` |
-| 六边形 | `{package}/infrastructure/adapter/outbound/persistence/repositoryimpl/` |
-| 整洁 | `{package}/infrastructure/persistence/repository/` |
-| COLA | `{package}/infrastructure/persistence/mapper/`（Gateway 实现通过 MyBatis Mapper） |
+| Hexagonal | `{package}/infrastructure/adapter/outbound/persistence/repositoryimpl/` |
+| Clean | `{package}/infrastructure/persistence/repository/` |
+| COLA | `{package}/infrastructure/persistence/mapper/` (Gateway implementation via MyBatis Mapper) |
 
-## 完整路径示例
+## Complete Path Examples
 
-假设基础包路径为 `com.example.order`，表名为 `user`：
+Assuming base package path is `com.example.order` and table name is `user`:
 
-### MVC 架构
+### MVC Architecture
 
 ```
 src/main/java/com/example/order/
@@ -122,7 +122,7 @@ src/main/java/com/example/order/
 └── dto/UserCreateDTO.java
 ```
 
-### DDD 架构
+### DDD Architecture
 
 ```
 src/main/java/com/example/order/
@@ -142,7 +142,7 @@ src/main/java/com/example/order/
     └── mapper/UserMapper.java
 ```
 
-### 六边形架构
+### Hexagonal Architecture
 
 ```
 src/main/java/com/example/order/
@@ -162,7 +162,7 @@ src/main/java/com/example/order/
         └── entity/UserEntity.java
 ```
 
-### 整洁架构
+### Clean Architecture
 
 ```
 src/main/java/com/example/order/
@@ -181,7 +181,7 @@ src/main/java/com/example/order/
         └── dto/UserWebRequest.java
 ```
 
-### COLA V5 架构（与 ddd-cola skill 对齐）
+### COLA V5 Architecture (aligned with ddd-cola skill)
 
 ```
 src/main/java/com/example/order/
@@ -209,63 +209,63 @@ src/main/java/com/example/order/
     └── config/
 ```
 
-## COLA V5 命名约定对照
+## COLA V5 Naming Convention Comparison
 
-> 与 `ddd-cola` skill 保持一致
+> Consistent with the `ddd-cola` skill
 
-| 概念 | COLA V5 命名 | 其他架构常见命名 | 说明 |
+| Concept | COLA V5 Naming | Common Naming in Other Architectures | Description |
 |:-----|:------------|:---------------|:-----|
-| 应用层 | `app` | `application` | COLA V5 使用简短命名 |
-| 仓储接口 | `gateway` | `repository` | COLA 使用 Gateway 术语 |
-| 控制器目录 | `adapter/controller/` | `adapter/web/controller/` | COLA 扁平化组织 |
-| 命令对象 | `Cmd` 后缀 | `Command` / `Request` | 如 `CreateUserCmd` |
-| 查询对象 | `Qry` 后缀 | `Query` / `Request` | 如 `GetUserQry` |
-| 执行器 | `Exe` 后缀 | `Handler` / `UseCase` | 如 `UserCreateCmdExe` |
-| 持久化对象 | `DO` 后缀 | `Entity` / `PO` | 如 `UserDO` |
+| Application layer | `app` | `application` | COLA V5 uses short naming |
+| Repository interface | `gateway` | `repository` | COLA uses Gateway terminology |
+| Controller directory | `adapter/controller/` | `adapter/web/controller/` | COLA uses flat organization |
+| Command objects | `Cmd` suffix | `Command` / `Request` | e.g., `CreateUserCmd` |
+| Query objects | `Qry` suffix | `Query` / `Request` | e.g., `GetUserQry` |
+| Executors | `Exe` suffix | `Handler` / `UseCase` | e.g., `UserCreateCmdExe` |
+| Persistence objects | `DO` suffix | `Entity` / `PO` | e.g., `UserDO` |
 
-## 使用步骤
+## Usage Steps
 
-1. **确认架构类型**（从 Step 2 获取）
-2. **确认基础包路径**（从 Step 1 获取）
-3. **查找对象类型**（Entity、Mapper、Service 等）
-4. **使用上表查找对应目录路径**
-5. **构建完整路径**：`src/main/java/{package}/{目录路径}/{ClassName}.java`
-6. **验证目录存在**，不存在则创建
-7. **生成文件**
+1. **Confirm architecture type** (from Step 2)
+2. **Confirm base package path** (from Step 1)
+3. **Find object type** (Entity, Mapper, Service, etc.)
+4. **Use the table above to find the corresponding directory path**
+5. **Build complete path**: `src/main/java/{package}/{directory path}/{ClassName}.java`
+6. **Verify directory exists**, create if it does not exist
+7. **Generate files**
 
-## 注意事项
+## Important Notes
 
-1. **领域实体 vs 持久化实体**：
-   - DDD、六边形、整洁、COLA 架构需要区分
-   - 领域实体包含业务逻辑，放在领域层
-   - 持久化实体是数据库映射，放在基础设施层
+1. **Domain Entity vs Persistence Entity**:
+   - DDD, Hexagonal, Clean, and COLA architectures require distinguishing these
+   - Domain entities contain business logic and are placed in the domain layer
+   - Persistence entities are database mappings and are placed in the infrastructure layer
 
-2. **Mapper 接口位置**：
-   - 在 DDD、六边形、整洁架构中，通常有两个位置：
-     - 仓储接口（领域层定义）
-     - MyBatis Mapper（基础设施层实现）
-   - 在 COLA 中，Gateway 在领域层定义，Mapper 在基础设施层实现
+2. **Mapper Interface Location**:
+   - In DDD, Hexagonal, and Clean architectures, there are typically two locations:
+     - Repository interface (defined in domain layer)
+     - MyBatis Mapper (implemented in infrastructure layer)
+   - In COLA, Gateway is defined in domain layer, Mapper is implemented in infrastructure layer
 
-3. **DTO 分类**：
-   - DDD 架构中，Request 和 Response 分开存放
-   - COLA 中 DTO 放在 adapter/dto/ 或 app/model/ 中
+3. **DTO Classification**:
+   - In DDD architecture, Request and Response are stored separately
+   - In COLA, DTOs are placed in `adapter/dto/` or `app/model/`
 
-4. **包路径转换**：
-   - 包路径使用点分隔：`com.example.order`
-   - 文件路径使用斜杠分隔：`com/example/order/`
-   - 基础路径：`src/main/java/`
+4. **Package Path Conversion**:
+   - Package paths use dot separators: `com.example.order`
+   - File paths use slash separators: `com/example/order/`
+   - Base path: `src/main/java/`
 
-5. **COLA V5 特殊约定**：
-   - 应用层包名使用 `app`（不是 `application`）
-   - 仓储接口使用 `gateway`（不是 `repository`）
-   - 控制器直接放在 `adapter/controller/`（不是 `adapter/web/controller/`）
+5. **COLA V5 Special Conventions**:
+   - Application layer package name uses `app` (not `application`)
+   - Repository interface uses `gateway` (not `repository`)
+   - Controllers are placed directly in `adapter/controller/` (not `adapter/web/controller/`)
 
-## 参考文档
+## Reference Documents
 
-- 详细映射指南：`architecture-directory-mapping-guide.md`
-- 详细示例：`examples/architecture-directory-mapping.md`
-- COLA V5 权威参考：`ddd-cola`
-- DDD 架构参考：`../ddd4j-project-creator/docs/1、DDD 经典分层架构目录结构.md`
-- 六边形架构参考：`../ddd4j-project-creator/docs/2、六边形架构详细目录结构参考.md`
-- 整洁架构参考：`../ddd4j-project-creator/docs/3、整洁架构详细目录结构参考.md`
-- COLA V5 架构参考：`../ddd4j-project-creator/docs/4、COLA V5 架构详细目录结构参考.md`
+- Detailed mapping guide: `architecture-directory-mapping-guide.md`
+- Detailed examples: `examples/architecture-directory-mapping.md`
+- COLA V5 authoritative reference: `ddd-cola`
+- DDD architecture reference: `../ddd4j-project-creator/docs/1、DDD Classic Layered Architecture Directory Structure.md`
+- Hexagonal architecture reference: `../ddd4j-project-creator/docs/2、Hexagonal Architecture Detailed Directory Structure Reference.md`
+- Clean architecture reference: `../ddd4j-project-creator/docs/3、Clean Architecture Detailed Directory Structure Reference.md`
+- COLA V5 architecture reference: `../ddd4j-project-creator/docs/4、COLA V5 Architecture Detailed Directory Structure Reference.md`

@@ -1,238 +1,232 @@
 # MyBatis-Plus Generator Skill
 
-## 概述
+## Overview
 
-这是一个基于 Agent Skills 规范的 MyBatis-Plus 代码生成技能，可以根据数据库表结构自动生成完整的 CRUD 代码，包括 Entity、Mapper、Service、ServiceImpl、Controller、DTO、VO、BO 等对象。
+This is a MyBatis-Plus code generation skill based on the Agent Skills specification, capable of automatically generating complete CRUD code from database table structures, including Entity, Mapper, Service, ServiceImpl, Controller, DTO, VO, BO and other objects.
 
-**重要提示**：本技能仅在用户明确提到 **MyBatis-Plus** 或 **mybatis-plus-generator** 时触发，避免与其他代码生成工具产生冲突。
+**Important**: This skill is triggered only when the user explicitly mentions **MyBatis-Plus** or **mybatis-plus-generator**, to avoid conflicts with other code generation tools.
 
-## 功能特点
+## Features
 
-1. **智能代码生成**：根据表结构和业务需求生成代码，包含智能注释而非简单模板填充
-2. **多架构支持**：支持 MVC、DDD（领域驱动设计）、分层架构、整洁架构、六边形架构、COLA V5 等
-3. **多语言支持**：支持 Java 和 Kotlin，使用对应的模板文件
-4. **智能注释**：生成符合 Java 编程规范的注释，基于业务上下文理解
-5. **自定义方法**：根据业务需求自动分析并生成自定义方法
-6. **API 文档支持**：支持 Swagger 2 和 OpenAPI 3 注解
-7. **DDD 模式支持**：支持聚合根、仓储、领域服务、值对象、领域事件等 DDD 模式
-8. **进度跟踪**：实时输出生成进度
-9. **统计报告**：生成完成后输出详细统计信息
+1. **Intelligent Code Generation**: Generates code based on table structures and business requirements, with intelligent comments rather than simple template filling
+2. **Multi-Architecture Support**: Supports MVC, DDD (Domain-Driven Design), layered architecture, Clean architecture, Hexagonal architecture, COLA V5, etc.
+3. **Multi-Language Support**: Supports Java and Kotlin, using corresponding template files
+4. **Intelligent Comments**: Generates comments compliant with Java programming standards, based on business context understanding
+5. **Custom Methods**: Automatically analyzes and generates custom methods based on business requirements
+6. **API Documentation Support**: Supports OpenAPI 3 annotations
+7. **DDD Pattern Support**: Supports Aggregate Root, Repository, Domain Service, Value Object, Domain Event and other DDD patterns
+8. **Progress Tracking**: Real-time generation progress output
+9. **Statistics Report**: Outputs detailed statistics after generation completes
 
-## 文件结构
+## File Structure
 
 ```
 mybatis-plus-generator/
-├── SKILL.md                              # 主技能文档（Agent Skills 规范）
-├── LICENSE.txt                           # Apache 2.0 许可证
-├── README.md                             # 本文件
-├── examples/                             # 示例目录
-│   ├── full-workflow-example.md         # 完整工作流程示例
-│   ├── mvc-architecture-example.md      # MVC 架构示例
-│   ├── ddd-architecture-example.md      # DDD 架构示例
-│   ├── architecture-directory-mapping.md # 架构目录映射示例
-│   └── swagger-annotations-example.md   # Swagger 注解示例
-├── reference/                            # 参考文档目录
-│   ├── mybatis-plus-generator-guide.md  # MyBatis-Plus Generator 指南
-│   ├── template-variables.md            # 模板变量参考
-│   ├── architecture-directory-mapping-guide.md # 架构目录映射详细指南
-│   ├── architecture-directory-quick-reference.md # 架构目录映射快速参考
-│   ├── code-generation-standards.md     # 代码生成标准
-│   ├── progress-and-statistics-formats.md # 进度和统计格式
-│   └── swagger-annotations-guide.md     # Swagger 注解指南
-└── templates/                            # 代码模板目录（FreeMarker 语法）
-    ├── entity.java.ftl / entity.kt.ftl  # Entity 实体类模板
-    ├── mapper.java.ftl / mapper.kt.ftl  # Mapper 接口模板
-    ├── service.java.ftl / service.kt.ftl # Service 接口模板
-    ├── serviceImpl.java.ftl / serviceImpl.kt.ftl # ServiceImpl 实现类模板
-    ├── controller.java.ftl / controller.kt.ftl # Controller 控制器模板
-    ├── dto.java.ftl / dto.kt.ftl         # DTO 数据传输对象模板
-    ├── vo.java.ftl / vo.kt.ftl          # VO 视图对象模板
-    ├── bo.java.ftl / bo.kt.ftl          # BO 业务对象模板
-    ├── repository.java.ftl / repository.kt.ftl # DDD Repository 接口模板
-    ├── aggregate-root.java.ftl / aggregate-root.kt.ftl # DDD 聚合根模板
-    ├── domain-service.java.ftl / domain-service.kt.ftl # DDD 领域服务模板
-    ├── value-object.java.ftl / value-object.kt.ftl # DDD 值对象模板
-    ├── domain-event.java.ftl / domain-event.kt.ftl # DDD 领域事件模板
-    ├── application-service.java.ftl / application-service.kt.ftl # DDD 应用服务模板
-    └── assembler.java.ftl / assembler.kt.ftl # DDD 装配器模板
+├── SKILL.md                              # Main skill document (Agent Skills specification)
+├── LICENSE.txt                           # Apache 2.0 license
+├── README.md                             # This file
+├── examples/                             # Examples directory
+│   ├── full-workflow-example.md         # Full workflow example
+│   ├── mvc-architecture-example.md      # MVC architecture example
+│   ├── ddd-architecture-example.md      # DDD architecture example
+│   ├── architecture-directory-mapping.md # Architecture directory mapping example
+│   └── swagger-annotations-example.md   # OpenAPI 3 annotation example
+├── reference/                            # Reference documentation directory
+│   ├── mybatis-plus-generator-guide.md  # MyBatis-Plus Generator guide
+│   ├── template-variables.md            # Template variables reference
+│   ├── architecture-directory-mapping-guide.md # Architecture directory mapping detailed guide
+│   ├── architecture-directory-quick-reference.md # Architecture directory mapping quick reference
+│   ├── code-generation-standards.md     # Code generation standards
+│   ├── progress-and-statistics-formats.md # Progress and statistics formats
+│   └── swagger-annotations-guide.md     # OpenAPI 3 annotation reference
+└── templates/                            # Code template directory (FreeMarker syntax)
+    ├── entity.java.ftl / entity.kt.ftl  # Entity class template
+    ├── mapper.java.ftl / mapper.kt.ftl  # Mapper interface template
+    ├── service.java.ftl / service.kt.ftl # Service interface template
+    ├── serviceImpl.java.ftl / serviceImpl.kt.ftl # ServiceImpl implementation class template
+    ├── controller.java.ftl / controller.kt.ftl # Controller template
+    ├── dto.java.ftl / dto.kt.ftl         # DTO data transfer object template
+    ├── vo.java.ftl / vo.kt.ftl          # VO view object template
+    ├── bo.java.ftl / bo.kt.ftl          # BO business object template
+    ├── repository.java.ftl / repository.kt.ftl # DDD Repository interface template
+    ├── aggregate-root.java.ftl / aggregate-root.kt.ftl # DDD Aggregate Root template
+    ├── domain-service.java.ftl / domain-service.kt.ftl # DDD Domain Service template
+    ├── value-object.java.ftl / value-object.kt.ftl # DDD Value Object template
+    ├── domain-event.java.ftl / domain-event.kt.ftl # DDD Domain Event template
+    ├── application-service.java.ftl / application-service.kt.ftl # DDD Application Service template
+    └── assembler.java.ftl / assembler.kt.ftl # DDD Assembler template
 ```
 
-## 工作流程
+## Workflow
 
-技能遵循 8 步系统化工作流程：
+The skill follows an 8-step systematic workflow:
 
-1. **收集配置**：数据库信息、全局配置、包配置、策略配置、API 文档类型（Swagger 2 / OpenAPI 3）
-2. **确定架构**：MVC、DDD、分层架构、整洁架构、六边形架构、COLA V5 等，并确定目录映射
-3. **收集需求**：功能需求分析，自动识别标准方法和自定义方法
-4. **确定语言**：Java 或 Kotlin，使用对应的模板文件
-5. **创建 Todo**：详细的生成计划，包含表名、对象类型、方法名
-6. **生成代码**：使用 FreeMarker 模板生成代码，包含智能注释
-7. **进度更新**：实时输出生成进度，更新 Todo 清单
-8. **统计信息**：生成完成后的详细统计报告
+1. **Collect Configuration**: Database information, global configuration, package configuration, strategy configuration, API documentation (OpenAPI 3)
+2. **Determine Architecture**: MVC, DDD, layered architecture, Clean architecture, Hexagonal architecture, COLA V5, etc., and determine directory mapping
+3. **Collect Requirements**: Functional requirements analysis, automatic identification of standard methods and custom methods
+4. **Determine Language**: Java or Kotlin, using corresponding template files
+5. **Create Todo**: Detailed generation plan, including table names, object types, method names
+6. **Generate Code**: Use FreeMarker templates to generate code, with intelligent comments
+7. **Progress Update**: Real-time generation progress output, update Todo list
+8. **Statistics**: Detailed statistics report after generation completes
 
-## 使用方式
+## Usage
 
-**重要提示**：本技能仅在用户明确提到 **MyBatis-Plus** 或 **mybatis-plus-generator** 时触发。
+**Important**: This skill is triggered only when the user explicitly mentions **MyBatis-Plus** or **mybatis-plus-generator**.
 
-### 触发短语示例
+### Trigger Phrase Examples
 
-- ✅ "生成 MyBatis-Plus 代码"
-- ✅ "使用 MyBatis-Plus 根据表结构生成代码"
-- ✅ "MyBatis-Plus 代码生成器"
+- ✅ "Generate MyBatis-Plus code"
+- ✅ "Use MyBatis-Plus to generate code from table structure"
+- ✅ "MyBatis-Plus code generator"
 - ✅ "mybatis-plus-generator"
-- ❌ "根据表结构生成代码"（未明确提到 MyBatis-Plus，不会触发）
-- ❌ "生成 CRUD 代码"（未明确提到 MyBatis-Plus，不会触发）
+- ❌ "Generate code from table structure" (MyBatis-Plus not explicitly mentioned, will not trigger)
+- ❌ "Generate CRUD code" (MyBatis-Plus not explicitly mentioned, will not trigger)
 
-### 使用流程
+### Usage Flow
 
-当用户明确提到 MyBatis-Plus 时，技能会自动：
+When the user explicitly mentions MyBatis-Plus, the skill automatically:
 
-1. **收集配置信息**：数据库连接、表名、包名、作者等
-2. **确定架构类型**：MVC、DDD 等，并确定正确的目录结构
-3. **分析业务需求**：识别标准 CRUD 方法和自定义业务方法
-4. **选择编程语言**：Java 或 Kotlin
-5. **生成代码**：使用对应的模板文件生成代码
-6. **提供进度更新**：实时显示生成进度
-7. **输出统计信息**：生成完成后的详细报告
+1. **Collects configuration**: Database connection, table names, package names, author, etc.
+2. **Determines architecture type**: MVC, DDD, etc., and determines the correct directory structure
+3. **Analyzes business requirements**: Identifies standard CRUD methods and custom business methods
+4. **Selects programming language**: Java or Kotlin
+5. **Generates code**: Uses corresponding template files to generate code
+6. **Provides progress updates**: Real-time display of generation progress
+7. **Outputs statistics**: Detailed report after generation completes
 
-## 模板说明
+## Template Description
 
-### 模板引擎
+### Template Engine
 
-所有模板文件使用 **FreeMarker** 模板语法（`.ftl` 文件），严格遵循 [MyBatis-Plus 官方模板](https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates)。
+All template files use **FreeMarker** template syntax (`.ftl` files), strictly following the [MyBatis-Plus official templates](https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates).
 
-### 模板语法
+### Template Syntax
 
-FreeMarker 模板支持：
-- 变量替换（`${variable}`）
-- 条件判断（`<#if>`）
-- 循环遍历（`<#list>`）
-- 字符串操作（`?substring`, `?lower_case` 等）
+FreeMarker templates support:
+- Variable substitution (`${variable}`)
+- Conditional logic (`<#if>`)
+- Loop iteration (`<#list>`)
+- String operations (`?substring`, `?lower_case`, etc.)
 
-### 模板分类
+### Template Categories
 
-#### 标准模板（MVC 架构）
+#### Standard Templates (MVC Architecture)
 
-- **Java 模板**：`entity.java.ftl`, `mapper.java.ftl`, `service.java.ftl`, `serviceImpl.java.ftl`, `controller.java.ftl`, `dto.java.ftl`, `vo.java.ftl`, `bo.java.ftl`
-- **Kotlin 模板**：`entity.kt.ftl`, `mapper.kt.ftl`, `service.kt.ftl`, `serviceImpl.kt.ftl`, `controller.kt.ftl`, `dto.kt.ftl`, `vo.kt.ftl`, `bo.kt.ftl`
+- **Java templates**: `entity.java.ftl`, `mapper.java.ftl`, `service.java.ftl`, `serviceImpl.java.ftl`, `controller.java.ftl`, `dto.java.ftl`, `vo.java.ftl`, `bo.java.ftl`
+- **Kotlin templates**: `entity.kt.ftl`, `mapper.kt.ftl`, `service.kt.ftl`, `serviceImpl.kt.ftl`, `controller.kt.ftl`, `dto.kt.ftl`, `vo.kt.ftl`, `bo.kt.ftl`
 
-#### DDD 架构模板
+#### DDD Architecture Templates
 
-- **领域层**：`aggregate-root.*.ftl`, `repository.*.ftl`, `domain-service.*.ftl`, `value-object.*.ftl`, `domain-event.*.ftl`
-- **应用层**：`application-service.*.ftl`
-- **接口层**：`assembler.*.ftl`
+- **Domain layer**: `aggregate-root.*.ftl`, `repository.*.ftl`, `domain-service.*.ftl`, `value-object.*.ftl`, `domain-event.*.ftl`
+- **Application layer**: `application-service.*.ftl`
+- **Interface layer**: `assembler.*.ftl`
 
-### 模板特性
+### Template Features
 
-- ✅ 支持 Swagger 2 和 OpenAPI 3 注解（根据配置自动选择）
-- ✅ 智能注释生成（基于表结构和业务上下文）
-- ✅ 自定义方法支持
-- ✅ Kotlin 特性支持（data class、null safety、companion object 等）
-- ✅ DDD 模式支持（聚合根、值对象、领域事件等）
+- ✅ Supports OpenAPI 3 annotations
+- ✅ Intelligent comment generation (based on table structure and business context)
+- ✅ Custom method support
+- ✅ Kotlin feature support (data class, null safety, companion object, etc.)
+- ✅ DDD pattern support (Aggregate Root, Value Object, Domain Event, etc.)
 
-详细模板变量说明请参考 `reference/template-variables.md`。
+For detailed template variable descriptions, refer to `reference/template-variables.md`.
 
-## 注释规范
+## Comment Standards
 
-生成的代码注释遵循严格的标准：
+Generated code comments follow strict standards:
 
-### JavaDoc 规范
+### JavaDoc Standards
 
-- **类注释**：包含 `<p>` 标签的描述，说明类的业务用途，列出主要字段
-- **方法注释**：包含 `<p>` 标签的描述，说明业务逻辑，明确参数类型和返回值类型
-- **字段注释**：说明业务含义，包含数据类型和约束信息
+- **Class comments**: Include `<p>` tag descriptions, explaining the business purpose of the class, listing main fields
+- **Method comments**: Include `<p>` tag descriptions, explaining business logic, specifying parameter types and return value types
+- **Field comments**: Explain business meaning, including data type and constraint information
 
-### 注释特点
+### Comment Features
 
-- ✅ **智能理解**：基于表结构和业务上下文生成注释，而非简单复制字段名
-- ✅ **符合规范**：遵循 Java 编程规范，使用 `<p>` 标签
-- ✅ **类型明确**：`@param`、`@return`、`@exception` 明确声明类型
-- ✅ **业务导向**：注释说明业务含义，而非技术实现细节
+- ✅ **Intelligent Understanding**: Generates comments based on table structure and business context, not simply copying field names
+- ✅ **Standards Compliance**: Follows Java programming standards, uses `<p>` tags
+- ✅ **Explicit Types**: `@param`, `@return`, `@exception` declare types explicitly
+- ✅ **Business-Oriented**: Comments explain business meaning, not technical implementation details
 
-详细注释规范请参考：
-- `reference/code-generation-standards.md` - 代码生成标准
-- `java-code-comments` 技能 - Java 代码注释技能
+For detailed comment standards, refer to:
+- `reference/code-generation-standards.md` - Code generation standards
+- `java-code-comments` skill - Java code comments skill
 
-## 架构支持
+## Architecture Support
 
-### MVC 架构
+### MVC Architecture
 
-生成标准的 MVC 分层代码：
-- Entity（实体类）
-- Mapper（数据访问层）
-- Service / ServiceImpl（业务逻辑层）
-- Controller（控制器层）
-- DTO / VO / BO（数据传输对象）
+Generates standard MVC layered code:
+- Entity (entity class)
+- Mapper (data access layer)
+- Service / ServiceImpl (business logic layer)
+- Controller (controller layer)
+- DTO / VO / BO (data transfer objects)
 
-### DDD 架构
+### DDD Architecture
 
-支持完整的 DDD 模式：
-- **聚合根**（Aggregate Root）：领域对象的核心
-- **仓储**（Repository）：领域层的持久化接口
-- **领域服务**（Domain Service）：跨聚合的业务逻辑
-- **值对象**（Value Object）：不可变的值对象
-- **领域事件**（Domain Event）：领域事件定义
-- **应用服务**（Application Service）：应用层编排
-- **装配器**（Assembler）：DTO 与领域对象转换
+Supports complete DDD patterns:
+- **Aggregate Root**: Core domain object
+- **Repository**: Domain layer persistence interface
+- **Domain Service**: Cross-aggregate business logic
+- **Value Object**: Immutable value object
+- **Domain Event**: Domain event definition
+- **Application Service**: Application layer orchestration
+- **Assembler**: DTO and domain object conversion
 
-### 目录映射
+### Directory Mapping
 
-不同架构模式有不同的目录结构，技能会根据架构类型自动确定正确的目录位置。详细说明请参考：
-- `reference/architecture-directory-mapping-guide.md` - 完整目录映射指南
-- `reference/architecture-directory-quick-reference.md` - 快速参考表
-- `examples/architecture-directory-mapping.md` - 目录映射示例
+Different architecture patterns have different directory structures. The skill automatically determines the correct directory location based on the architecture type. For details, refer to:
+- `reference/architecture-directory-mapping-guide.md` - Complete directory mapping guide
+- `reference/architecture-directory-quick-reference.md` - Quick reference table
+- `examples/architecture-directory-mapping.md` - Directory mapping example
 
-## API 文档支持
-
-### Swagger 2
-
-- 使用注解：`@ApiModel`, `@ApiModelProperty`, `@Api`, `@ApiOperation`, `@ApiParam`
-- 依赖：`springfox-swagger2`, `springfox-swagger-ui`
-- 适用于：Spring Boot 2.x 项目
+## API Documentation Support
 
 ### OpenAPI 3
 
-- 使用注解：`@Schema`, `@Tag`, `@Operation`, `@Parameter`
-- 依赖：`springdoc-openapi-ui`
-- 适用于：Spring Boot 2.2+ 和 Spring Boot 3.x 项目
+- Annotations used: `@Schema`, `@Tag`, `@Operation`, `@Parameter`
+- Dependency: `springdoc-openapi-ui`
+- Applicable to: Spring Boot 2.2+ and Spring Boot 3.x projects
 
-详细对比请参考 `reference/swagger-annotations-guide.md`。
+For detailed usage, refer to `reference/swagger-annotations-guide.md`.
 
-## 示例文档
+## Example Documentation
 
-- `examples/full-workflow-example.md` - 完整工作流程示例
-- `examples/mvc-architecture-example.md` - MVC 架构生成示例
-- `examples/ddd-architecture-example.md` - DDD 架构生成示例
-- `examples/architecture-directory-mapping.md` - 架构目录映射示例
-- `examples/swagger-annotations-example.md` - Swagger 注解使用示例
+- `examples/full-workflow-example.md` - Full workflow example
+- `examples/mvc-architecture-example.md` - MVC architecture generation example
+- `examples/ddd-architecture-example.md` - DDD architecture generation example
+- `examples/architecture-directory-mapping.md` - Architecture directory mapping example
+- `examples/swagger-annotations-example.md` - OpenAPI 3 annotation usage example
 
-## 参考文档
+## Reference Documentation
 
-### 核心参考
+### Core References
 
-- `reference/mybatis-plus-generator-guide.md` - MyBatis-Plus Generator 使用指南
-- `reference/template-variables.md` - 模板变量完整参考
-- `reference/code-generation-standards.md` - 代码生成标准和注释规范
+- `reference/mybatis-plus-generator-guide.md` - MyBatis-Plus Generator usage guide
+- `reference/template-variables.md` - Template variables complete reference
+- `reference/code-generation-standards.md` - Code generation standards and comment specifications
 
-### 架构参考
+### Architecture References
 
-- `reference/architecture-directory-mapping-guide.md` - 架构目录映射详细指南
-- `reference/architecture-directory-quick-reference.md` - 架构目录映射快速参考
+- `reference/architecture-directory-mapping-guide.md` - Architecture directory mapping detailed guide
+- `reference/architecture-directory-quick-reference.md` - Architecture directory mapping quick reference
 
-### 其他参考
+### Other References
 
-- `reference/swagger-annotations-guide.md` - Swagger 2 vs OpenAPI 3 注解对比
-- `reference/progress-and-statistics-formats.md` - 进度更新和统计报告格式
+- `reference/swagger-annotations-guide.md` - OpenAPI 3 annotation reference
+- `reference/progress-and-statistics-formats.md` - Progress update and statistics report formats
 
-## 外部链接
+## External Links
 
-- [MyBatis-Plus 官方文档](https://baomidou.com/)
-- [MyBatis-Plus Generator 文档](https://baomidou.com/pages/d357af/)
+- [MyBatis-Plus Official Documentation](https://baomidou.com/)
+- [MyBatis-Plus Generator Documentation](https://baomidou.com/pages/d357af/)
 - [MyBatis-Plus GitHub](https://github.com/baomidou/mybatis-plus)
-- [MyBatis-Plus 官方模板](https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates)
-- [Agent Skills 规范](https://agentskills.io/)
-- [Agent Skills 入门指南](https://support.claude.com/zh-CN/articles/12512198-%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89-skills)
+- [MyBatis-Plus Official Templates](https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates)
+- [Agent Skills Specification](https://agentskills.io/)
+- [Agent Skills Getting Started Guide](https://support.claude.com/zh-CN/articles/12512198-%E5%A6%82%E4%BBD%E5%88%9B%E5%BB%BA%E8%87%AE%E5%AE%9A%E4%B9%89-skills)
 
-## 许可证
+## License
 
-Apache 2.0 License - 详见 `LICENSE.txt`
+Apache 2.0 License - See `LICENSE.txt` for details

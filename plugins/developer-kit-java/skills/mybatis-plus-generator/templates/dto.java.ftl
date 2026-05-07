@@ -1,12 +1,7 @@
 package ${package.DTO};
 
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.media.Schema;
-</#if>
 </#if>
 <#if entityLombokModel>
 import lombok.Data;
@@ -27,11 +22,7 @@ import java.time.LocalDateTime;
  * @since ${date}
  */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@ApiModel(value = "${table.comment}${dtoType}DTO", description = "${table.comment}${dtoType}数据传输对象")
-<#elseif swaggerVersion == "openapi3">
 @Schema(description = "${table.comment}${dtoType}数据传输对象")
-</#if>
 </#if>
 <#if entityLombokModel>
 @Data
@@ -55,11 +46,7 @@ public class ${entity}${dtoType}DTO implements Serializable {
      */
 </#if>
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiModelProperty(value = "${field.comment}"<#if field.required?? && field.required>, required = true</#if>)
-<#elseif swaggerVersion == "openapi3">
     @Schema(description = "${field.comment}"<#if field.required?? && field.required>, required = true</#if>)
-</#if>
 </#if>
 <#if validation>
 <#if field.required?? && field.required>

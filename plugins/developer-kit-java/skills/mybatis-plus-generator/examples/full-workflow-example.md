@@ -1,257 +1,257 @@
-# 完整工作流程示例
+# Full Workflow Example
 
-## 场景
+## Scenario
 
-为一个用户管理系统生成完整的 MyBatis-Plus 代码，包括 user 表和 order 表，使用 MVC 架构，Java 语言。
+Generate complete MyBatis-Plus code for a user management system, including the `user` and `order` tables, using MVC architecture, Java language.
 
-## 工作流程
+## Workflow
 
-### Step 1: 收集配置信息
+### Step 1: Collect Configuration
 
-**用户输入：**
-
-```
-数据库信息：
-- 数据库类型：MySQL
-- 数据库名：teaching_ai
-- 表名：user, order
-
-全局配置：
-- 作者：System
-- 输出目录：src/main/java
-- 文件覆盖策略：询问
-- 启用 Lombok：是
-- 启用 Swagger：是
-- 启用验证注解：是
-
-包配置：
-- 父包名：com.example.app
-- Entity 包：entity
-- Mapper 包：mapper
-- Service 包：service
-- ServiceImpl 包：service.impl
-- Controller 包：controller
-
-策略配置：
-- 命名策略：驼峰命名
-- 表前缀：无
-- 主键策略：AUTO
-```
-
-**输出：**
+**User input:**
 
 ```
-## 配置信息确认
+Database information:
+- Database type: MySQL
+- Database name: teaching_ai
+- Table names: user, order
 
-✅ 数据库信息：
-- 数据库类型：MySQL
-- 数据库名：teaching_ai
-- 表名：user, order
+Global configuration:
+- Author: System
+- Output directory: src/main/java
+- File overwrite strategy: Ask
+- Enable Lombok: Yes
+- Enable Swagger: Yes
+- Enable validation annotations: Yes
 
-✅ 全局配置：
-- 作者：System
-- 输出目录：src/main/java
-- 文件覆盖策略：询问
-- 启用 Lombok：是
-- 启用 Swagger：是
-- 启用验证注解：是
+Package configuration:
+- Parent package: com.example.app
+- Entity package: entity
+- Mapper package: mapper
+- Service package: service
+- ServiceImpl package: service.impl
+- Controller package: controller
 
-✅ 包配置：
-- 父包名：com.example.app
-- Entity 包：com.example.app.entity
-- Mapper 包：com.example.app.mapper
-- Service 包：com.example.app.service
-- ServiceImpl 包：com.example.app.service.impl
-- Controller 包：com.example.app.controller
-
-✅ 策略配置：
-- 命名策略：驼峰命名
-- 表前缀：无
-- 主键策略：AUTO
+Strategy configuration:
+- Naming strategy: CamelCase
+- Table prefix: None
+- Primary key strategy: AUTO
 ```
 
-### Step 2: 确定架构类型
-
-**询问用户：**
+**Output:**
 
 ```
-请选择项目架构类型：
-- [x] 传统 MVC (Model-View-Controller)
-  - 生成：Entity, Mapper, Service, ServiceImpl, Controller
+## Configuration Confirmation
+
+✅ Database information:
+- Database type: MySQL
+- Database name: teaching_ai
+- Table names: user, order
+
+✅ Global configuration:
+- Author: System
+- Output directory: src/main/java
+- File overwrite strategy: Ask
+- Enable Lombok: Yes
+- Enable Swagger: Yes
+- Enable validation annotations: Yes
+
+✅ Package configuration:
+- Parent package: com.example.app
+- Entity package: com.example.app.entity
+- Mapper package: com.example.app.mapper
+- Service package: com.example.app.service
+- ServiceImpl package: com.example.app.service.impl
+- Controller package: com.example.app.controller
+
+✅ Strategy configuration:
+- Naming strategy: CamelCase
+- Table prefix: None
+- Primary key strategy: AUTO
 ```
 
-**用户确认：MVC 架构**
+### Step 2: Determine Architecture Type
 
-### Step 3: 收集功能需求
-
-**询问用户：**
+**Ask the user:**
 
 ```
-请描述此次生成代码的功能需求：
-
-例如：
-- 用户管理：需要根据邮箱查询用户、根据用户名查询用户、用户登录验证
-- 订单管理：需要订单统计、订单分页查询、订单状态更新
+Please select the project architecture type:
+- [x] Traditional MVC (Model-View-Controller)
+  - Generates: Entity, Mapper, Service, ServiceImpl, Controller
 ```
 
-**用户输入：**
+**User confirms: MVC architecture**
+
+### Step 3: Collect Functional Requirements
+
+**Ask the user:**
 
 ```
-用户管理功能需求：
-1. 用户注册（创建用户）
-2. 用户登录（根据用户名和密码查询）
-3. 根据邮箱查询用户
-4. 根据用户名查询用户
-5. 更新用户信息
-6. 删除用户
-7. 用户列表查询（分页）
+Please describe the functional requirements for this code generation:
 
-订单管理功能需求：
-1. 创建订单
-2. 根据订单ID查询订单
-3. 根据用户ID查询订单列表
-4. 订单统计（按用户统计订单数量和总金额）
-5. 更新订单状态
-6. 删除订单
-7. 订单分页查询
+Examples:
+- User management: need to query users by email, query users by username, user login verification
+- Order management: need order statistics, paginated order query, order status update
 ```
 
-**需求分析输出：**
+**User input:**
 
 ```
-## 需求分析结果
+User management functional requirements:
+1. User registration (create user)
+2. User login (query by username and password)
+3. Query user by email
+4. Query user by username
+5. Update user information
+6. Delete user
+7. User list query (paginated)
 
-### user 表
-
-标准方法：
-- saveUser() - 保存用户
-- findById() - 根据ID查询
-- updateUser() - 更新用户
-- deleteById() - 删除用户
-- findAll() - 查询所有（分页）
-
-自定义方法：
-- findByEmail(String email) - 根据邮箱查询用户
-- findByUsername(String username) - 根据用户名查询用户
-- login(String username, String password) - 用户登录验证
-
-### order 表
-
-标准方法：
-- saveOrder() - 保存订单
-- findById() - 根据ID查询
-- updateOrder() - 更新订单
-- deleteById() - 删除订单
-- findAll() - 查询所有（分页）
-
-自定义方法：
-- findByUserId(Long userId) - 根据用户ID查询订单列表
-- getOrderStatistics(Long userId) - 订单统计（订单数量、总金额）
-- updateOrderStatus(Long orderId, Integer status) - 更新订单状态
+Order management functional requirements:
+1. Create order
+2. Query order by order ID
+3. Query order list by user ID
+4. Order statistics (count orders and total amount per user)
+5. Update order status
+6. Delete order
+7. Paginated order query
 ```
 
-### Step 4: 确定编程语言
-
-**询问用户：**
+**Requirements analysis output:**
 
 ```
-请选择编程语言：
+## Requirements Analysis Results
+
+### user table
+
+Standard methods:
+- saveUser() - Save user
+- findById() - Query by ID
+- updateUser() - Update user
+- deleteById() - Delete by ID
+- findAll() - Query all (paginated)
+
+Custom methods:
+- findByEmail(String email) - Query user by email
+- findByUsername(String username) - Query user by username
+- login(String username, String password) - User login verification
+
+### order table
+
+Standard methods:
+- saveOrder() - Save order
+- findById() - Query by ID
+- updateOrder() - Update order
+- deleteById() - Delete by ID
+- findAll() - Query all (paginated)
+
+Custom methods:
+- findByUserId(Long userId) - Query order list by user ID
+- getOrderStatistics(Long userId) - Order statistics (order count, total amount)
+- updateOrderStatus(Long orderId, Integer status) - Update order status
+```
+
+### Step 4: Determine Programming Language
+
+**Ask the user:**
+
+```
+Please select the programming language:
 - [x] Java
 - [ ] Kotlin
 ```
 
-**用户确认：Java**
+**User confirms: Java**
 
-### Step 5: 创建 Todo 清单
+### Step 5: Create Todo List
 
-**生成的 Todo 清单：**
+**Generated Todo list:**
 
 ```markdown
 ## Todo List: MyBatis-Plus Code Generation
 
 ### Table: user
 
-#### Entity 层
-- [ ] User.java - 实体类
-  - [ ] 类注释
-  - [ ] 字段定义（id, username, email, password, status, createTime, updateTime）
-  - [ ] 字段注释
+#### Entity layer
+- [ ] User.java - Entity class
+  - [ ] Class comment
+  - [ ] Field definitions (id, username, email, password, status, createTime, updateTime)
+  - [ ] Field comments
 
-#### Mapper 层
-- [ ] UserMapper.java - 数据访问接口
-  - [ ] 类注释
-  - [ ] 基础 CRUD 方法（继承 BaseMapper）
-  - [ ] 自定义查询方法（findByEmail, findByUsername）
+#### Mapper layer
+- [ ] UserMapper.java - Data access interface
+  - [ ] Class comment
+  - [ ] Basic CRUD methods (extending BaseMapper)
+  - [ ] Custom query methods (findByEmail, findByUsername)
 
-#### Service 层
-- [ ] UserService.java - 服务接口
-  - [ ] 类注释
-  - [ ] saveUser() - 保存用户
-  - [ ] findById() - 根据ID查询
-  - [ ] updateUser() - 更新用户
-  - [ ] deleteById() - 删除用户
-  - [ ] findByEmail() - 根据邮箱查询
-  - [ ] findByUsername() - 根据用户名查询
-  - [ ] login() - 用户登录验证
+#### Service layer
+- [ ] UserService.java - Service interface
+  - [ ] Class comment
+  - [ ] saveUser() - Save user
+  - [ ] findById() - Query by ID
+  - [ ] updateUser() - Update user
+  - [ ] deleteById() - Delete by ID
+  - [ ] findByEmail() - Query by email
+  - [ ] findByUsername() - Query by username
+  - [ ] login() - User login verification
 
-#### ServiceImpl 层
-- [ ] UserServiceImpl.java - 服务实现类
-  - [ ] 类注释
-  - [ ] 实现所有 Service 接口方法
-  - [ ] 方法注释和实现骨架
+#### ServiceImpl layer
+- [ ] UserServiceImpl.java - Service implementation class
+  - [ ] Class comment
+  - [ ] Implement all Service interface methods
+  - [ ] Method comments and implementation skeleton
 
-#### Controller 层
-- [ ] UserController.java - 控制器
-  - [ ] 类注释
-  - [ ] createUser() - 创建用户
-  - [ ] getUserById() - 查询用户
-  - [ ] updateUser() - 更新用户
-  - [ ] deleteUser() - 删除用户
-  - [ ] getUserByEmail() - 根据邮箱查询
-  - [ ] getUserByUsername() - 根据用户名查询
-  - [ ] login() - 用户登录
+#### Controller layer
+- [ ] UserController.java - Controller
+  - [ ] Class comment
+  - [ ] createUser() - Create user
+  - [ ] getUserById() - Query user
+  - [ ] updateUser() - Update user
+  - [ ] deleteUser() - Delete user
+  - [ ] getUserByEmail() - Query by email
+  - [ ] getUserByUsername() - Query by username
+  - [ ] login() - User login
 
 ### Table: order
-- [ ] Order.java - 实体类
-- [ ] OrderMapper.java - 数据访问接口
-- [ ] OrderService.java - 服务接口
-- [ ] OrderServiceImpl.java - 服务实现类
-- [ ] OrderController.java - 控制器
+- [ ] Order.java - Entity class
+- [ ] OrderMapper.java - Data access interface
+- [ ] OrderService.java - Service interface
+- [ ] OrderServiceImpl.java - Service implementation class
+- [ ] OrderController.java - Controller
 ```
 
-### Step 6: 生成代码
+### Step 6: Generate Code
 
-**生成进度更新：**
+**Generation progress update:**
 
 ```markdown
-## 代码生成进度
+## Code Generation Progress
 
 ### Table: user
 
-✅ 已完成：
-- [x] User.java - 实体类（包含 7 个字段，完整注释）
-- [x] UserMapper.java - 数据访问接口（继承 BaseMapper，包含 2 个自定义方法）
+✅ Completed:
+- [x] User.java - Entity class (7 fields, complete comments)
+- [x] UserMapper.java - Data access interface (extending BaseMapper, 2 custom methods)
 
-🔄 进行中：
-- [ ] UserService.java - 服务接口
-  - [x] 类注释
-  - [x] saveUser() 方法
-  - [x] findById() 方法
-  - [x] updateUser() 方法
-  - [x] deleteById() 方法
-  - [ ] findByEmail() 方法
-  - [ ] findByUsername() 方法
-  - [ ] login() 方法
+🔄 In progress:
+- [ ] UserService.java - Service interface
+  - [x] Class comment
+  - [x] saveUser() method
+  - [x] findById() method
+  - [x] updateUser() method
+  - [x] deleteById() method
+  - [ ] findByEmail() method
+  - [ ] findByUsername() method
+  - [ ] login() method
 
-⏳ 待生成：
-- [ ] UserServiceImpl.java - 服务实现类
-- [ ] UserController.java - 控制器
+⏳ Pending:
+- [ ] UserServiceImpl.java - Service implementation class
+- [ ] UserController.java - Controller
 
 ### Table: order
 ...
 ```
 
-**生成的代码示例：**
+**Generated code example:**
 
 #### User.java (Entity)
 
@@ -263,18 +263,18 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * <p>用户实体类</p>
+ * <p>User entity class</p>
  * 
- * <p>对应数据库中的 user 表，用于存储用户的基本信息。
- * 本实体类使用 MyBatis-Plus 注解进行 ORM 映射，支持自动建表和字段映射。</p>
+ * <p>Corresponds to the user table in the database, used to store basic user information.
+ * This entity class uses MyBatis-Plus annotations for ORM mapping, supporting automatic table creation and field mapping.</p>
  * 
- * <p>主要字段：
+ * <p>Main fields:
  * <ul>
- *   <li>id: 用户主键，自增</li>
- *   <li>username: 用户名，唯一，用于登录</li>
- *   <li>email: 邮箱地址，唯一，用于登录和找回密码</li>
- *   <li>password: 加密后的密码</li>
- *   <li>status: 用户状态（0-禁用，1-启用）</li>
+ *   <li>id: User primary key, auto-increment</li>
+ *   <li>username: Username, unique, used for login</li>
+ *   <li>email: Email address, unique, used for login and password recovery</li>
+ *   <li>password: Encrypted password</li>
+ *   <li>status: User status (0-disabled, 1-enabled)</li>
  * </ul>
  * </p>
  * 
@@ -286,44 +286,44 @@ import java.time.LocalDateTime;
 public class User {
     
     /**
-     * <p>用户主键 ID</p>
+     * <p>User primary key ID</p>
      * 
-     * <p>数据库自增主键，唯一标识一个用户</p>
+     * <p>Auto-increment database primary key, uniquely identifies a user</p>
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     
     /**
-     * <p>用户名</p>
+     * <p>Username</p>
      * 
-     * <p>用户登录时使用的用户名，必须唯一，长度限制为 50 个字符</p>
+     * <p>Username used for user login, must be unique, length limit 50 characters</p>
      */
     @TableField("username")
     private String username;
     
     /**
-     * <p>邮箱地址</p>
+     * <p>Email address</p>
      * 
-     * <p>用户的邮箱地址，用于登录和找回密码，必须唯一，长度限制为 100 个字符</p>
+     * <p>User email address, used for login and password recovery, must be unique, length limit 100 characters</p>
      */
     @TableField("email")
     private String email;
     
     /**
-     * <p>密码</p>
+     * <p>Password</p>
      * 
-     * <p>用户密码，存储时已加密（BCrypt），长度限制为 255 个字符</p>
+     * <p>User password, encrypted when stored (BCrypt), length limit 255 characters</p>
      */
     @TableField("password")
     private String password;
     
     /**
-     * <p>用户状态</p>
+     * <p>User status</p>
      * 
-     * <p>用户状态标识：
+     * <p>User status indicator:
      * <ul>
-     *   <li>0: 禁用</li>
-     *   <li>1: 启用</li>
+     *   <li>0: Disabled</li>
+     *   <li>1: Enabled</li>
      * </ul>
      * </p>
      */
@@ -331,17 +331,17 @@ public class User {
     private Integer status;
     
     /**
-     * <p>创建时间</p>
+     * <p>Creation time</p>
      * 
-     * <p>用户记录的创建时间，由数据库自动设置</p>
+     * <p>User record creation time, automatically set by the database</p>
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     
     /**
-     * <p>更新时间</p>
+     * <p>Update time</p>
      * 
-     * <p>用户记录的最后更新时间，由数据库自动维护</p>
+     * <p>Last update time of the user record, automatically maintained by the database</p>
      */
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
@@ -357,18 +357,18 @@ import com.example.app.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * <p>用户服务接口</p>
+ * <p>User service interface</p>
  * 
- * <p>定义用户相关的业务逻辑接口，包括用户的增删改查操作。
- * 本接口遵循领域驱动设计（DDD）原则，封装用户领域的核心业务逻辑。</p>
+ * <p>Defines user-related business logic interfaces, including user CRUD operations.
+ * This interface follows Domain-Driven Design (DDD) principles, encapsulating core business logic of the user domain.</p>
  * 
- * <p>主要职责：
+ * <p>Main responsibilities:
  * <ul>
- *   <li>用户创建和注册</li>
- *   <li>用户信息查询（包括按邮箱、用户名查询）</li>
- *   <li>用户登录验证</li>
- *   <li>用户信息更新</li>
- *   <li>用户删除</li>
+ *   <li>User creation and registration</li>
+ *   <li>User information query (including query by email, username)</li>
+ *   <li>User login verification</li>
+ *   <li>User information update</li>
+ *   <li>User deletion</li>
  * </ul>
  * </p>
  * 
@@ -378,108 +378,108 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface UserService extends IService<User> {
     
     /**
-     * <p>根据邮箱查询用户</p>
+     * <p>Query user by email</p>
      * 
-     * <p>根据用户邮箱地址查询用户信息，用于用户登录和邮箱验证场景。
-     * 如果用户不存在，返回 null。</p>
+     * <p>Query user information by email address, used for user login and email verification scenarios.
+     * Returns null if the user does not exist.</p>
      * 
-     * @param email java.lang.String 用户邮箱地址，不能为空
-     * @return com.example.app.entity.User 用户实体对象，如果不存在则返回 null
-     * @exception java.lang.IllegalArgumentException 当邮箱地址为空时抛出
+     * @param email java.lang.String User email address, cannot be empty
+     * @return com.example.app.entity.User User entity object, returns null if not found
+     * @exception java.lang.IllegalArgumentException Thrown when email address is empty
      */
     User findByEmail(String email);
     
     /**
-     * <p>根据用户名查询用户</p>
+     * <p>Query user by username</p>
      * 
-     * <p>根据用户名查询用户信息，用于用户登录场景。
-     * 如果用户不存在，返回 null。</p>
+     * <p>Query user information by username, used for user login scenarios.
+     * Returns null if the user does not exist.</p>
      * 
-     * @param username java.lang.String 用户名，不能为空
-     * @return com.example.app.entity.User 用户实体对象，如果不存在则返回 null
-     * @exception java.lang.IllegalArgumentException 当用户名为空时抛出
+     * @param username java.lang.String Username, cannot be empty
+     * @return com.example.app.entity.User User entity object, returns null if not found
+     * @exception java.lang.IllegalArgumentException Thrown when username is empty
      */
     User findByUsername(String username);
     
     /**
-     * <p>用户登录验证</p>
+     * <p>User login verification</p>
      * 
-     * <p>根据用户名和密码验证用户身份，用于用户登录场景。
-     * 验证过程包括：查询用户、验证密码、检查用户状态。</p>
+     * <p>Verify user identity by username and password, used for user login scenarios.
+     * The verification process includes: querying user, verifying password, checking user status.</p>
      * 
-     * @param username java.lang.String 用户名，不能为空
-     * @param password java.lang.String 密码（明文），不能为空
-     * @return com.example.app.entity.User 用户实体对象，如果验证失败则返回 null
-     * @exception java.lang.IllegalArgumentException 当用户名或密码为空时抛出
+     * @param username java.lang.String Username, cannot be empty
+     * @param password java.lang.String Password (plain text), cannot be empty
+     * @return com.example.app.entity.User User entity object, returns null if verification fails
+     * @exception java.lang.IllegalArgumentException Thrown when username or password is empty
      */
     User login(String username, String password);
 }
 ```
 
-### Step 7: 进度更新
+### Step 7: Progress Update
 
-**实时进度输出：**
+**Real-time progress output:**
 
 ```
-✅ 已完成 user 表的 Entity 生成
-✅ 已完成 user 表的 Mapper 生成
-🔄 正在生成 user 表的 Service 接口...
-✅ 已完成 user 表的 Service 接口生成
-🔄 正在生成 user 表的 ServiceImpl 实现类...
-✅ 已完成 user 表的 ServiceImpl 实现类生成
-🔄 正在生成 user 表的 Controller 生成...
-✅ 已完成 user 表的 Controller 生成
+✅ Completed Entity generation for user table
+✅ Completed Mapper generation for user table
+🔄 Generating Service interface for user table...
+✅ Completed Service interface generation for user table
+🔄 Generating ServiceImpl implementation class for user table...
+✅ Completed ServiceImpl implementation class generation for user table
+🔄 Generating Controller for user table...
+✅ Completed Controller generation for user table
 
-✅ 已完成 order 表的 Entity 生成
+✅ Completed Entity generation for order table
 ...
 ```
 
-### Step 8: 统计信息
+### Step 8: Statistics
 
-**最终统计输出：**
+**Final statistics output:**
 
 ```markdown
-## 代码生成统计
+## Code Generation Statistics
 
-### 总体统计
-- **生成表数量**: 2 张表（user, order）
-- **生成对象总数**: 10 个对象
-- **生成方法总数**: 35 个方法
-- **生成文件总数**: 10 个文件
-- **代码总行数**: 约 1,800 行
+### Overall Statistics
+- **Tables generated**: 2 tables (user, order)
+- **Total objects generated**: 10 objects
+- **Total methods generated**: 35 methods
+- **Total files generated**: 10 files
+- **Total lines of code**: approximately 1,800 lines
 
-### 按表统计
+### Per-table Statistics
 
-#### user 表
-- Entity: 1 个（7 个字段）
-- Mapper: 1 个（继承 BaseMapper，2 个自定义方法）
-- Service: 1 个（7 个方法：4 个标准方法 + 3 个自定义方法）
-- ServiceImpl: 1 个（7 个方法实现）
-- Controller: 1 个（7 个接口）
-- **小计**: 5 个对象，16 个方法
+#### user table
+- Entity: 1 (7 fields)
+- Mapper: 1 (extends BaseMapper, 2 custom methods)
+- Service: 1 (7 methods: 4 standard methods + 3 custom methods)
+- ServiceImpl: 1 (7 method implementations)
+- Controller: 1 (7 endpoints)
+- **Subtotal**: 5 objects, 16 methods
 
-#### order 表
-- Entity: 1 个（10 个字段）
-- Mapper: 1 个（继承 BaseMapper，2 个自定义方法）
-- Service: 1 个（8 个方法：4 个标准方法 + 4 个自定义方法）
-- ServiceImpl: 1 个（8 个方法实现）
-- Controller: 1 个（8 个接口）
-- **小计**: 5 个对象，19 个方法
+#### order table
+- Entity: 1 (10 fields)
+- Mapper: 1 (extends BaseMapper, 2 custom methods)
+- Service: 1 (8 methods: 4 standard methods + 4 custom methods)
+- ServiceImpl: 1 (8 method implementations)
+- Controller: 1 (8 endpoints)
+- **Subtotal**: 5 objects, 19 methods
 
-### 文件位置
-所有文件已生成到以下目录：
+### File Locations
+All files have been generated in the following directories:
 - Entity: `src/main/java/com/example/app/entity/`
 - Mapper: `src/main/java/com/example/app/mapper/`
 - Service: `src/main/java/com/example/app/service/`
 - ServiceImpl: `src/main/java/com/example/app/service/impl/`
 - Controller: `src/main/java/com/example/app/controller/`
 
-### 代码质量
-- ✅ 所有类都有完整的 JavaDoc 注释
-- ✅ 所有方法都有参数和返回值说明
-- ✅ 所有字段都有业务含义注释
-- ✅ 自定义方法都有业务逻辑说明
-- ✅ 符合 Java 编程规范
-- ✅ 包含 Lombok 注解
-- ✅ 包含 Swagger 注解
+### Code Quality
+- ✅ All classes have complete JavaDoc comments
+- ✅ All methods have parameter and return value descriptions
+- ✅ All fields have business meaning comments
+- ✅ Custom methods have business logic descriptions
+- ✅ Compliant with Java programming standards
+- ✅ Includes Lombok annotations
+- ✅ Includes Swagger annotations
 ```

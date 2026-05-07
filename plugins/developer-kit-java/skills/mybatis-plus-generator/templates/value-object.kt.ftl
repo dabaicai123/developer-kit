@@ -2,12 +2,7 @@ package ${package.Domain}.model.valueobject
 
 import java.io.Serializable
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.ApiModel
-import io.swagger.annotations.ApiModelProperty
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.media.Schema
-</#if>
 </#if>
 
 /**
@@ -29,11 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema
  * @since ${date}
  */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@ApiModel(value = "${valueObjectName}值对象", description = "${valueObjectDescription}")
-<#elseif swaggerVersion == "openapi3">
 @Schema(description = "${valueObjectDescription}")
-</#if>
 </#if>
 data class ${valueObjectName} private constructor(
 ## ----------  BEGIN 值对象字段  ----------
@@ -50,11 +41,7 @@ data class ${valueObjectName} private constructor(
      */
 </#if>
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiModelProperty(value = "${field.comment}")
-<#elseif swaggerVersion == "openapi3">
     @Schema(description = "${field.comment}")
-</#if>
 </#if>
     val ${field.propertyName}: ${field.propertyType}<#if field.propertyType == "String">?</#if><#if field_has_next>,</#if>
 

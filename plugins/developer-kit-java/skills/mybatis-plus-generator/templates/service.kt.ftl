@@ -3,11 +3,7 @@ package ${package.Service}
 import ${package.Entity}.${entity}
 import ${superServiceClassPackage}
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.Api
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.tags.Tag
-</#if>
 </#if>
 
 /**
@@ -34,11 +30,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
  * @since ${date}
  */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@Api(value = "${table.comment}服务接口", tags = "${table.comment}管理")
-<#elseif swaggerVersion == "openapi3">
 @Tag(name = "${table.comment}管理", description = "${table.comment}服务接口")
-</#if>
 </#if>
 interface ${table.serviceName} : ${superServiceClass}<${entity}> {
 <#if customMethods??>

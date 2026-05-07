@@ -1,200 +1,197 @@
-# 模板变量参考
+# Template Variables Reference
 
-## 概述
+## Overview
 
-本文档说明 MyBatis-Plus Generator 模板中可用的变量，用于在代码生成时替换模板占位符。
+This document describes the variables available in MyBatis-Plus Generator templates, used to replace template placeholders during code generation.
 
-## 基础变量
+## Basic Variables
 
-### 包相关变量
+### Package-Related Variables
 
-- `${package.Entity}` - Entity 包路径（如：`com.example.app.entity`）
-- `${package.Mapper}` - Mapper 包路径（如：`com.example.app.mapper`）
-- `${package.Service}` - Service 包路径（如：`com.example.app.service`）
-- `${package.ServiceImpl}` - ServiceImpl 包路径（如：`com.example.app.service.impl`）
-- `${package.Controller}` - Controller 包路径（如：`com.example.app.controller`）
-- `${package.DTO}` - DTO 包路径（如：`com.example.app.dto`）
-- `${package.VO}` - VO 包路径（如：`com.example.app.vo`）
-- `${package.BO}` - BO 包路径（如：`com.example.app.bo`）
-- `${package.ModuleName}` - 模块名称（可选）
+- `${package.Entity}` - Entity package path (e.g., `com.example.app.entity`)
+- `${package.Mapper}` - Mapper package path (e.g., `com.example.app.mapper`)
+- `${package.Service}` - Service package path (e.g., `com.example.app.service`)
+- `${package.ServiceImpl}` - ServiceImpl package path (e.g., `com.example.app.service.impl`)
+- `${package.Controller}` - Controller package path (e.g., `com.example.app.controller`)
+- `${package.DTO}` - DTO package path (e.g., `com.example.app.dto`)
+- `${package.VO}` - VO package path (e.g., `com.example.app.vo`)
+- `${package.BO}` - BO package path (e.g., `com.example.app.bo`)
+- `${package.ModuleName}` - Module name (optional)
 
-### 类名相关变量
+### Class Name-Related Variables
 
-- `${entity}` - 实体类名（如：`User`）
-- `${table.entityName}` - 实体类名（同 `${entity}`）
-- `${table.mapperName}` - Mapper 接口名（如：`UserMapper`）
-- `${table.serviceName}` - Service 接口名（如：`UserService`）
-- `${table.serviceImplName}` - ServiceImpl 类名（如：`UserServiceImpl`）
-- `${table.controllerName}` - Controller 类名（如：`UserController`）
-- `${table.entityPath}` - 实体路径（用于 URL，如：`user`）
+- `${entity}` - Entity class name (e.g., `User`)
+- `${table.entityName}` - Entity class name (same as `${entity}`)
+- `${table.mapperName}` - Mapper interface name (e.g., `UserMapper`)
+- `${table.serviceName}` - Service interface name (e.g., `UserService`)
+- `${table.serviceImplName}` - ServiceImpl class name (e.g., `UserServiceImpl`)
+- `${table.controllerName}` - Controller class name (e.g., `UserController`)
+- `${table.entityPath}` - Entity path (for URL, e.g., `user`)
 
-### 表相关变量
+### Table-Related Variables
 
-- `${table.name}` - 表名（如：`user`）
-- `${table.comment}` - 表注释（如：`用户表`）
-- `${schemaName}` - 数据库 schema 名称（可选）
+- `${table.name}` - Table name (e.g., `user`)
+- `${table.comment}` - Table comment (e.g., `User table`)
+- `${schemaName}` - Database schema name (optional)
 
-### 作者和日期
+### Author and Date
 
-- `${author}` - 作者名称
-- `${date}` - 当前日期（格式：`yyyy-MM-dd`）
+- `${author}` - Author name
+- `${date}` - Current date (format: `yyyy-MM-dd`)
 
-## 字段相关变量
+## Field-Related Variables
 
-### 字段循环
+### Field Loop
 
-在模板中使用 `#foreach($field in ${table.fields})` 循环遍历所有字段。
+Use `#foreach($field in ${table.fields})` to iterate over all fields in templates.
 
-### 字段属性
+### Field Attributes
 
-- `${field.name}` - 数据库字段名（如：`user_name`）
-- `${field.propertyName}` - Java 属性名（如：`userName`）
-- `${field.type}` - 数据库字段类型（如：`varchar`）
-- `${field.propertyType}` - Java 属性类型（如：`String`）
-- `${field.comment}` - 字段注释（如：`用户名`）
-- `${field.length}` - 字段长度（如：`50`）
-- `${field.keyFlag}` - 是否为主键（boolean）
-- `${field.fill}` - 字段填充策略（如：`INSERT`、`UPDATE`、`INSERT_UPDATE`）
-- `${field.convert}` - 是否需要字段转换（boolean）
-- `${field.versionField}` - 是否为版本字段（boolean）
-- `${field.logicDeleteField}` - 是否为逻辑删除字段（boolean）
+- `${field.name}` - Database field name (e.g., `user_name`)
+- `${field.propertyName}` - Java property name (e.g., `userName`)
+- `${field.type}` - Database field type (e.g., `varchar`)
+- `${field.propertyType}` - Java property type (e.g., `String`)
+- `${field.comment}` - Field comment (e.g., `Username`)
+- `${field.length}` - Field length (e.g., `50`)
+- `${field.keyFlag}` - Whether it is a primary key (boolean)
+- `${field.fill}` - Field fill strategy (e.g., `INSERT`, `UPDATE`, `INSERT_UPDATE`)
+- `${field.convert}` - Whether field conversion is needed (boolean)
+- `${field.versionField}` - Whether it is a version field (boolean)
+- `${field.logicDeleteField}` - Whether it is a logical delete field (boolean)
 
-## 配置相关变量
+## Configuration-Related Variables
 
-### 全局配置
+### Global Configuration
 
-- `${swagger}` - 是否启用 API 文档（boolean）
-- `${swaggerVersion}` - API 文档版本（"swagger2" 或 "openapi3"）
-  - **"swagger2"**: 使用 `io.swagger.annotations.*` 包（Swagger 2）
-  - **"openapi3"**: 使用 `io.swagger.v3.oas.annotations.*` 包（OpenAPI 3）
-- `${entityLombokModel}` - 是否使用 Lombok（boolean）
-- `${restControllerStyle}` - 是否使用 REST 风格（boolean）
-- `${controllerMappingHyphenStyle}` - Controller 映射是否使用连字符（boolean）
-- `${superEntityClass}` - 父实体类（可选）
-- `${superEntityClassPackage}` - 父实体类包路径（可选）
-- `${superMapperClass}` - 父 Mapper 类（默认：`BaseMapper`）
-- `${superMapperClassPackage}` - 父 Mapper 类包路径（默认：`com.baomidou.mybatisplus.core.mapper.BaseMapper`）
-- `${superServiceClass}` - 父 Service 类（默认：`IService`）
-- `${superServiceClassPackage}` - 父 Service 类包路径（默认：`com.baomidou.mybatisplus.extension.service.IService`）
-- `${superServiceImplClass}` - 父 ServiceImpl 类（默认：`ServiceImpl`）
-- `${superServiceImplClassPackage}` - 父 ServiceImpl 类包路径（默认：`com.baomidou.mybatisplus.extension.service.impl.ServiceImpl`）
-- `${superControllerClass}` - 父 Controller 类（可选）
-- `${superControllerClassPackage}` - 父 Controller 类包路径（可选）
+- `${swagger}` - Whether to enable API documentation (boolean)
+- `${entityLombokModel}` - Whether to use Lombok (boolean)
+- `${restControllerStyle}` - Whether to use REST style (boolean)
+- `${controllerMappingHyphenStyle}` - Whether Controller mapping uses hyphens (boolean)
+- `${superEntityClass}` - Parent entity class (optional)
+- `${superEntityClassPackage}` - Parent entity class package path (optional)
+- `${superMapperClass}` - Parent Mapper class (default: `BaseMapper`)
+- `${superMapperClassPackage}` - Parent Mapper class package path (default: `com.baomidou.mybatisplus.core.mapper.BaseMapper`)
+- `${superServiceClass}` - Parent Service class (default: `IService`)
+- `${superServiceClassPackage}` - Parent Service class package path (default: `com.baomidou.mybatisplus.extension.service.IService`)
+- `${superServiceImplClass}` - Parent ServiceImpl class (default: `ServiceImpl`)
+- `${superServiceImplClassPackage}` - Parent ServiceImpl class package path (default: `com.baomidou.mybatisplus.extension.service.impl.ServiceImpl`)
+- `${superControllerClass}` - Parent Controller class (optional)
+- `${superControllerClassPackage}` - Parent Controller class package path (optional)
 
-### 主键策略
+### Primary Key Strategy
 
-- `${keyStrategy}` - 主键策略（如：`AUTO`、`UUID`、`ID_WORKER`）
-- `${keyPropertyName}` - 主键属性名（如：`id`）
+- `${keyStrategy}` - Primary key strategy (e.g., `AUTO`, `UUID`, `ID_WORKER`)
+- `${keyPropertyName}` - Primary key property name (e.g., `id`)
 
-### 序列化
+### Serialization
 
-- `${serialVersionUID}` - 是否生成 serialVersionUID（boolean）
+- `${serialVersionUID}` - Whether to generate serialVersionUID (boolean)
 
-## 自定义方法变量
+## Custom Method Variables
 
-### 自定义方法循环
+### Custom Method Loop
 
-在模板中使用 `#foreach($method in ${customMethods})` 循环遍历自定义方法。
+Use `#foreach($method in ${customMethods})` to iterate over custom methods in templates.
 
-### 方法属性
+### Method Attributes
 
-- `${method.name}` - 方法名（如：`findByEmail`）
-- `${method.description}` - 方法描述（如：`根据邮箱查询用户`）
-- `${method.detailDescription}` - 方法详细描述
-- `${method.returnType}` - 返回类型（如：`User`）
-- `${method.returnDescription}` - 返回值描述
-- `${method.mappingPath}` - Controller 映射路径（如：`email/{email}`）
+- `${method.name}` - Method name (e.g., `findByEmail`)
+- `${method.description}` - Method description (e.g., `Find user by email`)
+- `${method.detailDescription}` - Method detailed description
+- `${method.returnType}` - Return type (e.g., `User`)
+- `${method.returnDescription}` - Return value description
+- `${method.mappingPath}` - Controller mapping path (e.g., `email/{email}`)
 
-### 方法参数循环
+### Method Parameter Loop
 
-在方法中使用 `#foreach($param in ${method.parameters})` 循环遍历方法参数。
+Use `#foreach($param in ${method.parameters})` to iterate over method parameters within a method.
 
-### 参数属性
+### Parameter Attributes
 
-- `${param.name}` - 参数名（如：`email`）
-- `${param.type}` - 参数类型（如：`String`）
-- `${param.description}` - 参数描述（如：`用户邮箱地址`）
+- `${param.name}` - Parameter name (e.g., `email`)
+- `${param.type}` - Parameter type (e.g., `String`)
+- `${param.description}` - Parameter description (e.g., `User email address`)
 
-### 方法异常循环
+### Method Exception Loop
 
-在方法中使用 `#foreach($exception in ${method.exceptions})` 循环遍历方法异常。
+Use `#foreach($exception in ${method.exceptions})` to iterate over method exceptions within a method.
 
-### 异常属性
+### Exception Attributes
 
-- `${exception.type}` - 异常类型（如：`java.lang.IllegalArgumentException`）
-- `${exception.description}` - 异常描述（如：`当邮箱地址为空时抛出`）
+- `${exception.type}` - Exception type (e.g., `java.lang.IllegalArgumentException`)
+- `${exception.description}` - Exception description (e.g., `Thrown when email address is empty`)
 
-## DTO 相关变量
+## DTO-Related Variables
 
-### DTO 类型
+### DTO Types
 
-- `${dtoType}` - DTO 类型（如：`Create`、`Update`、`Query`）
-- `${dtoPurpose}` - DTO 用途（如：`创建用户`、`更新用户`）
-- `${dtoUsage}` - DTO 使用场景（如：`用户注册`、`用户信息更新`）
+- `${dtoType}` - DTO type (e.g., `Create`, `Update`, `Query`)
+- `${dtoPurpose}` - DTO purpose (e.g., `Create user`, `Update user`)
+- `${dtoUsage}` - DTO usage scenario (e.g., `User registration`, `User information update`)
 
-### DTO 字段循环
+### DTO Field Loop
 
-在 DTO 模板中使用 `#foreach($field in ${dtoFields})` 循环遍历 DTO 字段。
+Use `#foreach($field in ${dtoFields})` to iterate over DTO fields in DTO templates.
 
-### DTO 字段属性
+### DTO Field Attributes
 
-- `${field.required}` - 字段是否必填（boolean）
-- 其他字段属性同普通字段
+- `${field.required}` - Whether the field is required (boolean)
+- Other field attributes are the same as regular fields
 
-## 条件判断
+## Conditional Checks
 
-### 条件语法
+### Conditional Syntax
 
 ```velocity
 #if(${condition})
-    // 条件为真时的代码
+    // Code when condition is true
 #else
-    // 条件为假时的代码
+    // Code when condition is false
 #end
 ```
 
-### 常用条件
+### Common Conditions
 
-- `${swagger}` - 是否启用 Swagger
-- `${entityLombokModel}` - 是否使用 Lombok
-- `${customMethods}` - 是否有自定义方法
-- `${superEntityClass}` - 是否有父实体类
-- `${field.keyFlag}` - 是否为主键字段
-- `${field.fill}` - 是否有字段填充策略
+- `${swagger}` - Whether Swagger is enabled
+- `${entityLombokModel}` - Whether Lombok is used
+- `${customMethods}` - Whether there are custom methods
+- `${superEntityClass}` - Whether there is a parent entity class
+- `${field.keyFlag}` - Whether it is a primary key field
+- `${field.fill}` - Whether there is a field fill strategy
 
-## 循环语法
+## Loop Syntax
 
-### foreach 循环
+### foreach Loop
 
 ```velocity
 #foreach($item in ${items})
-    // 循环体
+    // Loop body
     ${item.property}
 #end
 ```
 
-### 循环变量
+### Loop Variables
 
-- `${foreach.index}` - 当前索引（从 0 开始）
-- `${foreach.count}` - 当前计数（从 1 开始）
-- `${foreach.hasNext}` - 是否有下一个元素（boolean）
-- `${foreach.first}` - 是否为第一个元素（boolean）
-- `${foreach.last}` - 是否为最后一个元素（boolean）
+- `${foreach.index}` - Current index (starting from 0)
+- `${foreach.count}` - Current count (starting from 1)
+- `${foreach.hasNext}` - Whether there is a next element (boolean)
+- `${foreach.first}` - Whether it is the first element (boolean)
+- `${foreach.last}` - Whether it is the last element (boolean)
 
-## 字符串操作
+## String Operations
 
-### 大小写转换
+### Case Conversion
 
-- `${string.substring(0,1).toLowerCase()}` - 首字母小写
-- `${string.substring(0,1).toUpperCase()}` - 首字母大写
+- `${string.substring(0,1).toLowerCase()}` - Lowercase first letter
+- `${string.substring(0,1).toUpperCase()}` - Uppercase first letter
 
-### 字符串判断
+### String Checks
 
-- `"$!field.comment" != ""` - 判断字符串不为空
+- `"$!field.comment" != ""` - Check if string is not empty
 
-## 使用示例
+## Usage Examples
 
-### 示例 1：生成字段
+### Example 1: Generate Fields
 
 ```velocity
 #foreach($field in ${table.fields})
@@ -205,33 +202,15 @@
 #end
 ```
 
-### 示例 2：条件生成
+### Example 2: Conditional Generation
 
 ```velocity
 #if(${swagger})
-    @ApiModelProperty(value = "${field.comment}")
-#end
-```
-
-### 示例 4：Swagger 注解选择
-
-```velocity
-#if(${swagger})
-#if(${swaggerVersion} == "swagger2")
-    @ApiModel(value = "${entity}对象", description = "${table.comment}")
-    @ApiModelProperty(value = "${field.comment}")
-    @Api(value = "${table.comment}管理", tags = "${table.comment}管理接口")
-    @ApiOperation(value = "创建${table.comment}", notes = "创建新的${table.comment}记录")
-#elseif(${swaggerVersion} == "openapi3")
-    @Schema(description = "${table.comment}")
     @Schema(description = "${field.comment}")
-    @Tag(name = "${table.comment}管理", description = "${table.comment}管理接口")
-    @Operation(summary = "创建${table.comment}", description = "创建新的${table.comment}记录")
-#end
 #end
 ```
 
-### 示例 3：自定义方法
+### Example 3: Custom Methods
 
 ```velocity
 #foreach($method in ${customMethods})
@@ -242,25 +221,18 @@
 #end
 ```
 
-### 示例 4：Swagger 注解选择
+### Example 4: OpenAPI 3 Annotations
 
 ```velocity
 #if(${swagger})
-#if(${swaggerVersion} == "swagger2")
-    @ApiModel(value = "${entity}对象", description = "${table.comment}")
-    @ApiModelProperty(value = "${field.comment}")
-    @Api(value = "${table.comment}管理", tags = "${table.comment}管理接口")
-    @ApiOperation(value = "创建${table.comment}", notes = "创建新的${table.comment}记录")
-#elseif(${swaggerVersion} == "openapi3")
     @Schema(description = "${table.comment}")
     @Schema(description = "${field.comment}")
-    @Tag(name = "${table.comment}管理", description = "${table.comment}管理接口")
-    @Operation(summary = "创建${table.comment}", description = "创建新的${table.comment}记录")
-#end
+    @Tag(name = "${table.comment} Management", description = "${table.comment} Management API")
+    @Operation(summary = "Create ${table.comment}", description = "Create a new ${table.comment} record")
 #end
 ```
 
-## 参考资料
+## Reference Materials
 
-- [Velocity 模板语法](https://velocity.apache.org/engine/2.3/user-guide.html)
-- [MyBatis-Plus Generator 文档](https://baomidou.com/pages/d357af/)
+- [Velocity Template Syntax](https://velocity.apache.org/engine/2.3/user-guide.html)
+- [MyBatis-Plus Generator Documentation](https://baomidou.com/pages/d357af/)

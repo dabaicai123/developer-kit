@@ -7,19 +7,19 @@ import ${package.Application}.dto.${entity}DTO;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>${table.comment}DTO装配器</p>
- * 
- * <p>负责${table.comment}聚合根与DTO之间的转换，位于接口层。
- * 装配器封装了领域对象与DTO之间的转换逻辑，保持领域模型的纯净性。</p>
- * 
- * <p>主要职责：
+ * <p>${table.comment} DTO assembler</p>
+ *
+ * <p>Responsible for converting between ${table.comment} aggregate root and DTOs, located in the interfaces layer.
+ * The assembler encapsulates conversion logic between domain objects and DTOs, keeping the domain model pure.</p>
+ *
+ * <p>Primary responsibilities:
  * <ul>
- *   <li>聚合根转换为DTO</li>
- *   <li>DTO转换为聚合根</li>
- *   <li>处理DTO与领域对象的映射关系</li>
+ *   <li>Convert aggregate root to DTO</li>
+ *   <li>Convert DTO to aggregate root</li>
+ *   <li>Handle mapping between DTOs and domain objects</li>
  * </ul>
  * </p>
- * 
+ *
  * @author ${author}
  * @since ${date}
  */
@@ -27,20 +27,20 @@ import org.springframework.stereotype.Component;
 public class ${entity}Assembler {
 
     /**
-     * <p>聚合根转换为响应DTO</p>
-     * 
-     * <p>将${table.comment}聚合根转换为响应DTO，用于API响应。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment}聚合根对象
-     * @return ${table.comment}响应DTO对象
+     * <p>Convert aggregate root to response DTO</p>
+     *
+     * <p>Convert ${table.comment} aggregate root to response DTO for API responses.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment} aggregate root object
+     * @return ${table.comment} response DTO object
      */
     public ${entity}ResponseDTO toResponseDTO(${entity} ${entity?substring(0,1)?lower_case}${entity?substring(1)}) {
         if (${entity?substring(0,1)?lower_case}${entity?substring(1)} == null) {
             return null;
         }
-        
+
         ${entity}ResponseDTO dto = new ${entity}ResponseDTO();
-        // TODO: 实现聚合根到响应DTO的转换逻辑
+        // TODO: Implement conversion logic from aggregate root to response DTO
 <#list table.fields as field>
         dto.set${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}(${entity?substring(0,1)?lower_case}${entity?substring(1)}.get${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}());
 </#list>
@@ -48,20 +48,20 @@ public class ${entity}Assembler {
     }
 
     /**
-     * <p>请求DTO转换为聚合根</p>
-     * 
-     * <p>将请求DTO转换为${table.comment}聚合根，用于创建或更新操作。</p>
-     * 
-     * @param requestDTO ${table.comment}请求DTO对象
-     * @return ${table.comment}聚合根对象
+     * <p>Convert request DTO to aggregate root</p>
+     *
+     * <p>Convert request DTO to ${table.comment} aggregate root for create or update operations.</p>
+     *
+     * @param requestDTO ${table.comment} request DTO object
+     * @return ${table.comment} aggregate root object
      */
     public ${entity} toAggregate(${entity}RequestDTO requestDTO) {
         if (requestDTO == null) {
             return null;
         }
-        
+
         ${entity} ${entity?substring(0,1)?lower_case}${entity?substring(1)} = new ${entity}();
-        // TODO: 实现请求DTO到聚合根的转换逻辑
+        // TODO: Implement conversion logic from request DTO to aggregate root
 <#list table.fields as field>
         ${entity?substring(0,1)?lower_case}${entity?substring(1)}.set${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}(requestDTO.get${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}());
 </#list>
@@ -69,20 +69,20 @@ public class ${entity}Assembler {
     }
 
     /**
-     * <p>应用DTO转换为聚合根</p>
-     * 
-     * <p>将应用层DTO转换为${table.comment}聚合根。</p>
-     * 
-     * @param dto ${table.comment}应用DTO对象
-     * @return ${table.comment}聚合根对象
+     * <p>Convert application DTO to aggregate root</p>
+     *
+     * <p>Convert application layer DTO to ${table.comment} aggregate root.</p>
+     *
+     * @param dto ${table.comment} application DTO object
+     * @return ${table.comment} aggregate root object
      */
     public ${entity} toAggregate(${entity}DTO dto) {
         if (dto == null) {
             return null;
         }
-        
+
         ${entity} ${entity?substring(0,1)?lower_case}${entity?substring(1)} = new ${entity}();
-        // TODO: 实现应用DTO到聚合根的转换逻辑
+        // TODO: Implement conversion logic from application DTO to aggregate root
 <#list table.fields as field>
         ${entity?substring(0,1)?lower_case}${entity?substring(1)}.set${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}(dto.get${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}());
 </#list>
@@ -90,20 +90,20 @@ public class ${entity}Assembler {
     }
 
     /**
-     * <p>聚合根转换为应用DTO</p>
-     * 
-     * <p>将${table.comment}聚合根转换为应用层DTO。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment}聚合根对象
-     * @return ${table.comment}应用DTO对象
+     * <p>Convert aggregate root to application DTO</p>
+     *
+     * <p>Convert ${table.comment} aggregate root to application layer DTO.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment} aggregate root object
+     * @return ${table.comment} application DTO object
      */
     public ${entity}DTO toDTO(${entity} ${entity?substring(0,1)?lower_case}${entity?substring(1)}) {
         if (${entity?substring(0,1)?lower_case}${entity?substring(1)} == null) {
             return null;
         }
-        
+
         ${entity}DTO dto = new ${entity}DTO();
-        // TODO: 实现聚合根到应用DTO的转换逻辑
+        // TODO: Implement conversion logic from aggregate root to application DTO
 <#list table.fields as field>
         dto.set${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}(${entity?substring(0,1)?lower_case}${entity?substring(1)}.get${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}());
 </#list>

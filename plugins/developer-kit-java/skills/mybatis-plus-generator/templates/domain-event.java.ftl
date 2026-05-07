@@ -4,20 +4,20 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>${eventName}领域事件</p>
- * 
- * <p>${eventDescription}，领域事件用于表示领域模型中发生的重要业务事件。
- * 领域事件是领域层的一部分，用于实现领域对象之间的解耦通信。</p>
- * 
- * <p>领域事件特性：
+ * <p>${eventName} domain event</p>
+ *
+ * <p>${eventDescription}. Domain events represent important business events that occur in the domain model.
+ * Domain events are part of the domain layer, used to achieve decoupled communication between domain objects.</p>
+ *
+ * <p>Domain event characteristics:
  * <ul>
- *   <li>不可变性：领域事件创建后不可修改</li>
- *   <li>时间戳：记录事件发生的时间</li>
- *   <li>事件源：记录触发事件的聚合根信息</li>
- *   <li>事件数据：包含事件相关的业务数据</li>
+ *   <li>Immutability: Domain events cannot be modified after creation</li>
+ *   <li>Timestamp: Records when the event occurred</li>
+ *   <li>Event source: Records the aggregate root information that triggered the event</li>
+ *   <li>Event data: Contains business data related to the event</li>
  * </ul>
  * </p>
- * 
+ *
  * @author ${author}
  * @since ${date}
  */
@@ -26,33 +26,33 @@ public class ${eventName} implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * <p>事件ID</p>
-     * 
-     * <p>事件的唯一标识符</p>
+     * <p>Event ID</p>
+     *
+     * <p>Unique identifier of the event</p>
      */
     private String eventId;
 
     /**
-     * <p>聚合根ID</p>
-     * 
-     * <p>触发事件的聚合根ID</p>
+     * <p>Aggregate root ID</p>
+     *
+     * <p>ID of the aggregate root that triggered the event</p>
      */
     private Long aggregateId;
 
     /**
-     * <p>事件发生时间</p>
-     * 
-     * <p>记录事件发生的时间戳</p>
+     * <p>Event occurrence time</p>
+     *
+     * <p>Timestamp recording when the event occurred</p>
      */
     private LocalDateTime occurredOn;
 
-## ----------  BEGIN 事件数据字段  ----------
+## ----------  BEGIN Event data fields  ----------
 <#list eventFields as field>
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，${field.type}类型</p>
+     *
+     * <p>${field.comment}, ${field.type} type</p>
      */
 <#else>
     /**
@@ -61,18 +61,18 @@ public class ${eventName} implements Serializable {
 </#if>
     private ${field.propertyType} ${field.propertyName};
 </#list>
-## ----------  END 事件数据字段  ----------
+## ----------  END Event data fields  ----------
 
     /**
-     * <p>创建${eventName}领域事件</p>
-     * 
-     * <p>创建新的${eventName}领域事件实例。</p>
-     * 
-     * @param aggregateId 聚合根ID
+     * <p>Create ${eventName} domain event</p>
+     *
+     * <p>Create a new ${eventName} domain event instance.</p>
+     *
+     * @param aggregateId Aggregate root ID
 <#list eventFields as field>
      * @param ${field.propertyName} ${field.comment}
 </#list>
-     * @return ${eventName}领域事件实例
+     * @return ${eventName} domain event instance
      */
     public static ${eventName} create(Long aggregateId<#list eventFields as field>, ${field.propertyType} ${field.propertyName}</#list>) {
         ${eventName} event = new ${eventName}();
@@ -85,29 +85,29 @@ public class ${eventName} implements Serializable {
         return event;
     }
 
-## ----------  BEGIN Getter 方法  ----------
+## ----------  BEGIN Getter methods  ----------
     /**
-     * <p>获取事件ID</p>
-     * 
-     * @return String 事件ID
+     * <p>Get event ID</p>
+     *
+     * @return String event ID
      */
     public String getEventId() {
         return eventId;
     }
 
     /**
-     * <p>获取聚合根ID</p>
-     * 
-     * @return Long 聚合根ID
+     * <p>Get aggregate root ID</p>
+     *
+     * @return Long aggregate root ID
      */
     public Long getAggregateId() {
         return aggregateId;
     }
 
     /**
-     * <p>获取事件发生时间</p>
-     * 
-     * @return LocalDateTime 事件发生时间
+     * <p>Get event occurrence time</p>
+     *
+     * @return LocalDateTime event occurrence time
      */
     public LocalDateTime getOccurredOn() {
         return occurredOn;
@@ -115,20 +115,20 @@ public class ${eventName} implements Serializable {
 
 <#list eventFields as field>
     /**
-     * <p>获取${field.comment}</p>
-     * 
+     * <p>Get ${field.comment}</p>
+     *
      * @return ${field.propertyType} ${field.comment}
      */
     public ${field.propertyType} get${field.propertyName?substring(0,1)?upper_case}${field.propertyName?substring(1)}() {
         return ${field.propertyName};
     }
 </#list>
-## ----------  END Getter 方法  ----------
+## ----------  END Getter methods  ----------
 
     /**
-     * <p>转换为字符串</p>
-     * 
-     * @return String 字符串表示
+     * <p>Convert to string</p>
+     *
+     * @return String string representation
      */
     @Override
     public String toString() {

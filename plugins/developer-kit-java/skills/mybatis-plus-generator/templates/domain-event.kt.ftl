@@ -4,51 +4,51 @@ import java.io.Serializable
 import java.time.LocalDateTime
 
 /**
- * <p>${eventName}领域事件</p>
- * 
- * <p>${eventDescription}，领域事件用于表示领域模型中发生的重要业务事件。
- * 领域事件是领域层的一部分，用于实现领域对象之间的解耦通信。</p>
- * 
- * <p>领域事件特性：
+ * <p>${eventName} domain event</p>
+ *
+ * <p>${eventDescription}. Domain events represent important business events that occur in the domain model.
+ * Domain events are part of the domain layer, used to achieve decoupled communication between domain objects.</p>
+ *
+ * <p>Domain event characteristics:
  * <ul>
- *   <li>不可变性：领域事件创建后不可修改</li>
- *   <li>时间戳：记录事件发生的时间</li>
- *   <li>事件源：记录触发事件的聚合根信息</li>
- *   <li>事件数据：包含事件相关的业务数据</li>
+ *   <li>Immutability: Domain events cannot be modified after creation</li>
+ *   <li>Timestamp: Records when the event occurred</li>
+ *   <li>Event source: Records the aggregate root information that triggered the event</li>
+ *   <li>Event data: Contains business data related to the event</li>
  * </ul>
  * </p>
- * 
+ *
  * @author ${author}
  * @since ${date}
  */
 data class ${eventName} private constructor(
     /**
-     * <p>事件ID</p>
-     * 
-     * <p>事件的唯一标识符</p>
+     * <p>Event ID</p>
+     *
+     * <p>Unique identifier of the event</p>
      */
     val eventId: String,
 
     /**
-     * <p>聚合根ID</p>
-     * 
-     * <p>触发事件的聚合根ID</p>
+     * <p>Aggregate root ID</p>
+     *
+     * <p>ID of the aggregate root that triggered the event</p>
      */
     val aggregateId: Long,
 
     /**
-     * <p>事件发生时间</p>
-     * 
-     * <p>记录事件发生的时间戳</p>
+     * <p>Event occurrence time</p>
+     *
+     * <p>Timestamp recording when the event occurred</p>
      */
     val occurredOn: LocalDateTime,
-## ----------  BEGIN 事件数据字段  ----------
+## ----------  BEGIN Event data fields  ----------
 <#list eventFields as field>
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，${field.type}类型</p>
+     *
+     * <p>${field.comment}, ${field.type} type</p>
      */
 <#else>
     /**
@@ -58,22 +58,22 @@ data class ${eventName} private constructor(
     val ${field.propertyName}: ${field.propertyType}<#if field.propertyType == "String">?</#if><#if field_has_next>,</#if>
 
 </#list>
-## ----------  END 事件数据字段  ----------
+## ----------  END Event data fields  ----------
 ) : Serializable {
 
     companion object {
         private const val serialVersionUID: Long = 1L
 
         /**
-         * <p>创建${eventName}领域事件</p>
-         * 
-         * <p>创建新的${eventName}领域事件实例。</p>
-         * 
-         * @param aggregateId 聚合根ID
+         * <p>Create ${eventName} domain event</p>
+         *
+         * <p>Create a new ${eventName} domain event instance.</p>
+         *
+         * @param aggregateId Aggregate root ID
 <#list eventFields as field>
          * @param ${field.propertyName} ${field.comment}
 </#list>
-         * @return ${eventName}领域事件实例
+         * @return ${eventName} domain event instance
          */
         fun create(aggregateId: Long<#list eventFields as field>, ${field.propertyName}: ${field.propertyType}<#if field.propertyType == "String">?</#if></#list>): ${eventName} {
             return ${eventName}(

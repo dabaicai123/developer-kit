@@ -3,15 +3,9 @@ package ${package.Controller}
 import ${package.Entity}.${entity}
 import ${package.Service}.${table.serviceName}
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
-</#if>
 </#if>
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -20,17 +14,17 @@ import ${superControllerClassPackage}
 </#if>
 
 /**
- * <p>${table.comment}控制器</p>
- * 
- * <p>提供${table.comment}相关的 REST API 接口，包括${table.comment}的创建、查询、更新和删除操作。
- * 本控制器遵循 RESTful 设计规范，使用标准的 HTTP 方法进行资源操作。</p>
- * 
- * <p>主要功能：
+ * <p>${table.comment} controller</p>
+ *
+ * <p>Provides REST API interfaces related to ${table.comment}, including create, query, update, and delete operations.
+ * This controller follows RESTful design conventions, using standard HTTP methods for resource operations.</p>
+ *
+ * <p>Primary functions:
  * <ul>
- *   <li>创建${table.comment}</li>
- *   <li>根据ID查询${table.comment}信息</li>
- *   <li>更新${table.comment}信息</li>
- *   <li>删除${table.comment}</li>
+ *   <li>Create ${table.comment}</li>
+ *   <li>Query ${table.comment} information by ID</li>
+ *   <li>Update ${table.comment} information</li>
+ *   <li>Delete ${table.comment}</li>
 <#if customMethods??>
 <#list customMethods as method>
  *   <li>${method.description}</li>
@@ -38,16 +32,12 @@ import ${superControllerClassPackage}
 </#if>
  * </ul>
  * </p>
- * 
+ *
  * @author ${author}
  * @since ${date}
  */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@Api(value = "${table.comment}管理", tags = "${table.comment}管理接口")
-<#elseif swaggerVersion == "openapi3">
-@Tag(name = "${table.comment}管理", description = "${table.comment}管理接口")
-</#if>
+@Tag(name = "${table.comment} Management", description = "${table.comment} management API")
 </#if>
 <#if restControllerStyle>
 @RestController
@@ -65,19 +55,15 @@ class ${table.controllerName} {
     lateinit var ${table.serviceName?substring(0,1)?lower_case}${table.serviceName?substring(1)}: ${table.serviceName}
 
     /**
-     * <p>创建${table.comment}</p>
-     * 
-     * <p>接收${table.comment}创建请求，验证数据后创建新${table.comment}并返回${table.comment}信息。</p>
-     * 
-     * @param entity ${table.comment}实体对象
-     * @return ${table.comment}实体对象
+     * <p>Create ${table.comment}</p>
+     *
+     * <p>Receive ${table.comment} creation request, validate data, create new ${table.comment} and return ${table.comment} information.</p>
+     *
+     * @param entity ${table.comment} entity object
+     * @return ${table.comment} entity object
      */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiOperation(value = "创建${table.comment}", notes = "创建新的${table.comment}记录")
-<#elseif swaggerVersion == "openapi3">
-    @Operation(summary = "创建${table.comment}", description = "创建新的${table.comment}记录")
-</#if>
+    @Operation(summary = "Create ${table.comment}", description = "Create a new ${table.comment} record")
 </#if>
     @PostMapping
     fun create(@RequestBody entity: ${entity}): ${entity} {
@@ -85,21 +71,16 @@ class ${table.controllerName} {
     }
 
     /**
-     * <p>根据ID查询${table.comment}</p>
-     * 
-     * <p>根据提供的${table.comment}ID查询对应的${table.comment}详细信息。</p>
-     * 
-     * @param id ${table.comment}唯一标识符
-     * @return ${table.comment}实体对象
+     * <p>Query ${table.comment} by ID</p>
+     *
+     * <p>Query ${table.comment} detailed information by the provided ${table.comment} ID.</p>
+     *
+     * @param id ${table.comment} unique identifier
+     * @return ${table.comment} entity object
      */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiOperation(value = "根据ID查询${table.comment}", notes = "根据ID查询${table.comment}详细信息")
-    @ApiParam(name = "id", value = "${table.comment}ID", required = true)
-<#elseif swaggerVersion == "openapi3">
-    @Operation(summary = "根据ID查询${table.comment}", description = "根据ID查询${table.comment}详细信息")
-    @Parameter(name = "id", description = "${table.comment}ID", required = true)
-</#if>
+    @Operation(summary = "Query ${table.comment} by ID", description = "Query ${table.comment} detailed information by ID")
+    @Parameter(name = "id", description = "${table.comment} ID", required = true)
 </#if>
     @GetMapping("/{id}")
     fun getById(@PathVariable id: Long): ${entity} {
@@ -107,20 +88,16 @@ class ${table.controllerName} {
     }
 
     /**
-     * <p>更新${table.comment}</p>
-     * 
-     * <p>根据${table.comment}ID和更新请求，更新${table.comment}的指定字段信息。</p>
-     * 
-     * @param id ${table.comment}唯一标识符
-     * @param entity ${table.comment}实体对象
-     * @return 更新后的${table.comment}实体对象
+     * <p>Update ${table.comment}</p>
+     *
+     * <p>Update specified fields of ${table.comment} based on ID and update request.</p>
+     *
+     * @param id ${table.comment} unique identifier
+     * @param entity ${table.comment} entity object
+     * @return Updated ${table.comment} entity object
      */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiOperation(value = "更新${table.comment}", notes = "更新${table.comment}信息")
-<#elseif swaggerVersion == "openapi3">
-    @Operation(summary = "更新${table.comment}", description = "更新${table.comment}信息")
-</#if>
+    @Operation(summary = "Update ${table.comment}", description = "Update ${table.comment} information")
 </#if>
     @PutMapping("/{id}")
     fun update(@PathVariable id: Long, @RequestBody entity: ${entity}): ${entity}? {
@@ -129,19 +106,15 @@ class ${table.controllerName} {
     }
 
     /**
-     * <p>删除${table.comment}</p>
-     * 
-     * <p>根据${table.comment}ID删除指定的${table.comment}。删除操作会级联删除${table.comment}相关的数据。</p>
-     * 
-     * @param id ${table.comment}唯一标识符
-     * @return 操作结果
+     * <p>Delete ${table.comment}</p>
+     *
+     * <p>Delete the specified ${table.comment} by ID. The delete operation will cascade delete ${table.comment} related data.</p>
+     *
+     * @param id ${table.comment} unique identifier
+     * @return Operation result
      */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiOperation(value = "删除${table.comment}", notes = "根据ID删除${table.comment}")
-<#elseif swaggerVersion == "openapi3">
-    @Operation(summary = "删除${table.comment}", description = "根据ID删除${table.comment}")
-</#if>
+    @Operation(summary = "Delete ${table.comment}", description = "Delete ${table.comment} by ID")
 </#if>
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long): Boolean {
@@ -149,30 +122,26 @@ class ${table.controllerName} {
     }
 <#if customMethods??>
 
-## ----------  BEGIN 自定义接口  ----------
+## ----------  BEGIN Custom endpoints  ----------
 <#list customMethods as method>
     /**
      * <p>${method.description}</p>
-     * 
+     *
      * <p>${method.detailDescription}</p>
-     * 
+     *
 <#list method.parameters as param>
      * @param ${param.name} ${param.type} ${param.description}
 </#list>
      * @return ${method.returnType} ${method.returnDescription}
      */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiOperation(value = "${method.description}", notes = "${method.detailDescription}")
-<#elseif swaggerVersion == "openapi3">
     @Operation(summary = "${method.description}", description = "${method.detailDescription}")
-</#if>
 </#if>
     @GetMapping("/${method.mappingPath}")
     fun ${method.name}(<#list method.parameters as param>@RequestParam ${param.name}: ${param.type}<#if param_has_next>, </#if></#list>): ${method.returnType} {
         return ${table.serviceName?substring(0,1)?lower_case}${table.serviceName?substring(1)}.${method.name}(<#list method.parameters as param>${param.name}<#if param_has_next>, </#if></#list>)
     }
 </#list>
-## ----------  END 自定义接口  ----------
+## ----------  END Custom endpoints  ----------
 </#if>
 }

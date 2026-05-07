@@ -4,16 +4,16 @@ import ${package.Domain}.model.aggregate.${entity?lower_case}.${entity}
 import org.springframework.stereotype.Service
 
 /**
- * <p>${table.comment}领域服务</p>
- * 
- * <p>${table.comment}的领域服务，位于领域层，包含不属于任何聚合根的领域逻辑。
- * 领域服务用于处理跨聚合的业务逻辑，或处理不适合放在聚合根中的复杂业务规则。</p>
- * 
- * <p>主要职责：
+ * <p>${table.comment} domain service</p>
+ *
+ * <p>Domain service for ${table.comment}, located in the domain layer, containing domain logic that does not belong to any aggregate root.
+ * Domain services handle cross-aggregate business logic or complex business rules that are not suitable for placement in aggregate roots.</p>
+ *
+ * <p>Primary responsibilities:
  * <ul>
- *   <li>处理跨聚合的业务逻辑</li>
- *   <li>实现复杂的业务规则</li>
- *   <li>协调多个聚合根完成业务操作</li>
+ *   <li>Handle cross-aggregate business logic</li>
+ *   <li>Implement complex business rules</li>
+ *   <li>Coordinate multiple aggregate roots to complete business operations</li>
 <#if customMethods??>
 <#list customMethods as method>
  *   <li>${method.description}</li>
@@ -21,9 +21,9 @@ import org.springframework.stereotype.Service
 </#if>
  * </ul>
  * </p>
- * 
- * <p>注意：领域服务应是无状态的，不应包含持久化逻辑。持久化操作应通过仓储接口完成。</p>
- * 
+ *
+ * <p>Note: Domain services should be stateless and should not contain persistence logic. Persistence operations should be performed through repository interfaces.</p>
+ *
  * @author ${author}
  * @since ${date}
  */
@@ -31,44 +31,44 @@ import org.springframework.stereotype.Service
 class ${entity}DomainService {
 
     /**
-     * <p>验证${table.comment}业务规则</p>
-     * 
-     * <p>验证${table.comment}是否符合业务规则。此方法包含复杂的业务规则验证逻辑。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment}聚合根对象
-     * @return Boolean 是否符合业务规则
+     * <p>Validate ${table.comment} business rules</p>
+     *
+     * <p>Validate whether ${table.comment} conforms to business rules. This method contains complex business rule validation logic.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment} aggregate root object
+     * @return Boolean whether it conforms to business rules
      */
     fun validateBusinessRules(${entity?substring(0,1)?lower_case}${entity?substring(1)}: ${entity}): Boolean {
-        // TODO: 实现业务规则验证逻辑
-        // 1. 验证业务不变性
-        // 2. 验证业务规则
-        // 3. 返回验证结果
+        // TODO: Implement business rule validation logic
+        // 1. Validate business invariants
+        // 2. Validate business rules
+        // 3. Return validation result
         return true
     }
 
     /**
-     * <p>计算${table.comment}相关业务指标</p>
-     * 
-     * <p>计算${table.comment}相关的业务指标，如统计信息、汇总数据等。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment}聚合根对象
-     * @return Any? 业务指标计算结果
+     * <p>Calculate ${table.comment} related business metrics</p>
+     *
+     * <p>Calculate business metrics related to ${table.comment}, such as statistics, summary data, etc.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment} aggregate root object
+     * @return Any? business metrics calculation result
      */
     fun calculateBusinessMetrics(${entity?substring(0,1)?lower_case}${entity?substring(1)}: ${entity}): Any? {
-        // TODO: 实现业务指标计算逻辑
-        // 1. 计算业务指标
-        // 2. 返回计算结果
+        // TODO: Implement business metrics calculation logic
+        // 1. Calculate business metrics
+        // 2. Return calculation result
         return null
     }
 <#if customMethods??>
 
-## ----------  BEGIN 自定义方法  ----------
+## ----------  BEGIN Custom methods  ----------
 <#list customMethods as method>
     /**
      * <p>${method.description}</p>
-     * 
+     *
      * <p>${method.detailDescription}</p>
-     * 
+     *
 <#list method.parameters as param>
      * @param ${param.name} ${param.type} ${param.description}
 </#list>
@@ -80,13 +80,13 @@ class ${entity}DomainService {
 </#if>
      */
     fun ${method.name}(<#list method.parameters as param>${param.name}: ${param.type}<#if param_has_next>, </#if></#list>): ${method.returnType} {
-        // TODO: 实现 ${method.description} 的领域服务逻辑
-        // 1. 业务规则验证
-        // 2. 业务逻辑处理
-        // 3. 返回处理结果
+        // TODO: Implement domain service logic for ${method.description}
+        // 1. Business rule validation
+        // 2. Business logic processing
+        // 3. Return processing result
         return null as ${method.returnType}
     }
 </#list>
-## ----------  END 自定义方法  ----------
+## ----------  END Custom methods  ----------
 </#if>
 }

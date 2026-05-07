@@ -1,12 +1,7 @@
 package ${package.VO};
 
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-<#elseif swaggerVersion == "openapi3">
 import io.swagger.v3.oas.annotations.media.Schema;
-</#if>
 </#if>
 <#if entityLombokModel>
 import lombok.Data;
@@ -24,11 +19,7 @@ import java.time.LocalDateTime;
  * @since ${date}
  */
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-@ApiModel(value = "${table.comment}VO", description = "${table.comment}视图对象")
-<#elseif swaggerVersion == "openapi3">
 @Schema(description = "${table.comment}视图对象")
-</#if>
 </#if>
 <#if entityLombokModel>
 @Data
@@ -52,11 +43,7 @@ public class ${entity}VO implements Serializable {
      */
 </#if>
 <#if swagger>
-<#if swaggerVersion == "swagger2">
-    @ApiModelProperty(value = "${field.comment}")
-<#elseif swaggerVersion == "openapi3">
     @Schema(description = "${field.comment}")
-</#if>
 </#if>
     private ${field.propertyType} ${field.propertyName};
 </#list>
