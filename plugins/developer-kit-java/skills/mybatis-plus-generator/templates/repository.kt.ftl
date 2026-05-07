@@ -5,21 +5,21 @@ import java.util.List
 import java.util.Optional
 
 /**
- * <p>${table.comment}仓储接口</p>
- * 
- * <p>定义${table.comment}聚合的仓储接口，遵循领域驱动设计（DDD）原则。
- * 仓储接口位于领域层，定义${table.comment}聚合的持久化契约，不依赖具体的技术实现。</p>
- * 
- * <p>主要职责：
+ * <p>${table.comment} repository interface</p>
+ *
+ * <p>Defines the repository interface for the ${table.comment} aggregate, following Domain-Driven Design (DDD) principles.
+ * The repository interface is located in the domain layer, defining the persistence contract for the ${table.comment} aggregate, without depending on specific technical implementations.</p>
+ *
+ * <p>Primary responsibilities:
  * <ul>
- *   <li>保存${table.comment}聚合</li>
- *   <li>根据ID查找${table.comment}聚合</li>
- *   <li>删除${table.comment}聚合</li>
- *   <li>查询${table.comment}聚合列表</li>
- *   <li>批量保存${table.comment}聚合</li>
- *   <li>批量删除${table.comment}聚合</li>
- *   <li>判断${table.comment}聚合是否存在</li>
- *   <li>统计${table.comment}聚合数量</li>
+ *   <li>Save ${table.comment} aggregate</li>
+ *   <li>Find ${table.comment} aggregate by ID</li>
+ *   <li>Delete ${table.comment} aggregate</li>
+ *   <li>Query ${table.comment} aggregate list</li>
+ *   <li>Batch save ${table.comment} aggregates</li>
+ *   <li>Batch delete ${table.comment} aggregates</li>
+ *   <li>Check if ${table.comment} aggregate exists</li>
+ *   <li>Count ${table.comment} aggregates</li>
 <#if customMethods??>
 <#list customMethods as method>
  *   <li>${method.description}</li>
@@ -27,98 +27,98 @@ import java.util.Optional
 </#if>
  * </ul>
  * </p>
- * 
- * <p>注意：仓储接口是领域层的核心接口，实现类应放在基础设施层（infrastructure/persistence/repository/）。</p>
- * 
+ *
+ * <p>Note: The repository interface is a core interface of the domain layer; implementations should be placed in the infrastructure layer (infrastructure/persistence/repository/).</p>
+ *
  * @author ${author}
  * @since ${date}
  */
 interface ${entity}Repository {
 
     /**
-     * <p>保存${table.comment}聚合</p>
-     * 
-     * <p>保存或更新${table.comment}聚合根。如果聚合根已存在则更新，否则创建新聚合根。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment}聚合根对象
-     * @return ${table.comment}聚合根对象
+     * <p>Save ${table.comment} aggregate</p>
+     *
+     * <p>Save or update ${table.comment} aggregate root. If the aggregate root already exists, update it; otherwise, create a new aggregate root.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)} ${table.comment} aggregate root object
+     * @return ${table.comment} aggregate root object
      */
     fun save(${entity?substring(0,1)?lower_case}${entity?substring(1)}: ${entity}): ${entity}
 
     /**
-     * <p>根据ID查找${table.comment}聚合</p>
-     * 
-     * <p>根据聚合根ID查找对应的${table.comment}聚合。如果不存在则返回 null。</p>
-     * 
-     * @param id ${table.comment}聚合根ID
-     * @return ${table.comment}聚合根对象，如果不存在则返回 null
+     * <p>Find ${table.comment} aggregate by ID</p>
+     *
+     * <p>Find the corresponding ${table.comment} aggregate by aggregate root ID. Returns null if not found.</p>
+     *
+     * @param id ${table.comment} aggregate root ID
+     * @return ${table.comment} aggregate root object, returns null if not found
      */
     fun findById(id: Long): ${entity}?
 
     /**
-     * <p>删除${table.comment}聚合</p>
-     * 
-     * <p>根据聚合根ID删除${table.comment}聚合。删除操作会级联删除聚合内的所有实体。</p>
-     * 
-     * @param id ${table.comment}聚合根ID
+     * <p>Delete ${table.comment} aggregate</p>
+     *
+     * <p>Delete ${table.comment} aggregate by aggregate root ID. The delete operation will cascade delete all entities within the aggregate.</p>
+     *
+     * @param id ${table.comment} aggregate root ID
      */
     fun deleteById(id: Long)
 
     /**
-     * <p>查询所有${table.comment}聚合</p>
-     * 
-     * <p>查询所有${table.comment}聚合根列表。注意：对于大数据量场景，应使用分页查询。</p>
-     * 
-     * @return ${table.comment}聚合根列表
+     * <p>Find all ${table.comment} aggregates</p>
+     *
+     * <p>Query all ${table.comment} aggregate root list. Note: For large data scenarios, use paginated queries.</p>
+     *
+     * @return ${table.comment} aggregate root list
      */
     fun findAll(): List<${entity}>
 
     /**
-     * <p>批量保存${table.comment}聚合</p>
-     * 
-     * <p>批量保存或更新${table.comment}聚合根列表。</p>
-     * 
-     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}List ${table.comment}聚合根列表
-     * @return 保存后的${table.comment}聚合根列表
+     * <p>Batch save ${table.comment} aggregates</p>
+     *
+     * <p>Batch save or update ${table.comment} aggregate root list.</p>
+     *
+     * @param ${entity?substring(0,1)?lower_case}${entity?substring(1)}List ${table.comment} aggregate root list
+     * @return Saved ${table.comment} aggregate root list
      */
     fun saveAll(${entity?substring(0,1)?lower_case}${entity?substring(1)}List: List<${entity}>): List<${entity}>
 
     /**
-     * <p>批量删除${table.comment}聚合</p>
-     * 
-     * <p>根据聚合根ID列表批量删除${table.comment}聚合。</p>
-     * 
-     * @param ids ${table.comment}聚合根ID列表
+     * <p>Batch delete ${table.comment} aggregates</p>
+     *
+     * <p>Batch delete ${table.comment} aggregates by aggregate root ID list.</p>
+     *
+     * @param ids ${table.comment} aggregate root ID list
      */
     fun deleteAllByIds(ids: List<Long>)
 
     /**
-     * <p>判断${table.comment}聚合是否存在</p>
-     * 
-     * <p>根据聚合根ID判断${table.comment}聚合是否存在。</p>
-     * 
-     * @param id ${table.comment}聚合根ID
-     * @return Boolean 是否存在
+     * <p>Check if ${table.comment} aggregate exists</p>
+     *
+     * <p>Check if ${table.comment} aggregate exists by aggregate root ID.</p>
+     *
+     * @param id ${table.comment} aggregate root ID
+     * @return Boolean whether it exists
      */
     fun existsById(id: Long): Boolean
 
     /**
-     * <p>统计${table.comment}聚合数量</p>
-     * 
-     * <p>统计${table.comment}聚合根的总数量。</p>
-     * 
-     * @return Long ${table.comment}聚合根数量
+     * <p>Count ${table.comment} aggregates</p>
+     *
+     * <p>Count the total number of ${table.comment} aggregate roots.</p>
+     *
+     * @return Long ${table.comment} aggregate root count
      */
     fun count(): Long
 <#if customMethods??>
 
-## ----------  BEGIN 自定义方法  ----------
+## ----------  BEGIN Custom methods  ----------
 <#list customMethods as method>
     /**
      * <p>${method.description}</p>
-     * 
+     *
      * <p>${method.detailDescription}</p>
-     * 
+     *
 <#list method.parameters as param>
      * @param ${param.name} ${param.type} ${param.description}
 </#list>
@@ -131,6 +131,6 @@ interface ${entity}Repository {
      */
     fun ${method.name}(<#list method.parameters as param>${param.name}: ${param.type}<#if param_has_next>, </#if></#list>): ${method.returnType}
 </#list>
-## ----------  END 自定义方法  ----------
+## ----------  END Custom methods  ----------
 </#if>
 }

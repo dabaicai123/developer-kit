@@ -7,17 +7,17 @@ import io.swagger.v3.oas.annotations.tags.Tag
 </#if>
 
 /**
- * <p>${table.comment}服务接口</p>
- * 
- * <p>定义${table.comment}相关的业务逻辑接口，包括${table.comment}的增删改查操作。
- * 本接口遵循领域驱动设计（DDD）原则，封装${table.comment}领域的核心业务逻辑。</p>
- * 
- * <p>主要职责：
+ * <p>${table.comment} service interface</p>
+ *
+ * <p>Defines business logic interfaces related to ${table.comment}, including CRUD operations.
+ * This interface follows Domain-Driven Design (DDD) principles, encapsulating core business logic of the ${table.comment} domain.</p>
+ *
+ * <p>Primary responsibilities:
  * <ul>
- *   <li>${table.comment}创建和保存</li>
- *   <li>${table.comment}信息查询（包括条件查询）</li>
- *   <li>${table.comment}信息更新</li>
- *   <li>${table.comment}删除</li>
+ *   <li>Create and save ${table.comment}</li>
+ *   <li>Query ${table.comment} information (including conditional queries)</li>
+ *   <li>Update ${table.comment} information</li>
+ *   <li>Delete ${table.comment}</li>
 <#if customMethods??>
 <#list customMethods as method>
  *   <li>${method.description}</li>
@@ -25,23 +25,23 @@ import io.swagger.v3.oas.annotations.tags.Tag
 </#if>
  * </ul>
  * </p>
- * 
+ *
  * @author ${author}
  * @since ${date}
  */
 <#if swagger>
-@Tag(name = "${table.comment}管理", description = "${table.comment}服务接口")
+@Tag(name = "${table.comment} Management", description = "${table.comment} service interface")
 </#if>
 interface ${table.serviceName} : ${superServiceClass}<${entity}> {
 <#if customMethods??>
 
-## ----------  BEGIN 自定义方法  ----------
+## ----------  BEGIN Custom methods  ----------
 <#list customMethods as method>
     /**
      * <p>${method.description}</p>
-     * 
+     *
      * <p>${method.detailDescription}</p>
-     * 
+     *
 <#list method.parameters as param>
      * @param ${param.name} ${param.type} ${param.description}
 </#list>
@@ -54,6 +54,6 @@ interface ${table.serviceName} : ${superServiceClass}<${entity}> {
      */
     fun ${method.name}(<#list method.parameters as param>${param.name}: ${param.type}<#if param_has_next>, </#if></#list>): ${method.returnType}
 </#list>
-## ----------  END 自定义方法  ----------
+## ----------  END Custom methods  ----------
 </#if>
 }

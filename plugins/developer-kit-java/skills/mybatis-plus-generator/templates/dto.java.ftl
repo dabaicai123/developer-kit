@@ -13,16 +13,16 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>${table.comment}${dtoType}DTO</p>
- * 
- * <p>用于${dtoPurpose}的数据传输对象。
- * 本DTO包含${table.comment}的${dtoFields}字段，用于${dtoUsage}场景。</p>
- * 
+ * <p>${table.comment} ${dtoType} DTO</p>
+ *
+ * <p>Data transfer object for ${dtoPurpose}.
+ * This DTO contains ${dtoFields} fields of ${table.comment}, used for ${dtoUsage} scenarios.</p>
+ *
  * @author ${author}
  * @since ${date}
  */
 <#if swagger>
-@Schema(description = "${table.comment}${dtoType}数据传输对象")
+@Schema(description = "${table.comment} ${dtoType} data transfer object")
 </#if>
 <#if entityLombokModel>
 @Data
@@ -32,13 +32,13 @@ public class ${entity}${dtoType}DTO implements Serializable {
 <#if serialVersionUID>
     private static final long serialVersionUID = 1L;
 </#if>
-## ----------  BEGIN DTO 字段  ----------
+## ----------  BEGIN DTO fields  ----------
 <#list dtoFields as field>
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，${field.type}类型<#if field.propertyType == "String">，长度限制为 ${field.length} 个字符</#if></p>
+     *
+     * <p>${field.comment}, ${field.type} type<#if field.propertyType == "String">, length limit of ${field.length} characters</#if></p>
      */
 <#else>
     /**
@@ -50,16 +50,16 @@ public class ${entity}${dtoType}DTO implements Serializable {
 </#if>
 <#if validation>
 <#if field.required?? && field.required>
-    @NotNull(message = "${field.comment}不能为空")
+    @NotNull(message = "${field.comment} cannot be empty")
 <#if field.propertyType == "String">
-    @NotBlank(message = "${field.comment}不能为空")
+    @NotBlank(message = "${field.comment} cannot be empty")
 </#if>
 </#if>
 <#if field.propertyType == "String" && field.length??>
-    @Size(max = ${field.length}, message = "${field.comment}长度不能超过${field.length}个字符")
+    @Size(max = ${field.length}, message = "${field.comment} length cannot exceed ${field.length} characters")
 </#if>
 </#if>
     private ${field.propertyType} ${field.propertyName};
 </#list>
-## ----------  END DTO 字段  ----------
+## ----------  END DTO fields  ----------
 }

@@ -10,16 +10,16 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>${table.comment}视图对象</p>
- * 
- * <p>用于${table.comment}的视图展示，包含${table.comment}的展示字段。
- * 本VO用于API响应，包含格式化后的数据和展示逻辑。</p>
- * 
+ * <p>${table.comment} view object</p>
+ *
+ * <p>Used for ${table.comment} view presentation, containing ${table.comment} display fields.
+ * This VO is used for API responses, containing formatted data and display logic.</p>
+ *
  * @author ${author}
  * @since ${date}
  */
 <#if swagger>
-@Schema(description = "${table.comment}视图对象")
+@Schema(description = "${table.comment} view object")
 </#if>
 <#if entityLombokModel>
 @Data
@@ -29,13 +29,13 @@ public class ${entity}VO implements Serializable {
 <#if serialVersionUID>
     private static final long serialVersionUID = 1L;
 </#if>
-## ----------  BEGIN VO 字段  ----------
+## ----------  BEGIN VO fields  ----------
 <#list voFields as field>
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，用于视图展示</p>
+     *
+     * <p>${field.comment}, used for view presentation</p>
      */
 <#else>
     /**
@@ -47,5 +47,5 @@ public class ${entity}VO implements Serializable {
 </#if>
     private ${field.propertyType} ${field.propertyName};
 </#list>
-## ----------  END VO 字段  ----------
+## ----------  END VO fields  ----------
 }

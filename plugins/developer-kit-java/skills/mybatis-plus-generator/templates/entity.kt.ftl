@@ -8,19 +8,19 @@ import java.io.Serializable
 import java.time.LocalDateTime
 
 /**
- * <p>${table.comment}实体类</p>
- * 
- * <p>对应数据库中的 ${table.name} 表，用于存储${table.comment}。
- * 本实体类使用 MyBatis-Plus 注解进行 ORM 映射，支持自动建表和字段映射。</p>
- * 
- * <p>主要字段：
+ * <p>${table.comment} entity class</p>
+ *
+ * <p>Corresponding to the ${table.name} table in the database, used to store ${table.comment}.
+ * This entity class uses MyBatis-Plus annotations for ORM mapping, supporting auto table creation and field mapping.</p>
+ *
+ * <p>Primary fields:
  * <ul>
 <#list table.fields as field>
  *   <li>${field.propertyName}: ${field.comment}</li>
 </#list>
  * </ul>
  * </p>
- * 
+ *
  * @author ${author}
  * @since ${date}
  */
@@ -47,7 +47,7 @@ class ${entity} : Serializable {
         private const val serialVersionUID: Long = 1L
     }
 </#if>
-## ----------  BEGIN 字段循环遍历  ----------
+## ----------  BEGIN Field loop iteration  ----------
 <#if entityLombokModel>
 <#list table.fields as field>
 <#if field.keyFlag>
@@ -56,8 +56,8 @@ class ${entity} : Serializable {
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，${field.type}类型<#if field.propertyType == "String">，长度限制为 ${field.length} 个字符</#if></p>
+     *
+     * <p>${field.comment}, ${field.type} type<#if field.propertyType == "String">, length limit of ${field.length} characters</#if></p>
      */
 <#else>
     /**
@@ -96,8 +96,8 @@ class ${entity} : Serializable {
 <#if field.comment?? && field.comment != "">
     /**
      * <p>${field.comment}</p>
-     * 
-     * <p>${field.comment}，${field.type}类型<#if field.propertyType == "String">，长度限制为 ${field.length} 个字符</#if></p>
+     *
+     * <p>${field.comment}, ${field.type} type<#if field.propertyType == "String">, length limit of ${field.length} characters</#if></p>
      */
 <#else>
     /**
@@ -128,5 +128,5 @@ class ${entity} : Serializable {
 
 </#list>
 </#if>
-## ----------  END 字段循环遍历  ----------
+## ----------  END Field loop iteration  ----------
 }
