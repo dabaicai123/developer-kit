@@ -14,7 +14,7 @@ A modular plugin system for AI-powered development assistance, organized as inst
 
 ```bash
 # Install into current project
-npx skills add your-org/developer-kit -g -y
+npx skills add dabaicai123/developer-kit -g -y
 
 # Or manual install via Makefile
 make install
