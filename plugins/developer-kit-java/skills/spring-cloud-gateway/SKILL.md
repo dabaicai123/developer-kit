@@ -2,6 +2,7 @@
 name: spring-cloud-gateway
 description: Spring Cloud Gateway patterns for Spring Boot 3.5.x covering routing, filters, rate limiting, and load balancing. Use when building API gateways for microservices.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -141,3 +142,9 @@ public KeyResolver ipKeyResolver() {
 - Configure circuit breakers per route with fallback URIs
 - Use rate limiting with Redis to protect downstream services
 - Keep gateway stateless — no business logic here
+
+## Related Skills
+
+- `spring-boot-resilience4j` — circuit breaker integration for gateway routes
+- `spring-cloud-openfeign` — Feign client patterns for downstream service calls
+- `spring-cloud-alibaba` — Nacos discovery integration for gateway routing

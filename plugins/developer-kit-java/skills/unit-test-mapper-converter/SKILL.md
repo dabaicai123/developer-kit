@@ -2,6 +2,7 @@
 name: unit-test-mapper-converter
 description: Provides patterns for unit testing mappers, converters, and bean mappings. Validates entity-to-DTO and model transformation logic in isolation. Generates executable mapping tests with MapStruct and custom converter test coverage. Use when writing mapping tests, converter tests, entity mapping tests, or ensuring correct data transformation between DTOs and domain objects.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -131,3 +132,7 @@ class UserMapperCompleteTest {
 ```
 
 Additional examples in: `references/examples.md`
+
+## Related Skills
+
+- `unit-test-service-layer` — Mockito patterns for testing service layer mappers

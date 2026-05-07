@@ -2,6 +2,7 @@
 name: spring-boot-security-jwt
 description: Provides JWT authentication and authorization patterns for Spring Boot 3.5.x covering token generation with JJWT, Bearer/cookie authentication, database/OAuth2 integration, and RBAC/permission-based access control using Spring Security 6.x. Use when implementing authentication or authorization in Spring Boot applications.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -191,3 +192,9 @@ public class AuthController {
 | [references/configuration.md](references/configuration.md) | Full SecurityFilterChain, CORS, CSRF config |
 | [references/token-management.md](references/token-management.md) | Refresh token entity, rotation, Redis blacklisting |
 | [references/authorization-patterns.md](references/authorization-patterns.md) | RBAC/ABAC, PermissionEvaluator, SpEL |
+
+## Related Skills
+
+- `spring-boot-security` — Spring Security configuration, CORS, CSRF, method security
+- `unit-test-security-authorization` — testing @PreAuthorize, @Secured, RBAC
+- `spring-boot-actuator` — securing management endpoints

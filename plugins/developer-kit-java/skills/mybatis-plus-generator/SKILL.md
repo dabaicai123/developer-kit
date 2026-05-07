@@ -2,6 +2,7 @@
 name: mybatis-plus-generator
 description: "Generates MyBatis-Plus code (Entity, Mapper, Service, ServiceImpl, Controller, DTO, VO, BO) from database tables. Supports MVC and DDD architectures, Java and Kotlin, with standard CRUD and custom methods. Use ONLY when the user explicitly mentions MyBatis-Plus or mybatis-plus-generator; do NOT trigger for JPA, Hibernate, or other ORMs."
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -460,6 +461,12 @@ All DDD templates are located in `templates/` root directory, supporting both Ja
 
 **Reference**: See MyBatis-Plus official templates at:
 - https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates
+
+## Related Skills
+
+- `ddd-cola` — COLA architecture layer structure for generated code
+- `mybatis-plus-patterns` — coding patterns for manually writing/editing MyBatis-Plus modules
+- `postgresql-table-design` — PostgreSQL schema design for code generation source tables
 
 ## Keywords
 

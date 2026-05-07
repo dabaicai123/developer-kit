@@ -2,6 +2,7 @@
 name: unit-test-controller-layer
 description: Provides patterns for unit testing REST controllers using MockMvc and @WebMvcTest. Generates controller tests that validates request/response mapping, validation, exception handling, and HTTP status codes. Use when testing web layer endpoints in isolation for API endpoint testing, Spring MVC tests, mock HTTP requests, or controller layer unit tests.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -246,3 +247,8 @@ void shouldReturnJsonWhenAcceptHeaderIsJson() throws Exception {
 
 - [Spring MockMvc Documentation](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/web/servlet/MockMvc.html)
 - [Spring Testing Best Practices](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing)
+
+## Related Skills
+
+- `unit-test-exception-handler` — testing @ExceptionHandler and @ControllerAdvice
+- `unit-test-bean-validation` — testing @Valid request DTO validation

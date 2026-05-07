@@ -2,6 +2,7 @@
 name: unit-test-service-layer
 description: Provides patterns for unit testing service layer with Mockito. Creates isolated tests that mock repository calls, verify method invocations, test exception scenarios, and stub external API responses. Use when testing service behaviors and business logic without database or external services.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -135,3 +136,8 @@ For additional patterns (multiple dependencies, argument captors, async services
 - [Mockito Documentation](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html)
 - [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/)
 - [AssertJ Assertions](https://assertj.github.io/assertj-core-features-highlight.html)
+
+## Related Skills
+
+- `spring-boot-tdd` — TDD workflow, coverage thresholds, test-first development
+- `unit-test-mapper-converter` — testing MapStruct mappers and entity/DTO converters

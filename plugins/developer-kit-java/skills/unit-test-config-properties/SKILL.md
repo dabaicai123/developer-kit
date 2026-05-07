@@ -2,6 +2,7 @@
 name: unit-test-config-properties
 description: Provides patterns for unit testing `@ConfigurationProperties` classes with `@ConfigurationPropertiesTest`. Validates property binding, tests validation constraints, verifies default values, checks type conversions, and mocks property sources for Spring Boot configuration properties. Use when testing application configuration binding, validating YAML or application.properties files, verifying environment-specific settings, or testing nested property structures.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -235,3 +236,7 @@ For **nested properties**, **profile-specific configurations**, **collection bin
 | Context fails to start | Missing dependencies | Ensure `spring-boot-starter-test` is in test scope |
 | Nested properties null | Inner class missing | Use `@Data` on nested classes or provide getters/setters |
 | Collection binding fails | Wrong indexing | Use `[0]`, `[1]` notation, not `(0)`, `(1)` |
+
+## Related Skills
+
+- `spring-boot-configuration-management` — @ConfigurationProperties patterns, Nacos config, profile-based configuration

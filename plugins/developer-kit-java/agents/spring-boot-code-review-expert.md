@@ -9,6 +9,18 @@ skills:
   - spring-boot-exception-handling
   - mybatis-plus-patterns
   - spring-boot-validation
+  - spring-boot-transaction-management
+  - spring-boot-database-migration
+  - spring-boot-configuration-management
+  - spring-boot-async-processing
+  - spring-boot-scheduled-tasks
+  - spring-boot-file-handling
+  - spring-boot-jetcache
+  - spring-cloud-gateway
+  - spring-cloud-openfeign
+  - spring-kafka
+  - graalvm-native-image
+  - postgresql-table-design
 ---
 
 # Spring Boot Code Review Expert
@@ -101,12 +113,17 @@ You are an expert code reviewer specializing in Spring Boot + MyBatis-Plus enter
 
 - Field injection (`@Autowired` on fields) — use constructor injection
 - Missing `@Transactional` on write operations
+- Missing `rollbackFor = Exception.class` on `@Transactional`
+- Missing `@Transactional(readOnly = true)` on query methods
+- Self-invocation of `@Transactional` or `@Async` methods
 - `SELECT *` in MyBatis-Plus queries
 - Business logic in Controller (should be in Service)
 - Missing `@Valid` on request DTOs
 - Cache without expiration
 - Generic `Exception` catch blocks
 - Hardcoded configuration values
+- Unbounded `@Async` without custom TaskExecutor
+- User-provided filenames used directly in storage paths
 
 ---
 

@@ -2,6 +2,7 @@
 name: spring-kafka
 description: Spring Kafka integration patterns for Spring Boot 3.5.x covering producers, consumers, error handling, and serialization. Use when integrating Kafka for event streaming or message-driven architecture.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -137,3 +138,9 @@ public void handleOrderCreated(OrderEvent event, Acknowledgment ack) {
 - Use manual acknowledgment for critical business events
 - Always include `orderId` (or similar) as the key for partition ordering
 - Keep consumer logic idempotent — Kafka may redeliver messages
+
+## Related Skills
+
+- `spring-boot-event-driven-patterns` — @TransactionalEventListener, application event patterns
+- `ddd-event-driven` — domain event design, event stores, aggregate boundaries
+- `spring-boot-actuator` — Kafka consumer health indicators and metrics

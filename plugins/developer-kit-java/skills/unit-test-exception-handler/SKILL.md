@@ -2,6 +2,7 @@
 name: unit-test-exception-handler
 description: Provides patterns for unit testing `@ExceptionHandler` and `@ControllerAdvice` in Spring Boot applications. Validates error response formatting, mocks exceptions, verifies HTTP status codes, tests field-level validation errors, and asserts custom error payloads. Use when writing Spring exception handler tests, REST API error tests, or mocking controller advice.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -136,3 +137,8 @@ class TestController {
 - **Logging side effects**: handlers that log should be verified with `verify(mockLogger).logXxx(...)`
 - **Localization**: when using `MessageSource`, test with different `Locale` values to confirm message resolution
 - **Security context**: `AuthorizationException` handlers can access `SecurityContextHolder` — test that context is correctly evaluated
+
+## Related Skills
+
+- `spring-boot-exception-handling` — @RestControllerAdvice, BusinessException, Result<T>
+- `unit-test-controller-layer` — MockMvc patterns for REST controller testing

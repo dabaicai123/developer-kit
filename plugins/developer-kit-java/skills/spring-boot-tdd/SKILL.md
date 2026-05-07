@@ -2,6 +2,7 @@
 name: spring-boot-tdd
 description: Test-driven development for Spring Boot using JUnit 5, Mockito, MockMvc, Testcontainers, and JaCoCo. Use when adding features, fixing bugs, or refactoring.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -169,3 +170,10 @@ class MarketBuilder {
 - Gradle: `./gradlew test jacocoTestReport`
 
 **Remember**: Keep tests fast, isolated, and deterministic. Test behavior, not implementation details.
+
+## Related Skills
+
+- `unit-test-service-layer` — Mockito patterns for service layer testing
+- `unit-test-controller-layer` — MockMvc patterns for REST controller testing
+- `unit-test-bean-validation` — Jakarta Bean Validation testing
+- `spring-boot-verification` — full build → lint → test → security scan pipeline

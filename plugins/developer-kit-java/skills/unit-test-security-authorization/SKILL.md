@@ -2,6 +2,7 @@
 name: unit-test-security-authorization
 description: Provides patterns for unit testing Spring Security with `@PreAuthorize`, `@Secured`, `@RolesAllowed`. Validates role-based access control and authorization policies. Use when testing security configurations and access control logic.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -98,6 +99,8 @@ void shouldRejectUnauthorizedWhenSecurityEnabled() {
 
 ### Basic `@PreAuthorize` Test
 
+> **Important**: `@PreAuthorize` works via Spring AOP proxying. To test method-level security, you must use `@SpringBootTest` + `@EnableMethodSecurity` so the proxy intercepts calls. Mockito's `@InjectMocks` bypasses the proxy, making `@PreAuthorize` silently ignored.
+
 ```java
 @Service
 public class UserService {
@@ -107,19 +110,27 @@ public class UserService {
   }
 }
 
-// Test
-@Test
-@WithMockUser(roles = "ADMIN")
-void shouldAllowAdminToDeleteUser() {
-  assertThatCode(() -> service.deleteUser(1L))
-    .doesNotThrowAnyException();
-}
+// Test — requires Spring context for proxy-based security
+@SpringBootTest
+@EnableMethodSecurity
+class UserServiceAuthorizationTest {
 
-@Test
-@WithMockUser(roles = "USER")
-void shouldDenyUserFromDeletingUser() {
-  assertThatThrownBy(() -> service.deleteUser(1L))
-    .isInstanceOf(AccessDeniedException.class);
+  @MockBean private UserRepository userRepository;
+  @Autowired private UserService userService;
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  void shouldAllowAdminToDeleteUser() {
+    assertThatCode(() -> userService.deleteUser(1L))
+      .doesNotThrowAnyException();
+  }
+
+  @Test
+  @WithMockUser(roles = "USER")
+  void shouldDenyUserFromDeletingUser() {
+    assertThatThrownBy(() -> userService.deleteUser(1L))
+      .isInstanceOf(AccessDeniedException.class);
+  }
 }
 ```
 
@@ -185,3 +196,8 @@ See [references/basic-testing.md](references/basic-testing.md) for more basic pa
 
 ### Complete Examples
 - **[references/complete-examples.md](references/complete-examples.md)** - Before/after examples showing transition from manual to declarative security
+
+## Related Skills
+
+- `spring-boot-security` — Spring Security configuration, CORS, CSRF, method security
+- `spring-boot-security-jwt` — JWT authentication, SecurityFilterChain, token management

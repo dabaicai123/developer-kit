@@ -2,6 +2,7 @@
 name: unit-test-boundary-conditions
 description: Provides edge case, corner case, boundary condition, and limit testing patterns for Java unit tests. Validates minimum/maximum values, null cases, empty collections, numeric overflow/underflow, floating-point precision, and off-by-one scenarios using JUnit 5 and AssertJ. Use when writing .java test files to ensure code handles limits, corner cases, and special inputs correctly.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -272,9 +273,13 @@ class ArrayBoundaryTest {
 
 ## References
 
-- [Integer.MIN_VALUE/MAX_VALUE](https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html)
-- [Double.MIN_VALUE/MAX_VALUE](https://docs.oracle.com/javase/8/docs/api/java/lang/Double.html)
+- [Integer.MIN_VALUE/MAX_VALUE](https://docs.oracle.com/javase/21/docs/api/java.base/java/lang/Integer.html)
+- [Double.MIN_VALUE/MAX_VALUE](https://docs.oracle.com/javase/21/docs/api/java.base/java/lang/Double.html)
 - [AssertJ Floating Point](https://assertj.github.io/assertj-core-features-highlight.html#assertions-on-numbers)
 - [Boundary Value Analysis](https://en.wikipedia.org/wiki/Boundary-value_analysis)
 - [references/concurrent-testing.md](references/concurrent-testing.md) - Thread safety patterns
 - [references/parameterized-patterns.md](references/parameterized-patterns.md) - Off-by-one and parameterized examples
+
+## Related Skills
+
+- `unit-test-parameterized` — @ParameterizedTest, @ValueSource, @CsvSource for boundary values

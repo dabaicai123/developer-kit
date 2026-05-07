@@ -2,6 +2,7 @@
 name: spring-boot-verification
 description: "Verification loop for Spring Boot projects: build, static analysis, tests with coverage, security scans, and diff review before release or PR."
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -211,13 +212,13 @@ Checklist:
 ```
 VERIFICATION REPORT
 ===================
-Build:     [PASS/FAIL
+Build:     [PASS/FAIL]
 Static:    [PASS/FAIL] (spotbugs/pmd/checkstyle)
 Tests:     [PASS/FAIL] (X/Y passed, Z% coverage)
 Security:  [PASS/FAIL] (CVE findings: N)
-Diff:      [X files changed
+Diff:      [X files changed]
 
-Overall:   [READY / NOT READY
+Overall:   [READY / NOT READY]
 
 Issues to Fix:
 1. ...
@@ -230,3 +231,9 @@ Issues to Fix:
 - Keep a short loop: `mvn -T 4 test` + spotbugs for quick feedback
 
 **Remember**: Fast feedback beats late surprises. Keep the gate strict—treat warnings as defects in production systems.
+
+## Related Skills
+
+- `spring-boot-tdd` — test-driven development workflow with JUnit 5, Mockito, Testcontainers
+- `unit-test-service-layer` — service layer unit testing with Mockito
+- `spring-boot-actuator` — production health probes and metrics for verification

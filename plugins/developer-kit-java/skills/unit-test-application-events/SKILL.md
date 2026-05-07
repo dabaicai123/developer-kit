@@ -2,6 +2,7 @@
 name: unit-test-application-events
 description: Provides patterns for unit testing Spring application events. Validates event publishing with ApplicationEventPublisher, tests @EventListener annotation behavior, and verifies async event handling. Use when writing tests for event listeners, mocking application events, or verifying events were published in your Spring Boot services.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -226,3 +227,7 @@ class AsyncEventListenerTest {
 - [Spring ApplicationEvent Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationEvent.html)
 - [ApplicationEventPublisher Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationEventPublisher.html)
 - [`@EventListener` Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/event/EventListener.html)
+
+## Related Skills
+
+- `spring-boot-event-driven-patterns` — @EventListener, @TransactionalEventListener, event publishing patterns

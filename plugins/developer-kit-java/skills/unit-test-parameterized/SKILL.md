@@ -2,6 +2,7 @@
 name: unit-test-parameterized
 description: Provides parameterized testing patterns with JUnit 5, generates data-driven unit tests using @ParameterizedTest, @ValueSource, @CsvSource, @MethodSource. Creates tests that run the same logic with multiple input values. Use when writing data-driven Java tests, multiple test cases from single method, or boundary value analysis.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -163,14 +164,33 @@ void shouldValidateRange(int value, int min, int max, boolean expected) {
 }
 ```
 
-### Error Condition Testing
+### Null and Empty String Testing
+
+`@ValueSource` does not support null values. Use `@NullSource`, `@EmptySource`, or `@MethodSource` instead:
 
 ```java
 @ParameterizedTest
-@ValueSource(strings = {"", " ", null})
+@NullAndEmptySource  // Combines @NullSource + @EmptySource
+void shouldThrowExceptionForNullAndEmptyInput(String input) {
+  assertThatThrownBy(() -> Parser.parse(input))
+    .isInstanceOf(IllegalArgumentException.class);
+}
+
+// Or use @MethodSource for mixed null + non-null values
+@ParameterizedTest
+@MethodSource("invalidInputs")
 void shouldThrowExceptionForInvalidInput(String input) {
   assertThatThrownBy(() -> Parser.parse(input))
     .isInstanceOf(IllegalArgumentException.class);
+}
+
+static Stream<Arguments> invalidInputs() {
+  return Stream.of(
+    Arguments.of((String) null),
+    Arguments.of(""),
+    Arguments.of(" "),
+    Arguments.of("  ")
+  );
 }
 ```
 
@@ -195,3 +215,7 @@ void shouldThrowExceptionForInvalidInput(String input) {
 
 - [JUnit 5 Parameterized Tests](https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests)
 - [`@ParameterizedTest` API](https://junit.org/junit5/docs/current/api/org.junit.jupiter.params/org/junit/jupiter/params/ParameterizedTest.html)
+
+## Related Skills
+
+- `unit-test-boundary-conditions` — boundary value analysis, numeric/string/collection limits

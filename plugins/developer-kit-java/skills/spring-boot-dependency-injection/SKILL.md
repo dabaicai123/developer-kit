@@ -2,6 +2,7 @@
 name: spring-boot-dependency-injection
 description: Provides dependency injection patterns for Spring Boot projects, including constructor-first design, optional collaborator handling, bean selection, and wiring validation. Use when creating services and configurations, replacing field injection, or troubleshooting ambiguous or fragile Spring wiring.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -185,5 +186,6 @@ Use `@Primary` for the default path and `@Qualifier` only where a specific varia
 
 ## Related Skills
 
-- `spring-boot-rest-api-standards`
-- `unit-test-service-layer`
+- `spring-boot-configuration-management` — @ConfigurationProperties, constructor binding, Nacos config
+- `spring-boot-event-driven-patterns` — @TransactionalEventListener, event-driven architecture
+- `spring-boot-rest-api-standards` — REST API design, DTOs, validation

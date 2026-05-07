@@ -2,6 +2,7 @@
 name: graalvm-native-image
 description: Provides expert guidance for building GraalVM Native Image executables from Java applications. Use when converting JVM applications to native binaries, optimizing cold start times, reducing memory footprint, configuring native build tools for Maven or Gradle, resolving reflection and resource issues in native builds, or implementing framework-specific native support for Spring Boot, Quarkus, and Micronaut. Triggers include "graalvm native image", "native executable java", "java cold start optimization", "native build tools", "ahead of time compilation java", "reflection config graalvm", "native image build failure".
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -258,7 +259,7 @@ RUN ./mvnw -Pnative package -DskipTests
 FROM debian:bookworm-slim
 COPY --from=builder /app/target/<app-name> /app/<app-name>
 EXPOSE 8080
-ENTRYPOINT ["/app/<app-name>"
+ENTRYPOINT ["/app/<app-name>"]
 ```
 
 For Spring Boot applications, use `paketobuildpacks/builder-jammy-tiny` with Cloud Native Buildpacks:
@@ -418,6 +419,11 @@ curl http://localhost:8080/actuator/health
 - Native executables are harder to decompile than JARs, but are not tamper-proof
 - Ensure secrets are not embedded in the native image at build time
 - Use environment variables or external config for sensitive data
+
+## Related Skills
+
+- `spring-boot-actuator` — native image health checks and monitoring endpoints
+- `docker-expert` — minimal Docker images for native executables
 
 ## Troubleshooting
 

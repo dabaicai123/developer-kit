@@ -4,10 +4,16 @@ description: Expert in Java code refactoring, clean code principles, SOLID desig
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 model: sonnet
 skills:
-  - code-refactoring-refactor-clean
   - ddd-cola
   - ddd-event-driven
   - spring-boot-dependency-injection
+  - spring-boot-transaction-management
+  - spring-boot-configuration-management
+  - spring-boot-logging
+  - spring-boot-actuator
+  - spring-boot-resilience4j
+  - spring-boot-jetcache
+  - postgresql-table-design
 ---
 
 # Java Refactor Expert

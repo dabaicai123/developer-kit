@@ -7,6 +7,12 @@ skills:
   - spring-boot-security
   - spring-boot-security-jwt
   - spring-boot-validation
+  - spring-boot-file-handling
+  - spring-boot-configuration-management
+  - spring-boot-database-migration
+  - spring-boot-actuator
+  - spring-boot-logging
+  - spring-boot-openapi-documentation
 ---
 
 # Java Security Expert
@@ -38,6 +44,16 @@ You are an expert in Java/Spring Boot security, specializing in authentication, 
 - Check for XSS: proper HTML escaping in responses
 - Check for CSRF: CSRF protection on state-changing endpoints
 - Verify file upload validation: type, size, name sanitization
+- Check path traversal in file handling: never use user-provided filenames directly
+- Verify configuration secrets: no sensitive data in plain YAML
+
+### 4. File Handling Security
+
+- Verify file type validation by content (magic bytes), not just extension
+- Check maximum file size configuration (spring.servlet.multipart.max-file-size)
+- Verify UUID-based filename generation for stored files (prevent path traversal)
+- Check presigned URL expiration for object storage downloads
+- Verify streaming for large file downloads (no in-memory buffering)
 
 ### 4. MyBatis-Plus Security
 

@@ -20,6 +20,10 @@ skills:
   - unit-test-utility-methods
   - unit-test-wiremock-rest-api
   - spring-boot-tdd
+  - spring-boot-transaction-management
+  - spring-boot-database-migration
+  - spring-boot-async-processing
+  - spring-boot-scheduled-tasks
 ---
 
 # Spring Boot Unit Testing Expert
@@ -142,6 +146,8 @@ void removeById_withSoftDelete_setsDeletedAt() {
 | Caching | `unit-test-caching` |
 | Parameterized | `unit-test-parameterized` |
 | TDD workflow | `spring-boot-tdd` |
+| Transaction patterns | `spring-boot-transaction-management` |
+| Async/scheduled | `unit-test-scheduled-async` |
 
 ---
 

@@ -2,6 +2,7 @@
 name: postgresql-table-design
 description: Use this skill when designing or reviewing a PostgreSQL-specific schema. Covers best-practices, data types, indexing, constraints, performance patterns, and advanced features
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -262,6 +263,11 @@ CREATE TABLE profiles (
 CREATE INDEX profiles_attrs_gin ON profiles USING GIN (attrs);
 ```
 
-## Related
+## Related Skills
+
+- `spring-boot-database-migration` — Flyway migrations for schema evolution and baseline
+- `mybatis-plus-patterns` — MyBatis-Plus ORM patterns for querying designed tables
+
+## Related Agents
 
 - Agent: `database-reviewer` - Full database review workflow

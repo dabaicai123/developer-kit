@@ -2,6 +2,7 @@
 name: spring-boot-logging
 description: Spring Boot logging configuration patterns covering Logback, structured JSON logging, log levels per-package, and MDC correlation. Use when configuring application logging for production observability.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -148,3 +149,8 @@ logging:
 - Never log sensitive data (passwords, tokens, PII)
 - Use `logback-spring.xml` with `<springProfile>` for environment-specific config
 - Always clear MDC in filter's `finally` block to prevent context leaking
+
+## Related Skills
+
+- `spring-boot-actuator` — log level management via Actuator endpoints
+- `spring-boot-exception-handling` — exception logging patterns in global exception handler

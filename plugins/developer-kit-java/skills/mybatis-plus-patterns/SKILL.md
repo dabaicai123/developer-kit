@@ -2,6 +2,7 @@
 name: mybatis-plus-patterns
 description: MyBatis-Plus patterns for Spring Boot 3.5.x covering mapper, entity, service layer, pagination, soft delete, and field fill. Use for Java Spring Boot backend development with MyBatis-Plus as ORM.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -24,13 +25,10 @@ MyBatis-Plus ORM patterns for Spring Boot 3.5.x with PostgreSQL.
 
 ## Related Skills
 
-- For REST API standards → `spring-boot-rest-api-standards`
-- For exception handling → `spring-boot-exception-handling`
-- For validation → `spring-boot-validation`
-- For caching → `jetcache`
-- For logging → `spring-boot-logging`
-- For async processing → `spring-boot-event-driven-patterns`
-- For code generation → `mybatis-plus-generator`
+- `spring-boot-transaction-management` — transaction boundaries with MyBatis-Plus IService/ServiceImpl
+- `spring-boot-database-migration` — Flyway migrations for schema evolution
+- `postgresql-table-design` — PostgreSQL data types, indexing, and constraints
+- `mybatis-plus-generator` — batch code generation from database tables
 
 ## Mapper Pattern
 
@@ -205,7 +203,7 @@ Page<UserEntity> result = userMapper.selectPage(page, wrapper);
 ## Best Practices
 
 - Use **IService/ServiceImpl pattern**: Service 接口继承 `IService<Entity>`，实现类继承 `ServiceImpl<Mapper, Entity>`
-- Use `@Transactional(readOnly = true)` for all query methods
+- Use `@Transactional(readOnly = true)` on all query methods → detailed transaction patterns see `spring-boot-transaction-management`
 - Use `LambdaQueryWrapper` instead of `QueryWrapper` for type safety
 - Use `@TableLogic` for soft deletes — never physically delete business data
 - Use `Page<>` for pagination, never manually calculate offset

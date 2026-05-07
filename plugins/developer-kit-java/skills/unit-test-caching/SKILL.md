@@ -2,6 +2,7 @@
 name: unit-test-caching
 description: "Provides patterns for unit testing Spring Cache annotations (@Cacheable, @CachePut, @CacheEvict). Generates test code that mocks cache managers, verifies cache hit/miss behavior, tests cache key generation with SpEL expressions, validates eviction strategies, and checks conditional caching scenarios. Triggers: caching tests, test Spring cache, mock cache, Spring Boot caching, cache hit/miss verification, @Cacheable testing."
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -269,6 +270,8 @@ class OrderCachePutTest {
 
 ### Testing Conditional Caching
 
+> **Important**: Conditional caching (`unless`, `condition`) also relies on Spring AOP proxying. The examples below test the **logic** of what should happen when the condition evaluates — they use `new` to demonstrate the uncached baseline. For full proxy-aware testing, use `@SpringBootTest` + `@EnableCaching` + `@Autowired` as shown in the `@Cacheable` section above.
+
 ```java
 @Service
 public class DataService {
@@ -291,36 +294,46 @@ public class DataService {
   }
 }
 
+// Proxy-aware test with @SpringBootTest
+@SpringBootTest
+@EnableCaching
 class ConditionalCachingTest {
+
+  @Configuration
+  @EnableCaching
+  static class TestConfig {
+    @Bean
+    CacheManager cacheManager() { return new ConcurrentMapCacheManager("data", "users"); }
+  }
+
+  @MockBean private DataRepository dataRepository;
+  @Autowired private DataService dataService;
 
   @Test
   void shouldNotCacheNullResults() {
-    DataRepository dataRepository = mock(DataRepository.class);
     when(dataRepository.findById(999L)).thenReturn(Optional.empty());
-    DataService service = new DataService(dataRepository);
 
-    service.getData(999L);
-    service.getData(999L);
+    dataService.getData(999L);
+    dataService.getData(999L);
 
-    verify(dataRepository, times(2)).findById(999L); // Called twice - no caching
+    verify(dataRepository, times(2)).findById(999L); // Called twice - null not cached
   }
 
   @Test
   void shouldNotCacheWhenConditionIsFalse() {
-    DataRepository dataRepository = mock(DataRepository.class);
     when(dataRepository.findById(-1L)).thenReturn(Optional.of(new Data(-1L, "Test")));
 
-    DataService service = new DataService(dataRepository);
+    dataService.getUser(-1L);
+    dataService.getUser(-1L);
 
-    service.getUser(-1L);
-    service.getUser(-1L);
-
-    verify(dataRepository, times(2)).findById(-1L); // Condition "#id > 0" = false
+    verify(dataRepository, times(2)).findById(-1L); // Condition "#id > 0" = false, no caching
   }
 }
 ```
 
 ### Testing Cache Keys with SpEL
+
+> **Important**: SpEL key expressions require Spring proxy for cache resolution. Use `@SpringBootTest` + `@EnableCaching` + `@Autowired` for proxy-aware testing.
 
 ```java
 @Service
@@ -338,24 +351,34 @@ public class InventoryService {
   }
 }
 
+// Proxy-aware test with @SpringBootTest
+@SpringBootTest
+@EnableCaching
 class CacheKeyTest {
+
+  @Configuration
+  @EnableCaching
+  static class TestConfig {
+    @Bean
+    CacheManager cacheManager() { return new ConcurrentMapCacheManager("inventory"); }
+  }
+
+  @MockBean private InventoryRepository inventoryRepository;
+  @Autowired private InventoryService inventoryService;
 
   @Test
   void shouldUseCorrectCacheKeyForDifferentCombinations() {
-    InventoryRepository repository = mock(InventoryRepository.class);
     InventoryItem item = new InventoryItem(1L, 1L, 100);
-    when(repository.findByProductAndWarehouse(1L, 1L)).thenReturn(item);
-
-    InventoryService service = new InventoryService(repository);
+    when(inventoryRepository.findByProductAndWarehouse(1L, 1L)).thenReturn(item);
 
     // Same key: "1-1" - should cache
-    service.getInventory(1L, 1L);
-    service.getInventory(1L, 1L); // Cache hit
-    verify(repository, times(1)).findByProductAndWarehouse(1L, 1L);
+    inventoryService.getInventory(1L, 1L);
+    inventoryService.getInventory(1L, 1L); // Cache hit
+    verify(inventoryRepository, times(1)).findByProductAndWarehouse(1L, 1L);
 
     // Different key: "2-1" - cache miss
-    service.getInventory(2L, 1L); // Cache miss
-    verify(repository, times(2)).findByProductAndWarehouse(any(), any());
+    inventoryService.getInventory(2L, 1L); // Cache miss
+    verify(inventoryRepository, times(2)).findByProductAndWarehouse(any(), any());
   }
 }
 ```
@@ -391,3 +414,7 @@ class CacheKeyTest {
 - [Spring Caching Documentation](https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#cache)
 - [Cacheable Annotation](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/cache/annotation/Cacheable.html)
 - [SpEL Expressions](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#expressions)
+
+## Related Skills
+
+- `spring-boot-jetcache` — JetCache multi-level caching patterns, @Cached, @CacheUpdate

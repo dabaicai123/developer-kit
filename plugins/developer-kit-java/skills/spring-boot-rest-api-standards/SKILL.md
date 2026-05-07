@@ -2,6 +2,7 @@
 name: spring-boot-rest-api-standards
 description: Provides REST API design standards and best practices for Spring Boot projects. Use when creating or reviewing REST endpoints, DTOs, error handling, pagination, security headers, HATEOAS and architecture patterns.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -192,18 +193,7 @@ public class UserService {
 public record UserResponse(Long id, String name, String email) {}
 ```
 
-### 3. Implement Proper Transaction Management
-```java
-@Service
-@Transactional
-public class UserService {
-    @Transactional(readOnly = true)
-    public Optional<User> findById(Long id) { return userRepository.findById(id); }
-
-    @Transactional
-    public User create(User user) { return userRepository.save(user); }
-}
-```
+> For transaction management patterns (`@Transactional`, propagation, rollback rules), see `spring-boot-transaction-management`.
 
 ## Constraints and Warnings
 
@@ -219,3 +209,10 @@ public class UserService {
 - See `references/` directory for comprehensive reference material including HTTP status codes, Spring annotations, and detailed examples
 - Refer to the `spring-boot-code-review-expert` agent for code review guidelines
 - Review `spring-boot-dependency-injection` for dependency injection patterns
+
+## Related Skills
+
+- `spring-boot-validation` — @Valid, @NotBlank, MethodArgumentNotValidException
+- `spring-boot-exception-handling` — @RestControllerAdvice, BusinessException, Result<T>
+- `spring-boot-security-jwt` — JWT authentication for REST endpoints
+- `spring-boot-openapi-documentation` — OpenAPI/Swagger documentation for REST APIs

@@ -1,0 +1,255 @@
+# Scheduled Task Patterns — Detailed Reference
+
+## @Scheduled fixedDelay — delay after previous execution completes
+
+`fixedDelay` waits N milliseconds after the previous execution finishes before starting the next. This prevents task pile-up when execution takes longer than the interval.
+
+```java
+@Component
+@Slf4j
+public class HeartbeatTask {
+
+    @Scheduled(fixedDelayString = "${app.task.heartbeat-delay:10000}")
+    public void sendHeartbeat() {
+        log.info("[HeartbeatTask] sending heartbeat");
+        // If this takes 5s, next execution starts 10s after this one finishes
+        // Total cycle = execution time + fixedDelay
+        heartbeatClient.ping();
+    }
+}
+```
+
+Use `fixedDelayString` to reference configuration properties. Use `fixedDelay` for hardcoded values (not recommended).
+
+## @Scheduled fixedRate — execute at fixed interval regardless of completion
+
+`fixedRate` starts a new execution every N milliseconds regardless of whether the previous one finished. If execution takes longer than the interval, tasks queue up with the default single-thread scheduler.
+
+```java
+@Component
+@Slf4j
+public class MetricsCollectTask {
+
+    @Scheduled(fixedRateString = "${app.task.metrics-rate:5000}")
+    public void collectMetrics() {
+        // Executes every 5 seconds regardless of previous completion
+        // With pool.size=1, if this takes 8s, the next execution waits
+        metricsService.collect();
+    }
+}
+```
+
+**Warning**: With default `pool.size=1`, `fixedRate` tasks that take longer than their interval will queue up. Either:
+- Increase `spring.task.scheduling.pool.size`
+- Switch to `fixedDelay` for long-running tasks
+- Use `@Async` + `@Scheduled` combination for concurrent execution
+
+## @Scheduled initialDelay — delay before first execution
+
+`initialDelay` postpones the first execution by N milliseconds after application startup. Useful to avoid running tasks while the application is still initializing.
+
+```java
+@Component
+@Slf4j
+public class CacheWarmupTask {
+
+    /**
+     * Wait 30 seconds after startup before first execution,
+     * then execute every 5 minutes.
+     */
+    @Scheduled(initialDelayString = "${app.task.warmup-delay:30000}",
+               fixedRateString = "${app.task.warmup-rate:300000}")
+    public void warmupCache() {
+        log.info("[CacheWarmupTask] warming up cache");
+        cacheService.warmup();
+    }
+}
+```
+
+Combine `initialDelay` with `fixedRate` or `fixedDelay`. It only affects the first execution.
+
+## @Scheduled cron — cron expression syntax
+
+`cron` allows complex schedule patterns using cron expressions. Spring cron uses 6 fields (seconds, minutes, hours, day-of-month, month, day-of-week).
+
+```java
+@Component
+@Slf4j
+public class NightlyTask {
+
+    /**
+     * Execute at 2:30 AM every day.
+     * Cron expression from config for runtime adjustment.
+     */
+    @Scheduled(cron = "${app.task.nightly-cron:0 30 2 * * ?}")
+    public void nightlyDataSync() {
+        log.info("[NightlyTask] starting nightly sync");
+        dataSyncService.syncAll();
+    }
+}
+```
+
+See `cron-expression-reference.md` for full cron syntax and common patterns.
+
+## Task pool configuration: SchedulingConfigurer with custom TaskScheduler
+
+When you need more control than `spring.task.scheduling.pool.size`, implement `SchedulingConfigurer` to provide a custom `TaskScheduler`.
+
+```java
+@Configuration
+@Slf4j
+public class SchedulingConfig implements SchedulingConfigurer {
+
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        taskRegistrar.setTaskScheduler(taskScheduler());
+    }
+
+    @Bean
+    public TaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(4);
+        scheduler.setThreadNamePrefix("scheduled-");
+        scheduler.setAwaitTerminationSeconds(60);
+        scheduler.setWaitForTasksToCompleteOnShutdown(true);
+        scheduler.setErrorHandler(t -> log.error("Scheduled task error", t));
+        scheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        scheduler.initialize();
+        return scheduler;
+    }
+}
+```
+
+Key configuration:
+- `poolSize` — number of threads for scheduled tasks
+- `threadNamePrefix` — identifiable thread names for logging and debugging
+- `waitForTasksToCompleteOnShutdown` — graceful shutdown: wait for running tasks
+- `awaitTerminationSeconds` — max wait time on shutdown
+- `errorHandler` — catch unhandled exceptions instead of silently stopping the task
+- `rejectedExecutionHandler` — `CallerRunsPolicy` runs the task on the caller thread when the pool is full
+
+## Conditional scheduling: @ConditionalOnProperty to enable/disable tasks
+
+Disable scheduled tasks in certain environments (e.g., disable in dev, enable in prod).
+
+```java
+@Component
+@Slf4j
+@ConditionalOnProperty(
+    name = "app.task.data-sync.enabled",
+    havingValue = "true",
+    matchIfMissing = false       // Default: disabled unless explicitly set
+)
+public class DataSyncTask {
+
+    @Scheduled(fixedDelayString = "${app.task.sync-delay:30000}")
+    public void syncData() {
+        log.info("[DataSyncTask] sync started");
+        dataSyncService.sync();
+    }
+}
+```
+
+```yaml
+# application-prod.yml — enable the task
+app:
+  task:
+    data-sync:
+      enabled: true
+
+# application-dev.yml — disable the task
+app:
+  task:
+    data-sync:
+      enabled: false
+```
+
+`matchIfMissing = false` means the bean is not created when the property is absent. Use `matchIfMissing = true` to enable by default.
+
+## Dynamic scheduling: TaskScheduler for runtime task registration
+
+For tasks that need to be registered or cancelled at runtime, use `TaskScheduler` directly instead of `@Scheduled`.
+
+```java
+@Service
+@Slf4j
+public class DynamicTaskService {
+
+    private final ThreadPoolTaskScheduler taskScheduler;
+    private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+
+    public DynamicTaskService(ThreadPoolTaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
+    }
+
+    /**
+     * Register a new scheduled task at runtime.
+     */
+    public void scheduleTask(String taskId, Runnable task, String cronExpression) {
+        ScheduledFuture<?> future = taskScheduler.schedule(task,
+            new CronTrigger(cronExpression, TimeZone.getTimeZone("Asia/Shanghai")));
+        scheduledTasks.put(taskId, future);
+        log.info("[DynamicTaskService] registered task: {}", taskId);
+    }
+
+    /**
+     * Cancel a running scheduled task.
+     */
+    public void cancelTask(String taskId) {
+        ScheduledFuture<?> future = scheduledTasks.get(taskId);
+        if (future != null) {
+            future.cancel(false);  // false = don't interrupt if currently running
+            scheduledTasks.remove(taskId);
+            log.info("[DynamicTaskService] cancelled task: {}", taskId);
+        }
+    }
+
+    /**
+     * List all active scheduled tasks.
+     */
+    public Set<String> getActiveTaskIds() {
+        return scheduledTasks.keySet();
+    }
+}
+```
+
+## Monitoring: logging execution time, failure tracking
+
+Every scheduled task should log start, end, and elapsed time. This provides observability without external monitoring tools.
+
+```java
+@Component
+@Slf4j
+public class MonitoredTask {
+
+    @Scheduled(cron = "${app.task.sync-cron:0 0/10 * * * ?}")
+    public void syncData() {
+        long start = System.currentTimeMillis();
+        String taskName = "DataSync";
+        log.info("[{}] START", taskName);
+
+        try {
+            dataSyncService.sync();
+            long elapsed = System.currentTimeMillis() - start;
+            log.info("[{}] END — elapsed={}ms", taskName, elapsed);
+
+            // Alert if execution takes too long
+            if (elapsed > 30_000) {
+                log.warn("[{}] SLOW — elapsed={}ms exceeds threshold 30000ms",
+                    taskName, elapsed);
+            }
+        } catch (Exception e) {
+            long elapsed = System.currentTimeMillis() - start;
+            log.error("[{}] FAIL — elapsed={}ms, error={}",
+                taskName, elapsed, e.getMessage(), e);
+        }
+    }
+}
+```
+
+Pattern: `[TaskName] START`, `[TaskName] END — elapsed=Nms`, `[TaskName] FAIL — elapsed=Nms`.
+
+For production monitoring, also consider:
+- Micrometer metrics: record `timer.record(elapsed, TimeUnit.MILLISECONDS)` for each execution
+- Actuator custom health indicator: mark service DOWN if a critical scheduled task fails repeatedly
+- XXL-Job admin console: built-in execution log and alerting

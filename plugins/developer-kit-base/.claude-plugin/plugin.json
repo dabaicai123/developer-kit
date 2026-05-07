@@ -1,0 +1,23 @@
+{
+  "name": "developer-kit-base",
+  "version": "1.0.0",
+  "description": "Universal development toolkit with git workflow, documentation, and README generation — language-agnostic skills applicable to any project",
+  "author": {
+    "name": "Internal Team"
+  },
+  "homepage": "https://github.com/your-org/developer-kit",
+  "license": "MIT",
+  "keywords": [
+    "git",
+    "documentation",
+    "readme",
+    "conventional-commits",
+    "diataxis",
+    "developer-tools"
+  ],
+  "skills": [
+    "./skills/create-readme",
+    "./skills/documentation-writer",
+    "./skills/git-commit"
+  ]
+}

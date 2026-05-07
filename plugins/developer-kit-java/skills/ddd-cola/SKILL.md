@@ -2,6 +2,7 @@
 name: ddd-cola
 description: "COLA DDD architecture skill: project scaffolding, POM dependencies, COLA layer structure (adapter/app/domain/infrastructure), dependency direction, gateway pattern, naming conventions. Use when creating a Spring Boot project, setting up COLA/DDD architecture, or structuring layered applications."
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -185,12 +186,19 @@ public class OrderGatewayImpl implements OrderGateway {
 
 ## Best Practices
 
-- Domain logic belongs exclusively in the Domain layer; Application only orchestrates and manages transaction boundaries
+- Domain logic belongs exclusively in the Domain layer; Application only orchestrates and manages transaction boundaries → full transaction patterns see `spring-boot-transaction-management`
 - Define ports (interfaces) in Domain or Application; Infrastructure implements them
 - Avoid business logic in Adapter layer; DTO/domain conversion at boundary
 - Follow COLA naming: `Cmd` for commands, `Executor` for handlers, `Gateway` for ports
-- Use `@Transactional(readOnly = true)` for query executors
+- Use `@Transactional(readOnly = true)` for query executors → see `spring-boot-transaction-management` for detailed patterns
 - Use `LambdaQueryWrapper` in Infrastructure persistence, never raw `QueryWrapper`
+
+## Related Skills
+
+- `ddd-event-driven` — domain event design, event stores, aggregate boundaries
+- `spring-boot-transaction-management` — @Transactional patterns for executor and service layer
+- `mybatis-plus-patterns` — MyBatis-Plus persistence patterns for Infrastructure layer
+- `spring-boot-dependency-injection` — constructor injection, Bean lifecycle for COLA layers
 
 ## Keywords
 

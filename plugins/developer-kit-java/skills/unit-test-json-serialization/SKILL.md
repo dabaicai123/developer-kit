@@ -2,6 +2,7 @@
 name: unit-test-json-serialization
 description: Provides patterns for unit testing JSON serialization/deserialization with Jackson and `@JsonTest`. Validates JSON mapping, custom serializers, date formats, and polymorphic types. Use when testing JSON serialization, validating custom serializers, or writing JSON unit tests in Spring Boot applications.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -286,3 +287,7 @@ When a JSON test fails, follow this workflow:
 - [Spring `@JsonTest` Documentation](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/test/autoconfigure/json/JsonTest.html)
 - [Jackson ObjectMapper](https://fasterxml.github.io/jackson-databind/javadoc/2.15/com/fasterxml/jackson/databind/ObjectMapper.html)
 - [Jackson Annotations](https://fasterxml.github.io/jackson-annotations/javadoc/2.15/)
+
+## Related Skills
+
+- `spring-boot-openapi-documentation` — OpenAPI schema generation from Jackson-annotated DTOs

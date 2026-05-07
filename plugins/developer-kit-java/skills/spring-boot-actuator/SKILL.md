@@ -2,6 +2,7 @@
 name: spring-boot-actuator
 description: Provides patterns to configure Spring Boot Actuator for production-grade monitoring, health probes, secured management endpoints, and Micrometer metrics across JVM services. Use when setting up monitoring, health checks, or metrics for Spring Boot applications.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -121,3 +122,9 @@ public class ExternalServiceHealth implements HealthIndicator {
 - Keep `/health` publicly accessible for load balancer checks only
 - Add `application` and `environment` tags via `MeterRegistryCustomizer` for metric correlation
 - Health indicators must be fast (< 250ms) — never block on slow operations
+
+## Related Skills
+
+- `spring-boot-logging` — structured JSON logging, MDC correlation for observability
+- `spring-boot-resilience4j` — circuit breaker, retry, rate limiter health indicators
+- `spring-boot-security-jwt` — securing management endpoints with JWT

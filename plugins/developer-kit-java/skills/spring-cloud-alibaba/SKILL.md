@@ -2,10 +2,11 @@
 name: spring-cloud-alibaba
 description: "Provides comprehensive guidance for Spring Cloud Alibaba including Nacos, Sentinel, RocketMQ, and Alibaba Cloud integration. Use when the user asks about Spring Cloud Alibaba, needs to use Alibaba Cloud services, implement service discovery with Nacos, or work with Spring Cloud Alibaba components."
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# Spring Cloud Alibaba 开发指南
+# Spring Cloud Alibaba Development Guide
 
 ## When to use this skill
 
@@ -13,27 +14,27 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 - Implementing service discovery, configuration management, or flow control in microservices
 - Choosing between OpenFeign and Dubbo for inter-service communication
 
-## 概述
+## Overview
 
-Spring Cloud Alibaba 是阿里巴巴提供的微服务解决方案，提供了 Nacos（服务注册与配置）、Sentinel（流量控制）、RocketMQ（消息队列）等组件。微服务间调用推荐使用 OpenFeign（声明式 HTTP 客户端），而非 Dubbo RPC。分布式事务请慎重评估 Seata，业务侵入重，优先考虑本地事务 + 事件驱动最终一致性。
+Spring Cloud Alibaba is a microservice solution provided by Alibaba, offering components such as Nacos (service registration and configuration), Sentinel (flow control), and RocketMQ (message queue). For inter-service communication, OpenFeign (declarative HTTP client) is recommended over Dubbo RPC. For distributed transactions, evaluate Seata carefully — it imposes heavy business intrusion. Prefer local transactions combined with event-driven eventual consistency instead.
 
-## 核心组件
+## Core Components
 
-### 1. Nacos（服务注册与配置中心）
+### 1. Nacos (Service Registration and Configuration Center)
 
-**Nacos Server 安装**：
+**Nacos Server Installation**:
 
 ```bash
-# 下载 Nacos
+# Download Nacos
 wget https://github.com/alibaba/nacos/releases/download/3.1.1/nacos-server-3.1.1.tar.gz
 
-# 解压并启动
+# Extract and start
 tar -xzf nacos-server-3.1.1.tar.gz
 cd nacos/bin
 sh startup.sh -m standalone
 ```
 
-**服务注册**：
+**Service Registration**:
 
 ```java
 @SpringBootApplication
@@ -45,7 +46,7 @@ public class UserServiceApplication {
 }
 ```
 
-**application.yml**：
+**application.yml**:
 
 ```yaml
 spring:
@@ -59,7 +60,7 @@ spring:
         group: DEFAULT_GROUP
 ```
 
-**配置管理**：
+**Configuration Management**:
 
 ```yaml
 spring:
@@ -76,7 +77,7 @@ spring:
             refresh: true
 ```
 
-**动态配置刷新**：
+**Dynamic Configuration Refresh**:
 
 ```java
 @RestController
@@ -92,9 +93,9 @@ public class ConfigController {
 }
 ```
 
-### 2. Sentinel（流量控制）
+### 2. Sentinel (Flow Control)
 
-**依赖**：
+**Dependency**:
 
 ```xml
 <dependency>
@@ -103,7 +104,7 @@ public class ConfigController {
 </dependency>
 ```
 
-**配置**：
+**Configuration**:
 
 ```yaml
 spring:
@@ -121,7 +122,7 @@ spring:
             rule-type: flow
 ```
 
-**流量控制**：
+**Flow Control**:
 
 ```java
 @Service
@@ -133,12 +134,12 @@ public class UserService {
     }
     
     public User getUserBlockHandler(Long id, BlockException ex) {
-        return new User(); // 降级处理
+        return new User(); // Degraded fallback response
     }
 }
 ```
 
-**熔断降级**：
+**Circuit Breaker and Degradation**:
 
 ```java
 @SentinelResource(
@@ -147,18 +148,18 @@ public class UserService {
     blockHandler = "getUserBlockHandler"
 )
 public User getUser(Long id) {
-    // 业务逻辑
+    // Business logic
 }
 
 public User getUserFallback(Long id, Throwable ex) {
-    // 降级处理
+    // Degraded fallback handling
     return new User();
 }
 ```
 
-### 3. RocketMQ（消息队列）
+### 3. RocketMQ (Message Queue)
 
-**依赖**：
+**Dependency**:
 
 ```xml
 <dependency>
@@ -167,7 +168,7 @@ public User getUserFallback(Long id, Throwable ex) {
 </dependency>
 ```
 
-**配置**：
+**Configuration**:
 
 ```yaml
 spring:
@@ -182,7 +183,7 @@ spring:
               group: user-service-group
 ```
 
-**消息发送**：
+**Message Sending**:
 
 ```java
 @Service
@@ -199,7 +200,7 @@ public class UserService {
 }
 ```
 
-**消息接收**：
+**Message Receiving**:
 
 ```java
 @Component
@@ -210,101 +211,30 @@ public class UserService {
 public class UserEventListener implements RocketMQListener<User> {
     @Override
     public void onMessage(User user) {
-        // 处理消息
+        // Process message
         System.out.println("Received user: " + user.getName());
     }
 }
 ```
 
-### 4. Seata（分布式事务）— 慎重使用
+### 4. Seata (Distributed Transactions) — Use with Caution
 
-> **注意**：Seata 业务侵入重（需要代理数据源、undo_log 表、全局事务锁），优先考虑 **本地事务 + RocketMQ 事件驱动最终一致性** 方案。仅在强一致性刚需场景下使用 Seata AT 模式。
+> **Note**: Seata imposes heavy business intrusion (requires proxied data sources, undo_log tables, and global transaction locks). Prefer **local transactions + RocketMQ event-driven eventual consistency** as the primary approach. Use Seata AT mode only when strong consistency is strictly required. For a full comparison of distributed transaction patterns (Saga orchestration/choreography vs 2PC vs Outbox), compensating transaction patterns, and detailed Seata configuration, see `spring-boot-transaction-management` -> `references/distributed-transaction-patterns.md`.
 
-**依赖**：
+**Dependency** (only include when strong-consistency distributed transactions are confirmed necessary):
 
 ```xml
-<!-- 仅在确认需要强一致性分布式事务时引入 -->
 <dependency>
     <groupId>com.alibaba.cloud</groupId>
     <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
 </dependency>
 ```
 
-**配置**：
+### 5. OpenFeign (Declarative HTTP Client) — Recommended over Dubbo
 
-```yaml
-spring:
-  cloud:
-    alibaba:
-      seata:
-        tx-service-group: my-tx-group
-        enabled: true
+> **OpenFeign is recommended** as the inter-service communication solution over Dubbo RPC. OpenFeign is based on HTTP, integrates seamlessly with the Spring Cloud ecosystem, and requires no additional protocol or port management.
 
-seata:
-  enabled: true
-  application-id: ${spring.application.name}
-  tx-service-group: my-tx-group
-  config:
-    type: nacos
-    nacos:
-      server-addr: localhost:8848
-      namespace: ""
-      group: SEATA_GROUP
-  registry:
-    type: nacos
-    nacos:
-      server-addr: localhost:8848
-      namespace: ""
-      group: SEATA_GROUP
-```
-
-**使用 @GlobalTransactional**：
-
-```java
-@Service
-public class OrderService {
-    @GlobalTransactional
-    public void createOrder(Order order) {
-        // 1. 创建订单
-        orderRepository.save(order);
-        
-        // 2. 扣减库存
-        productService.reduceStock(order.getProductId(), order.getQuantity());
-        
-        // 3. 扣减余额
-        accountService.deductBalance(order.getUserId(), order.getAmount());
-    }
-}
-```
-
-**推荐替代方案：事件驱动最终一致性**：
-
-```java
-@Service
-public class OrderService {
-    @Transactional  // 本地事务保证订单+事件同库写入
-    public void createOrder(Order order) {
-        orderRepository.save(order);
-        rocketMQTemplate.convertAndSend("order-created-topic", new OrderCreatedEvent(order));
-    }
-}
-
-// 各服务监听事件，本地事务处理
-@Component
-@RocketMQMessageListener(topic = "order-created-topic", consumerGroup = "stock-consumer-group")
-public class StockEventHandler implements RocketMQListener<OrderCreatedEvent> {
-    @Transactional
-    public void onMessage(OrderCreatedEvent event) {
-        stockRepository.reduceStock(event.getProductId(), event.getQuantity());
-    }
-}
-```
-
-### 5. OpenFeign（声明式 HTTP 客户端）— 推荐替代 Dubbo
-
-> **推荐使用 OpenFeign** 作为微服务间调用方案，而非 Dubbo RPC。OpenFeign 基于 HTTP，与 Spring Cloud 生态无缝集成，无需额外协议和端口管理。
-
-**依赖**：
+**Dependency**:
 
 ```xml
 <dependency>
@@ -312,14 +242,14 @@ public class StockEventHandler implements RocketMQListener<OrderCreatedEvent> {
     <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 
-<!-- 如需负载均衡 -->
+<!-- For load balancing -->
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-loadbalancer</artifactId>
 </dependency>
 ```
 
-**配置**：
+**Configuration**:
 
 ```yaml
 spring:
@@ -331,10 +261,10 @@ spring:
             connectTimeout: 5000
             readTimeout: 10000
           user-service:
-            url: http://user-service  # Nacos 服务名自动解析
+            url: http://user-service  # Nacos service name resolves automatically
 ```
 
-**服务消费者**：
+**Service Consumer**:
 
 ```java
 @FeignClient(name = "user-service", path = "/api/v1/users")
@@ -349,35 +279,35 @@ public class OrderService {
     
     public Order createOrder(Long userId, Order order) {
         UserVO user = userServiceClient.getUser(userId).getData();
-        // 创建订单逻辑
+        // Order creation logic
         return order;
     }
 }
 ```
 
-### 6. Dubbo（RPC 框架）— 不推荐
+### 6. Dubbo (RPC Framework) — Not Recommended
 
-> **不推荐使用 Dubbo** 作为微服务间调用方案。Dubbo 需要额外暴露 RPC 端口、管理二进制协议，与 Spring Cloud REST 生态不兼容。OpenFeign 更轻量、与 Nacos + Sentinel 集成更好。
+> **Dubbo is not recommended** as the inter-service communication solution. Dubbo requires exposing additional RPC ports and managing binary protocols, which are incompatible with the Spring Cloud REST ecosystem. OpenFeign is lighter and integrates better with Nacos and Sentinel.
 
-## 微服务架构示例
+## Microservice Architecture Example
 
-### 项目结构
+### Project Structure
 
 ```
 microservices/
-├── nacos-server/           # Nacos 服务
-├── gateway/                # API 网关
-├── user-service/           # 用户服务
-├── order-service/          # 订单服务
-└── product-service/        # 商品服务
+├── nacos-server/           # Nacos service
+├── gateway/                # API gateway
+├── user-service/           # User service
+├── order-service/          # Order service
+└── product-service/        # Product service
 ```
 
-### 配置示例
+### Configuration Example
 
-**统一配置管理**：
+**Unified Configuration Management**:
 
 ```yaml
-# Nacos 配置中心
+# Nacos configuration center
 spring:
   cloud:
     nacos:
@@ -395,33 +325,32 @@ spring:
             refresh: true
 ```
 
-## 最佳实践
+## Best Practices
 
-### 1. 服务注册
+### 1. Service Registration
 
-- 使用 Nacos 作为服务注册中心
-- 配置合适的命名空间和分组
-- 设置健康检查
+- Use Nacos as the service registration center
+- Configure appropriate namespaces and groups
+- Set up health checks
 
-### 2. 配置管理
+### 2. Configuration Management
 
-- 使用 Nacos 配置中心统一管理
-- 区分环境配置（dev、test、prod）
-- 支持动态刷新
+- Use Nacos configuration center for unified management
+- Separate environment configurations (dev, test, prod)
+- Support dynamic refresh
 
-### 3. 流量控制
+### 3. Flow Control
 
-- 使用 Sentinel 进行流量控制
-- 配置限流、熔断、降级规则
-- 监控服务调用情况
+- Use Sentinel for flow control
+- Configure rate limiting, circuit breaker, and degradation rules
+- Monitor service invocation metrics
 
-### 4. 分布式事务
+### 4. Distributed Transactions
 
-- **优先方案**：本地事务 + RocketMQ 事件驱动最终一致性
-- **慎重使用** Seata AT 模式 — 业务侵入重，仅强一致性刚需场景
-- 避免长事务
+- **Preferred approach**: Local transactions + RocketMQ event-driven eventual consistency — see `spring-boot-transaction-management`
+- **Use with caution**: Seata AT mode — heavy business intrusion, only for strong-consistency requirements — see `spring-boot-transaction-management` -> `references/distributed-transaction-patterns.md`
 
-## 常用依赖
+## Common Dependencies
 
 ```xml
 <!-- BOM (Spring Boot 3.5.x) -->
@@ -461,18 +390,40 @@ spring:
     <artifactId>spring-cloud-starter-alibaba-rocketmq</artifactId>
 </dependency>
 
-<!-- OpenFeign（推荐替代 Dubbo） -->
+<!-- OpenFeign (recommended over Dubbo) -->
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 ```
 
-## 示例 Prompt
+## Example Prompts
 
-- "如何使用 Spring Cloud Alibaba 构建微服务架构？"
-- "Nacos 如何配置服务注册和配置管理？"
-- "如何在 Spring Cloud Alibaba 中使用 Sentinel 进行流量控制？"
-- "Spring Cloud Alibaba 中分布式事务如何处理？优先最终一致性方案"
-- "如何配置 RocketMQ 消息队列？"
-- "微服务间调用推荐 OpenFeign 还是 Dubbo？"
+- "How to build a microservice architecture with Spring Cloud Alibaba?"
+- "How to configure service registration and configuration management with Nacos?"
+- "How to use Sentinel for flow control in Spring Cloud Alibaba?"
+- "How to handle distributed transactions in Spring Cloud Alibaba? Prefer eventual consistency approach"
+- "How to configure RocketMQ message queue?"
+- "Is OpenFeign or Dubbo recommended for inter-service communication?"
+
+## Constraints / Warnings
+
+- **Seata**: Avoid unless strong consistency is strictly required. Heavy business intrusion (proxied data sources, undo_log tables, global transaction locks). Prefer local transactions + event-driven eventual consistency.
+- **Dubbo**: Not recommended for inter-service calls. Requires additional RPC ports and binary protocol management, incompatible with Spring Cloud REST ecosystem. Use OpenFeign instead.
+- **Nacos namespace**: Always configure separate namespaces for different environments (dev, test, prod) to prevent configuration conflicts.
+- **Sentinel rules**: Store flow rules in Nacos for persistence; otherwise, rules are lost on application restart.
+- **RocketMQ**: Ensure the name-server is accessible and the producer/consumer group names are unique across services.
+- **Version alignment**: The Spring Cloud Alibaba BOM version must align with the Spring Boot and Spring Cloud versions. Check the official version mapping table before upgrading.
+
+## Keywords
+
+`spring-cloud-alibaba`, `nacos`, `sentinel`, `rocketmq`, `seata`, `openfeign`, `dubbo`, `service-discovery`, `configuration-management`, `flow-control`, `circuit-breaker`, `rate-limiting`, `distributed-transaction`, `event-driven`, `eventual-consistency`, `microservices`
+
+## Related Skills
+
+- [spring-boot-event-driven-patterns](../spring-boot-event-driven-patterns/SKILL.md) — Event-driven patterns for eventual consistency and async processing
+- [spring-cloud-gateway](../spring-cloud-gateway/SKILL.md) — API gateway routing and filtering
+- [spring-cloud-openfeign](../spring-cloud-openfeign/SKILL.md) — Declarative HTTP client configuration and best practices
+- [spring-boot-resilience4j](../spring-boot-resilience4j/SKILL.md) — Circuit breaker and resilience patterns (alternative to Sentinel)
+- [spring-boot-actuator](../spring-boot-actuator/SKILL.md) — Monitoring, health checks, and observability
+- [ddd-cola](../ddd-cola/SKILL.md) — DDD architecture and COLA framework for microservice design

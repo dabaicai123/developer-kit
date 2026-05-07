@@ -12,7 +12,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 - SpringDoc OpenAPI 2.8.6
 - JUnit 5 + Mockito + MockMvc + Testcontainers + JaCoCo
 
-## Skills (46)
+## Skills (47)
 
 ### Project Setup
 | Skill | Description |
@@ -25,7 +25,8 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | `mybatis-plus-patterns` | MyBatis-Plus mapper/entity/service patterns |
 | `mybatis-plus-generator` | Code generation from database tables |
 | `postgresql-table-design` | PostgreSQL schema design |
-| `jetcache` | JetCache + Redisson caching & distributed services |
+| `spring-boot-database-migration` | Flyway-based database migration |
+| `spring-boot-jetcache` | JetCache + Redisson caching & distributed services |
 
 ### Core Spring Boot
 | Skill | Description |
@@ -36,19 +37,17 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | `spring-boot-logging` | Logging configuration and patterns |
 | `spring-boot-rest-api-standards` | REST API design standards |
 | `spring-boot-validation` | Input validation patterns |
+| `spring-boot-transaction-management` | Transaction management, propagation, rollback rules, Saga/Outbox patterns |
+| `spring-boot-configuration-management` | @ConfigurationProperties, Nacos Config Center, profiles |
+| `spring-boot-async-processing` | @Async, CompletableFuture, ThreadPoolTaskExecutor |
+| `spring-boot-scheduled-tasks` | @Scheduled, XXL-Job distributed scheduling |
+| `spring-boot-file-handling` | File upload/download, MinIO/OSS, EasyExcel |
 
 ### Security
 | Skill | Description |
 |-------|-------------|
 | `spring-boot-security` | Spring Security configuration |
 | `spring-boot-security-jwt` | JWT authentication with JJWT |
-
-### Documentation & API
-| Skill | Description |
-|-------|-------------|
-| `spring-boot-openapi-documentation` | SpringDoc OpenAPI integration |
-| `create-readme` | README generation |
-| `documentation-writer` | Documentation writing patterns |
 
 ### Microservices & Cloud
 | Skill | Description |
@@ -91,18 +90,15 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | `ddd-cola` | COLA DDD architecture + project scaffolding + POM dependencies |
 | `ddd-event-driven` | Event-driven DDD patterns |
 
-### DevOps & Workflow
+### DevOps
 | Skill | Description |
 |-------|-------------|
-| `git-commit` | Git commit conventions |
 | `docker-expert` | Docker patterns |
 
 ### Project Management
 | Skill | Description |
 |-------|-------------|
 | `architecture-decision-records` | ADR drafting |
-| `code-refactoring-refactor-clean` | Code refactoring and cleanup |
-| `ab-test-setup` | A/B testing setup |
 
 ## Agents (6)
 
@@ -131,7 +127,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | `/devkit.java.write-integration-tests` | Write integration tests |
 | `/devkit.java.generate-refactoring-tasks` | Generate refactoring tasks |
 
-## Rules (5)
+## Rules (6)
 
 | Rule | Applies to |
 |------|------------|
@@ -140,6 +136,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | `language-best-practices` | `**/*.java` |
 | `error-handling` | `**/*.java` |
 | `mybatis-plus-conventions` | `**/*Mapper.java`, `**/*Service.java`, `**/*ServiceImpl.java` |
+| `transaction-conventions` | `**/*Service.java`, `**/*ServiceImpl.java` |
 
 ## Installation
 

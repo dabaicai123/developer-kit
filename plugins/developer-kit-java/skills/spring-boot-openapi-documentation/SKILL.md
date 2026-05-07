@@ -2,6 +2,7 @@
 name: spring-boot-openapi-documentation
 description: Provides patterns to generate comprehensive REST API documentation using SpringDoc OpenAPI 3.0 and Swagger UI in Spring Boot 3.x applications. Use when setting up API documentation, configuring Swagger UI, adding OpenAPI annotations, implementing security documentation, or enhancing REST endpoints with examples and schemas.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -253,10 +254,9 @@ public OpenAPI customOpenAPI() {
 
 ## Related Skills
 
-- `spring-boot-rest-api-standards` — REST API design standards
-- `spring-boot-dependency-injection` — Dependency injection patterns
-- `unit-test-controller-layer` — Testing REST controllers
-- `spring-boot-actuator` — Production monitoring and management
+- `spring-boot-rest-api-standards` — REST API design standards, URL conventions, Result<T>
+- `spring-boot-validation` — @Valid, @NotBlank, MethodArgumentNotValidException
+- `spring-boot-security-jwt` — JWT security scheme configuration in OpenAPI docs
 
 ## External Resources
 

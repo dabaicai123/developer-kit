@@ -1,0 +1,246 @@
+---
+name: spring-boot-database-migration
+description: "Flyway-based database migration for Spring Boot with PostgreSQL — versioning, naming conventions, rollback strategies, and data migration patterns"
+version: "1.0.0"
+type: skill
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+---
+
+# Spring Boot Database Migration
+
+Flyway-based schema evolution for Spring Boot with PostgreSQL — versioning, naming, rollback strategies, and data migration patterns.
+
+## When to use this skill
+
+- Setting up Flyway database migration in a Spring Boot project
+- Writing new versioned SQL migrations (schema or data changes)
+- Handling migration failures, checksum mismatches, or baseline for existing databases
+- Planning rollback strategies for applied migrations
+- Designing safe data seeding and reference data migrations
+
+## Project Setup — Flyway dependency and Spring Boot auto-configuration
+
+Add Flyway dependencies to `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.flywaydb</groupId>
+    <artifactId>flyway-core</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.flywaydb</groupId>
+    <artifactId>flyway-database-postgresql</artifactId>
+</dependency>
+```
+
+Spring Boot auto-configures Flyway on startup. Migrations are picked up from `src/main/resources/db/migration/` by default. Flyway runs automatically before the application fully starts, applying any pending migrations.
+
+## Instructions — migration lifecycle workflow
+
+### Creating a new migration
+
+1. Determine the next version number. Check existing migrations in `src/main/resources/db/migration/`.
+2. Create a new file following the naming convention: `V{version}__description.sql` (double underscore between version and description).
+3. Write the SQL targeting PostgreSQL. Use `IF NOT EXISTS` / `IF EXISTS` guards for safety.
+4. Test the migration locally by running the application (Flyway applies it on startup).
+
+### Running migrations (Flyway auto-runs on startup)
+
+Spring Boot runs Flyway automatically during application startup. Pending migrations (those with a version higher than the last applied version) are discovered and executed in order. The `flyway_schema_history` table tracks applied migrations with their version, description, checksum, and execution time.
+
+To run manually or in a CI pipeline:
+
+```bash
+# Using Maven plugin
+mvn flyway:migrate
+
+# Using Flyway CLI
+flyway migrate
+```
+
+### Handling migration failures
+
+If a migration fails mid-execution, Flyway marks it as failed in `flyway_schema_history`. The application will not start until the issue is resolved:
+
+1. Fix the SQL in the migration file (if it has not been applied yet).
+2. If the migration partially applied, manually clean up the database to match the intended state, then run `flyway repair` to reset the failed migration record:
+   ```bash
+   mvn flyway:repair
+   ```
+3. Restart the application — Flyway will re-attempt the corrected migration.
+
+**Important**: `flyway repair` only fixes the `flyway_schema_history` table metadata (checksums, failed flags). It does NOT rollback or undo any partial DDL changes already committed to the database.
+
+### Baseline for existing databases
+
+When introducing Flyway to a database that already has tables, use baseline to mark the current state as the starting point:
+
+- Set `spring.flyway.baseline-on-migrate=true` in configuration.
+- Flyway will create the `flyway_schema_history` table and insert a baseline record at the configured `baseline-version` (default: 1).
+- Migrations with versions above the baseline version are then applied normally.
+- Name your initial schema migration at the baseline version (e.g., `V1__init_schema.sql`) — Flyway will skip it since the baseline already accounts for it.
+
+## Examples
+
+### Example 1: Flyway dependency in pom.xml
+
+```xml
+<dependencies>
+    <!-- Flyway core engine -->
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+    </dependency>
+    <!-- PostgreSQL dialect support (required since Flyway 10) -->
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
+    <!-- Spring Boot auto-configuration for Flyway -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+</dependencies>
+```
+
+### Example 2: Baseline migration V1__init_schema.sql
+
+Initial schema with core business entities:
+
+```sql
+-- V1__init_schema.sql
+-- Initial baseline schema for the application
+
+CREATE TABLE IF NOT EXISTS users (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username    TEXT    NOT NULL UNIQUE,
+    email       TEXT    NOT NULL UNIQUE,
+    password    TEXT    NOT NULL,
+    status      TEXT    NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'SUSPENDED', 'DELETED')),
+    create_time TIMESTAMPTZ NOT NULL DEFAULT now(),
+    update_time TIMESTAMPTZ NOT NULL DEFAULT now(),
+    create_by   BIGINT  NOT NULL,
+    update_by   BIGINT  NOT NULL,
+    deleted_at  TIMESTAMPTZ,
+    version     INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS roles (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name        TEXT    NOT NULL UNIQUE,
+    description TEXT,
+    create_time TIMESTAMPTZ NOT NULL DEFAULT now(),
+    update_time TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS user_role (
+    user_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role_id     BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email       ON users (email);
+CREATE INDEX IF NOT EXISTS idx_users_deleted_at  ON users (deleted_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_users_status      ON users (status);
+```
+
+### Example 3: Incremental migration V2__add_user_status_column.sql
+
+Add a new column to track user login status:
+
+```sql
+-- V2__add_user_status_column.sql
+-- Add last_login_time column and login_count for user activity tracking
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_time TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS login_count     INTEGER NOT NULL DEFAULT 0;
+
+-- Add index for querying recently active users
+CREATE INDEX IF NOT EXISTS idx_users_last_login_time ON users (last_login_time DESC);
+```
+
+### Example 4: Data migration V3__seed_default_roles.sql
+
+Seed reference data with safety checks:
+
+```sql
+-- V3__seed_default_roles.sql
+-- Insert default system roles if they do not already exist
+
+INSERT INTO roles (name, description)
+VALUES ('ADMIN', 'System administrator with full access')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO roles (name, description)
+VALUES ('USER', 'Standard application user')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO roles (name, description)
+VALUES ('GUEST', 'Read-only guest access')
+ON CONFLICT (name) DO NOTHING;
+```
+
+### Example 5: Application.yml Flyway configuration
+
+```yaml
+spring:
+  flyway:
+    # Enable Flyway (default: true)
+    enabled: true
+    # Baseline an existing database — essential for databases created before Flyway was introduced
+    baseline-on-migrate: true
+    # Baseline version — Flyway skips all migrations <= this version
+    baseline-version: 1
+    # Allow out-of-order migrations (use with caution in production)
+    out-of-order: false
+    # Validate migration checksums before running (default: true)
+    validate-on-migrate: true
+    # Location of SQL migration files
+    locations: classpath:db/migration
+    # Table name for Flyway history tracking
+    table: flyway_schema_history
+    # Encoding of migration files
+    encoding: UTF-8
+    # Clean schema before migrate — NEVER use in production
+    clean-disabled: true
+```
+
+## Best Practices
+
+- Always use `V{version}__description.sql` naming (double underscore) — single underscore creates a different migration type
+- Never modify a migration that has already been applied — create a new migration instead; modifying an applied migration causes checksum validation failure
+- Use `baseline-on-migrate=true` for databases that already exist before Flyway was introduced
+- Keep migrations small and focused — one logical change per migration (e.g., one table, one column addition, one data seed)
+- Test migrations on a copy of production data before deploying to production
+- Add `IF NOT EXISTS` / `IF EXISTS` guards for safety — prevents errors if migrations are re-run or if the schema state is uncertain
+- Never put irreversible operations (`DROP TABLE`, `DROP COLUMN`) in migrations without a documented rollback plan
+- Use `ON CONFLICT DO NOTHING` for data seeding — prevents duplicate data errors
+- Put schema changes and data changes in separate migrations — schema migrations (DDL) should not depend on data migrations (DML)
+- Use `CREATE INDEX CONCURRENTLY` for large tables — avoids locking the table during index creation (cannot run inside a transaction, which Flyway wraps by default; set `flyway.execute-in-transaction=false` if needed)
+
+## Constraints and Warnings
+
+- Flyway Community edition does NOT auto-generate rollback scripts — plan rollback migrations manually
+- Out-of-order migrations (`allowOutOfOrder`) should be avoided in production — they indicate uncoordinated team practices and can cause unexpected schema states
+- Large data migrations should be done outside Flyway — use batch scripts or application-level migrations for bulk data changes (thousands of rows) to avoid startup delays
+- Never use Flyway migrations for schema changes that require application downtime — coordinate schema changes with deployment strategy
+- Migration checksum validation fails if you modify an applied migration — use `flyway repair` only to reset checksums after intentional changes, not to bypass validation
+- `CREATE INDEX CONCURRENTLY` cannot run inside a transaction — Flyway wraps migrations in transactions by default; disable with `spring.flyway.execute-in-transaction=false` or use a separate migration script outside Flyway
+- Flyway runs before the application beans are fully initialized — do not rely on application-layer logic (services, repositories) in SQL migrations
+
+## References
+
+- [flyway-migration-naming-conventions](references/flyway-migration-naming-conventions.md) — naming rules, version strategies, repeatable and undo migrations
+- [flyway-rollback-strategies](references/flyway-rollback-strategies.md) — rollback patterns, repair command, baseline recovery
+- [postgresql-migration-examples](references/postgresql-migration-examples.md) — complete runnable migration scripts for PostgreSQL
+
+## Related Skills
+
+- `postgresql-table-design` — PostgreSQL schema design, data types, indexing, and constraints
+- `mybatis-plus-patterns` — MyBatis-Plus ORM patterns for querying migrated tables
+- `spring-boot-actuator` — Flyway health indicator and migration status via Actuator
+
+## Keywords
+
+flyway, migration, baseline, schema evolution, V-numbering, rollback

@@ -2,6 +2,7 @@
 name: unit-test-scheduled-async
 description: Provides patterns for unit testing Spring `@Scheduled` and `@Async` methods using JUnit 5, CompletableFuture, Awaitility, and Mockito. Covers mocking task execution and timing, verifying execution counts, testing cron expressions, validating retry behavior, and simulating thread pool behavior. Use when testing background tasks, cron jobs, periodic execution, scheduled tasks, or thread pool behavior.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -58,13 +59,16 @@ void shouldReturnCompletedFuture() throws Exception {
 // @Scheduled: call directly, mock the repository
 @Component
 class DataRefreshTask {
-  @InjectMocks private DataRepository dataRepository;
+  private final DataRepository dataRepository;
+  public DataRefreshTask(DataRepository dataRepository) { this.dataRepository = dataRepository; }
   @Scheduled(fixedDelay = 60000) public void refreshCache() { /* ... */ }
 }
 @Test
 void shouldRefreshCache() {
+  DataRepository dataRepository = mock(DataRepository.class);
   when(dataRepository.findAll()).thenReturn(List.of(new Data(1L, "item1")));
-  dataRefreshTask.refreshCache();
+  DataRefreshTask task = new DataRefreshTask(dataRepository);
+  task.refreshCache();
   verify(dataRepository).findAll();
 }
 
@@ -121,5 +125,10 @@ Full Maven/Gradle dependencies, additional test classes, and execution count pat
 - [Spring `@Async` Documentation](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Async.html)
 - [Spring `@Scheduled` Documentation](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html)
 - [Awaitility Testing Library](https://github.com/awaitility/awaitility)
-- [CompletableFuture API](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html)
+- [CompletableFuture API](https://docs.oracle.com/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html)
 - Code examples: `references/examples.md`
+
+## Related Skills
+
+- `spring-boot-async-processing` — @Async patterns, CompletableFuture, TaskExecutor
+- `spring-boot-scheduled-tasks` — @Scheduled patterns, XXL-Job, distributed scheduling

@@ -2,6 +2,7 @@
 name: unit-test-wiremock-rest-api
 description: Provides patterns for unit testing external REST APIs using WireMock. Stubs API responses, verifies request details, simulates failures (timeouts, 4xx/5xx errors), and validates HTTP client behavior without real network calls. Use when testing service integrations with external APIs or mocking HTTP endpoints.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -113,3 +114,7 @@ See `references/advanced-examples.md` for error scenarios, body verification, ti
 - [WireMock Documentation](https://wiremock.org/)
 - [WireMock Stubbing Guide](https://wiremock.org/docs/stubbing/)
 - `references/advanced-examples.md` - Error scenarios, body verification, timeouts
+
+## Related Skills
+
+- `spring-cloud-openfeign` — Feign client testing patterns with WireMock

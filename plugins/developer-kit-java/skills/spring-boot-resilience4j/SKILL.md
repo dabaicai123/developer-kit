@@ -2,6 +2,7 @@
 name: spring-boot-resilience4j
 description: Provides fault tolerance patterns for Spring Boot 3.x using Resilience4j. Use when implementing circuit breakers, handling service failures, adding retry logic with exponential backoff, configuring rate limiters, or protecting services from cascading failures. Generates circuit breaker, retry, rate limiter, bulkhead, time limiter, and fallback implementations. Validates resilience configurations through Actuator endpoints.
 version: "1.0.0"
+type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -58,16 +59,15 @@ Apply `@CircuitBreaker` annotation to methods calling external services:
 ```java
 @Service
 public class PaymentService {
-    private final RestTemplate restTemplate;
+    private final PaymentClient paymentClient;
 
-    public PaymentService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public PaymentService(PaymentClient paymentClient) {
+        this.paymentClient = paymentClient;
     }
 
     @CircuitBreaker(name = "paymentService", fallbackMethod = "paymentFallback")
     public PaymentResponse processPayment(PaymentRequest request) {
-        return restTemplate.postForObject("http://payment-api/process",
-            request, PaymentResponse.class);
+        return paymentClient.processPayment(request);
     }
 
     private PaymentResponse paymentFallback(PaymentRequest request, Exception ex) {
@@ -105,17 +105,15 @@ Apply `@Retry` annotation for transient failure recovery:
 ```java
 @Service
 public class ProductService {
-    private final RestTemplate restTemplate;
+    private final ProductClient productClient;
 
-    public ProductService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public ProductService(ProductClient productClient) {
+        this.productClient = productClient;
     }
 
     @Retry(name = "productService", fallbackMethod = "getProductFallback")
     public Product getProduct(Long productId) {
-        return restTemplate.getForObject(
-            "http://product-api/products/" + productId,
-            Product.class);
+        return productClient.getProduct(productId);
     }
 
     private Product getProductFallback(Long productId, Exception ex) {
@@ -391,13 +389,13 @@ See references/testing-patterns.md for unit and integration testing strategies.
 ```java
 // BEFORE: No protection
 public PaymentResponse processPayment(PaymentRequest request) {
-    return restTemplate.postForObject("http://payment-api/process", request, PaymentResponse.class);
+    return paymentClient.processPayment(request);
 }
 
 // AFTER: Circuit breaker with fallback
 @CircuitBreaker(name = "paymentService", fallbackMethod = "paymentFallback")
 public PaymentResponse processPayment(PaymentRequest request) {
-    return restTemplate.postForObject("http://payment-api/process", request, PaymentResponse.class);
+    return paymentClient.processPayment(request);
 }
 private PaymentResponse paymentFallback(PaymentRequest request, Exception ex) {
     return PaymentResponse.builder().status("PENDING").message("Service temporarily unavailable").build();
@@ -434,4 +432,15 @@ private Result<Void> rateLimitFallback(Exception ex) {
 }
 ```
 
-**See also:** [Configuration Reference](references/configuration-reference.md) · [Testing Patterns](references/testing-patterns.md) · [Examples](references/examples.md) · [Resilience4j Docs](https://resilience4j.readme.io/) · [Actuator Skill](spring-boot-actuator)
+## Related Skills
+
+- `spring-cloud-openfeign` — Feign client resilience integration, retry and circuit breaker configuration
+- `spring-boot-actuator` — Resilience4j health indicators and metrics endpoints
+- `spring-boot-exception-handling` — CallNotPermittedException, RequestNotPermitted exception handling
+
+## References
+
+- [Configuration Reference](references/configuration-reference.md)
+- [Testing Patterns](references/testing-patterns.md)
+- [Examples](references/examples.md)
+- [Resilience4j Docs](https://resilience4j.readme.io/)

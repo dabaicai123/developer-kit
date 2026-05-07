@@ -16,9 +16,20 @@ skills:
   - spring-boot-validation
   - spring-boot-exception-handling
   - spring-boot-logging
+  - spring-boot-transaction-management
+  - spring-boot-database-migration
+  - spring-boot-configuration-management
+  - spring-boot-async-processing
+  - spring-boot-scheduled-tasks
+  - spring-boot-file-handling
   - ddd-cola
-  - jetcache
+  - spring-boot-jetcache
   - spring-cloud-alibaba
+  - spring-cloud-gateway
+  - spring-cloud-openfeign
+  - spring-kafka
+  - graalvm-native-image
+  - postgresql-table-design
 ---
 
 # Spring Boot Backend Development Expert
@@ -103,10 +114,16 @@ When implementing features, reference these skills for detailed patterns:
 | Code generation | `mybatis-plus-generator` |
 | REST API design | `spring-boot-rest-api-standards` |
 | Security | `spring-boot-security-jwt` |
-| Caching | `jetcache` |
+| Caching | `spring-boot-jetcache` |
 | Exception handling | `spring-boot-exception-handling` |
 | Validation | `spring-boot-validation` |
 | Documentation | `spring-boot-openapi-documentation` |
+| Transactions | `spring-boot-transaction-management` |
+| Database migration | `spring-boot-database-migration` |
+| Configuration | `spring-boot-configuration-management` |
+| Async processing | `spring-boot-async-processing` |
+| Scheduled tasks | `spring-boot-scheduled-tasks` |
+| File handling | `spring-boot-file-handling` |
 
 ---
 
