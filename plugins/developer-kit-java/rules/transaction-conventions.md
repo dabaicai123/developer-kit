@@ -1,0 +1,38 @@
+---
+paths:
+  - "**/*Service.java"
+  - "**/*ServiceImpl.java"
+---
+
+# Rule: Transaction Conventions
+
+Enforce consistent transaction management in the Spring Boot + MyBatis-Plus service layer.
+
+## Guidelines
+
+1. **Place `@Transactional` on ServiceImpl methods, not on the Service interface** — Spring AOP proxies intercept calls on the concrete class; interface-level annotations may be ignored depending on proxy mode.
+
+2. **Always specify `rollbackFor = Exception.class`** — default rollback only covers `RuntimeException` and `Error`. Checked exceptions (e.g., `IOException`) silently commit the transaction.
+
+3. **Use `@Transactional(readOnly = true)` on all query methods** — hints persistence layer to skip flush and dirty-checking, improving read performance.
+
+4. **Avoid self-invocation** — `this.internalMethod()` bypasses the proxy; `@Transactional` on same-class method calls is silently ignored. Extract internal transactional logic to a separate bean.
+
+5. **Keep transaction scope focused** — only wrap DB operations. External API calls, file I/O, and long computations should not be inside `@Transactional` — they hold connections unnecessarily and risk pool exhaustion.
+
+6. **Set explicit timeout on batch/long-running methods** — transactions without timeout can hold connections indefinitely. Use `@Transactional(timeout = 30)` for batch operations.
+
+7. **Use `TransactionTemplate` for programmatic control** — when transaction boundaries are conditional or need fine-grained control within a single method.
+
+## Anti-Patterns
+
+- `@Transactional` on Service interface
+- Missing `rollbackFor = Exception.class`
+- Missing `readOnly = true` on query methods
+- Self-invocation with `@Transactional`
+- Wrapping external API calls or file I/O inside `@Transactional`
+- Catching and swallowing exceptions inside `@Transactional`
+- Casual use of `Propagation.REQUIRES_NEW`
+- No timeout on batch operations
+
+For detailed examples and explanations, use the `spring-boot-transaction-management` skill.
