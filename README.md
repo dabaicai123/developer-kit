@@ -12,7 +12,7 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 - SpringDoc OpenAPI 2.8.6
 - JUnit 5 + Mockito + MockMvc + Testcontainers + JaCoCo
 
-## Skills (51)
+## Skills (48)
 
 ### Project Setup
 | Skill | Description |
@@ -96,13 +96,10 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 |-------|-------------|
 | `docker-expert` | Docker patterns |
 
-### Documentation & Workflow
+### Project Management
 | Skill | Description |
 |-------|-------------|
 | `architecture-decision-records` | ADR drafting |
-| `create-readme` | README generation |
-| `documentation-writer` | Diataxis documentation |
-| `git-commit` | Conventional commit workflow |
 
 ## Agents (6)
 
