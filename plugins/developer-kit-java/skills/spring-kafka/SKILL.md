@@ -1,6 +1,6 @@
 ---
 name: spring-kafka
-description: Spring Kafka integration patterns for Spring Boot 3.5.x covering producers, consumers, error handling, and serialization. Use when integrating Kafka for event streaming or message-driven architecture.
+description: Spring Kafka infrastructure for Spring Boot 3.5.x — producer/consumer configuration, serialization, error handling, retry, and Spring Cloud Stream. Use when configuring Kafka clients, setting up topic subscriptions, or handling Kafka-specific errors. For event-driven architecture patterns (domain events, outbox, choreography), use spring-boot-event-driven-patterns.
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -8,14 +8,15 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Kafka
 
-Kafka integration patterns for Spring Boot 3.5.x.
+Kafka client infrastructure for Spring Boot 3.5.x.
 
 ## When to use this skill
 
-- Producing or consuming Kafka messages
-- Implementing event-driven microservices with Kafka
-- Configuring Kafka error handling and retry strategies
-- Setting up Kafka with Spring Cloud Stream
+- Configuring Kafka producer/consumer properties and serialization
+- Handling Kafka-specific errors, retries, and dead letter topics
+- Setting up Spring Cloud Stream with Kafka binder
+
+> For event-driven architecture patterns (domain events, `@TransactionalEventListener`, outbox pattern), use `spring-boot-event-driven-patterns`. This skill focuses on Kafka infrastructure configuration.
 
 ## Dependencies
 

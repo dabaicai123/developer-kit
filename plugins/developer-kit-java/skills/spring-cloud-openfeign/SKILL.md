@@ -1,6 +1,6 @@
 ---
 name: spring-cloud-openfeign
-description: "Spring Cloud OpenFeign declarative HTTP client patterns for Spring Boot 3.5.x — Feign client configuration, timeout/retry, error decoder, Resilience4j fallback, request/response interceptors, compression, connection pool tuning (Apache HttpClient/OkHttp), pagination, file upload, multipart, anti-patterns, and error handling. Use when making service-to-service HTTP calls in microservices."
+description: "Spring Cloud OpenFeign declarative HTTP client for Spring Boot 3.5.x — Feign client definition, timeout/retry, error decoder, Resilience4j fallback, interceptors, and connection pool tuning. Use when making service-to-service HTTP calls in microservices."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

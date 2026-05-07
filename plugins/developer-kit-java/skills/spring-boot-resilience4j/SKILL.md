@@ -20,6 +20,8 @@ Provides Resilience4j patterns (circuit breaker, retry, rate limiter, bulkhead, 
 - Protecting services from overload and resource exhaustion
 - Combining multiple patterns for comprehensive resilience
 
+> **Resilience4j vs Sentinel**: Use Resilience4j for single-service or non-Alibaba-stack projects. Use Spring Cloud Alibaba Sentinel if your project already uses Nacos/Spring Cloud Alibaba — Sentinel integrates with Nacos dashboard and provides cluster-level flow control. Both provide circuit breaking and rate limiting; the choice depends on your microservice stack.
+
 ## Instructions
 
 ### 1. Setup and Dependencies

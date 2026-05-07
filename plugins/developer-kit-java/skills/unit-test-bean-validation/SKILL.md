@@ -21,6 +21,8 @@ This skill provides executable patterns for unit testing Jakarta Bean Validation
 - Testing conditional validation with validation groups
 - Fast validation tests without Spring Boot context
 
+> For implementing validation annotations in your code (choosing constraints, writing custom validators), use `spring-boot-validation`. This skill focuses on testing existing validation rules.
+
 ## Instructions
 
 1. **Add dependencies**: Include `jakarta.validation-api` and `hibernate-validator` in test scope

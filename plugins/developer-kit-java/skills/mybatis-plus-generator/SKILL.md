@@ -13,30 +13,21 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 This skill is for **batch code generation** from database tables. For manually writing or editing individual Mapper/Entity/Service modules, use `mybatis-plus-patterns` instead.
 
 **ALWAYS use this skill when the user mentions:**
-- MyBatis-Plus code generation (explicitly mentions "MyBatis-Plus" or "mybatis-plus")
+- MyBatis-Plus code generation
 - Generating MyBatis-Plus code from database tables
 - MyBatis-Plus generator or mybatis-plus-generator
 - Creating MyBatis-Plus Entity, Mapper, Service, Controller code
-- 生成 MyBatis-Plus 代码 (explicitly mentions "MyBatis-Plus")
-- MyBatis-Plus 代码生成器 (MyBatis-Plus code generator)
-- 使用 MyBatis-Plus 生成代码 (generate code using MyBatis-Plus)
 
 **Trigger phrases include:**
-- "生成 MyBatis-Plus 代码" (generate MyBatis-Plus code) - **must include "MyBatis-Plus"**
-- "MyBatis-Plus 代码生成" (MyBatis-Plus code generation) - **must include "MyBatis-Plus"**
-- "mybatis-plus-generator" (explicitly mentions the generator)
-- "使用 MyBatis-Plus 根据表结构生成代码" (use MyBatis-Plus to generate code from table structure)
-- "MyBatis-Plus 生成 Entity、Service、Controller" (MyBatis-Plus generate Entity, Service, Controller)
-- "MyBatis-Plus 代码生成器" (MyBatis-Plus code generator)
+- "MyBatis-Plus code generation"
+- "mybatis-plus-generator"
+- "Generate code from database tables with MyBatis-Plus"
 
 **DO NOT trigger this skill for:**
 - Generic code generation without mentioning MyBatis-Plus
 - JPA/Hibernate code generation
 - Other ORM frameworks (TypeORM, Sequelize, etc.)
 - Generic CRUD operations without MyBatis-Plus context
-- "根据表结构生成代码" without "MyBatis-Plus" (too generic)
-- "生成 CRUD 代码" without "MyBatis-Plus" (too generic)
-- "代码生成器" without "MyBatis-Plus" (too generic)
 
 **Supported architectures:**
 - Traditional MVC (Model-View-Controller)
@@ -49,15 +40,15 @@ This skill is for **batch code generation** from database tables. For manually w
 - Kotlin
 
 **Supported component types:**
-- Entity (实体类)
-- Mapper (数据访问接口)
-- Service (服务接口)
-- ServiceImpl (服务实现类)
-- Controller (控制器)
+- Entity
+- Mapper (data access interface)
+- Service (service interface)
+- ServiceImpl (service implementation)
+- Controller
 - DTO (Data Transfer Object)
 - VO (Value Object / View Object)
 - BO (Business Object)
-- Model (数据模型)
+- Model (data model)
 
 ## How to use this skill
 
@@ -96,8 +87,8 @@ This skill follows a systematic 8-step workflow:
    - Enable Lombok (yes/no)
    - Enable API documentation (yes/no)
    - **API Documentation Type** (if enabled):
-     - Swagger 2 (使用 `io.swagger.annotations.*`)
-     - OpenAPI 3 (使用 `io.swagger.v3.oas.annotations.*`)
+     - Swagger 2 (`io.swagger.annotations.*`)
+     - OpenAPI 3 (`io.swagger.v3.oas.annotations.*`)
    - Enable validation annotations (yes/no)
 
 3. **Package Configuration:**
@@ -122,15 +113,15 @@ This skill follows a systematic 8-step workflow:
 When user enables API documentation, you MUST ask:
 
 ```
-请选择 API 文档类型：
+Select API documentation type:
 - [ ] Swagger 2
-  - 使用注解：@ApiModel, @ApiModelProperty, @Api, @ApiOperation
-  - 依赖：springfox-swagger2, springfox-swagger-ui
-  - 适用于：Spring Boot 2.x 项目
+  - Annotations: @ApiModel, @ApiModelProperty, @Api, @ApiOperation
+  - Dependencies: springfox-swagger2, springfox-swagger-ui
+  - For: Spring Boot 2.x projects
 - [ ] OpenAPI 3
-  - 使用注解：@Schema, @Tag, @Operation, @Parameter
-  - 依赖：springdoc-openapi-ui
-  - 适用于：Spring Boot 2.2+ 和 Spring Boot 3.x 项目
+  - Annotations: @Schema, @Tag, @Operation, @Parameter
+  - Dependencies: springdoc-openapi-ui
+  - For: Spring Boot 2.2+ and Spring Boot 3.x projects
 ```
 
 **Wait for user confirmation** before proceeding.
@@ -144,17 +135,17 @@ When user enables API documentation, you MUST ask:
 Present architecture options:
 
 ```
-请选择项目架构类型：
-- [ ] 传统 MVC (Model-View-Controller)
-  - 生成：Entity, Mapper, Service, ServiceImpl, Controller
-- [ ] COLA V5 (领域驱动设计) ← 推荐，与 ddd-cola skill 对齐
-  - 生成：Entity, Gateway, AppService, ServiceImpl, Controller, DTO, VO
-- [ ] 分层架构 (Layered Architecture)
-  - 生成：Entity, Mapper, Service, ServiceImpl, Controller
-- [ ] 整洁架构 (Clean Architecture)
-  - 生成：Entity, Repository, UseCase, Controller, DTO
-- [ ] 自定义架构
-  - 请指定需要生成的对象类型
+Select project architecture type:
+- [ ] Traditional MVC (Model-View-Controller)
+  - Generates: Entity, Mapper, Service, ServiceImpl, Controller
+- [ ] COLA V5 (Domain-Driven Design) ← Recommended, aligned with ddd-cola skill
+  - Generates: Entity, Gateway, AppService, ServiceImpl, Controller, DTO, VO
+- [ ] Layered Architecture
+  - Generates: Entity, Mapper, Service, ServiceImpl, Controller
+- [ ] Clean Architecture
+  - Generates: Entity, Repository, UseCase, Controller, DTO
+- [ ] Custom Architecture
+  - Specify which object types to generate
 ```
 
 **Wait for user confirmation** before proceeding.
@@ -179,9 +170,9 @@ For `user` table with base package `com.example.order`:
 - **DDD**: Entity → `com/example/order/domain/model/aggregate/user/User.java`, Controller → `com/example/order/interfaces/web/controller/UserController.java`
 - **Hexagonal**: Entity → `com/example/order/domain/model/entity/User.java`, Controller → `com/example/order/infrastructure/adapter/inbound/web/controller/UserController.java`
 - **Clean**: Entity → `com/example/order/domain/entity/User.java`, Controller → `com/example/order/infrastructure/web/controller/UserController.java`
-- **COLA**（与 ddd-cola skill 对齐）: Entity → `com/example/order/domain/model/entity/User.java`, Gateway → `com/example/order/domain/gateway/UserGateway.java`, AppService → `com/example/order/app/service/UserAppService.java`, Controller → `com/example/order/adapter/controller/UserController.java`
+- **COLA** (aligned with ddd-cola skill): Entity → `com/example/order/domain/model/entity/User.java`, Gateway → `com/example/order/domain/gateway/UserGateway.java`, AppService → `com/example/order/app/service/UserAppService.java`, Controller → `com/example/order/adapter/controller/UserController.java`
 
-**CRITICAL**: Always confirm the exact directory structure with the user if the project structure is unclear. Ask: "请确认项目的目录结构，以便我将生成的代码放在正确的位置。"
+**CRITICAL**: Always confirm the exact directory structure with the user if the project structure is unclear. Ask: "Please confirm the project directory structure so I can place generated code in the correct locations."
 
 #### Step 3: Collect Requirements
 
@@ -190,14 +181,14 @@ For `user` table with base package `com.example.order`:
 Ask the user:
 
 ```
-请描述此次生成代码的功能需求：
+Describe the functional requirements for this code generation:
 
-例如：
-- 用户管理：需要根据邮箱查询用户、根据用户名查询用户、用户登录验证
-- 订单管理：需要订单统计、订单分页查询、订单状态更新
-- 商品管理：需要商品搜索、商品分类查询、库存管理
+For example:
+- User management: need to query users by email, query by username, user login verification
+- Order management: need order statistics, paginated order query, order status update
+- Product management: need product search, category query, inventory management
 
-请详细描述每个表需要哪些功能，我会根据需求自动分析需要生成的方法。
+Describe in detail what features each table needs, and I will automatically analyze the required methods.
 ```
 
 **After user provides requirements:**
@@ -224,7 +215,7 @@ Ask the user:
 **CRITICAL: Ask user about programming language.**
 
 ```
-请选择编程语言：
+Select programming language:
 - [ ] Java
 - [ ] Kotlin
 ```
@@ -244,49 +235,49 @@ For each table, generate a structured todo list:
 
 ### Table: user
 
-#### Entity 层
-- [ ] User.java - 实体类
-  - [ ] 类注释
-  - [ ] 字段定义（id, username, email, password, status, createTime, updateTime）
-  - [ ] 字段注释
+#### Entity Layer
+- [ ] User.java - Entity class
+  - [ ] Class comments
+  - [ ] Field definitions (id, username, email, password, status, createTime, updateTime)
+  - [ ] Field comments
 
-#### Mapper 层
-- [ ] UserMapper.java - 数据访问接口
-  - [ ] 类注释
-  - [ ] 基础 CRUD 方法（继承 BaseMapper）
+#### Mapper Layer
+- [ ] UserMapper.java - Data access interface
+  - [ ] Class comments
+  - [ ] Basic CRUD methods (extends BaseMapper)
 
-#### Service 层
-- [ ] UserService.java - 服务接口
-  - [ ] 类注释
-  - [ ] saveUser() - 保存用户
-  - [ ] findById() - 根据ID查询
-  - [ ] updateUser() - 更新用户
-  - [ ] deleteById() - 删除用户
-  - [ ] findByEmail() - 根据邮箱查询（自定义方法）
-  - [ ] findByUsername() - 根据用户名查询（自定义方法）
+#### Service Layer
+- [ ] UserService.java - Service interface
+  - [ ] Class comments
+  - [ ] saveUser() - Save user
+  - [ ] findById() - Query by ID
+  - [ ] updateUser() - Update user
+  - [ ] deleteById() - Delete user
+  - [ ] findByEmail() - Query by email (custom method)
+  - [ ] findByUsername() - Query by username (custom method)
 
-#### ServiceImpl 层
-- [ ] UserServiceImpl.java - 服务实现类
-  - [ ] 类注释
-  - [ ] 实现所有 Service 接口方法
-  - [ ] 方法注释和实现骨架
+#### ServiceImpl Layer
+- [ ] UserServiceImpl.java - Service implementation
+  - [ ] Class comments
+  - [ ] Implement all Service interface methods
+  - [ ] Method comments and implementation skeletons
 
-#### Controller 层
-- [ ] UserController.java - 控制器
-  - [ ] 类注释
-  - [ ] createUser() - 创建用户
-  - [ ] getUserById() - 查询用户
-  - [ ] updateUser() - 更新用户
-  - [ ] deleteUser() - 删除用户
-  - [ ] getUserByEmail() - 根据邮箱查询（自定义接口）
+#### Controller Layer
+- [ ] UserController.java - Controller
+  - [ ] Class comments
+  - [ ] createUser() - Create user
+  - [ ] getUserById() - Query user
+  - [ ] updateUser() - Update user
+  - [ ] deleteUser() - Delete user
+  - [ ] getUserByEmail() - Query by email (custom endpoint)
 
-#### DTO 层（如果架构需要）
-- [ ] UserCreateDTO.java - 创建用户DTO
-- [ ] UserUpdateDTO.java - 更新用户DTO
-- [ ] UserQueryDTO.java - 查询用户DTO
+#### DTO Layer (if architecture requires)
+- [ ] UserCreateDTO.java - Create user DTO
+- [ ] UserUpdateDTO.java - Update user DTO
+- [ ] UserQueryDTO.java - Query user DTO
 
-#### VO 层（如果架构需要）
-- [ ] UserVO.java - 用户视图对象
+#### VO Layer (if architecture requires)
+- [ ] UserVO.java - User view object
 
 ### Table: order
 ...
@@ -473,7 +464,4 @@ All DDD templates are located in `templates/` root directory, supporting both Ja
 **English keywords:**
 mybatis-plus, mybatis-plus-generator, mybatis-plus code generator, mybatis-plus code generation, generate mybatis-plus code, mybatis-plus entity generator, mybatis-plus mapper generator, mybatis-plus service generator, mybatis-plus controller generator, mybatis-plus crud generation, mybatis-plus from table, mybatis-plus code from database
 
-**Chinese keywords (中文关键词):**
-MyBatis-Plus, mybatis-plus-generator, MyBatis-Plus 代码生成器, MyBatis-Plus 代码生成, 生成 MyBatis-Plus 代码, MyBatis-Plus 实体类生成, MyBatis-Plus Mapper 生成, MyBatis-Plus Service 生成, MyBatis-Plus Controller 生成, MyBatis-Plus CRUD 生成, MyBatis-Plus 根据表生成代码, MyBatis-Plus 数据库转代码, MyBatis-Plus 表转 Java, 使用 MyBatis-Plus 生成代码
-
-**IMPORTANT**: All keywords must include "MyBatis-Plus" or "mybatis-plus" to avoid false triggers. Generic terms like "代码生成器" (code generator) or "根据表生成代码" (generate code from table) without "MyBatis-Plus" should NOT trigger this skill.
+**IMPORTANT**: All keywords must include "MyBatis-Plus" or "mybatis-plus" to avoid false triggers. Generic terms like "code generator" or "generate code from table" without "MyBatis-Plus" should NOT trigger this skill.
