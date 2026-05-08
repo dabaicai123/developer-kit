@@ -1,6 +1,6 @@
 ---
 name: architecture-decision-records
-description: Patterns for creating, maintaining, and managing Architecture Decision Records (ADRs). Use when making significant architectural decisions, documenting technology choices, recording design trade-offs, or establishing decision-making processes. For DDD architecture decisions and COLA layer structure, use ddd-cola.
+description: "Architecture Decision Records (ADR) for creating, maintaining, and managing architectural decisions. Use when making significant architectural decisions, documenting technology choices, or recording design trade-offs."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

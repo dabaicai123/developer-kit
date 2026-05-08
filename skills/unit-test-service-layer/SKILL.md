@@ -1,6 +1,6 @@
 ---
 name: unit-test-service-layer
-description: Provides patterns for unit testing service layer with Mockito. Creates isolated tests that mock repository calls, verify method invocations, test exception scenarios, and stub external API responses. Use when testing service behaviors and business logic without database or external services.
+description: "Unit testing service layer with Mockito: mocking repository calls, verifying method invocations, exception scenarios, and stubbing external API responses. Use when testing service behaviors and business logic without database or external services."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

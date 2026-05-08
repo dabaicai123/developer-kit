@@ -1,6 +1,6 @@
 ---
 name: spring-boot-validation
-description: "Jakarta Bean Validation (JSR-380) patterns for Spring Boot 3.5.x with @Valid/@Validated, custom validators, validation groups, nested validation, @ConfigurationProperties validation, programmatic Validator, response DTO for validation errors, and anti-patterns. Use when implementing input validation for REST APIs or service methods."
+description: "Jakarta Bean Validation (JSR-380) for Spring Boot 3.5.x with @Valid/@Validated, custom validators, validation groups, nested validation, @ConfigurationProperties validation, programmatic Validator, response DTO for validation errors, and anti-patterns. Use when implementing input validation for REST APIs or service methods."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

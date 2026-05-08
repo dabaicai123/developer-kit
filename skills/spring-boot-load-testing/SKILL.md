@@ -1,6 +1,6 @@
 ---
 name: spring-boot-load-testing
-description: "Spring Boot API load testing with k6 — REST endpoint benchmarks, MyBatis-Plus pagination queries, JWT auth scenarios, HikariCP pool validation, JetCache hit/miss verification. Use when running load tests, stress tests, or performance benchmarks against Spring Boot services. Triggers: load test, stress test, benchmark, k6, performance test, JMeter."
+description: "Spring Boot API load testing with k6: REST endpoint benchmarks, MyBatis-Plus pagination queries, JWT auth scenarios, HikariCP pool validation, and JetCache hit/miss verification. Use when running load tests, stress tests, or performance benchmarks against Spring Boot services."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

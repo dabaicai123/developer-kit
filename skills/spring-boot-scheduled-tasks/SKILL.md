@@ -1,6 +1,6 @@
 ---
 name: spring-boot-scheduled-tasks
-description: "Spring Boot scheduled tasks — @Scheduled, XXL-Job distributed scheduling, cron expressions, task monitoring, and misfire handling patterns""
+description: "Spring Boot scheduled tasks with @Scheduled, XXL-Job distributed scheduling, cron expressions, task monitoring, and misfire handling. Use when implementing scheduled or periodic tasks in Spring Boot."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

@@ -1,6 +1,6 @@
 ---
 name: spring-cloud-gateway
-description: Spring Cloud Gateway patterns for Spring Boot 3.5.x covering routing, filters, rate limiting, and load balancing. Use when building API gateways for microservices.
+description: "Spring Cloud Gateway for Spring Boot 3.5.x: routing, filters, rate limiting, and load balancing. Use when building API gateways for microservices."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

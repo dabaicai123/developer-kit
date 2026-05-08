@@ -1,6 +1,6 @@
 ---
 name: ddd-event-driven
-description: "Domain-driven event architecture guidance — domain event design, event sourcing, CQRS, aggregate root event publishing, outbox pattern, snapshooting, projections, and anti-patterns. Use when designing event-driven architecture, evaluating event sourcing vs simple events, or implementing CQRS."
+description: "Domain-driven event architecture for Spring Boot: domain event design, event sourcing, CQRS, aggregate root event publishing, outbox pattern, snapshooting, projections, and anti-patterns. Use when designing event-driven architecture, evaluating event sourcing vs simple events, or implementing CQRS."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

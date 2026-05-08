@@ -1,6 +1,6 @@
 ---
 name: spring-boot-rest-api-standards
-description: Provides REST API design standards and best practices for Spring Boot projects. Use when creating or reviewing REST endpoints, DTOs, error handling, pagination, security headers, HATEOAS and architecture patterns.
+description: "REST API design standards for Spring Boot: endpoints, DTOs, error handling, pagination, security headers, HATEOAS, and architecture patterns. Use when creating or reviewing REST endpoints in Spring Boot projects."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

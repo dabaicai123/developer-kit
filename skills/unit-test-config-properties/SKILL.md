@@ -1,6 +1,6 @@
 ---
 name: unit-test-config-properties
-description: Provides patterns for unit testing `@ConfigurationProperties` classes with `@ConfigurationPropertiesTest`. Validates property binding, tests validation constraints, verifies default values, checks type conversions, and mocks property sources for Spring Boot configuration properties. Use when testing application configuration binding, validating YAML or application.properties files, verifying environment-specific settings, or testing nested property structures.
+description: "Unit testing @ConfigurationProperties with @ConfigurationPropertiesTest: property binding, validation constraints, default values, type conversions, and nested property structures. Use when testing application configuration binding or validating YAML/properties files."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

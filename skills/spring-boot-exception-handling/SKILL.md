@@ -1,6 +1,6 @@
 ---
 name: spring-boot-exception-handling
-description: "Global exception handling patterns for Spring Boot 3.5.x with @RestControllerAdvice, custom exception hierarchy, @ExceptionHandler, unified Result<T> response, field-level validation errors, error code system, logging integration, and anti-patterns. Use when implementing centralized error handling or defining custom business exceptions."
+description: "Global exception handling for Spring Boot 3.5.x with @RestControllerAdvice, custom exception hierarchy, @ExceptionHandler, unified Result<T> response, field-level validation errors, error code system, logging integration, and anti-patterns. Use when implementing centralized error handling or defining custom business exceptions."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

@@ -1,6 +1,6 @@
 ---
 name: unit-test-mapper-converter
-description: Provides patterns for unit testing mappers, converters, and bean mappings. Validates DO-to-DTO and model transformation logic in isolation. Generates executable mapping tests with MapStruct and custom converter test coverage. Use when writing mapping tests, converter tests, DO mapping tests, or ensuring correct data transformation between DTOs and Data Objects.
+description: "Unit testing mappers and converters with MapStruct: DO-to-DTO transformation, custom converter coverage, and mapping logic validation. Use when writing tests for object mapping or ensuring correct data transformation between DTOs and Data Objects."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

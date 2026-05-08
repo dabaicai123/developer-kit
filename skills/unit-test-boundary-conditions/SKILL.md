@@ -1,6 +1,6 @@
 ---
 name: unit-test-boundary-conditions
-description: Provides edge case, corner case, boundary condition, and limit testing patterns for Java unit tests. Validates minimum/maximum values, null cases, empty collections, numeric overflow/underflow, floating-point precision, and off-by-one scenarios using JUnit 5 and AssertJ. Use when writing .java test files to ensure code handles limits, corner cases, and special inputs correctly.
+description: "Unit testing edge cases and boundary conditions with JUnit 5 and AssertJ: min/max values, null cases, empty collections, numeric overflow, floating-point precision, and off-by-one scenarios. Use when writing tests to ensure code handles limits, corner cases, and special inputs."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

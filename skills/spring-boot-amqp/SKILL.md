@@ -1,6 +1,6 @@
 ---
 name: spring-boot-amqp
-description: Spring AMQP / RabbitMQ infrastructure for Spring Boot 3.x — connection, exchange/queue/binding configuration, Jackson message converter, producer patterns with RabbitTemplate, consumer patterns with @RabbitListener, manual acknowledgment, dead-letter handling, retry strategy, and idempotency. Use when configuring RabbitMQ clients, setting up queue subscriptions, or handling AMQP-specific errors. For event-driven architecture patterns (domain events, outbox), use spring-boot-event-driven-patterns.
+description: "Spring AMQP / RabbitMQ for Spring Boot 3.x: connection, exchange/queue/binding, Jackson message converter, RabbitTemplate producer, @RabbitListener consumer, manual acknowledgment, dead-letter handling, retry, and idempotency. Use when configuring RabbitMQ clients, setting up queue subscriptions, or handling AMQP-specific errors."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

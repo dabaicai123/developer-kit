@@ -1,6 +1,6 @@
 ---
 name: spring-boot-dependency-injection
-description: Provides dependency injection patterns for Spring Boot projects, including constructor-first design, optional collaborator handling, bean selection, and wiring validation. Use when creating services and configurations, replacing field injection, or troubleshooting ambiguous or fragile Spring wiring.
+description: "Spring Boot dependency injection with constructor-first design, optional collaborator handling, bean selection, and wiring validation. Use when creating services and configurations, replacing field injection, or troubleshooting Spring wiring."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

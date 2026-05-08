@@ -1,6 +1,6 @@
 ---
 name: spring-cloud-alibaba
-description: "Provides comprehensive guidance for Spring Cloud Alibaba including Nacos, Sentinel, RocketMQ, and Alibaba Cloud integration. Use when the user asks about Spring Cloud Alibaba, needs to use Alibaba Cloud services, implement service discovery with Nacos, or work with Spring Cloud Alibaba components."
+description: "Spring Cloud Alibaba with Nacos, Sentinel, RocketMQ, and Alibaba Cloud integration. Use when implementing service discovery with Nacos, circuit breaking with Sentinel, or working with Alibaba Cloud services."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

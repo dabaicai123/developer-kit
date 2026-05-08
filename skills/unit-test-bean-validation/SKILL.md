@@ -1,6 +1,6 @@
 ---
 name: unit-test-bean-validation
-description: Provides patterns for unit testing Jakarta Bean Validation (JSR-380), including @Valid, @NotNull, @Min, @Max, @Email constraints with Hibernate Validator. Generates custom validator tests, constraint violation assertions, validation groups, and parameterized validation tests. Validates data integrity logic without Spring context. Use when writing validation tests, bean validation tests, or testing custom constraint validators.
+description: "Unit testing Jakarta Bean Validation (JSR-380) with Hibernate Validator: @Valid, @NotNull, @Min, @Max, @Email constraints, custom validator tests, validation groups, and parameterized tests. Use when writing validation tests or testing custom constraint validators."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

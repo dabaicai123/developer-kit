@@ -1,6 +1,6 @@
 ---
 name: spring-boot-logging
-description: Spring Boot logging configuration patterns covering Logback, structured JSON logging, log levels per-package, and MDC correlation. Use when configuring application logging for production observability.
+description: "Spring Boot logging with Logback, structured JSON logging, log levels per-package, and MDC correlation. Use when configuring application logging for production observability."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

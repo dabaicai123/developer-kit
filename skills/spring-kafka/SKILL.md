@@ -1,6 +1,6 @@
 ---
 name: spring-kafka
-description: Spring Kafka infrastructure for Spring Boot 3.5.x — producer/consumer configuration, serialization, error handling, retry, and Spring Cloud Stream. Use when configuring Kafka clients, setting up topic subscriptions, or handling Kafka-specific errors. For event-driven architecture patterns (domain events, outbox, choreography), use spring-boot-event-driven-patterns.
+description: "Spring Kafka for Spring Boot 3.5.x: producer/consumer configuration, serialization, error handling, retry, and Spring Cloud Stream. Use when configuring Kafka clients, setting up topic subscriptions, or handling Kafka-specific errors."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

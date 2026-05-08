@@ -1,6 +1,6 @@
 ---
 name: mybatis-plus-generator
-description: "Generates MyBatis-Plus code (Entity, Mapper, Service, ServiceImpl, Controller, DTO, VO, BO) from database tables. Supports MVC and DDD architectures, Java and Kotlin, with standard CRUD and custom methods. Use ONLY when the user explicitly mentions MyBatis-Plus or mybatis-plus-generator; do NOT trigger for JPA, Hibernate, or other ORMs."
+description: "MyBatis-Plus code generation from database tables: Entity, Mapper, Service, Controller, DTO, VO, BO with MVC and DDD architectures in Java and Kotlin. Use when scaffolding MyBatis-Plus CRUD code from existing database tables."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

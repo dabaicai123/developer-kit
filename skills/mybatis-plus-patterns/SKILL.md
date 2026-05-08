@@ -1,6 +1,6 @@
 ---
 name: mybatis-plus-patterns
-description: MyBatis-Plus patterns for Spring Boot 3.5.x covering mapper, data object (DO), service layer, pagination, soft delete, field fill, and optimistic lock. Use for Java Spring Boot backend development with MyBatis-Plus as ORM.
+description: "MyBatis-Plus for Spring Boot 3.5.x: mapper, data object (DO), service layer, pagination, soft delete, field fill, and optimistic lock. Use when building Java Spring Boot backend with MyBatis-Plus as ORM."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

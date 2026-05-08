@@ -1,6 +1,6 @@
 ---
 name: spring-boot-transaction-management
-description: "Spring Boot transaction management with MyBatis-Plus — declarative @Transactional, propagation, rollback rules, self-invocation pitfalls, and distributed transaction patterns (Saga choreography/orchestration, Outbox, Seata caution)"
+description: "Spring Boot transaction management with MyBatis-Plus: declarative @Transactional, propagation, rollback rules, self-invocation pitfalls, and distributed transaction patterns (Saga, Outbox, Seata). Use when implementing transaction management in Spring Boot with MyBatis-Plus."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

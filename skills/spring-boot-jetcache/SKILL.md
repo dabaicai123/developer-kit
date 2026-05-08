@@ -1,6 +1,6 @@
 ---
 name: spring-boot-jetcache
-description: "JetCache two-level caching (Caffeine LOCAL + Redisson REMOTE) and Redisson distributed lock. Use when adding declarative caching (@Cached/@CacheInvalidate/@CacheUpdate), configuring QuickConfig, implementing distributed locks (RLock), or setting up syncLocal. Includes RedisUtils/DistributedLockUtils utilities. For API gateway rate limiting, use spring-cloud-gateway; for message queues, use spring-kafka."
+description: "JetCache two-level caching (Caffeine LOCAL + Redisson REMOTE) and Redisson distributed lock with @Cached/@CacheInvalidate, QuickConfig, RLock, and syncLocal. Use when adding declarative caching, configuring distributed locks, or setting up two-level cache in Spring Boot."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

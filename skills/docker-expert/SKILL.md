@@ -1,6 +1,6 @@
 ---
 name: docker-expert
-description: "Docker containerization expert for Java/Spring Boot applications — multi-stage builds, JVM optimization, GraalVM native images, Compose orchestration, and production hardening."
+description: "Docker containerization for Java/Spring Boot applications: multi-stage builds, JVM optimization, GraalVM native images, Compose orchestration, and production hardening. Use when building Docker images for Spring Boot services or configuring container deployment."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

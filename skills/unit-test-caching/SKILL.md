@@ -1,6 +1,6 @@
 ---
 name: unit-test-caching
-description: "Provides patterns for unit testing Spring Cache annotations (@Cacheable, @CachePut, @CacheEvict). Generates test code that mocks cache managers, verifies cache hit/miss behavior, tests cache key generation with SpEL expressions, validates eviction strategies, and checks conditional caching scenarios. Triggers: caching tests, test Spring cache, mock cache, Spring Boot caching, cache hit/miss verification, @Cacheable testing."
+description: "Unit testing Spring Cache annotations with @Cacheable, @CachePut, @CacheEvict: cache hit/miss behavior, cache key generation with SpEL, eviction strategies, and conditional caching. Use when testing caching behavior or verifying Spring Cache annotations."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

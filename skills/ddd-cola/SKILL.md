@@ -1,6 +1,6 @@
 ---
 name: ddd-cola
-description: "COLA DDD architecture skill: project scaffolding, POM dependencies, COLA layer structure (adapter/app/domain/infrastructure), dependency direction, gateway pattern, naming conventions. Use when creating a Spring Boot project, setting up COLA/DDD architecture, or structuring layered applications."
+description: "COLA DDD architecture for Spring Boot: project scaffolding, layer structure (adapter/app/domain/infrastructure), dependency direction, gateway pattern, and naming conventions. Use when creating a Spring Boot project with COLA/DDD architecture or structuring layered applications."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

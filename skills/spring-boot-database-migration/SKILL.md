@@ -1,6 +1,6 @@
 ---
 name: spring-boot-database-migration
-description: "Flyway-based database migration for Spring Boot with PostgreSQL — versioning, naming conventions, rollback strategies, and data migration patterns""
+description: "Flyway-based database migration for Spring Boot with PostgreSQL: versioning, naming conventions, rollback strategies, and data migration patterns. Use when managing database schema evolution with Flyway."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

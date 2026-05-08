@@ -1,6 +1,6 @@
 ---
 name: unit-test-utility-methods
-description: Provides patterns for testing utility classes, static methods, and helper functions. Validates pure functions, null handling, edge cases, and boundary conditions. Generates AssertJ assertions and @ParameterizedTest for string utils, math utils, validators, and collection helpers. Use when testing utils, test helpers, helper functions, static methods, or verifying utility code correctness.
+description: "Unit testing utility classes, static methods, and helper functions: pure functions, null handling, edge cases, and boundary conditions with AssertJ and @ParameterizedTest. Use when testing utility code, helper functions, or static methods."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

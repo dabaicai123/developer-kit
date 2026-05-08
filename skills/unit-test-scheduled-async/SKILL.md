@@ -1,6 +1,6 @@
 ---
 name: unit-test-scheduled-async
-description: Provides patterns for unit testing Spring `@Scheduled` and `@Async` methods using JUnit 5, CompletableFuture, Awaitility, and Mockito. Covers mocking task execution and timing, verifying execution counts, testing cron expressions, validating retry behavior, and simulating thread pool behavior. Use when testing background tasks, cron jobs, periodic execution, scheduled tasks, or thread pool behavior.
+description: "Unit testing @Scheduled and @Async methods with JUnit 5, CompletableFuture, Awaitility, and Mockito: task execution, timing, cron expressions, retry behavior, and thread pool behavior. Use when testing background tasks, cron jobs, or scheduled execution."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

@@ -1,6 +1,6 @@
 ---
 name: mapstruct-patterns
-description: MapStruct object mapping within DDD/COLA architecture — Domain ↔ DO, Domain ↔ DTO/Cmd conversions in Infrastructure and Adapter layers, update mapping, nested objects, Maven config with Lombok. Use when creating mappers for COLA layer boundaries, replacing manual fromDomain/toDomain conversions, or configuring MapStruct with Spring Boot. For mapper testing, use unit-test-mapper-converter.
+description: "MapStruct object mapping for DDD/COLA architecture: Domain ↔ DO, Domain ↔ DTO/Cmd conversions, update mapping, nested objects, and Maven config with Lombok. Use when creating mappers for COLA layer boundaries or configuring MapStruct with Spring Boot."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

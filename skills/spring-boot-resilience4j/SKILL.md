@@ -1,6 +1,6 @@
 ---
 name: spring-boot-resilience4j
-description: Provides fault tolerance patterns for Spring Boot 3.x using Resilience4j. Use when implementing circuit breakers, handling service failures, adding retry logic with exponential backoff, configuring rate limiters, or protecting services from cascading failures. Generates circuit breaker, retry, rate limiter, bulkhead, time limiter, and fallback implementations. Validates resilience configurations through Actuator endpoints.
+description: "Resilience4j fault tolerance for Spring Boot 3.x: circuit breaker, retry, rate limiter, bulkhead, time limiter, and fallback implementations. Use when implementing circuit breakers, adding retry logic, configuring rate limiters, or protecting services from cascading failures."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

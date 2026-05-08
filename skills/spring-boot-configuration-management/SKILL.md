@@ -1,6 +1,6 @@
 ---
 name: spring-boot-configuration-management
-description: "Spring Boot configuration management — @ConfigurationProperties, Nacos Config Center integration, profile-based configuration, property validation, and type-safe config patterns""
+description: "Spring Boot configuration management with @ConfigurationProperties, Nacos Config Center, profile-based configuration, property validation, and type-safe config patterns. Use when managing application configuration in Spring Boot services."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
