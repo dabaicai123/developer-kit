@@ -25,6 +25,8 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 
 8. **Use `DO` suffix for persistence objects** — `UserDO`, `OrderDO`. Domain entities in DDD use bare names (`Order`). Never use `Entity` suffix for persistence objects.
 
+9. **Add Javadoc to classes, public methods, and fields** — every class must have a one-line description of its responsibility. Every public method must explain WHAT it does. Every field in domain objects, DTOs, VOs, and DOs must have a Javadoc comment explaining its meaning — especially in DDD where field names alone may not convey business intent (e.g., `/** Order total amount including tax */ BigDecimal totalAmount`). Only write comments for WHY, not for obvious WHAT.
+
 ## Anti-Patterns
 
 - `SELECT *` — always specify needed columns
@@ -37,3 +39,5 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 - Integer soft delete (`deleted 0/1`) — use `deleted_at TIMESTAMPTZ` with `@TableLogic(value = "", delval = "now()")`
 - `Entity` suffix for persistence objects — use `DO` suffix
 - Table name prefix (`t_xxx`) — use plain snake_case (`xxx`)
+- Classes, methods, or fields without Javadoc — always document responsibility and meaning
+- Comments that repeat the code (`// set the name`) — write WHY, not WHAT
