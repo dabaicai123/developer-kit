@@ -102,6 +102,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
 ## Pagination Configuration
 
+Since **3.5.9**, the pagination plugin requires a separate `mybatis-plus-jsqlparser` dependency:
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-jsqlparser</artifactId>
+    <version>${mybatis-plus.version}</version>
+</dependency>
+```
+
 ```java
 @Configuration
 public class MybatisPlusConfig {
