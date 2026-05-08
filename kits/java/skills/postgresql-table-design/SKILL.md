@@ -46,6 +46,13 @@ CREATE TABLE orders (
 CREATE INDEX ON orders (user_id);
 CREATE INDEX ON orders (created_at);
 CREATE INDEX ON orders (deleted_at) WHERE deleted_at IS NULL;  -- partial index for active rows
+
+COMMENT ON TABLE orders IS 'Order records for customer purchases';
+COMMENT ON COLUMN orders.user_id IS 'Reference to the customer who placed the order';
+COMMENT ON COLUMN orders.total IS 'Order total amount including tax';
+COMMENT ON COLUMN orders.status IS 'Order lifecycle status: PENDING, PAID, CANCELED';
+COMMENT ON COLUMN orders.deleted_at IS 'Soft delete marker: NULL = active, non-NULL = deletion timestamp';
+COMMENT ON COLUMN orders.version IS 'Optimistic lock counter, incremented on each update';
 ```
 
 ### Soft Delete Pattern
@@ -72,6 +79,7 @@ Application layer: if affected rows = 0, throw concurrent modification error.
 - Define a **PRIMARY KEY** for reference tables (users, orders, etc.). Not always needed for time-series/event/log data. When used, prefer `BIGINT GENERATED ALWAYS AS IDENTITY`; use `UUID` only when global uniqueness/opacity is needed.
 - **Normalize first (to 3NF)** to eliminate data redundancy and update anomalies; denormalize **only** for measured, high-ROI reads where join performance is proven problematic. Premature denormalization creates maintenance burden.
 - Add **NOT NULL** everywhere it’s semantically required; use **DEFAULT**s for common values.
+- Add **COMMENT ON TABLE and COMMENT ON COLUMN** for every business table and column — describes purpose and business meaning in SQL schema, visible in `\d+ table` and `\l+` in psql, and consumed by ORM tools and documentation generators. Never leave tables or columns without comments.
 - Create **indexes for access paths you actually query**: PK/unique (auto), **FK columns (manual!)**, frequent filters/sorts, and join keys.
 - Prefer **TIMESTAMPTZ** for event time; **NUMERIC** for money; **TEXT** for strings; **BIGINT** for integer values, **DOUBLE PRECISION** for floats (or `NUMERIC` for exact decimal arithmetic).
 
@@ -236,6 +244,10 @@ CREATE TABLE users (
 );
 CREATE UNIQUE INDEX ON users (LOWER(email));
 CREATE INDEX ON users (created_at);
+
+COMMENT ON TABLE users IS 'System user accounts';
+COMMENT ON COLUMN users.email IS 'User login email, case-insensitive unique';
+COMMENT ON COLUMN users.name IS 'Display name of the user';
 ```
 
 ### Orders
@@ -250,6 +262,11 @@ CREATE TABLE orders (
 );
 CREATE INDEX ON orders (user_id);
 CREATE INDEX ON orders (created_at);
+
+COMMENT ON TABLE orders IS 'Customer purchase orders';
+COMMENT ON COLUMN orders.user_id IS 'Customer who placed the order';
+COMMENT ON COLUMN orders.status IS 'Order lifecycle: PENDING → PAID or CANCELED';
+COMMENT ON COLUMN orders.total IS 'Total amount including tax';
 ```
 
 ### JSONB
