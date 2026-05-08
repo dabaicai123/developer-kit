@@ -67,7 +67,38 @@ unzip starter.zip -d ./demo-java && rm starter.zip && cd demo-java
 </dependency>
 ```
 
-### 3. Configuration
+### 3. .gitignore
+
+Append to the generated `.gitignore`:
+
+```gitignore
+# Build
+target/
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+```
+
+### 4. Configuration
 
 ```yaml
 spring:
@@ -93,7 +124,7 @@ mybatis-plus:
       logic-not-delete-value: ""
 ```
 
-### 4. Docker Compose
+### 5. Docker Compose
 
 ```yaml
 services:
@@ -109,7 +140,7 @@ services:
     ports: ["6379:6379"]
 ```
 
-### 5. Maven Commands
+### 6. Maven Commands
 
 | Command | Description |
 |---------|------------|
