@@ -96,6 +96,9 @@ logs/
 # Environment
 .env
 .env.local
+
+# JAVA
+target/
 ```
 
 ### 4. Configuration
