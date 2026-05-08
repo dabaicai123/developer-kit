@@ -40,6 +40,12 @@ unzip starter.zip -d ./demo-java && rm starter.zip && cd demo-java
   <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
   <version>3.5.9</version>
 </dependency>
+<!-- Pagination plugin (required since 3.5.9) -->
+<dependency>
+  <groupId>com.baomidou</groupId>
+  <artifactId>mybatis-plus-jsqlparser</artifactId>
+  <version>3.5.9</version>
+</dependency>
 <!-- PostgreSQL Driver -->
 <dependency>
   <groupId>org.postgresql</groupId>
@@ -92,7 +98,7 @@ mybatis-plus:
 ```yaml
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     ports: ["5432:5432"]
     environment:
       POSTGRES_USER: postgres
@@ -221,7 +227,9 @@ public class OrderDO {
     @Version
     private Integer version;
 
-    // Manual conversion — or use MapStruct converter → see mapstruct-patterns
+    // Manual conversion placeholder — use MapStruct converter → see mapstruct-patterns
+    // Replace with: private final OrderDOConverter orderDOConverter;
+    // orderDOConverter.toDO(order) / orderDOConverter.toDomain(orderDO)
     public static OrderDO fromDomain(Order order) { /* manual mapping */ }
     public Order toDomain() { /* manual mapping */ }
 }
