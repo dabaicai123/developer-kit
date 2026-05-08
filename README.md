@@ -172,21 +172,14 @@ Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .c
 | `java-refactor-expert` | Refactoring patterns | sonnet |
 | `java-security-expert` | Security audit | sonnet |
 
-## Commands (11)
+## Commands (4)
 
 | Command | Description |
 |---------|-------------|
-| `/devkit.java.code-review` | Code quality review |
-| `/devkit.java.generate-crud` | Generate CRUD with MyBatis-Plus |
-| `/devkit.java.refactor-class` | Refactor a class |
-| `/devkit.java.architect-review` | Architecture review |
-| `/devkit.java.dependency-audit` | Dependency audit |
-| `/devkit.java.generate-docs` | Generate documentation |
-| `/devkit.java.security-review` | Security review |
-| `/devkit.java.upgrade-dependencies` | Upgrade dependencies |
-| `/devkit.java.write-unit-tests` | Write unit tests |
-| `/devkit.java.write-integration-tests` | Write integration tests |
-| `/devkit.java.generate-refactoring-tasks` | Generate refactoring tasks |
+| `/devkit.feature` | Implement a Spring Boot feature (REST API, service, CRUD, business logic) |
+| `/devkit.review` | Review code for quality, security, architecture, and pattern compliance |
+| `/devkit.test` | Generate unit or integration tests for a Java class |
+| `/devkit.refactor` | Refactor a class or generate a refactoring task list for a module |
 
 ## Rules (6)
 
