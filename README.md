@@ -40,14 +40,16 @@ bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/ma
 
 **Windows (PowerShell):**
 ```powershell
+$s = irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.ps1
+
 # java kit (default)
-irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.ps1 | iex
+& ([scriptblock]::Create($s))
 
 # base kit
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.ps1))) -Kit base
+& ([scriptblock]::Create($s)) -Kit base
 
 # both kits
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.ps1))) -Kit all
+& ([scriptblock]::Create($s)) -Kit all
 ```
 
 ### Skills-only Installation
