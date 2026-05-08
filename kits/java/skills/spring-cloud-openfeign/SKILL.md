@@ -286,7 +286,7 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
 }
 ```
 
-Enable Resilience4j circuit breaker for Feign in configuration:
+Enable Resilience4j circuit breaker for Feign and reference the resilience4j skill for full configuration:
 
 ```yaml
 spring:
@@ -294,19 +294,9 @@ spring:
     openfeign:
       circuitbreaker:
         enabled: true
-
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10s
-    instances:
-      user-service:
-        baseConfig: default
 ```
+
+For circuit breaker configuration (sliding window, failure rate, wait duration, etc.), see `spring-boot-resilience4j`. OpenFeign integrates with Resilience4j via `resilience4j-spring-boot3` dependency.
 
 ### 6. Implement request/response interceptors
 
@@ -385,28 +375,7 @@ spring:
         disable-ssl-validation: false
 ```
 
-**OkHttp (for lower latency and HTTP/2 support):**
-
-```xml
-<dependency>
-    <groupId>io.github.openfeign</groupId>
-    <artifactId>feign-okhttp</artifactId>
-    <version>13.5</version>
-</dependency>
-```
-
-```yaml
-spring:
-  cloud:
-    openfeign:
-      okhttp:
-        enabled: true
-      httpclient:
-        max-connections: 200
-        max-connections-per-route: 50
-        connection-timeout: 3000
-        follow-redirects: true
-```
+**OkHttp alternative:** Use `io.github.openfeign:feign-okhttp:13.5` dependency and set `spring.cloud.openfeign.okhttp.enabled: true` for HTTP/2 support and lower latency. Connection pool parameters (`max-connections`, `max-connections-per-route`, `connection-timeout`) apply the same way.
 
 **Connection pool sizing guidelines:**
 
@@ -481,143 +450,6 @@ public class FeignMultipartConfig {
     public SpringFormEncoder springFormEncoder(ObjectMapper objectMapper) {
         return new SpringFormEncoder(new SpringEncoder(new SpringFormEncoder(), objectMapper));
     }
-}
-```
-
-## Examples
-
-### Example 1: Basic Feign client with fallback and error decoder
-
-```java
-@FeignClient(
-    name = "user-service",
-    fallbackFactory = UserClientFallbackFactory.class
-)
-public interface UserClient {
-
-    @GetMapping("/api/v1/users/{id}")
-    Result<UserResponse> getUser(@PathVariable("id") Long id);
-
-    @PostMapping("/api/v1/users")
-    Result<UserResponse> createUser(@RequestBody CreateUserRequest request);
-}
-
-@Component
-@Slf4j
-public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
-    @Override
-    public UserClient create(Throwable cause) {
-        log.warn("UserClient fallback: {}", cause.getMessage());
-        return new UserClient() {
-            @Override
-            public Result<UserResponse> getUser(Long id) {
-                return Result.fail(503, "user-service unavailable");
-            }
-            @Override
-            public Result<UserResponse> createUser(CreateUserRequest request) {
-                throw new ServiceUnavailableException("user-service unavailable");
-            }
-        };
-    }
-}
-```
-
-### Example 2: Error decoder translating remote errors to local exceptions
-
-```java
-@Component
-@Slf4j
-public class FeignErrorDecoder implements ErrorDecoder {
-    private final ObjectMapper objectMapper;
-
-    public FeignErrorDecoder(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
-    @Override
-    public Exception decode(String methodKey, Response response) {
-        try {
-            String body = Util.toString(response.body().asReader(StandardCharsets.UTF_8));
-            Result<Void> result = objectMapper.readValue(body, new TypeReference<Result<Void>>() {});
-            if (result != null && result.getCode() != 200) {
-                return switch (response.status()) {
-                    case 404 -> new NotFoundException("Remote resource", methodKey);
-                    case 503 -> new ServiceUnavailableException("Remote: " + methodKey);
-                    default  -> new BusinessException(response.status() * 1000, result.getMsg());
-                };
-            }
-        } catch (IOException e) {
-            log.error("Failed to decode remote error: method={}", methodKey, e);
-        }
-        return new Default().decode(methodKey, response);
-    }
-}
-```
-
-### Example 3: JWT and tracing header propagation
-
-```java
-@Component
-public class FeignAuthInterceptor implements RequestInterceptor {
-    @Override
-    public void apply(RequestTemplate template) {
-        ServletRequestAttributes attrs =
-            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attrs != null) {
-            String token = attrs.getRequest().getHeader(HttpHeaders.AUTHORIZATION);
-            if (token != null) {
-                template.header(HttpHeaders.AUTHORIZATION, token);
-            }
-        }
-    }
-}
-```
-
-### Example 4: Connection pool configuration with Apache HttpClient
-
-```yaml
-spring:
-  cloud:
-    openfeign:
-      httpclient:
-        enabled: true
-        max-connections: 200
-        max-connections-per-route: 50
-        connection-timeout: 3000
-      client:
-        config:
-          default:
-            connect-timeout: 3000
-            read-timeout: 5000
-            logger-level: BASIC
-```
-
-### Example 5: Paginated Feign client
-
-```java
-@FeignClient(name = "product-service", fallbackFactory = ProductClientFallbackFactory.class)
-public interface ProductClient {
-
-    @GetMapping("/api/v1/products")
-    Result<PageResult<ProductResponse>> searchProducts(
-        @RequestParam("category") String category,
-        @RequestParam("page") int page,
-        @RequestParam("pageSize") int pageSize
-    );
-}
-```
-
-### Example 6: File upload Feign client with multipart
-
-```java
-@FeignClient(name = "storage-service", fallbackFactory = StorageClientFallbackFactory.class)
-public interface StorageClient {
-
-    @PostMapping(value = "/api/v1/files/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    Result<FileResponse> uploadFile(
-        @RequestPart("file") MultipartFile file,
-        @RequestParam("bucket") String bucket
-    );
 }
 ```
 

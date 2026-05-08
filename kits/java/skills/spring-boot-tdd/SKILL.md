@@ -23,52 +23,21 @@ TDD guidance for Spring Boot services with 80%+ coverage (unit + integration).
 3) Refactor with tests green
 4) Enforce coverage (JaCoCo)
 
-## Unit Tests (JUnit 5 + Mockito)
+## Test Strategies by Layer
 
-```java
-@ExtendWith(MockitoExtension.class)
-class MarketServiceTest {
-  @Mock MarketRepository repo;
-  @InjectMocks MarketService service;
+> For detailed code examples per layer, see the dedicated testing skills:
+> - `unit-test-service-layer` — Mockito patterns for service testing
+> - `unit-test-controller-layer` — MockMvc patterns for REST controllers
+> - `unit-test-mapper-converter` — MapStruct converter + MyBatis mapper testing
 
-  @Test
-  void createsMarket() {
-    CreateMarketRequest req = new CreateMarketRequest("name", "desc", Instant.now(), List.of("cat"));
-    when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+| Layer | Tool | Skill Reference |
+|-------|------|-----------------|
+| Service | Mockito + `@ExtendWith(MockitoExtension.class)` | `unit-test-service-layer` |
+| Controller | `@WebMvcTest` + MockMvc | `unit-test-controller-layer` |
+| Mapper | Testcontainers + `@SpringBootTest` | `unit-test-mapper-converter` |
+| Integration | `@SpringBootTest` + `@AutoConfigureMockMvc` | This skill (see below) |
 
-    Market result = service.create(req);
-
-    assertThat(result.name()).isEqualTo("name");
-    verify(repo).save(any());
-  }
-}
-```
-
-Patterns:
-- Arrange-Act-Assert
-- Avoid partial mocks; prefer explicit stubbing
-- Use `@ParameterizedTest` for variants
-
-## Web Layer Tests (MockMvc)
-
-```java
-@WebMvcTest(MarketController.class)
-class MarketControllerTest {
-  @Autowired MockMvc mockMvc;
-  @MockBean MarketService marketService;
-
-  @Test
-  void returnsMarkets() throws Exception {
-    when(marketService.list(any())).thenReturn(Collections.emptyList());
-
-    mockMvc.perform(get("/api/markets"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray());
-  }
-}
-```
-
-## Integration Tests (SpringBootTest)
+## Integration Test Pattern
 
 ```java
 @SpringBootTest
@@ -88,44 +57,6 @@ class MarketIntegrationTest {
   }
 }
 ```
-
-## Persistence Tests (MyBatis-Plus)
-
-```java
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
-class MarketMapperTest {
-  @Autowired MarketMapper mapper;
-
-  @DynamicPropertySource
-  static void configureProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", postgres::getJdbcUrl);
-    registry.add("spring.datasource.username", postgres::getUsername);
-    registry.add("spring.datasource.password", postgres::getPassword);
-  }
-
-  @Container
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18-alpine");
-
-  @Test
-  void insertsAndSelects() {
-    MarketDO entity = new MarketDO();
-    entity.setName("Test");
-    mapper.insert(entity);
-
-    MarketDO found = mapper.selectOne(
-        new LambdaQueryWrapper<MarketDO>().eq(MarketDO::getName, "Test"));
-    assertThat(found).isNotNull();
-    assertThat(found.getName()).isEqualTo("Test");
-  }
-}
-```
-
-## Testcontainers
-
-- Use reusable containers for Postgres/Redis to mirror production
-- Wire via `@DynamicPropertySource` to inject JDBC URLs into Spring context
 
 ## Coverage (JaCoCo)
 

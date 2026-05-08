@@ -318,57 +318,11 @@ public class OrderQueryService {
 
 ### 5. Outbox pattern integration for reliable delivery
 
-Events are saved to an outbox table in the same local transaction as the aggregate, then a separate poller publishes to the message broker. This guarantees that business data and events are always consistent:
+The Outbox pattern guarantees that business data and events are always consistent by persisting events to an outbox table in the same local transaction as the aggregate. A separate poller then reads pending events and publishes them to the message broker. This eliminates the risk of event loss if the broker is unavailable at publish time.
 
-```java
-/**
- * Outbox event entity — stored in the same transaction as the aggregate.
- * <p>A separate poller reads pending events and publishes them to the message broker.</p>
- */
-@Data
-@TableName("outbox_events")
-public class OutboxEventDO {
-    @TableId(type = IdType.ASSIGN_UUID)
-    private String id;
-    private String aggregateType;
-    private String aggregateId;
-    private String eventType;
-    private String payload;        // JSON-serialized event
-    private Instant createdAt;
-    private Instant publishedAt;   // Set by poller after successful publishing
-}
-```
+**Key principle:** Never publish events directly to a message broker within a business transaction. Instead, write events to a local outbox table alongside the aggregate, then relay them asynchronously via a poller or CDC stream.
 
-```java
-// Application service — save aggregate AND outbox event in same transaction
-@Service
-@RequiredArgsConstructor
-public class OrderApplicationService {
-    private final OrderRepository orderRepository;
-    private final OutboxEventMapper outboxMapper;
-
-    @Transactional(rollbackFor = Exception.class)
-    public void placeOrder(UUID orderId, PlaceOrderCommand cmd) {
-        Order order = orderRepository.findById(orderId);
-        order.place(cmd.items());
-        orderRepository.save(order);
-
-        // Save outbox events in the SAME transaction — guarantees consistency
-        for (DomainEvent event : order.getDomainEvents()) {
-            OutboxEventDO outbox = new OutboxEventDO();
-            outbox.setAggregateType("Order");
-            outbox.setAggregateId(order.getId().toString());
-            outbox.setEventType(event.getClass().getSimpleName());
-            outbox.setPayload(JsonUtils.toJson(event));
-            outbox.setCreatedAt(Instant.now());
-            outboxMapper.insert(outbox);
-        }
-        order.clearDomainEvents();
-    }
-}
-```
-
-For the full Outbox implementation (poller, publisher, Saga choreography/orchestration), see `spring-boot-transaction-management` -> `references/distributed-transaction-patterns.md` and `spring-boot-event-driven-patterns` -> `references/outbox-pattern.md`.
+For detailed Outbox/Saga patterns, see `spring-boot-transaction-management` references/distributed-transaction-patterns.md.
 
 ### 6. Snapshooting for long event streams
 
@@ -404,6 +358,26 @@ public Account reconstituteWithSnapshot(AccountSnapshot snapshot, List<DomainEve
 - Store snapshots in a separate table (not mixed with events)
 - Always include the event version in the snapshot for correct replay boundary
 - Snapshots are ephemeral — they can be rebuilt from the full event stream if corrupted
+
+```java
+// Snapshot creation service
+@Service
+@RequiredArgsConstructor
+public class AccountSnapshotService {
+    private final AccountRepository accountRepository;
+    private final AccountSnapshotRepository snapshotRepository;
+
+    public void createSnapshot(UUID accountId) {
+        Account account = accountRepository.reconstitute(accountId);
+        AccountSnapshot snapshot = new AccountSnapshot();
+        snapshot.setAccountId(accountId);
+        snapshot.setBalance(account.getBalance());
+        snapshot.setEventVersion(accountRepository.getLatestVersion(accountId));
+        snapshot.setSnapshotTimestamp(Instant.now());
+        snapshotRepository.save(snapshot);
+    }
+}
+```
 
 ### 7. Projections for read model optimization
 
@@ -444,216 +418,24 @@ public class OrderSummaryProjection {
 - Projections can be rebuilt from the event stream at any time (no permanent data loss)
 - Projection handlers must be idempotent — events may be replayed during rebuilds
 
-## Examples
-
-### Example 1: Simple domain event decoupling (low complexity)
-
-```java
-// Event definition
-public record OrderPlacedEvent(
-    UUID orderId,
-    UUID customerId,
-    BigDecimal totalAmount,
-    Instant occurredAt
-) implements DomainEvent {}
-
-// Aggregate publishes event
-public class Order extends AggregateRoot {
-    public void place(List<OrderItem> items) {
-        this.status = OrderStatus.PLACED;
-        this.total = calculateTotal(items);
-        registerEvent(new OrderPlacedEvent(this.id, this.customerId, this.total, Instant.now()));
-    }
-}
-
-// Application service publishes after save
-@Service
-@RequiredArgsConstructor
-public class OrderApplicationService {
-    private final OrderRepository orderRepository;
-    private final ApplicationEventPublisher eventPublisher;
-
-    @Transactional(rollbackFor = Exception.class)
-    public void placeOrder(UUID orderId, List<OrderItem> items) {
-        Order order = orderRepository.findById(orderId);
-        order.place(items);
-        orderRepository.save(order);
-        order.getDomainEvents().forEach(eventPublisher::publishEvent);
-        order.clearDomainEvents();
-    }
-}
-```
-
-### Example 2: Event sourcing aggregate with reconstitute
-
-```java
-public class Account {
-    private UUID id;
-    private BigDecimal balance = BigDecimal.ZERO;
-    private final List<DomainEvent> pendingEvents = new ArrayList<>();
-
-    public void deposit(BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ValidationException("Deposit amount must be positive");
-        }
-        pendingEvents.add(new MoneyDepositedEvent(id, amount, Instant.now()));
-        apply(new MoneyDepositedEvent(id, amount, Instant.now()));
-    }
-
-    public void apply(MoneyDepositedEvent event) {
-        this.balance = this.balance.add(event.amount());
-    }
-
-    public static Account reconstitute(UUID id, List<DomainEvent> events) {
-        Account account = new Account();
-        account.id = id;
-        events.forEach(account::apply);
-        return account;
-    }
-}
-```
-
-### Example 3: Outbox pattern for reliable event publishing
-
-```java
-@Service
-@RequiredArgsConstructor
-public class OrderApplicationService {
-    private final OrderRepository orderRepository;
-    private final OutboxEventMapper outboxMapper;
-
-    @Transactional(rollbackFor = Exception.class)
-    public void placeOrder(UUID orderId, PlaceOrderCommand cmd) {
-        Order order = orderRepository.findById(orderId);
-        order.place(cmd.items());
-        orderRepository.save(order);
-
-        for (DomainEvent event : order.getDomainEvents()) {
-            OutboxEventDO outbox = new OutboxEventDO();
-            outbox.setAggregateType("Order");
-            outbox.setAggregateId(order.getId().toString());
-            outbox.setEventType(event.getClass().getSimpleName());
-            outbox.setPayload(JsonUtils.toJson(event));
-            outbox.setCreatedAt(Instant.now());
-            outboxMapper.insert(outbox);
-        }
-        order.clearDomainEvents();
-    }
-}
-```
-
-### Example 4: CQRS with separate read/write models
-
-```java
-// Write side — command service
-@Service
-@RequiredArgsConstructor
-public class OrderCommandService {
-    private final OrderRepository orderRepository;
-    private final ApplicationEventPublisher eventPublisher;
-
-    @Transactional(rollbackFor = Exception.class)
-    public UUID placeOrder(PlaceOrderCommand cmd) {
-        Order order = Order.create(cmd.customerId(), cmd.items());
-        orderRepository.save(order);
-        order.getDomainEvents().forEach(eventPublisher::publishEvent);
-        order.clearDomainEvents();
-        return order.getId();
-    }
-}
-
-// Read side — query service uses projection
-@Service
-@RequiredArgsConstructor
-public class OrderQueryService {
-    private final OrderReadRepository readRepository;
-
-    @Transactional(readOnly = true)
-    public OrderSummary getOrderSummary(UUID orderId) {
-        return readRepository.findSummaryById(orderId);
-    }
-}
-
-// Projection handler updates read model
-@Component
-@RequiredArgsConstructor
-public class OrderSummaryProjection {
-    private final OrderSummaryRepository summaryRepository;
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onOrderPlaced(OrderPlacedEvent event) {
-        OrderSummary summary = new OrderSummary();
-        summary.setOrderId(event.orderId());
-        summary.setTotalAmount(event.totalAmount());
-        summary.setStatus("PLACED");
-        summaryRepository.save(summary);
-    }
-}
-```
-
-### Example 5: Snapshooting to reduce replay cost
-
-```java
-// Reconstitute with snapshot
-public Account reconstituteWithSnapshot(AccountSnapshot snapshot, List<DomainEvent> postSnapshotEvents) {
-    Account account = new Account();
-    account.id = snapshot.getAccountId();
-    account.balance = snapshot.getBalance();
-    postSnapshotEvents.forEach(account::apply);
-    return account;
-}
-
-// Snapshot creation service
-@Service
-@RequiredArgsConstructor
-public class AccountSnapshotService {
-    private final AccountRepository accountRepository;
-    private final AccountSnapshotRepository snapshotRepository;
-
-    public void createSnapshot(UUID accountId) {
-        Account account = accountRepository.reconstitute(accountId);
-        AccountSnapshot snapshot = new AccountSnapshot();
-        snapshot.setAccountId(accountId);
-        snapshot.setBalance(account.getBalance());
-        snapshot.setEventVersion(accountRepository.getLatestVersion(accountId));
-        snapshot.setSnapshotTimestamp(Instant.now());
-        snapshotRepository.save(snapshot);
-    }
-}
-```
-
 ## Best Practices
 
-- **Name events in past tense**: `OrderPlaced` (not `PlaceOrder`) — events represent facts that have happened
-- **Include only essential data**: aggregate ID and key attributes — avoid large payloads or sensitive information
-- **Guarantee at-least-once delivery with idempotent consumers**: use an outbox table with polling for reliable publishing
 - **Define an explicit event versioning strategy**: additive fields only, never remove or rename existing fields; use new event types for breaking changes
 - **Start with simple domain events before adopting event sourcing**: the complexity trade-off must be justified by audit trail or temporal query requirements
-- **Separate write and read models in CQRS**: writes go through aggregates (business rules), reads go through projections (query optimization)
-- **Make projection handlers idempotent**: events may be replayed during rebuilds; handle duplicate events gracefully
-- **Take periodic snapshots for long-lived aggregates**: every N events or on schedule, to reduce replay cost
+- **Guarantee at-least-once delivery with idempotent consumers**: use an outbox table with polling for reliable publishing
 - **Use correlation IDs**: trace events across service boundaries for debugging and observability
-- **Register events inside the business method**: ensures state change and event generation are always consistent
 
 ## Anti-patterns
 
-- **Anemic events** — events that carry only the aggregate ID with no data (`OrderPlacedEvent(UUID orderId)` with nothing else). Consumers must query back to the source service, creating tight coupling and additional network calls. Include enough data for consumers to act independently.
 - **Event coupling** — consumers that depend on event payload fields from other services. When the source service changes its event structure, all consumers break. Design events to be self-contained and stable; use additive changes only.
-- **Synchronous event chains** — processing events synchronously in the same thread creates blocking chains: ServiceA publishes event -> ServiceB handles synchronously -> ServiceC handles synchronously. Any failure in the chain blocks the original operation. Use async processing with message brokers.
-- **Event as command** — designing events as commands (`CreateUserEvent` instead of `UserCreatedEvent`). Commands are imperative ("do this"); events are declarative ("this happened"). Events should not dictate what the consumer must do.
-- **Full entity in event payload** — embedding the entire `Order` entity in `OrderPlacedEvent`. Events become large, violate immutability (if the entity is mutable), and create coupling. Use summary data only.
-- **Missing outbox pattern** — publishing events to a message broker without persisting them in the same transaction. If the broker publish fails, the business data is committed but the event is lost. Always use the outbox pattern for reliable delivery.
+- **Synchronous event chains** — processing events synchronously in the same thread creates blocking chains. Any failure in the chain blocks the original operation. Use async processing with message brokers.
 - **Snapshot as source of truth** — treating snapshots as the definitive state instead of the event stream. Snapshots are ephemeral and can be rebuilt; the event stream is the authoritative source. Never delete events.
 - **Projection with business logic** — projection handlers that contain business rules or validation. Projections should be simple event-to-read-model translations; business rules belong in the write side.
 
 ## Constraints and Warnings
 
-- **Event sourcing adds significant complexity**: you must manage event storage, replay logic, schema evolution, and projections. Only adopt it when audit trail, temporal queries, or state rebuild requirements justify the cost.
 - **Event versioning is critical**: never remove or rename fields from existing events. Additive changes (new fields with defaults) are safe. Breaking changes require new event types or topics.
 - **CQRS requires eventual consistency**: the read model may lag behind the write model. Clients must handle stale reads (e.g., "your order has been placed but may not appear in search immediately").
-- **Outbox pattern is required for reliable delivery**: publishing events to a message broker without persisting them in the same transaction risks data loss if the broker is unavailable.
-- **Snapshooting is a performance optimization, not a replacement for events**: always keep the full event stream. Snapshots reduce replay cost but can be rebuilt from events if corrupted.
-- **Projections must be idempotent**: events may be delivered more than once (at-least-once semantics). Handlers must tolerate duplicate events without producing duplicate side effects.
 - **@TransactionalEventListener(phase = AFTER_COMMIT) is essential**: events must only be published after the transaction commits. `@EventListener` fires during the transaction — if the transaction later rolls back, the event is already published, creating inconsistency.
 
 ## References

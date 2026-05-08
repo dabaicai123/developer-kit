@@ -183,181 +183,22 @@ public class FileController {
 }
 ```
 
-### Example 2: MinIO client configuration and operations
+### Example 2: FileStorageService interface (storage abstraction)
+
+Business code depends only on the `FileStorageService` interface — implementations activate via `@ConditionalOnProperty`:
 
 ```java
-@Configuration
-@ConditionalOnProperty(name = "file.storage.type", havingValue = "minio")
-public class MinioConfig {
-
-    @Bean
-    public MinioClient minioClient(
-            @Value("${minio.endpoint}") String endpoint,
-            @Value("${minio.access-key}") String accessKey,
-            @Value("${minio.secret-key}") String secretKey) {
-        return MinioClient.builder()
-                .endpoint(endpoint)
-                .credentials(accessKey, secretKey)
-                .build();
-    }
-}
-
-@Service
-@ConditionalOnProperty(name = "file.storage.type", havingValue = "minio")
-@RequiredArgsConstructor
-@Slf4j
-public class MinioFileStorageService implements FileStorageService {
-
-    private final MinioClient minioClient;
-    @Value("${minio.bucket}") private String bucket;
-
-    @Override
-    public String upload(MultipartFile file, String storageFilename) {
-        try {
-            ensureBucketExists();
-            minioClient.putObject(PutObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(storageFilename)
-                    .stream(file.getInputStream(), file.getSize(), -1)
-                    .contentType(file.getContentType())
-                    .build());
-            return storageFilename;
-        } catch (Exception e) {
-            log.error("MinIO upload failed: {}", storageFilename, e);
-            throw new BusinessException(500, "File upload failed");
-        }
-    }
-
-    @Override
-    public InputStream download(String storagePath) {
-        try {
-            return minioClient.getObject(GetObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(storagePath)
-                    .build());
-        } catch (Exception e) {
-            log.error("MinIO download failed: {}", storagePath, e);
-            throw new NotFoundException("File", storagePath);
-        }
-    }
-
-    @Override
-    public void delete(String storagePath) {
-        try {
-            minioClient.removeObject(RemoveObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(storagePath)
-                    .build());
-        } catch (Exception e) {
-            log.error("MinIO delete failed: {}", storagePath, e);
-            throw new BusinessException(500, "File delete failed");
-        }
-    }
-
-    @Override
-    public String generatePresignedUrl(String storagePath, int expiryMinutes) {
-        try {
-            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
-                    .bucket(bucket)
-                    .object(storagePath)
-                    .method(Method.GET)
-                    .expiry(expiryMinutes)
-                    .build());
-        } catch (Exception e) {
-            log.error("MinIO presigned URL generation failed: {}", storagePath, e);
-            throw new BusinessException(500, "Failed to generate download URL");
-        }
-    }
-
-    private void ensureBucketExists() {
-        try {
-            boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
-            if (!exists) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-            }
-        } catch (Exception e) {
-            log.error("MinIO bucket check/create failed", e);
-            throw new BusinessException(500, "Storage initialization failed");
-        }
-    }
+public interface FileStorageService {
+    String upload(MultipartFile file, String storageFilename);
+    InputStream download(String storagePath);
+    void delete(String storagePath);
+    String generatePresignedUrl(String storagePath, int expiryMinutes);
 }
 ```
 
-### Example 3: Aliyun OSS client configuration and operations
+> For complete MinIO and Aliyun OSS implementations, see `references/minio-oss-integration.md`.
 
-```java
-@Configuration
-@ConditionalOnProperty(name = "file.storage.type", havingValue = "oss")
-public class OssConfig {
-
-    @Bean
-    public OSS ossClient(
-            @Value("${oss.endpoint}") String endpoint,
-            @Value("${oss.access-key-id}") String accessKeyId,
-            @Value("${oss.access-key-secret}") String accessKeySecret) {
-        return new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
-    }
-}
-
-@Service
-@ConditionalOnProperty(name = "file.storage.type", havingValue = "oss")
-@RequiredArgsConstructor
-@Slf4j
-public class OssFileStorageService implements FileStorageService {
-
-    private final OSS ossClient;
-    @Value("${oss.bucket}") private String bucket;
-
-    @Override
-    public String upload(MultipartFile file, String storageFilename) {
-        try {
-            ossClient.putObject(new PutObjectRequest(bucket, storageFilename, file.getInputStream()));
-            return storageFilename;
-        } catch (Exception e) {
-            log.error("OSS upload failed: {}", storageFilename, e);
-            throw new BusinessException(500, "File upload failed");
-        }
-    }
-
-    @Override
-    public InputStream download(String storagePath) {
-        try {
-            OSSObject ossObject = ossClient.getObject(bucket, storagePath);
-            return ossObject.getObjectContent();
-        } catch (OSSException e) {
-            if (e.getErrorCode().equals("NoSuchKey")) {
-                throw new NotFoundException("File", storagePath);
-            }
-            log.error("OSS download failed: {}", storagePath, e);
-            throw new BusinessException(500, "File download failed");
-        }
-    }
-
-    @Override
-    public void delete(String storagePath) {
-        try {
-            ossClient.deleteObject(bucket, storagePath);
-        } catch (Exception e) {
-            log.error("OSS delete failed: {}", storagePath, e);
-            throw new BusinessException(500, "File delete failed");
-        }
-    }
-
-    @Override
-    public String generatePresignedUrl(String storagePath, int expiryMinutes) {
-        try {
-            Date expiration = new Date(System.currentTimeMillis() + expiryMinutes * 60 * 1000L);
-            URL url = ossClient.generatePresignedUrl(bucket, storagePath, expiration);
-            return url.toString();
-        } catch (Exception e) {
-            log.error("OSS presigned URL generation failed: {}", storagePath, e);
-            throw new BusinessException(500, "Failed to generate download URL");
-        }
-    }
-}
-```
-
-### Example 4: EasyExcel export — write data to Excel and stream as HTTP response
+### Example 3: EasyExcel export — write data to Excel and stream as HTTP response
 
 ```java
 @RestController

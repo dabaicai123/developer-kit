@@ -315,61 +315,7 @@ public class GlobalExceptionHandler {
 
 ## Examples
 
-### Example 1: Complete exception hierarchy + global handler
-
-```java
-// --- Exception hierarchy ---
-public class BusinessException extends RuntimeException {
-    private final int code;
-    private final String msg;
-    public BusinessException(int code, String msg) {
-        super(msg);
-        this.code = code;
-        this.msg = msg;
-    }
-    public int getCode() { return code; }
-    public String getMsg() { return msg; }
-}
-
-public class NotFoundException extends BusinessException {
-    public NotFoundException(int code, String msg) { super(code, msg); }
-    public NotFoundException(String resource, Object id) { super(404, resource + " not found: " + id); }
-}
-
-public class ConflictException extends BusinessException {
-    public ConflictException(String msg) { super(409, msg); }
-}
-
-// --- Global handler ---
-@RestControllerAdvice
-@Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(BusinessException.class)
-    public Result<Void> handleBusiness(BusinessException e) {
-        log.warn("Business error: code={}, msg={}", e.getCode(), e.getMsg());
-        return Result.fail(e.getCode(), e.getMsg());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<Void> handleValidation(MethodArgumentNotValidException ex) {
-        String msg = ex.getBindingResult().getFieldErrors().stream()
-            .map(f -> f.getField() + ": " + f.getDefaultMessage())
-            .collect(Collectors.joining("; "));
-        log.warn("Validation error: {}", msg);
-        return Result.fail(400, msg);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public Result<Void> handleUnexpected(Exception e) {
-        log.error("Unexpected error", e);
-        return Result.fail(500, "Internal server error");
-    }
-}
-```
-
-### Example 2: Throwing BusinessException from service layer
+### Example 1: Throwing BusinessException from service layer
 
 ```java
 @Service
@@ -397,50 +343,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 }
 ```
 
-### Example 3: Error code system with per-module granularity
-
-```java
-public final class ErrorCodes {
-    public static final int USER_NOT_FOUND = 104004;
-    public static final int ORDER_NOT_FOUND = 204004;
-    public static final int ORDER_STOCK_INSUFFICIENT = 204010;
-    public static final int PAYMENT_TIMEOUT = 305008;
-
-    public static int httpStatus(int errorCode) {
-        return errorCode % 1000;
-    }
-}
-
-// Service layer usage — specific error codes give clients precise error handling
-@Override
-public OrderDO getOrder(Long id) {
-    return Optional.ofNullable(baseMapper.selectById(id))
-        .orElseThrow(() -> new NotFoundException(ErrorCodes.ORDER_NOT_FOUND, "Order not found: " + id));
-}
-```
-
-### Example 4: Validation error with field-level detail
-
-```java
-@RestControllerAdvice
-@Slf4j
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<Void> handleValidation(MethodArgumentNotValidException ex) {
-        List<FieldErrorDetail> details = ex.getBindingResult().getFieldErrors().stream()
-            .map(f -> new FieldErrorDetail(f.getField(), f.getDefaultMessage(), f.getRejectedValue()))
-            .toList();
-        String msg = details.stream()
-            .map(d -> d.field() + ": " + d.message())
-            .collect(Collectors.joining("; "));
-        log.warn("Validation error: {}", msg);
-        return Result.fail(400, msg);
-    }
-}
-```
-
-### Example 5: Local handler overriding global for specific controller
+### Example 2: Local handler overriding global for specific controller
 
 ```java
 @RestController

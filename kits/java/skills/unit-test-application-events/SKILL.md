@@ -10,7 +10,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 ## Overview
 
-Provides actionable patterns for testing Spring `ApplicationEvent` publishers and `@EventListener` consumers using JUnit 5 and Mockito — without booting the full Spring context.
+Provides actionable patterns for testing Spring event publishers and `@EventListener` consumers using JUnit 5 and Mockito — without booting the full Spring context. Uses modern plain-POJO event pattern (no `ApplicationEvent` inheritance needed since Spring 4.2+).
 
 ## When to use this skill
 
@@ -71,19 +71,12 @@ dependencies {
 }
 ```
 
-### Custom Event and Publisher Test
+### Plain POJO Event and Publisher Test
+
+> Since Spring 4.2+, events no longer need to extend `ApplicationEvent`. Use plain records or classes — they're simpler, immutable, and easier to test.
 
 ```java
-public class UserCreatedEvent extends ApplicationEvent {
-  private final User user;
-
-  public UserCreatedEvent(Object source, User user) {
-    super(source);
-    this.user = user;
-  }
-
-  public User getUser() { return user; }
-}
+public record UserCreatedEvent(User user) {}
 
 @Service
 public class UserService {
@@ -97,7 +90,7 @@ public class UserService {
 
   public User createUser(String name, String email) {
     User savedUser = userRepository.save(new User(name, email));
-    eventPublisher.publishEvent(new UserCreatedEvent(this, savedUser));
+    eventPublisher.publishEvent(new UserCreatedEvent(savedUser));
     return savedUser;
   }
 }
@@ -128,7 +121,7 @@ class UserServiceEventTest {
     userService.createUser("Alice", "alice@example.com");
 
     verify(eventPublisher).publishEvent(eventCaptor.capture());
-    assertThat(eventCaptor.getValue().getUser()).isEqualTo(newUser);
+    assertThat(eventCaptor.getValue().user()).isEqualTo(newUser);
   }
 }
 ```
@@ -144,7 +137,7 @@ public class UserEventListener {
 
   @EventListener
   public void onUserCreated(UserCreatedEvent event) {
-    emailService.sendWelcomeEmail(event.getUser().getEmail());
+    emailService.sendWelcomeEmail(event.user().getEmail());
   }
 }
 
@@ -156,7 +149,7 @@ class UserEventListenerTest {
     UserEventListener listener = new UserEventListener(emailService);
 
     User user = new User(1L, "Alice", "alice@example.com");
-    listener.onUserCreated(new UserCreatedEvent(this, user));
+    listener.onUserCreated(new UserCreatedEvent(user));
 
     verify(emailService).sendWelcomeEmail("alice@example.com");
   }
@@ -169,7 +162,7 @@ class UserEventListenerTest {
     UserEventListener listener = new UserEventListener(emailService);
     User user = new User(1L, "Alice", "alice@example.com");
 
-    assertThatCode(() -> listener.onUserCreated(new UserCreatedEvent(this, user)))
+    assertThatCode(() -> listener.onUserCreated(new UserCreatedEvent(user)))
       .doesNotThrowAnyException();
   }
 }
@@ -185,7 +178,7 @@ public class AsyncEventListener {
   @EventListener
   @Async
   public void onUserCreatedAsync(UserCreatedEvent event) {
-    slowService.processUser(event.getUser());
+    slowService.processUser(event.user());
   }
 }
 
@@ -197,7 +190,7 @@ class AsyncEventListenerTest {
     AsyncEventListener listener = new AsyncEventListener(slowService);
 
     User user = new User(1L, "Alice", "alice@example.com");
-    listener.onUserCreatedAsync(new UserCreatedEvent(this, user));
+    listener.onUserCreatedAsync(new UserCreatedEvent(user));
 
     Thread.sleep(200); // checkpoint: allow async executor to run
     verify(slowService).processUser(user);

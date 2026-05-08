@@ -285,8 +285,8 @@ When a JSON test fails, follow this workflow:
 ## References
 
 - [Spring `@JsonTest` Documentation](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/test/autoconfigure/json/JsonTest.html)
-- [Jackson ObjectMapper](https://fasterxml.github.io/jackson-databind/javadoc/2.15/com/fasterxml/jackson/databind/ObjectMapper.html)
-- [Jackson Annotations](https://fasterxml.github.io/jackson-annotations/javadoc/2.15/)
+- [Jackson ObjectMapper](https://fasterxml.github.io/jackson-databind/javadoc/2.18/com/fasterxml/jackson/databind/ObjectMapper.html)
+- [Jackson Annotations](https://fasterxml.github.io/jackson-annotations/javadoc/2.18/)
 
 ## Related Skills
 

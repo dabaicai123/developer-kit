@@ -11,12 +11,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ## When to use this skill
 
 - Setting up Spring Cloud Alibaba components (Nacos, Sentinel, RocketMQ, Seata)
-- Implementing service discovery, configuration management, or flow control in microservices
-- Choosing between OpenFeign and Dubbo for inter-service communication
+- Implementing service discovery or flow control in microservices
 
 ## Overview
 
-Spring Cloud Alibaba is a microservice solution provided by Alibaba, offering components such as Nacos (service registration and configuration), Sentinel (flow control), and RocketMQ (message queue). For inter-service communication, OpenFeign (declarative HTTP client) is recommended over Dubbo RPC. For distributed transactions, evaluate Seata carefully — it imposes heavy business intrusion. Prefer local transactions combined with event-driven eventual consistency instead.
+Spring Cloud Alibaba provides Nacos (service registration and configuration), Sentinel (flow control), and RocketMQ (message queue). For inter-service communication, use OpenFeign (see `spring-cloud-openfeign`). For distributed transactions, evaluate Seata carefully — it imposes heavy business intrusion; prefer local transactions combined with event-driven eventual consistency (see `spring-boot-transaction-management`).
 
 ## Core Components
 
@@ -60,38 +59,7 @@ spring:
         group: DEFAULT_GROUP
 ```
 
-**Configuration Management**:
-
-```yaml
-spring:
-  cloud:
-    nacos:
-      config:
-        server-addr: localhost:8848
-        file-extension: yaml
-        namespace: dev
-        group: DEFAULT_GROUP
-        shared-configs:
-          - data-id: common-config.yaml
-            group: DEFAULT_GROUP
-            refresh: true
-```
-
-**Dynamic Configuration Refresh**:
-
-```java
-@RestController
-@RefreshScope
-public class ConfigController {
-    @Value("${app.name:default}")
-    private String appName;
-    
-    @GetMapping("/config")
-    public String getConfig() {
-        return appName;
-    }
-}
-```
+**Configuration Management**: For detailed Nacos Config patterns (bootstrap.yml, shared/extension configs, @RefreshScope, ConfigListener), see `spring-boot-configuration-management`.
 
 ### 2. Sentinel (Flow Control)
 
@@ -230,64 +198,10 @@ public class UserEventListener implements RocketMQListener<User> {
 </dependency>
 ```
 
-### 5. OpenFeign (Declarative HTTP Client) — Recommended over Dubbo
+### 5. OpenFeign
 
-> **OpenFeign is recommended** as the inter-service communication solution over Dubbo RPC. OpenFeign is based on HTTP, integrates seamlessly with the Spring Cloud ecosystem, and requires no additional protocol or port management.
+For OpenFeign client patterns, see `spring-cloud-openfeign`.
 
-**Dependency**:
-
-```xml
-<dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-openfeign</artifactId>
-</dependency>
-
-<!-- For load balancing -->
-<dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-</dependency>
-```
-
-**Configuration**:
-
-```yaml
-spring:
-  cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            connectTimeout: 5000
-            readTimeout: 10000
-          user-service:
-            url: http://user-service  # Nacos service name resolves automatically
-```
-
-**Service Consumer**:
-
-```java
-@FeignClient(name = "user-service", path = "/api/v1/users")
-public interface UserServiceClient {
-    @GetMapping("/{id}")
-    Result<UserVO> getUser(@PathVariable("id") Long id);
-}
-
-@Service
-public class OrderService {
-    private final UserServiceClient userServiceClient;
-    
-    public Order createOrder(Long userId, Order order) {
-        UserVO user = userServiceClient.getUser(userId).getData();
-        // Order creation logic
-        return order;
-    }
-}
-```
-
-### 6. Dubbo (RPC Framework) — Not Recommended
-
-> **Dubbo is not recommended** as the inter-service communication solution. Dubbo requires exposing additional RPC ports and managing binary protocols, which are incompatible with the Spring Cloud REST ecosystem. OpenFeign is lighter and integrates better with Nacos and Sentinel.
 
 ## Microservice Architecture Example
 
@@ -302,53 +216,14 @@ microservices/
 └── product-service/        # Product service
 ```
 
-### Configuration Example
-
-**Unified Configuration Management**:
-
-```yaml
-# Nacos configuration center
-spring:
-  cloud:
-    nacos:
-      config:
-        server-addr: localhost:8848
-        file-extension: yaml
-        namespace: ${spring.profiles.active}
-        group: DEFAULT_GROUP
-        extension-configs:
-          - data-id: common-datasource.yaml
-            group: DEFAULT_GROUP
-            refresh: true
-          - data-id: common-redis.yaml
-            group: DEFAULT_GROUP
-            refresh: true
-```
+For unified configuration management patterns, see `spring-boot-configuration-management`.
 
 ## Best Practices
 
-### 1. Service Registration
-
-- Use Nacos as the service registration center
-- Configure appropriate namespaces and groups
-- Set up health checks
-
-### 2. Configuration Management
-
-- Use Nacos configuration center for unified management
-- Separate environment configurations (dev, test, prod)
-- Support dynamic refresh
-
-### 3. Flow Control
-
-- Use Sentinel for flow control
-- Configure rate limiting, circuit breaker, and degradation rules
-- Monitor service invocation metrics
-
-### 4. Distributed Transactions
-
-- **Preferred approach**: Local transactions + RocketMQ event-driven eventual consistency — see `spring-boot-transaction-management`
-- **Use with caution**: Seata AT mode — heavy business intrusion, only for strong-consistency requirements — see `spring-boot-transaction-management` -> `references/distributed-transaction-patterns.md`
+- **Service Registration**: Use Nacos discovery with appropriate namespaces/groups; set up health checks.
+- **Configuration Management**: Use Nacos Config Center with namespace isolation (see `spring-boot-configuration-management` for detailed patterns).
+- **Flow Control**: Configure Sentinel rate limiting, circuit breaker, and degradation rules; persist rules in Nacos.
+- **Distributed Transactions**: Prefer local transactions + RocketMQ eventual consistency (see `spring-boot-transaction-management`). Use Seata AT mode only for strict strong-consistency needs.
 
 ## Common Dependencies
 

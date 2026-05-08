@@ -8,51 +8,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 ## When to use this skill
 
-**CRITICAL: This skill should ONLY be triggered when the user explicitly mentions MyBatis-Plus or mybatis-plus-generator.**
-
 This skill is for **batch code generation** from database tables. For manually writing or editing individual Mapper/Entity/Service modules, use `mybatis-plus-patterns` instead.
 
-**ALWAYS use this skill when the user mentions:**
-- MyBatis-Plus code generation
-- Generating MyBatis-Plus code from database tables
-- MyBatis-Plus generator or mybatis-plus-generator
-- Creating MyBatis-Plus Entity, Mapper, Service, Controller code
+Use when the user mentions MyBatis-Plus code generation, mybatis-plus-generator, or scaffolding MyBatis-Plus CRUD code from existing database tables. Do NOT trigger for generic code generation, JPA/Hibernate, or other ORM frameworks.
 
-**Trigger phrases include:**
-- "MyBatis-Plus code generation"
-- "mybatis-plus-generator"
-- "Generate code from database tables with MyBatis-Plus"
-
-**DO NOT trigger this skill for:**
-- Generic code generation without mentioning MyBatis-Plus
-- JPA/Hibernate code generation
-- Other ORM frameworks (TypeORM, Sequelize, etc.)
-- Generic CRUD operations without MyBatis-Plus context
-
-**Supported architectures:**
-- Traditional MVC (Model-View-Controller)
-- DDD (Domain-Driven Design)
-- Layered Architecture
-- Clean Architecture
-
-**Supported languages:**
-- Java
-- Kotlin
-
-**Supported component types:**
-- Entity
-- Mapper (data access interface)
-- Service (service interface)
-- ServiceImpl (service implementation)
-- Controller
-- DTO (Data Transfer Object)
-- VO (Value Object / View Object)
-- BO (Business Object)
-- Model (data model)
+Supported: MVC / DDD / Layered / Clean architectures; Java and Kotlin; Entity, Mapper, Service, ServiceImpl, Controller, DTO, VO, BO.
 
 ## How to use this skill
-
-**CRITICAL: This skill should ONLY be triggered when the user explicitly mentions MyBatis-Plus or mybatis-plus-generator. Do NOT trigger for generic code generation requests without MyBatis-Plus context.**
 
 ### Workflow Overview
 

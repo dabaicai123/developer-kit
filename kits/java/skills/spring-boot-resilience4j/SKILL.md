@@ -32,7 +32,7 @@ Add Resilience4j dependencies to your project. For Maven, add to `pom.xml`:
 <dependency>
     <groupId>io.github.resilience4j</groupId>
     <artifactId>resilience4j-spring-boot3</artifactId>
-    <version>2.2.0</version> // Use latest stable version
+    <version>2.4.0</version>
 </dependency>
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -47,7 +47,7 @@ Add Resilience4j dependencies to your project. For Maven, add to `pom.xml`:
 For Gradle, add to `build.gradle`:
 
 ```gradle
-implementation "io.github.resilience4j:resilience4j-spring-boot3:2.2.0"
+implementation "io.github.resilience4j:resilience4j-spring-boot3:2.4.0"
 implementation "org.springframework.boot:spring-boot-starter-aop"
 implementation "org.springframework.boot:spring-boot-starter-actuator"
 ```

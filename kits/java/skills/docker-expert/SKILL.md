@@ -69,7 +69,7 @@ Docker containerization expert specializing in Java and Spring Boot applications
 - **Build context efficiency**: Comprehensive .dockerignore and build context management
 - **Base image selection**: eclipse-temurin vs distroless vs GraalVM native image strategies
 
-#### Maven Multi-Stage Build
+#### Maven Multi-Stage Build (primary)
 
 ```dockerfile
 # ---- Stage 1: Dependency resolution (cached layer) ----
@@ -96,32 +96,18 @@ ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-XX:+UseContainerSupport", \
             "-jar", "app.jar"]
 ```
 
-#### Gradle Multi-Stage Build
+**Gradle alternative** — only the dependency resolution step differs:
 
 ```dockerfile
-# ---- Stage 1: Dependency resolution (cached layer) ----
+# Replace Stage 1 (deps) with:
 FROM eclipse-temurin:21 AS deps
 WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
 RUN gradle dependencies --no-daemon || return 0
 
-# ---- Stage 2: Build ----
-FROM deps AS build
-COPY src ./src
-RUN gradle bootJar --no-daemon -x test
-
-# ---- Stage 3: Runtime ----
-FROM eclipse-temurin:21-jre AS runtime
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-WORKDIR /app
-COPY --from=build --chown=appuser:appgroup /app/build/libs/*.jar app.jar
-USER appuser
-EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-XX:+UseContainerSupport", \
-            "-jar", "app.jar"]
+# Stage 2 build command: gradle bootJar --no-daemon -x test
+# Stage 3 COPY path: /app/build/libs/*.jar instead of /app/target/*.jar
 ```
 
 #### .dockerignore
@@ -388,35 +374,7 @@ volumes:
 
 ### 5. GraalVM Native Image Docker Build
 
-For sub-second startup and minimal memory footprint, compile Spring Boot to a native executable. See the **graalvm-native-image** skill for full details.
-
-```dockerfile
-# ---- Stage 1: Build native executable ----
-FROM ghcr.io/graalvm/native-image-community:21 AS build
-WORKDIR /app
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-COPY src ./src
-RUN mvn -Pnative package -DskipTests -B
-
-# ---- Stage 2: Minimal runtime ----
-FROM debian:bookworm-slim AS runtime
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-WORKDIR /app
-COPY --from=build --chown=appuser:appgroup /app/target/*.jar app
-USER appuser
-EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
-ENTRYPOINT ["./app"]
-```
-
-**Key differences from JAR-based build:**
-- Base runtime image is `debian:bookworm-slim` (~80 MB) or `gcr.io/distroless/base` (~20 MB) — no JVM needed
-- Startup time: <100ms vs 2-5s for JVM
-- Memory footprint: ~50-100 MB vs ~300-500 MB for JVM
-- No JVM tuning flags needed in ENTRYPOINT
-- Health check `start_period` reduced to 5s due to fast startup
+For GraalVM Native Image Docker builds, see the **`graalvm-native-image`** skill. That skill covers native executable compilation, base image selection (`debian:bookworm-slim` vs distroless), sub-second startup, minimal memory footprint, and all native-image-specific Docker configuration.
 
 ### 6. Image Size Optimization
 
@@ -614,72 +572,22 @@ Avoid these common mistakes in Java/Spring Boot Docker setups:
 
 - **Spring Boot Actuator health endpoint** must be accessible without authentication for Docker HEALTHCHECK. Either exclude the health endpoint from security or use a separate management port.
 
-## Code Review Checklist
+## Code Review Checklist (Top 10 Critical Items)
 
-When reviewing Docker configurations for Java/Spring Boot, focus on:
-
-### Dockerfile & Multi-Stage Builds
-- [ ] Dependencies resolved in a separate stage before copying source code
-- [ ] Production stage uses `eclipse-temurin:21-jre` (not full JDK)
-- [ ] Production stage contains only the JAR — no source, no build tooling
-- [ ] Comprehensive `.dockerignore` excludes `.git`, IDE files, logs, documentation
-- [ ] Base image pinned to a specific tag (not `latest`)
-- [ ] Non-root user created and USER directive set
-
-### JVM Optimization
-- [ ] `-XX:MaxRAMPercentage` set to match container memory limits
-- [ ] `-XX:+UseContainerSupport` explicitly set for clarity
-- [ ] `-XX:+ExitOnOutOfMemoryError` enabled for container resilience
-- [ ] `-Djava.security.egd=file:/dev/./urandom` for faster startup
-- [ ] Memory limits in Compose match JVM heap expectations (25% overhead for non-heap)
-
-### Container Security
-- [ ] Container runs as non-root user
-- [ ] Secrets managed via Docker secrets, not environment variables
-- [ ] Base images scanned for vulnerabilities
-- [ ] `read_only: true` and `cap_drop: ALL` where feasible
-- [ ] No sensitive data in image layers
-
-### Docker Compose
-- [ ] No deprecated `version` key
-- [ ] Service dependencies use `condition: service_healthy`
-- [ ] Custom networks configured for service isolation (internal backend)
-- [ ] Environment-specific overrides via `docker-compose.override.yml`
-- [ ] Named volumes for data persistence (PostgreSQL, Redis)
-- [ ] Resource limits defined to prevent exhaustion
-
-### Health Checks
-- [ ] HEALTHCHECK directive uses Spring Boot Actuator endpoint
-- [ ] `start_period` accounts for Spring Boot startup time (30-40s for JVM, 5s for native)
-- [ ] Health endpoint excluded from security or on a separate management port
-- [ ] PostgreSQL `pg_isready` and Redis `redis-cli ping` for infrastructure health
+1. [ ] Dependencies resolved in a separate stage before copying source code
+2. [ ] Production stage uses `eclipse-temurin:21-jre` (not full JDK)
+3. [ ] Production stage contains only the JAR — no source, no build tooling
+4. [ ] Non-root user created and USER directive set
+5. [ ] `-XX:MaxRAMPercentage` set to match container memory limits
+6. [ ] `-XX:+ExitOnOutOfMemoryError` enabled for container resilience
+7. [ ] Secrets managed via Docker secrets, not environment variables
+8. [ ] Service dependencies use `condition: service_healthy` in Compose
+9. [ ] HEALTHCHECK uses Spring Boot Actuator endpoint with appropriate `start_period`
+10. [ ] No deprecated `version` key in Compose files
 
 ## Common Issue Diagnostics
 
-### Slow Builds (10+ minutes)
-**Symptoms**: Long build times, frequent full rebuilds
-**Root causes**: No dependency caching, large build context, missing `.dockerignore`
-**Solutions**: Multi-stage dependency resolution, BuildKit cache mounts, comprehensive `.dockerignore`
-
-### JVM OOM Kills
-**Symptoms**: Container killed by OS, `Exit 137` in logs
-**Root causes**: JVM heap exceeds container memory limit, missing `-XX:MaxRAMPercentage`
-**Solutions**: Set `MaxRAMPercentage=75.0`, increase container memory limit, add `-XX:+ExitOnOutOfMemoryError`
-
-### Slow Spring Boot Startup in Containers
-**Symptoms**: 30+ seconds to become ready
-**Root causes**: Large dependency scan, `SecureRandom` blocking on `/dev/random`, classpath scanning
-**Solutions**: `-Djava.security.egd=file:/dev/./urandom`, layered JAR, GraalVM native image, lazy initialization
-
-### Connection Failures to PostgreSQL/Redis
-**Symptoms**: `Connection refused` during startup
-**Root causes**: Missing `depends_on: condition: service_healthy`, Spring Boot starts before database is ready
-**Solutions**: Health-check-based startup ordering, Spring Boot retry with `spring.datasource.hikari.connection-timeout`
-
-### Image Size Over 500 MB
-**Symptoms**: Slow push/pull, high disk usage
-**Root causes**: Full JDK base image, build tools in production layer, no multi-stage build
-**Solutions**: Use `eclipse-temurin:21-jre`, multi-stage builds, distroless, or GraalVM native image
+See **`references/common-issues.md`** for detailed troubleshooting, including slow builds, JVM OOM kills, Spring Boot startup delays, connection failures, and oversized images.
 
 ## Related Skills
 

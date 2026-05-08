@@ -30,7 +30,7 @@ SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS384);
 // Generate a 512-bit key for HS512
 SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
-// Using Strength enum (JJWT 0.12.6)
+// Using Strength enum (JJWT 0.13.0)
 SecretKey normalKey = Keys.secretKeyFor(Keys.Strength.NORMAL);   // 256-bit
 SecretKey mediumKey = Keys.secretKeyFor(Keys.Strength.MEDIUM);   // 384-bit
 SecretKey strongKey = Keys.secretKeyFor(Keys.Strength.HIGH);     // 512-bit
@@ -270,7 +270,7 @@ public String generateAccessToken(UserDetails userDetails) {
     return Jwts.builder()
         .subject(userDetails.getUsername())
         .issuer(jwtProperties.issuer())                   // iss claim
-        .audience().add(jwtProperties.audience()).and()   // aud claim (JJWT 0.12.6)
+        .audience().add(jwtProperties.audience()).and()   // aud claim (JJWT 0.13.0)
         .issuedAt(new Date())
         .expiration(new Date(System.currentTimeMillis() + jwtProperties.accessTokenExpiration()))
         .claim("authorities", userDetails.getAuthorities().stream()
@@ -288,7 +288,7 @@ public boolean isTokenValid(String token, UserDetails userDetails) {
         Claims claims = Jwts.parser()
             .verifyWith(getVerificationKey())
             .requireIssuer(jwtProperties.issuer())        // Validate iss
-            .requireAudience(jwtProperties.audience())    // Validate aud (JJWT 0.12.6)
+            .requireAudience(jwtProperties.audience())    // Validate aud (JJWT 0.13.0)
             .build()
             .parseSignedClaims(token)
             .getPayload();
@@ -467,14 +467,14 @@ public class JwtKeyValidationConfig {
 }
 ```
 
-## JJWT Parser Configuration (0.12.6)
+## JJWT Parser Configuration (0.13.0)
 
 ### Modern Parser Builder API
 
-JJWT 0.12.6 uses a new builder-based parser API. The old `Jwts.parserBuilder()` is replaced with `Jwts.parser()`:
+JJWT 0.13.0 uses a new builder-based parser API. The old `Jwts.parserBuilder()` is replaced with `Jwts.parser()`:
 
 ```java
-// JJWT 0.12.6 parser (new API)
+// JJWT 0.13.0 parser (new API)
 JwtParser parser = Jwts.parser()
     .verifyWith(secretKey)                   // Verify signature (renamed from setSigningKey)
     .requireIssuer("my-app")                 // Validate issuer
@@ -486,10 +486,10 @@ JwtParser parser = Jwts.parser()
 Claims claims = parser.parseSignedClaims(token).getPayload();
 ```
 
-### JJWT Builder API (0.12.6)
+### JJWT Builder API (0.13.0)
 
 ```java
-// JJWT 0.12.6 builder (new API)
+// JJWT 0.13.0 builder (new API)
 String token = Jwts.builder()
     .subject("user123")
     .issuer("my-app")
@@ -501,9 +501,9 @@ String token = Jwts.builder()
     .compact();
 ```
 
-### Key API Changes from JJWT 0.11.x to 0.12.6
+### Key API Changes from JJWT 0.11.x to 0.13.0
 
-| Old API (0.11.x) | New API (0.12.6) | Notes |
+| Old API (0.11.x) | New API (0.13.0) | Notes |
 |-------------------|-------------------|-------|
 | `Jwts.parserBuilder()` | `Jwts.parser()` | Builder renamed |
 | `.setSigningKey(key)` | `.verifyWith(key)` | Method renamed |
