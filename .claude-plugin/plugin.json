@@ -89,7 +89,9 @@
     "./skills/unit-test-security-authorization",
     "./skills/unit-test-service-layer",
     "./skills/unit-test-utility-methods",
-    "./skills/unit-test-wiremock-rest-api"
+    "./skills/unit-test-wiremock-rest-api",
+    "./skills/spring-boot-amqp",
+    "./skills/mapstruct-patterns"
   ],
   "lspServers": "./.lsp.json"
 }

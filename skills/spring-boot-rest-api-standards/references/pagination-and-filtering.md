@@ -144,7 +144,7 @@ public class PageResult<T> {
     }
 
     /**
-     * Map entity records to DTOs while preserving pagination metadata
+     * Map data object records to DTOs while preserving pagination metadata
      */
     public <R> PageResult<R> map(Function<E, R> mapper) {
         PageResult<R> result = new PageResult<>();

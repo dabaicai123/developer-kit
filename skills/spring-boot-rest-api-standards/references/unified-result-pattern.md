@@ -74,7 +74,7 @@ public class PageResult<T> {
         return new PageResult<>(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize());
     }
 
-    // Convert entities to VOs after pagination
+    // Convert data objects to VOs after pagination
     public <U> PageResult<U> map(Function<T, U> converter) {
         List<U> voList = records.stream().map(converter).collect(Collectors.toList());
         return new PageResult<>(voList, total, page, pageSize);
@@ -261,12 +261,12 @@ public class UserController {
 
 ```java
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     @Override
     @Transactional(readOnly = true)
     public UserVO getById(Long id) {
-        UserEntity entity = baseMapper.selectById(id);
+        UserDO entity = baseMapper.selectById(id);
         if (entity == null) {
             throw new NotFoundException("User", id);
         }
@@ -277,9 +277,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     @Transactional(readOnly = true)
     public PageResult<UserVO> page(long page, long pageSize) {
-        Page<UserEntity> mpPage = baseMapper.selectPage(
+        Page<UserDO> mpPage = baseMapper.selectPage(
             new Page<>(page, pageSize),
-            lambdaQuery().orderByDesc(UserEntity::getCreatedAt)
+            lambdaQuery().orderByDesc(UserDO::getCreatedAt)
         );
         return PageResult.of(mpPage).map(UserConverter::toVO);
     }

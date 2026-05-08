@@ -4,7 +4,7 @@
 
 Demonstrates complete examples of using OpenAPI 3 annotations in Entity, Controller, and DTO.
 
-## Entity Example
+## DO Example
 
 ```java
 package com.example.app.entity;
@@ -30,7 +30,7 @@ public class User {
     /**
      * <p>User primary key ID</p>
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     @Schema(description = "User primary key ID")
     private Long id;
     

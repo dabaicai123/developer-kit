@@ -37,8 +37,8 @@ CREATE TABLE `user` (
   `email` varchar(100) NOT NULL COMMENT 'Email address',
   `password` varchar(255) NOT NULL COMMENT 'Password',
   `status` int(11) NOT NULL DEFAULT '1' COMMENT 'User status: 0-disabled, 1-enabled',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  `created_at` TIMESTAMPTZ NOT NULL DEFAULT now() COMMENT 'Creation time',
+  `updated_at` TIMESTAMPTZ NOT NULL DEFAULT now() COMMENT 'Update time',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_username` (`username`),
   UNIQUE KEY `uk_email` (`email`)
@@ -91,7 +91,7 @@ import java.time.LocalDateTime;
 @TableName("user")
 public class User {
     
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     
     @TableField("username")
@@ -106,10 +106,10 @@ public class User {
     @TableField("status")
     private Integer status;
     
-    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @TableField(value = "created_at", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     
-    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 }
 ```

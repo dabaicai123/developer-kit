@@ -96,9 +96,9 @@ public OrderService(UserService userService) {
 
 - `QueryWrapper` → `LambdaQueryWrapper` (type-safe queries)
 - Raw mapper XML → `@Select` annotations or LambdaQueryWrapper
-- Direct `BaseMapper` calls → `IService/ServiceImpl` pattern
+- Direct `BaseMapper` calls → `IService/ServiceImpl` pattern (MVC) or Gateway pattern (DDD/COLA)
 - Manual pagination → MyBatis-Plus `Page<>` object
-- Manual soft delete → `@TableLogic` annotation
+- Manual soft delete → `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ`
 - Manual field fill → `@TableField(fill = FieldFill.INSERT/UPDATE)`
 
 ## SOLID Principles Checklist

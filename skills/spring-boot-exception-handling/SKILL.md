@@ -132,7 +132,7 @@ public class BusinessException extends RuntimeException {
 }
 
 // Usage in service layer
-public UserEntity getUser(Long id) {
+public UserDO getUser(Long id) {
     return Optional.ofNullable(baseMapper.selectById(id))
         .orElseThrow(() -> new NotFoundException(ErrorCodes.USER_NOT_FOUND, "User not found: " + id));
 }
@@ -374,24 +374,24 @@ public class GlobalExceptionHandler {
 ```java
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(OrderCreateDTO dto) {
         // Validate business rules — throw NotFoundException if user does not exist
-        UserEntity user = userMapper.selectById(dto.getUserId());
+        UserDO user = userMapper.selectById(dto.getUserId());
         if (user == null) {
             throw new NotFoundException("User", dto.getUserId());
         }
 
         // Validate business rules — throw ConflictException if duplicate order exists
-        if (lambdaQuery().eq(OrderEntity::getExternalRef, dto.getExternalRef()).exists()) {
+        if (lambdaQuery().eq(OrderDO::getExternalRef, dto.getExternalRef()).exists()) {
             throw new ConflictException("Order already exists with ref: " + dto.getExternalRef());
         }
 
         // Business logic proceeds...
-        OrderEntity order = OrderConverter.toEntity(dto);
+        OrderDO order = OrderConverter.toDO(dto);
         baseMapper.insert(order);
     }
 }
@@ -413,7 +413,7 @@ public final class ErrorCodes {
 
 // Service layer usage — specific error codes give clients precise error handling
 @Override
-public OrderEntity getOrder(Long id) {
+public OrderDO getOrder(Long id) {
     return Optional.ofNullable(baseMapper.selectById(id))
         .orElseThrow(() -> new NotFoundException(ErrorCodes.ORDER_NOT_FOUND, "Order not found: " + id));
 }

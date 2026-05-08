@@ -50,9 +50,9 @@ You are an expert Spring Boot backend developer specializing in the MyBatis-Plus
 
 When implementing a new feature, follow this order:
 
-1. **Entity** — Define MyBatis-Plus entity with `@TableName`, `@TableId`, `@TableLogic`
-2. **Mapper** — Create `XxxMapper extends BaseMapper<XxxEntity>`
-3. **Service** — Create `XxxService extends IService<XxxEntity>` + `XxxServiceImpl extends ServiceImpl<XxxMapper, XxxEntity>`
+1. **Data Object** — Define MyBatis-Plus DO with `@TableName`, `@TableId(type = IdType.ASSIGN_ID)`, `@TableLogic(value = "", delval = "now()")`
+2. **Mapper** — Create `XxxMapper extends BaseMapper<XxxDO>`
+3. **Service** — MVC: `XxxService extends IService<XxxDO>` + `XxxServiceImpl extends ServiceImpl<XxxMapper, XxxDO>`; DDD: `XxxGateway` interface + `XxxGatewayImpl` (see `ddd-cola` skill)
 4. **DTO/VO/BO** — Define request/response objects with validation annotations
 5. **Controller** — REST endpoint with `@RestController`, proper HTTP methods, OpenAPI annotations
 6. **Exception handling** — Business exceptions via global `@RestControllerAdvice`
@@ -63,10 +63,12 @@ When implementing a new feature, follow this order:
 
 Always use:
 - `LambdaQueryWrapper` (never raw `QueryWrapper`)
-- `IService/ServiceImpl` pattern for business logic
-- `@TableLogic` for soft deletes
+- `IService/ServiceImpl` pattern for MVC; Gateway pattern for DDD/COLA (see `ddd-cola` skill)
+- `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft deletes
 - `lambdaQuery()` and `lambdaUpdate()` inside ServiceImpl
 - `Page<>` object for pagination
+- `DO` suffix for persistence objects (never `Entity` suffix)
+- `@Version` for optimistic locking
 
 Never use:
 - Raw SQL in mapper XML when `LambdaQueryWrapper` suffices

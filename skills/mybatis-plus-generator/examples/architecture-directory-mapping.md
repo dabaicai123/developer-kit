@@ -79,7 +79,7 @@ src/main/java/com/example/order/
         ├── mapper/
         │   └── UserMapper.java      # MyBatis Mapper
         └── entity/
-            └── UserEntity.java      # Persistence entity
+            └── UserDO.java      # Persistence data object
 ```
 
 ### File Path Examples
@@ -91,14 +91,14 @@ src/main/java/com/example/order/
 - Controller: `src/main/java/com/example/order/interfaces/web/controller/UserController.java`
 - Request DTO: `src/main/java/com/example/order/interfaces/web/dto/request/UserCreateRequest.java`
 - Response VO: `src/main/java/com/example/order/interfaces/web/dto/response/UserResponse.java`
-- Persistence Entity: `src/main/java/com/example/order/infrastructure/persistence/entity/UserEntity.java`
+- Persistence DO: `src/main/java/com/example/order/infrastructure/persistence/entity/UserDO.java`
 - Mapper: `src/main/java/com/example/order/infrastructure/persistence/mapper/UserMapper.java`
 
 ### Notes
 
 In DDD architecture:
 - **Domain entity (User)** is a business model, placed in `domain/model/aggregate/` or `domain/model/entity/`
-- **Persistence entity (UserEntity)** is a technical implementation, placed in `infrastructure/persistence/entity/`
+- **Persistence DO (UserDO)** is a technical implementation, placed in `infrastructure/persistence/entity/`
 - **Mapper interface** is defined in the domain layer (`domain/repository/`) and implemented in the infrastructure layer (`infrastructure/persistence/mapper/`)
 
 ## 3. Hexagonal Architecture
@@ -142,7 +142,7 @@ src/main/java/com/example/order/
                 ├── mapper/
                 │   └── UserMapper.java         # MyBatis Mapper
                 └── entity/
-                    └── UserEntity.java         # Persistence entity
+                    └── UserDO.java         # Persistence data object
 ```
 
 ### File Path Examples
@@ -154,7 +154,7 @@ src/main/java/com/example/order/
 - Controller: `src/main/java/com/example/order/infrastructure/adapter/inbound/web/controller/UserController.java`
 - Repository Impl: `src/main/java/com/example/order/infrastructure/adapter/outbound/persistence/repositoryimpl/UserRepositoryImpl.java`
 - Mapper: `src/main/java/com/example/order/infrastructure/adapter/outbound/persistence/mapper/UserMapper.java`
-- Persistence Entity: `src/main/java/com/example/order/infrastructure/adapter/outbound/persistence/entity/UserEntity.java`
+- Persistence DO: `src/main/java/com/example/order/infrastructure/adapter/outbound/persistence/entity/UserDO.java`
 
 ## 4. Clean Architecture
 
@@ -192,7 +192,7 @@ src/main/java/com/example/order/
     │   ├── mapper/
     │   │   └── UserMapper.java         # MyBatis Mapper
     │   └── entity/
-    │       └── UserEntity.java         # Persistence entity
+    │       └── UserDO.java         # Persistence data object
     └── web/
         ├── controller/
         │   └── UserController.java     # Controller
@@ -210,7 +210,7 @@ src/main/java/com/example/order/
 - Controller: `src/main/java/com/example/order/infrastructure/web/controller/UserController.java`
 - Repository Impl: `src/main/java/com/example/order/infrastructure/persistence/repository/UserRepositoryImpl.java`
 - Mapper: `src/main/java/com/example/order/infrastructure/persistence/mapper/UserMapper.java`
-- Persistence Entity: `src/main/java/com/example/order/infrastructure/persistence/entity/UserEntity.java`
+- Persistence DO: `src/main/java/com/example/order/infrastructure/persistence/entity/UserDO.java`
 
 ## 5. COLA V5 Architecture
 

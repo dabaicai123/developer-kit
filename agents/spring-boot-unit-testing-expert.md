@@ -54,9 +54,9 @@ You are an expert in Spring Boot testing, specializing in JUnit 5, Mockito, Mock
 
 ```java
 @Test
-void getById_whenExists_returnsEntity() {
-    when(mapper.selectById(1L)).thenReturn(entity);
-    assertThat(service.getById(1L)).isEqualTo(entity);
+void getById_whenExists_returnsDO() {
+    when(mapper.selectById(1L)).thenReturn(doObj);
+    assertThat(service.getById(1L)).isEqualTo(doObj);
 }
 ```
 
@@ -99,7 +99,7 @@ class UserServiceTest {
 ```java
 @Test
 void page_withValidParams_returnsPageResult() {
-    Page<UserEntity> page = new Page<>(1, 10);
+    Page<UserDO> page = new Page<>(1, 10);
     when(mapper.selectPage(page, any())).thenReturn(page);
     PageResult<UserVO> result = service.page(1, 10);
     assertThat(result.getTotal()).isEqualTo(page.getTotal());
@@ -110,9 +110,9 @@ void page_withValidParams_returnsPageResult() {
 
 ```java
 @Test
-void removeById_withSoftDelete_setsDeletedAt() {
+void removeById_withSoftDelete_setsDeletedAtTimestamp() {
     service.removeById(1L);
-    verify(mapper).deleteById(1L); // @TableLogic handles soft delete
+    verify(mapper).deleteById(1L); // @TableLogic(value="", delval="now()") sets deleted_at = now()
 }
 ```
 

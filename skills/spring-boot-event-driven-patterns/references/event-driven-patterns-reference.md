@@ -187,7 +187,7 @@ spring.cloud.stream.bindings.eventPublisher-out-0.destination=product-events
 
 ## Transactional Outbox Pattern Reference
 
-### Outbox Entity Schema
+### Outbox Data Object Schema
 
 ```sql
 CREATE TABLE outbox_events (

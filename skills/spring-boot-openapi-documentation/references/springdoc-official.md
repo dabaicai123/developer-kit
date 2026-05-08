@@ -253,13 +253,13 @@ public Book createBook(
 
 ## Model Documentation
 
-### Entity with Validation Annotations
+### Data Object with Validation Annotations
 ```java
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
 @Entity
-@Schema(description = "Book entity representing a published book")
+@Schema(description = "Book data object representing a published book")
 public class Book {
 
     @Id

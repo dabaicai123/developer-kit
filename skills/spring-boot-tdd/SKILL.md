@@ -110,12 +110,12 @@ class MarketMapperTest {
 
   @Test
   void insertsAndSelects() {
-    MarketEntity entity = new MarketEntity();
+    MarketDO entity = new MarketDO();
     entity.setName("Test");
     mapper.insert(entity);
 
-    MarketEntity found = mapper.selectOne(
-        new LambdaQueryWrapper<MarketEntity>().eq(MarketEntity::getName, "Test"));
+    MarketDO found = mapper.selectOne(
+        new LambdaQueryWrapper<MarketDO>().eq(MarketDO::getName, "Test"));
     assertThat(found).isNotNull();
     assertThat(found.getName()).isEqualTo("Test");
   }

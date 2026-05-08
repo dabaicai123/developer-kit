@@ -83,7 +83,7 @@ See [controller-documentation.md](references/controller-documentation.md) for pa
 Apply `@Schema` annotations to DTOs:
 
 ```java
-@Schema(description = "Book entity")
+@Schema(description = "Book data object")
 public class Book {
     @Schema(example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
@@ -154,13 +154,13 @@ Configure API grouping, versioning, and build plugins. See [advanced-configurati
 - **[dependency-setup.md](references/dependency-setup.md)** — Maven/Gradle dependencies and version selection
 - **[configuration.md](references/configuration.md)** — Basic and advanced configuration options
 - **[controller-documentation.md](references/controller-documentation.md)** — Controller and endpoint documentation patterns
-- **[model-documentation.md](references/model-documentation.md)** — Entity, DTO, and validation documentation
+- **[model-documentation.md](references/model-documentation.md)** — Data Object, DTO, and validation documentation
 - **[security-configuration.md](references/security-configuration.md)** — JWT, OAuth2, Basic Auth, API key configuration
 - **[pagination-support.md](references/pagination-support.md)** — Pageable, Slice, and custom pagination patterns
 - **[advanced-configuration.md](references/advanced-configuration.md)** — API groups, customizers, OpenAPI bean configuration
 - **[exception-handling.md](references/exception-handling.md)** — Exception documentation and error response schemas
 - **[build-integration.md](references/build-integration.md)** — Maven/Gradle plugins and CI/CD integration
-- **[complete-examples.md](references/complete-examples.md)** — Full controller, entity, and configuration examples
+- **[complete-examples.md](references/complete-examples.md)** — Full controller, data object, and configuration examples
 - **[annotations-reference.md](references/annotations-reference.md)** — Complete annotation reference with attributes
 - **[springdoc-official.md](references/springdoc-official.md)** — Official SpringDoc documentation
 - **[troubleshooting.md](references/troubleshooting.md)** — Common issues and solutions
@@ -209,7 +209,7 @@ public class BookController {
 ### Documented Model with Validation
 
 ```java
-@Schema(description = "Book entity")
+@Schema(description = "Book data object")
 public class Book {
     @Schema(description = "Unique identifier", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;

@@ -40,7 +40,7 @@ When declarative `@Transactional` does not fit (e.g., conditional transaction bo
 ```java
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
 
     private final TransactionTemplate transactionTemplate;
 
@@ -95,7 +95,7 @@ See `references/rollback-rules-and-exceptions.md` for detailed flow diagrams and
  */
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
 
     /**
      * 创建订单
@@ -106,10 +106,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(OrderCreateDTO dto) {
-        OrderEntity order = OrderConverter.toEntity(dto);
+        OrderDO order = OrderConverter.toDO(dto);
         baseMapper.insert(order);
         // 订单明细也插入，与订单主体在同一事务中
-        orderItemService.saveBatch(OrderConverter.toItemEntities(dto.getItems(), order.getId()));
+        orderItemService.saveBatch(OrderConverter.toItemDOs(dto.getItems(), order.getId()));
     }
 }
 ```
@@ -122,7 +122,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
  * <p>继承 ServiceImpl 获得 CRUD 基础方法</p>
  */
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     /**
      * 根据邮箱查询用户
@@ -133,8 +133,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
      */
     @Override
     @Transactional(readOnly = true)
-    public UserEntity findByEmail(String email) {
-        return lambdaQuery().eq(UserEntity::getEmail, email).one();
+    public UserDO findByEmail(String email) {
+        return lambdaQuery().eq(UserDO::getEmail, email).one();
     }
 
     /**
@@ -149,11 +149,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     @Transactional(readOnly = true)
     public PageResult<UserVO> page(int pageNum, int pageSize, UserQueryBO query) {
-        LambdaQueryWrapper<UserEntity> wrapper = lambdaQuery()
-            .like(StringUtils.isNotBlank(query.getUsername()), UserEntity::getUsername, query.getUsername())
-            .eq(query.getStatus() != null, UserEntity::getStatus, query.getStatus())
-            .orderByDesc(UserEntity::getCreatedAt);
-        Page<UserEntity> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
+        LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
+            .like(StringUtils.isNotBlank(query.getUsername()), UserDO::getUsername, query.getUsername())
+            .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
+            .orderByDesc(UserDO::getCreatedAt);
+        Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
         return PageResult.of(mpPage).map(UserConverter::toVO);
     }
 }
@@ -168,7 +168,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
  */
 @Service
 @RequiredArgsConstructor
-public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLogEntity> implements AuditLogService {
+public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLogDO> implements AuditLogService {
 
     /**
      * 记录操作审计日志
@@ -181,19 +181,19 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLogEnt
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void log(String action, String target, String detail) {
-        AuditLogEntity logEntity = new AuditLogEntity();
-        logEntity.setAction(action);
-        logEntity.setTarget(target);
-        logEntity.setDetail(detail);
-        logEntity.setCreatedAt(LocalDateTime.now());
-        baseMapper.insert(logEntity);
+        AuditLogDO logDO = new AuditLogDO();
+        logDO.setAction(action);
+        logDO.setTarget(target);
+        logDO.setDetail(detail);
+        logDO.setCreatedAt(LocalDateTime.now());
+        baseMapper.insert(logDO);
     }
 }
 
 // 主业务服务调用审计日志 — 即使主事务回滚，审计日志已独立提交
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
 
     private final AuditLogService auditLogService;
 
@@ -201,7 +201,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long orderId) {
         // 主业务：取消订单
-        OrderEntity order = baseMapper.selectById(orderId);
+        OrderDO order = baseMapper.selectById(orderId);
         order.setStatus(OrderStatus.CANCELLED);
         baseMapper.updateById(order);
 
@@ -222,7 +222,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
  */
 @Service
 @RequiredArgsConstructor
-public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImportEntity> implements DataImportService {
+public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImportDO> implements DataImportService {
 
     /**
      * 从 CSV 文件导入数据
@@ -234,7 +234,7 @@ public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImp
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importFromCsv(String filePath) throws IOException {
-        List<DataImportEntity> entities = parseCsv(filePath);  // 可能抛出 IOException
+        List<DataImportDO> dataObjects = parseCsv(filePath);  // 可能抛出 IOException
         saveBatch(entities);
     }
 
@@ -245,9 +245,9 @@ public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImp
     @Override
     @Transactional(rollbackFor = Exception.class, noRollbackFor = BusinessException.class)
     public void processWithAcceptableError(Long id) {
-        DataImportEntity entity = baseMapper.selectById(id);
+        DataImportDO dataObject = baseMapper.selectById(id);
         // 如果抛出 BusinessException，事务仍然提交
-        validateAndProcess(entity);
+        validateAndProcess(dataObject);
     }
 }
 ```
@@ -260,13 +260,13 @@ public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImp
  * <p>Spring AOP 基于代理，同类内部方法调用绕过代理，@Transactional 注解被静默忽略</p>
  */
 @Service
-public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentEntity> implements PaymentService {
+public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> implements PaymentService {
 
     /**
      * 支付流程 — 内部调用 processRefund()，后者的事务注解无效
      */
     public void handlePayment(PaymentDTO dto) {
-        PaymentEntity payment = PaymentConverter.toEntity(dto);
+        PaymentDO payment = PaymentConverter.toDO(dto);
         baseMapper.insert(payment);
 
         // ❌ this.processRefund() 绕过了 Spring AOP 代理
@@ -287,12 +287,12 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentEntity
  */
 @Service
 @RequiredArgsConstructor
-public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentEntity> implements PaymentService {
+public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> implements PaymentService {
 
     private final RefundService refundService;  // ✅ 注入独立的服务
 
     public void handlePayment(PaymentDTO dto) {
-        PaymentEntity payment = PaymentConverter.toEntity(dto);
+        PaymentDO payment = PaymentConverter.toDO(dto);
         baseMapper.insert(payment);
 
         // ✅ 通过 Spring 代理调用 refundService，@Transactional 生效
@@ -302,13 +302,13 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentEntity
 
 @Service
 @RequiredArgsConstructor
-public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundEntity> implements RefundService {
+public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> implements RefundService {
 
     /** ✅ 独立 bean 上的 @Transactional 会被代理正确拦截 */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void processRefund(Long paymentId, BigDecimal amount) {
-        RefundEntity refund = new RefundEntity();
+        RefundDO refund = new RefundDO();
         refund.setPaymentId(paymentId);
         refund.setAmount(amount);
         baseMapper.insert(refund);

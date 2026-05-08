@@ -6,7 +6,7 @@ This document provides a quick directory mapping reference for various object ty
 
 ## Quick Lookup Table
 
-### Entity (Entity Classes)
+### Entity (Data Object Classes)
 
 | Architecture Type | Directory Path |
 |:--------|:---------|
@@ -86,9 +86,9 @@ This document provides a quick directory mapping reference for various object ty
 | Clean | `{package}/application/dto/` |
 | COLA | `{package}/app/model/` or `{package}/app/executor/` (COLA V5 uses app, not application) |
 
-### Persistence Entity
+### Persistence Data Object (DO)
 
-**Note**: Only in DDD, Hexagonal, Clean, and COLA architectures is it necessary to distinguish between domain entities and persistence entities.
+**Note**: Only in DDD, Hexagonal, Clean, and COLA architectures is it necessary to distinguish between domain entities and persistence data objects.
 
 | Architecture Type | Directory Path |
 |:--------|:---------|
@@ -138,7 +138,7 @@ src/main/java/com/example/order/
 │       ├── request/UserCreateRequest.java
 │       └── response/UserResponse.java
 └── infrastructure/persistence/
-    ├── entity/UserEntity.java
+    ├── entity/UserDO.java
     └── mapper/UserMapper.java
 ```
 
@@ -159,7 +159,7 @@ src/main/java/com/example/order/
     └── outbound/persistence/
         ├── repositoryimpl/UserRepositoryImpl.java
         ├── mapper/UserMapper.java
-        └── entity/UserEntity.java
+        └── entity/UserDO.java
 ```
 
 ### Clean Architecture
@@ -175,7 +175,7 @@ src/main/java/com/example/order/
     ├── persistence/
     │   ├── repository/UserRepositoryImpl.java
     │   ├── mapper/UserMapper.java
-    │   └── entity/UserEntity.java
+    │   └── entity/UserDO.java
     └── web/
         ├── controller/UserController.java
         └── dto/UserWebRequest.java
@@ -235,10 +235,10 @@ src/main/java/com/example/order/
 
 ## Important Notes
 
-1. **Domain Entity vs Persistence Entity**:
+1. **Domain Entity vs Persistence Data Object**:
    - DDD, Hexagonal, Clean, and COLA architectures require distinguishing these
    - Domain entities contain business logic and are placed in the domain layer
-   - Persistence entities are database mappings and are placed in the infrastructure layer
+   - Persistence data objects (DO suffix) are database mappings and are placed in the infrastructure layer
 
 2. **Mapper Interface Location**:
    - In DDD, Hexagonal, and Clean architectures, there are typically two locations:

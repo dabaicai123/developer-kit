@@ -59,7 +59,7 @@ You are an expert in Java/Spring Boot security, specializing in authentication, 
 
 - **Always use** `LambdaQueryWrapper` — prevents SQL injection via type-safe column references
 - **Never** pass user input directly to `QueryWrapper.apply()` without sanitization
-- **Verify** `@TableLogic` soft delete — prevents data leakage through hard delete
+- **Verify** `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` soft delete — prevents data leakage through hard delete
 - **Check** mapper XML for raw SQL with `${}` (interpolation) vs `#{}` (parameterized)
 
 ### 5. Dependency Security

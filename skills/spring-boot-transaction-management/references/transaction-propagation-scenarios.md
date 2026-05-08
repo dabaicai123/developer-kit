@@ -16,8 +16,8 @@ All 7 Spring transaction propagation types with explanation and usage guidance.
 @Override
 @Transactional(rollbackFor = Exception.class)  // propagation = Propagation.REQUIRED 是默认值
 public void create(UserCreateDTO dto) {
-    UserEntity entity = UserConverter.toEntity(dto);
-    baseMapper.insert(entity);
+    UserDO dataObject = UserConverter.toDO(dto);
+    baseMapper.insert(dataObject);
 }
 ```
 
@@ -35,7 +35,7 @@ public void create(UserCreateDTO dto) {
 @Override
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public long countByStatus(UserStatus status) {
-    return lambdaQuery().eq(UserEntity::getStatus, status).count();
+    return lambdaQuery().eq(UserDO::getStatus, status).count();
 }
 ```
 
@@ -54,9 +54,9 @@ public long countByStatus(UserStatus status) {
 @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Exception.class)
 public void batchUpdateStatus(List<Long> ids, UserStatus status) {
     ids.forEach(id -> {
-        UserEntity entity = baseMapper.selectById(id);
-        entity.setStatus(status);
-        baseMapper.updateById(entity);
+        UserDO dataObject = baseMapper.selectById(id);
+        dataObject.setStatus(status);
+        baseMapper.updateById(dataObject);
     });
 }
 ```
@@ -77,12 +77,12 @@ public void batchUpdateStatus(List<Long> ids, UserStatus status) {
 @Override
 @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
 public void logOperation(String action, String target, String detail) {
-    AuditLogEntity log = new AuditLogEntity();
-    log.setAction(action);
-    log.setTarget(target);
-    log.setDetail(detail);
-    log.setCreatedAt(LocalDateTime.now());
-    baseMapper.insert(log);
+    AuditLogDO logDO = new AuditLogDO();
+    logDO.setAction(action);
+    logDO.setTarget(target);
+    logDO.setDetail(detail);
+    logDO.setCreatedAt(LocalDateTime.now());
+    baseMapper.insert(logDO);
 }
 ```
 
@@ -156,8 +156,8 @@ public void batchImport(List<UserImportDTO> dtoList) {
 @Override
 @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
 public void importSingleUser(UserImportDTO dto) {
-    UserEntity entity = UserConverter.toEntity(dto);
-    baseMapper.insert(entity);
+    UserDO dataObject = UserConverter.toDO(dto);
+    baseMapper.insert(dataObject);
 }
 ```
 

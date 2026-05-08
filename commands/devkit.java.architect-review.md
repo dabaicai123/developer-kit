@@ -29,7 +29,8 @@ Reviews the architecture of a Spring Boot project for pattern compliance and str
 4. Evaluate MyBatis-Plus integration:
    - Mapper/Service/ServiceImpl pattern usage
    - LambdaQueryWrapper adoption rate
-   - @TableLogic soft delete consistency
+   - `@TableLogic(value = "", delval = "now()")` + `deleted_at TIMESTAMPTZ` soft delete consistency
+   - DO suffix usage (no Entity suffix)
 5. Generate architecture report with:
    - Pattern compliance score
    - Anti-patterns found

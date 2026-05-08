@@ -147,7 +147,7 @@ class ProductEventTest {
 Ensures reliable event publishing even on failures.
 
 ```java
-// Outbox entity
+// Outbox data object
 @Entity
 @Table(name = "outbox_events")
 @Getter

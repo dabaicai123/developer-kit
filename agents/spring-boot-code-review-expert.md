@@ -45,8 +45,9 @@ You are an expert code reviewer specializing in Spring Boot + MyBatis-Plus enter
 ### Phase 3: MyBatis-Plus Pattern Verification
 
 - **Must use**: `LambdaQueryWrapper` (never `QueryWrapper`)
-- **Must use**: `IService/ServiceImpl` pattern
-- **Must use**: `@TableLogic` for soft delete fields
+- **Must use**: `IService/ServiceImpl` pattern for MVC; Gateway pattern for DDD/COLA
+- **Must use**: `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft delete
+- **Must use**: `DO` suffix for persistence objects (never `Entity` suffix)
 - **Must use**: `lambdaQuery()` / `lambdaUpdate()` in ServiceImpl
 - **Must avoid**: Raw SQL when LambdaQueryWrapper suffices
 - **Must avoid**: Direct BaseMapper calls in Controller

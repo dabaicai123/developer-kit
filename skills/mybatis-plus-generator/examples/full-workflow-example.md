@@ -290,7 +290,7 @@ public class User {
      * 
      * <p>Auto-increment database primary key, uniquely identifies a user</p>
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     
     /**
@@ -335,7 +335,7 @@ public class User {
      * 
      * <p>User record creation time, automatically set by the database</p>
      */
-    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @TableField(value = "created_at", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     
     /**
@@ -343,7 +343,7 @@ public class User {
      * 
      * <p>Last update time of the user record, automatically maintained by the database</p>
      */
-    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 }
 ```

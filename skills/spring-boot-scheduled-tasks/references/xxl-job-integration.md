@@ -261,14 +261,14 @@ public class DataService {
     @Transactional(readOnly = true)
     public int processShard(int shardIndex, int shardTotal) {
         // Query data assigned to this shard
-        List<DataEntity> items = dataMapper.selectList(
-            new LambdaQueryWrapper<DataEntity>()
-                .eq(DataEntity::getStatus, Status.PENDING)
+        List<DataDO> items = dataMapper.selectList(
+            new LambdaQueryWrapper<DataDO>()
+                .eq(DataDO::getStatus, Status.PENDING)
                 .apply("MOD(id, {0}) = {1}", shardTotal, shardIndex)
         );
 
         // Process each item
-        for (DataEntity item : items) {
+        for (DataDO item : items) {
             processItem(item);
         }
 
@@ -350,7 +350,7 @@ public ReturnT<String> dataMigration() {
     int batchSize = 500;
 
     while (true) {
-        List<DataEntity> batch = dataService.fetchBatch(batchSize);
+        List<DataDO> batch = dataService.fetchBatch(batchSize);
         if (batch.isEmpty()) {
             XxlJobHelper.log("no more data to process, breaking loop");
             break;

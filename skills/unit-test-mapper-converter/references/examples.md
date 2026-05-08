@@ -36,7 +36,7 @@ dependencies {
 @Mapper(componentModel = "spring")
 public interface UserMapper {
   UserDto toDto(User user);
-  User toEntity(UserDto dto);
+  User toDO(UserDto dto);
   List<UserDto> toDtos(List<User> users);
 }
 
@@ -54,9 +54,9 @@ class UserMapperTest {
   }
 
   @Test
-  void shouldMapDtoToEntity() {
+  void shouldMapDtoToDO() {
     UserDto dto = new UserDto(1L, "Alice", "alice@example.com", 25);
-    User user = userMapper.toEntity(dto);
+    User user = userMapper.toDO(dto);
     assertThat(user)
       .isNotNull()
       .hasFieldOrPropertyWithValue("id", 1L)
@@ -77,7 +77,7 @@ class UserMapperTest {
   }
 
   @Test
-  void shouldHandleNullEntity() {
+  void shouldHandleNullDO() {
     assertThat(userMapper.toDto(null)).isNull();
   }
 }
@@ -240,7 +240,7 @@ class BidirectionalMapperTest {
   void shouldMaintainDataInRoundTrip() {
     User original = new User(1L, "Alice", "alice@example.com", 25);
     UserDto dto = mapper.toDto(original);
-    User restored = mapper.toEntity(dto);
+    User restored = mapper.toDO(dto);
     assertThat(restored)
       .hasFieldOrPropertyWithValue("id", original.getId())
       .hasFieldOrPropertyWithValue("name", original.getName());
@@ -251,7 +251,7 @@ class BidirectionalMapperTest {
     Address address = new Address("123 Main", "NYC", "NY", "10001");
     User user = new User(1L, "Alice", "alice@example.com", 25, address);
     UserDto dto = mapper.toDto(user);
-    User restored = mapper.toEntity(dto);
+    User restored = mapper.toDO(dto);
     assertThat(restored).usingRecursiveComparison().isEqualTo(user);
   }
 }
@@ -262,17 +262,17 @@ class BidirectionalMapperTest {
 ```java
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-  void updateEntity(@MappingTarget User entity, UserDto dto);
+  void updateDO(@MappingTarget User user, UserDto dto);
 }
 
 class PartialMapperTest {
   private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
 
   @Test
-  void shouldUpdateExistingEntity() {
+  void shouldUpdateExistingDO() {
     User existing = new User(1L, "Alice", "alice@old.com", 25);
     UserDto dto = new UserDto(1L, "Alice", "alice@new.com", 26);
-    mapper.updateEntity(existing, dto);
+    mapper.updateDO(existing, dto);
     assertThat(existing)
       .hasFieldOrPropertyWithValue("email", "alice@new.com")
       .hasFieldOrPropertyWithValue("age", 26);
@@ -282,7 +282,7 @@ class PartialMapperTest {
   void shouldNotUpdateFieldsNotInDto() {
     User existing = new User(1L, "Alice", "alice@example.com", 25);
     UserDto dto = new UserDto(1L, "Bob", null, 0);
-    mapper.updateEntity(existing, dto);
+    mapper.updateDO(existing, dto);
     assertThat(existing.getEmail()).isEqualTo("alice@example.com");
   }
 }

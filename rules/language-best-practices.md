@@ -17,11 +17,13 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 
 4. **Set expiration on cached data** — always use `expire` with JetCache `@Cached`. Never cache without expiration. For patterns, see the `spring-boot-jetcache` skill.
 
-5. **Use `@TableLogic` soft delete** — never use physical delete for business data. For patterns, see the `mybatis-plus-patterns` skill.
+5. **Use `@TableLogic(value = "", delval = "now()")` timestamp-based soft delete** — `deleted_at TIMESTAMPTZ` (NULL = active, `now()` = deleted). Never use physical delete for business data, never use integer `deleted 0/1`. For patterns, see the `mybatis-plus-patterns` skill.
 
 6. **Use unified `Result<T>` wrapper** for all API responses — `code/msg/data` format. Never return bare objects. For details, see the `spring-boot-rest-api-standards` skill.
 
 7. **Use Java 21 features** when appropriate: `var` for obvious types, records for immutable DTOs/VOs, pattern matching for `instanceof`, switch expressions, sealed classes, text blocks for multi-line strings.
+
+8. **Use `DO` suffix for persistence objects** — `UserDO`, `OrderDO`. Domain entities in DDD use bare names (`Order`). Never use `Entity` suffix for persistence objects.
 
 ## Anti-Patterns
 
@@ -32,3 +34,6 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 - Cache without `expire` — always set expiration
 - Missing `@Transactional(readOnly = true)` on queries
 - Bare objects in API responses — use `Result<T>` wrapper
+- Integer soft delete (`deleted 0/1`) — use `deleted_at TIMESTAMPTZ` with `@TableLogic(value = "", delval = "now()")`
+- `Entity` suffix for persistence objects — use `DO` suffix
+- Table name prefix (`t_xxx`) — use plain snake_case (`xxx`)

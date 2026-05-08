@@ -81,10 +81,10 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
-      id-type: auto
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
+      id-type: assign_id
+      logic-delete-field: deletedAt
+      logic-delete-value: "now()"
+      logic-not-delete-value: ""
 ```
 
 ### 4. Docker Compose
@@ -125,15 +125,29 @@ com.example.app/
 │   └── service/           # Application services (orchestration, transactions)
 ├── domain/
 │   ├── model/             # Entities, Value Objects, Aggregates
-│   │   ├── entity/
+│   │   ├── entity/        # Bare names (Order, Customer) — no suffix, no ORM annotations
 │   │   └── valueobject/
 │   ├── service/           # Domain services
 │   └── gateway/           # Repository and external service interfaces (ports)
 └── infrastructure/
-    ├── persistence/       # Repository implementations (MyBatis-Plus)
+    ├── persistence/       # GatewayImpl + DO + Mapper (MyBatis-Plus)
     ├── external/          # External API clients
     └── config/            # Spring configuration
 ```
+
+### Naming Per Layer
+
+| Layer | Class Type | Suffix | Example |
+|-------|-----------|--------|---------|
+| Domain | Entity | none | `Order` |
+| Domain | Gateway | Gateway | `OrderGateway` |
+| Domain | Value Object | none | `Money` |
+| Domain | Domain Event | Event | `OrderCreatedEvent` |
+| Application | Executor | Executor | `CreateOrderExecutor` |
+| Application | Command | Cmd | `CreateOrderCmd` |
+| Infrastructure | Data Object | DO | `OrderDO` |
+| Infrastructure | Gateway Impl | GatewayImpl | `OrderGatewayImpl` |
+| Adapter | Controller | Controller | `OrderController` |
 
 ### Dependency Direction
 
@@ -149,6 +163,21 @@ Adapter → Application → Domain ← Infrastructure
 ### Example: Use Case Executor
 
 ```java
+// Domain entity — bare name, no suffix, no ORM annotations
+public class Order {
+    private String orderId;
+    private List<OrderItem> items;
+    private OrderStatus status;
+
+    public static Order create(List<OrderItem> items, String customerId) {
+        Order order = new Order();
+        order.orderId = IdUtil.simpleUUID();
+        order.items = items;
+        order.status = OrderStatus.PENDING;
+        return order;
+    }
+}
+
 // Domain gateway (port)
 public interface OrderGateway {
     void save(Order order);
@@ -172,32 +201,72 @@ public class CreateOrderExecutor {
     }
 }
 
-// Infrastructure implementation (MyBatis-Plus)
+// Infrastructure DO — persistence mapping with MyBatis-Plus annotations
+@TableName("order")
+public class OrderDO {
+    @TableId(type = IdType.ASSIGN_ID)
+    private Long id;
+    private String orderId;
+    private String status;
+
+    @TableLogic(value = "", delval = "now()")
+    private LocalDateTime deletedAt;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createdAt;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updatedAt;
+
+    @Version
+    private Integer version;
+
+    // Manual conversion — or use MapStruct converter → see mapstruct-patterns
+    public static OrderDO fromDomain(Order order) { /* manual mapping */ }
+    public Order toDomain() { /* manual mapping */ }
+}
+
+// Infrastructure gateway implementation (MyBatis-Plus)
 @Repository
 public class OrderGatewayImpl implements OrderGateway {
     private final OrderMapper orderMapper;
+    // Option A: Manual conversion (simple, few fields)
+    // Option B: MapStruct converter → see mapstruct-patterns
 
     @Override
     public void save(Order order) {
-        orderMapper.insert(OrderEntity.fromDomain(order));
+        orderMapper.insert(OrderDO.fromDomain(order));
+    }
+
+    @Override
+    public Optional<Order> findById(String id) {
+        return Optional.ofNullable(orderMapper.selectOne(
+            new LambdaQueryWrapper<OrderDO>().eq(OrderDO::getOrderId, id)))
+            .map(OrderDO::toDomain);
     }
 }
 ```
 
 ## Best Practices
 
-- Domain logic belongs exclusively in the Domain layer; Application only orchestrates and manages transaction boundaries → full transaction patterns see `spring-boot-transaction-management`
+- Domain logic belongs exclusively in the Domain layer; Application only orchestrates and manages transaction boundaries → see `spring-boot-transaction-management`
 - Define ports (interfaces) in Domain or Application; Infrastructure implements them
 - Avoid business logic in Adapter layer; DTO/domain conversion at boundary
 - Follow COLA naming: `Cmd` for commands, `Executor` for handlers, `Gateway` for ports
-- Use `@Transactional(readOnly = true)` for query executors → see `spring-boot-transaction-management` for detailed patterns
+- Domain entities use **bare names** (no suffix); Infrastructure DOs use **DO suffix**
+- Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft delete
+- Use `@TableId(type = IdType.ASSIGN_ID)` for distributed ID generation
+- Use `@TableName("xxx")` with plain snake_case — no prefix
+- Use `@Transactional(readOnly = true)` for query executors → see `spring-boot-transaction-management`
 - Use `LambdaQueryWrapper` in Infrastructure persistence, never raw `QueryWrapper`
+- Use MapStruct converters at layer boundaries instead of manual `fromDomain()/toDomain()` → see `mapstruct-patterns`
 
 ## Related Skills
 
 - `ddd-event-driven` — domain event design, event stores, aggregate boundaries
 - `spring-boot-transaction-management` — @Transactional patterns for executor and service layer
-- `mybatis-plus-patterns` — MyBatis-Plus persistence patterns for Infrastructure layer
+- `mybatis-plus-patterns` — MyBatis-Plus persistence patterns for Infrastructure layer (MVC IService pattern)
+- `mapstruct-patterns` — MapStruct converters for Domain ↔ DO and Domain ↔ DTO at layer boundaries
 - `spring-boot-dependency-injection` — constructor injection, Bean lifecycle for COLA layers
 
 ## Keywords

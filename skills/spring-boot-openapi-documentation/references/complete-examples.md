@@ -134,7 +134,7 @@ public class BookController {
 }
 ```
 
-## Complete Book Entity
+## Complete Book Data Object
 
 ```java
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -144,7 +144,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "books")
-@Schema(description = "Book entity representing a published book")
+@Schema(description = "Book data object representing a published book")
 public class Book {
 
     @Id

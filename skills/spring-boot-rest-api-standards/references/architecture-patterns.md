@@ -336,8 +336,8 @@ package com.example.infrastructure.persistence;
 import com.example.domain.model.User;
 import com.example.domain.model.UserId;
 import com.example.domain.repository.UserRepository;
-import com.example.infrastructure.entity.UserEntity;
-import com.example.infrastructure.mapper.UserEntityMapper;
+import com.example.infrastructure.entity.UserDO;
+import com.example.infrastructure.mapper.UserDOMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -346,18 +346,18 @@ import org.springframework.stereotype.Repository;
 public class JpaUserRepository implements UserRepository {
 
     private final SpringDataUserRepository springDataRepository;
-    private final UserEntityMapper entityMapper;
+    private final UserDOMapper doMapper;
 
     @Override
     public Optional<User> findById(UserId id) {
         return springDataRepository.findById(id.getValue())
-                .map(entityMapper::toDomain);
+                .map(doMapper::toDomain);
     }
 
     @Override
     public void save(User user) {
-        UserEntity entity = entityMapper.toEntity(user);
-        springDataRepository.save(entity);
+        UserDO dataObject = doMapper.toDO(user);
+        springDataRepository.save(dataObject);
     }
 
     @Override
@@ -376,18 +376,18 @@ public class JpaUserRepository implements UserRepository {
 ```java
 package com.example.infrastructure.persistence;
 
-import com.example.infrastructure.entity.UserEntity;
+import com.example.infrastructure.entity.UserDO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SpringDataUserRepository extends JpaRepository<UserEntity, Long> {
+public interface SpringDataUserRepository extends JpaRepository<UserDO, Long> {
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM UserEntity u WHERE u.email = :email")
-    Optional<UserEntity> findByEmail(@Param("email") String email);
+    @Query("SELECT u FROM UserDO u WHERE u.email = :email")
+    Optional<UserDO> findByEmail(@Param("email") String email);
 }
 ```
 

@@ -2,7 +2,7 @@
 
 ## Complete CRUD REST API with Validation
 
-### Entity with Validation
+### Data Object with Validation
 ```java
 @Entity
 @Table(name = "users")

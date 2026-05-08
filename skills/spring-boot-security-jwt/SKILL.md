@@ -190,7 +190,7 @@ public class AuthController {
 | File | Content |
 |------|---------|
 | [references/configuration.md](references/configuration.md) | Full SecurityFilterChain, CORS, CSRF config |
-| [references/token-management.md](references/token-management.md) | Refresh token entity, rotation, Redis blacklisting |
+| [references/token-management.md](references/token-management.md) | Refresh token Data Object, rotation, Redis blacklisting |
 | [references/authorization-patterns.md](references/authorization-patterns.md) | RBAC/ABAC, PermissionEvaluator, SpEL |
 
 ## Related Skills

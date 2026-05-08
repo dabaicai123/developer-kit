@@ -152,7 +152,7 @@ Documents model schemas.
 
 ```java
 @Schema(
-    description = "Book entity",
+    description = "Book data object",
     name = "Book",
     type = "object",
     required = true,

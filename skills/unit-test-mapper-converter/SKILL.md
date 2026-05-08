@@ -1,6 +1,6 @@
 ---
 name: unit-test-mapper-converter
-description: Provides patterns for unit testing mappers, converters, and bean mappings. Validates entity-to-DTO and model transformation logic in isolation. Generates executable mapping tests with MapStruct and custom converter test coverage. Use when writing mapping tests, converter tests, entity mapping tests, or ensuring correct data transformation between DTOs and domain objects.
+description: Provides patterns for unit testing mappers, converters, and bean mappings. Validates DO-to-DTO and model transformation logic in isolation. Generates executable mapping tests with MapStruct and custom converter test coverage. Use when writing mapping tests, converter tests, DO mapping tests, or ensuring correct data transformation between DTOs and Data Objects.
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -15,7 +15,7 @@ Provides patterns for unit testing MapStruct mappers and custom converter classe
 ## When to use this skill
 
 - Writing mapping tests for MapStruct mapper implementations
-- Testing custom entity-to-DTO converters and bean mappings
+- Testing custom DO-to-DTO converters and bean mappings
 - Validating nested object mapping and collection transformations
 
 ## Instructions
@@ -47,7 +47,7 @@ Configure `nullValueMappingStrategy` in mapper if null should return empty/defau
 
 ### 3. Test Bidirectional Mapping
 ```java
-User restored = mapper.toEntity(mapper.toDto(original));
+User restored = mapper.toDO(mapper.toDto(original));
 assertThat(restored).usingRecursiveComparison().isEqualTo(original);
 ```
 
@@ -81,7 +81,7 @@ Use `@ValueMapping` for enum-to-enum translations. Test all enum values exhausti
 - Use `usingRecursiveComparison()` for complex nested structures
 - Test all mapper methods including collection transformations
 - Verify null handling for all nullable source fields
-- Test bidirectional mapping catches asymmetries between entity→DTO and DTO→entity
+- Test bidirectional mapping catches asymmetries between DO→DTO and DTO→DO
 - Keep mapper tests focused on transformation correctness, not implementation details
 
 ## Constraints and Warnings
@@ -119,7 +119,7 @@ class UserMapperCompleteTest {
   @Test
   void shouldMaintainRoundTrip() {
     User original = new User(1L, "Alice", "alice@example.com", 25);
-    assertThat(mapper.toEntity(mapper.toDto(original)))
+    assertThat(mapper.toDO(mapper.toDto(original)))
       .usingRecursiveComparison()
       .isEqualTo(original);
   }

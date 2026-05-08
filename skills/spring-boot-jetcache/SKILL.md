@@ -99,7 +99,7 @@ public class MyApplication {
 
 ```java
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     @Cached(name = "user:", key = "#userId", expire = 3600,
             cacheType = CacheType.BOTH, localExpire = 300,
@@ -107,13 +107,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @CachePenetrationProtect
     @CacheRefresh(refresh = 1800, stopRefreshAfterLastAccess = 3600)
     @Override
-    public UserEntity getUserById(Long userId) {
+    public UserDO getUserById(Long userId) {
         return getById(userId);
     }
 
     @CacheUpdate(name = "user:", key = "#user.id", value = "#user")
     @Override
-    public void updateUser(UserEntity user) {
+    public void updateUser(UserDO user) {
         updateById(user);
     }
 
@@ -143,9 +143,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
 
 ```java
 @Service
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
 
-    private Cache<Long, OrderEntity> orderCache;
+    private Cache<Long, OrderDO> orderCache;
 
     @Autowired
     private CacheManager cacheManager;
@@ -163,12 +163,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     }
 
     @Override
-    public OrderEntity getOrder(Long orderId) {
+    public OrderDO getOrder(Long orderId) {
         return orderCache.computeIfAbsent(orderId, id -> getById(id));
     }
 
     @Override
-    public void updateOrder(OrderEntity order) {
+    public void updateOrder(OrderDO order) {
         updateById(order);
         orderCache.put(order.getId(), order);
     }

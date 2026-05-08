@@ -1,6 +1,6 @@
 # Transactional Outbox Pattern
 
-## Outbox Entity
+## Outbox Data Object
 
 ### Basic Outbox Event
 

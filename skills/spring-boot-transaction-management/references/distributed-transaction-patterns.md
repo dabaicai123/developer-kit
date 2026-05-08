@@ -263,7 +263,7 @@ Every forward operation MUST have a corresponding compensating transaction. Comp
  */
 @Service
 @RequiredArgsConstructor
-public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentEntity> implements PaymentService {
+public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> implements PaymentService {
 
     private final OutboxEventPublisher outboxEventPublisher;
 
@@ -272,7 +272,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentEntity
      */
     @Transactional(rollbackFor = Exception.class)
     public void processPayment(PaymentRequest request) {
-        PaymentEntity payment = new PaymentEntity();
+        PaymentDO payment = new PaymentDO();
         payment.setOrderId(request.getOrderId());
         payment.setAmount(request.getAmount());
         payment.setStatus(PaymentStatus.COMPLETED);
@@ -307,8 +307,8 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentEntity
 
 | Strategy | Implementation | When to Use |
 |----------|---------------|-------------|
-| Status guard | Check entity state before action (as above) | Most common — simple and reliable |
-| Deduplication table | Insert (requestId, action) with UNIQUE constraint | When no suitable entity state field |
+| Status guard | Check data object state before action (as above) | Most common — simple and reliable |
+| Deduplication table | Insert (requestId, action) with UNIQUE constraint | When no suitable data object state field |
 | Version check | Optimistic locking with @Version field | When concurrent compensation possible |
 
 ## Local Transaction + Outbox Pattern (Recommended for Microservices)
@@ -379,7 +379,7 @@ public class OutboxEventPublisher {
     private final OutboxEventMapper outboxEventMapper;
 
     public void publish(String eventType, Long aggregateId, Object payload) {
-        OutboxEventEntity event = new OutboxEventEntity();
+        OutboxEventDO event = new OutboxEventDO();
         event.setEventType(eventType);
         event.setAggregateId(aggregateId);
         event.setPayload(JsonUtils.toJson(payload));
@@ -408,13 +408,13 @@ public class OutboxEventPoller {
     @Scheduled(fixedDelay = 1000)  // 每 1 秒扫描一次
     @Transactional(rollbackFor = Exception.class)
     public void pollAndPublish() {
-        LambdaQueryWrapper<OutboxEventEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(OutboxEventEntity::getStatus, OutboxStatus.PENDING)
-               .orderByAsc(OutboxEventEntity::getCreatedAt)
+        LambdaQueryWrapper<OutboxEventDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OutboxEventDO::getStatus, OutboxStatus.PENDING)
+               .orderByAsc(OutboxEventDO::getCreatedAt)
                .last("LIMIT 100");  // 每次最多处理 100 条
 
-        List<OutboxEventEntity> events = outboxEventMapper.selectList(wrapper);
-        for (OutboxEventEntity event : events) {
+        List<OutboxEventDO> events = outboxEventMapper.selectList(wrapper);
+        for (OutboxEventDO event : events) {
             try {
                 kafkaTemplate.send(event.getEventType(), event.getPayload()).get();
                 event.setStatus(OutboxStatus.PUBLISHED);
@@ -440,8 +440,8 @@ Track saga execution status to enable monitoring, recovery, and troubleshooting:
  */
 @Data
 @TableName("saga_state")
-public class SagaStateEntity {
-    @TableId(type = IdType.AUTO)
+public class SagaStateDO {
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     private String sagaId;
     private String sagaType;          // e.g., "OrderCreateSaga"

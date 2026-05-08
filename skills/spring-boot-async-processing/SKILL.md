@@ -1,6 +1,6 @@
 ---
 name: spring-boot-async-processing
-description: "Spring Boot async processing — @Async, CompletableFuture, ThreadPoolTaskExecutor configuration, async exception handling, and async+transaction boundary patterns"
+description: "Spring Boot async processing — @Async, CompletableFuture, ThreadPoolTaskExecutor configuration, async exception handling, and async+transaction boundary patterns""
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

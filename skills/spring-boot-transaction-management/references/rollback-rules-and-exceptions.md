@@ -16,7 +16,7 @@ This is a common source of bugs: developers assume any exception will rollback t
 @Override
 @Transactional  // 默认：仅 RuntimeException 和 Error 触发回滚
 public void importData(String filePath) throws IOException {
-    List<DataEntity> data = parseCsv(filePath);  // IOException — checked exception
+    List<DataDO> data = parseCsv(filePath);  // IOException — checked exception
     saveBatch(data);
     // 如果 parseCsv() 抛出 IOException，已插入的数据不会回滚！
 }
@@ -34,7 +34,7 @@ The recommended practice is to always specify `rollbackFor = Exception.class`, w
 @Override
 @Transactional(rollbackFor = Exception.class)
 public void importData(String filePath) throws IOException {
-    List<DataEntity> data = parseCsv(filePath);  // IOException — 触发回滚
+    List<DataDO> data = parseCsv(filePath);  // IOException — 触发回滚
     saveBatch(data);
     // 如果 parseCsv() 抛出 IOException，所有插入的数据都会回滚
 }
@@ -77,11 +77,11 @@ The most critical rollback pitfall: **catching and swallowing exceptions inside 
 @Override
 @Transactional(rollbackFor = Exception.class)
 public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
-    AccountEntity from = accountMapper.selectById(fromId);
+    AccountDO from = accountMapper.selectById(fromId);
     from.setBalance(from.getBalance().subtract(amount));
     accountMapper.updateById(from);
 
-    AccountEntity to = accountMapper.selectById(toId);
+    AccountDO to = accountMapper.selectById(toId);
     try {
         to.setBalance(to.getBalance().add(amount));
         accountMapper.updateById(to);
@@ -98,11 +98,11 @@ public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
 @Override
 @Transactional(rollbackFor = Exception.class)
 public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
-    AccountEntity from = accountMapper.selectById(fromId);
+    AccountDO from = accountMapper.selectById(fromId);
     from.setBalance(from.getBalance().subtract(amount));
     accountMapper.updateById(from);
 
-    AccountEntity to = accountMapper.selectById(toId);
+    AccountDO to = accountMapper.selectById(toId);
     to.setBalance(to.getBalance().add(amount));
     accountMapper.updateById(to);
     // 异常自然传播到代理层 → 事务回滚，两个账户都不变更
@@ -116,11 +116,11 @@ public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
 @Transactional(rollbackFor = Exception.class)
 public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
     try {
-        AccountEntity from = accountMapper.selectById(fromId);
+        AccountDO from = accountMapper.selectById(fromId);
         from.setBalance(from.getBalance().subtract(amount));
         accountMapper.updateById(from);
 
-        AccountEntity to = accountMapper.selectById(toId);
+        AccountDO to = accountMapper.selectById(toId);
         to.setBalance(to.getBalance().add(amount));
         accountMapper.updateById(to);
     } catch (Exception e) {

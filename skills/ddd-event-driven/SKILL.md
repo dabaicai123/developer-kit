@@ -327,7 +327,7 @@ Events are saved to an outbox table in the same local transaction as the aggrega
  */
 @Data
 @TableName("outbox_events")
-public class OutboxEventEntity {
+public class OutboxEventDO {
     @TableId(type = IdType.ASSIGN_UUID)
     private String id;
     private String aggregateType;
@@ -355,7 +355,7 @@ public class OrderApplicationService {
 
         // Save outbox events in the SAME transaction — guarantees consistency
         for (DomainEvent event : order.getDomainEvents()) {
-            OutboxEventEntity outbox = new OutboxEventEntity();
+            OutboxEventDO outbox = new OutboxEventDO();
             outbox.setAggregateType("Order");
             outbox.setAggregateId(order.getId().toString());
             outbox.setEventType(event.getClass().getSimpleName());
@@ -529,7 +529,7 @@ public class OrderApplicationService {
         orderRepository.save(order);
 
         for (DomainEvent event : order.getDomainEvents()) {
-            OutboxEventEntity outbox = new OutboxEventEntity();
+            OutboxEventDO outbox = new OutboxEventDO();
             outbox.setAggregateType("Order");
             outbox.setAggregateId(order.getId().toString());
             outbox.setEventType(event.getClass().getSimpleName());

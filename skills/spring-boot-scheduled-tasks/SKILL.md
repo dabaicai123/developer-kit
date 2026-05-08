@@ -1,6 +1,6 @@
 ---
 name: spring-boot-scheduled-tasks
-description: "Spring Boot scheduled tasks — @Scheduled, XXL-Job distributed scheduling, cron expressions, task monitoring, and misfire handling patterns"
+description: "Spring Boot scheduled tasks — @Scheduled, XXL-Job distributed scheduling, cron expressions, task monitoring, and misfire handling patterns""
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -260,13 +260,13 @@ public class DataCleanupTask {
 
         while (true) {
             // Query a batch of IDs first
-            List<Long> ids = new LambdaQueryWrapper<OrderEntity>()
-                .eq(OrderEntity::getStatus, OrderStatus.COMPLETED)
-                .lt(OrderEntity::getCreatedAt, threshold)
-                .select(OrderEntity::getId)
+            List<Long> ids = new LambdaQueryWrapper<OrderDO>()
+                .eq(OrderDO::getStatus, OrderStatus.COMPLETED)
+                .lt(OrderDO::getCreatedAt, threshold)
+                .select(OrderDO::getId)
                 .last("LIMIT 500")
                 .stream()
-                .map(OrderEntity::getId)
+                .map(OrderDO::getId)
                 .toList();
 
             if (ids.isEmpty()) {
@@ -285,8 +285,8 @@ public class DataCleanupTask {
 
     @Transactional
     public void deleteBatch(List<Long> ids) {
-        orderLogMapper.delete(new LambdaQueryWrapper<OrderLogEntity>()
-            .in(OrderLogEntity::getOrderId, ids));
+        orderLogMapper.delete(new LambdaQueryWrapper<OrderLogDO>()
+            .in(OrderLogDO::getOrderId, ids));
         orderMapper.deleteBatchIds(ids);
     }
 }

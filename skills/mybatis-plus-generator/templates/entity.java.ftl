@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>${table.comment} entity class</p>
+ * <p>${table.comment} data object class</p>
  *
  * <p>Corresponding to the ${table.name} table in the database, used to store ${table.comment}.
  * This entity class uses MyBatis-Plus annotations for ORM mapping, supporting auto table creation and field mapping.</p>
@@ -87,7 +87,7 @@ public class ${entity} implements Serializable {
     @Version
 </#if>
 <#if field.logicDeleteField>
-    @TableLogic
+    @TableLogic(value = "", delval = "now()")
 </#if>
     private ${field.propertyType} ${field.propertyName};
 </#list>

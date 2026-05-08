@@ -1,13 +1,13 @@
 # Model Documentation Patterns
 
-## Entity with Validation
+## Data Object with Validation
 
 ```java
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
 @Entity
-@Schema(description = "Book entity representing a published book")
+@Schema(description = "Book data object representing a published book")
 public class Book {
 
     @Id
@@ -60,7 +60,7 @@ public class BookDetail {
     private PublicationInfo publicationInfo;
 }
 
-@Schema(description = "Publisher entity")
+@Schema(description = "Publisher data object")
 public class Publisher {
     @Schema(example = "Prentice Hall")
     private String name;
@@ -84,7 +84,7 @@ public enum BookStatus {
     DISCONTINUED
 }
 
-@Schema(description = "Book entity")
+@Schema(description = "Book data object")
 public class Book {
     @Schema(description = "Current book status", example = "AVAILABLE")
     private BookStatus status;

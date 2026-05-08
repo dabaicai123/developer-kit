@@ -1,6 +1,6 @@
 ---
 name: spring-boot-file-handling
-description: "Spring Boot file handling — MultipartFile upload/download, MinIO and Aliyun OSS object storage, EasyExcel export/import, file validation, and storage abstraction patterns"
+description: "Spring Boot file handling — MultipartFile upload/download, MinIO and Aliyun OSS object storage, EasyExcel export/import, file validation, and storage abstraction patterns""
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep

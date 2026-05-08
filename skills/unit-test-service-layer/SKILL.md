@@ -140,4 +140,4 @@ For additional patterns (multiple dependencies, argument captors, async services
 ## Related Skills
 
 - `spring-boot-tdd` — TDD workflow, coverage thresholds, test-first development
-- `unit-test-mapper-converter` — testing MapStruct mappers and entity/DTO converters
+- `unit-test-mapper-converter` — testing MapStruct mappers and DO/DTO converters

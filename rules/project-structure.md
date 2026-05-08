@@ -14,7 +14,7 @@ com.example.module/
 ├── controller/    → UserController.java
 ├── service/       → UserService.java (interface) + UserServiceImpl.java
 ├── mapper/        → UserMapper.java
-├── entity/        → UserEntity.java
+├── entity/        → UserDO.java
 ├── dto/           → UserCreateDTO.java, UserUpdateDTO.java
 ├── vo/            → UserVO.java, UserPageVO.java
 └── bo/            → UserQueryBO.java
@@ -26,21 +26,29 @@ com.example.module/
 com.example.user/
 ├── adapter/         → controller, web (VO)
 ├── app/             → service, executor
-├── domain/          → entity, gateway, event
-├── infrastructure/  → persistence (Mapper, GatewayImpl), config, gateway (clients)
+├── domain/          → entity (bare name, no suffix), gateway, event
+├── infrastructure/  → persistence (Mapper, OrderDO, GatewayImpl), config, gateway (clients)
 ```
 
 For full COLA/DDD architecture details, use the `ddd-cola` skill.
 
+## Naming Per Architecture
+
+| Architecture | Persistence Object | Domain Entity | Data Access |
+|---|---|---|---|
+| MVC | `UserDO` (DO suffix) | N/A | `UserService extends IService<UserDO>` |
+| COLA/DDD | `OrderDO` (DO suffix, in infrastructure) | `Order` (bare name, in domain) | `OrderGateway` interface + `OrderGatewayImpl` |
+
 ## Dependency Direction
 
 - **Controller** → depends on **Service** (only)
-- **Service** → depends on **Mapper** and **Domain Entity** (only)
-- **Mapper** → depends on **Entity** (only)
+- **Service** → depends on **Mapper** and **DO** (only)
+- **Mapper** → depends on **DO** (only)
 
 ## Anti-Patterns
 
 - Controller → Mapper (bypasses Service layer)
 - Service → Controller (upward dependency)
-- Entity → Service (upward dependency)
+- Domain Entity → Service (upward dependency in DDD)
 - Field injection (`@Autowired` on fields) — use constructor injection
+- `Entity` suffix for persistence objects — use `DO` suffix
