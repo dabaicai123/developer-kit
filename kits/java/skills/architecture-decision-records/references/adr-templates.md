@@ -53,7 +53,7 @@ compliance for financial transactions.
 
 ## Decision
 
-We will use **PostgreSQL 15** as our primary database.
+We will use **PostgreSQL 18** as our primary database.
 
 ## Rationale
 
