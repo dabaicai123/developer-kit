@@ -15,32 +15,39 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 
 ## Installation
 
-### Full Installation (Recommended)
+Two kits are available:
 
-Install all components (skills, agents, commands, rules) to your project's `.claude/` directory:
+| Kit | Contents |
+|-----|----------|
+| `java` (default) | Spring Boot skills, agents, commands, rules |
+| `base` | Language-agnostic base skills |
+
+### Script Installation (Recommended)
+
+Run from your project root. Installs into `.claude/` and safely overwrites on re-run.
 
 **macOS / Linux:**
 ```bash
-cd YOUR_PROJECT
-git clone --depth 1 https://github.com/dabaicai123/developer-kit.git _dk_tmp
-mkdir -p .claude/skills .claude/agents .claude/commands .claude/rules
-cp -rf _dk_tmp/skills/* .claude/skills/
-cp -f _dk_tmp/agents/*.md .claude/agents/
-cp -f _dk_tmp/commands/*.md .claude/commands/
-cp -f _dk_tmp/rules/*.md .claude/rules/
-rm -rf _dk_tmp
+# java kit (default)
+bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.sh)
+
+# base kit
+bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.sh) base
+
+# both kits
+bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.sh) all
 ```
 
 **Windows (PowerShell):**
 ```powershell
-cd YOUR_PROJECT
-git clone --depth 1 https://github.com/dabaicai123/developer-kit.git $env:TEMP\developer-kit
-New-Item -ItemType Directory -Force -Path .claude\skills, .claude\agents, .claude\commands, .claude\rules | Out-Null
-Copy-Item -Recurse -Force $env:TEMP\developer-kit\skills\* .claude\skills\
-Copy-Item -Force $env:TEMP\developer-kit\agents\*.md .claude\agents\
-Copy-Item -Force $env:TEMP\developer-kit\commands\*.md .claude\commands\
-Copy-Item -Force $env:TEMP\developer-kit\rules\*.md .claude\rules\
-Remove-Item -Recurse -Force $env:TEMP\developer-kit
+# java kit (default)
+irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.ps1 | iex
+
+# base kit
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.ps1))) -Kit base
+
+# both kits
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.ps1))) -Kit all
 ```
 
 ### Skills-only Installation
@@ -52,8 +59,6 @@ npx skills add dabaicai123/developer-kit -g -y
 ```
 
 ### Uninstall
-
-Remove all installed components from your project:
 
 **macOS / Linux:**
 ```bash

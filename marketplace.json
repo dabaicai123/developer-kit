@@ -6,10 +6,20 @@
       "displayName": "Developer Kit - Java",
       "description": "Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Cloud Alibaba, testing, security, DDD architecture, and DevOps integration",
       "version": "1.0.0",
-      "path": ".",
+      "path": "kits/java",
       "author": "Internal Team",
       "license": "MIT",
       "keywords": ["java", "spring-boot", "mybatis-plus", "spring-cloud-alibaba"]
+    },
+    {
+      "name": "developer-kit-base",
+      "displayName": "Developer Kit - Base",
+      "description": "Base skills kit — language-agnostic utilities and shared patterns",
+      "version": "1.0.0",
+      "path": "kits/base",
+      "author": "Internal Team",
+      "license": "MIT",
+      "keywords": ["base", "utilities"]
     }
   ]
 }
