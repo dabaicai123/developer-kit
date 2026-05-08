@@ -12,6 +12,59 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 - SpringDoc OpenAPI 2.8.6
 - JUnit 5 + Mockito + MockMvc + Testcontainers + JaCoCo
 
+
+## Installation
+
+### Full Installation (Recommended)
+
+Install all components (skills, agents, commands, rules) to your project's `.claude/` directory:
+
+**macOS / Linux:**
+```bash
+cd YOUR_PROJECT
+git clone --depth 1 https://github.com/dabaicai123/developer-kit.git _dk_tmp
+mkdir -p .claude/skills .claude/agents .claude/commands .claude/rules
+cp -rf _dk_tmp/skills/* .claude/skills/
+cp -f _dk_tmp/agents/*.md .claude/agents/
+cp -f _dk_tmp/commands/*.md .claude/commands/
+cp -f _dk_tmp/rules/*.md .claude/rules/
+rm -rf _dk_tmp
+```
+
+**Windows (PowerShell):**
+```powershell
+cd YOUR_PROJECT
+git clone --depth 1 https://github.com/dabaicai123/developer-kit.git $env:TEMP\developer-kit
+New-Item -ItemType Directory -Force -Path .claude\skills, .claude\agents, .claude\commands, .claude\rules | Out-Null
+Copy-Item -Recurse -Force $env:TEMP\developer-kit\skills\* .claude\skills\
+Copy-Item -Force $env:TEMP\developer-kit\agents\*.md .claude\agents\
+Copy-Item -Force $env:TEMP\developer-kit\commands\*.md .claude\commands\
+Copy-Item -Force $env:TEMP\developer-kit\rules\*.md .claude\rules\
+Remove-Item -Recurse -Force $env:TEMP\developer-kit
+```
+
+### Skills-only Installation
+
+Only installs skills (no agents, rules, or commands):
+
+```bash
+npx skills add dabaicai123/developer-kit -g -y
+```
+
+### Uninstall
+
+Remove all installed components from your project:
+
+**macOS / Linux:**
+```bash
+rm -rf .claude/skills .claude/agents .claude/commands .claude/rules
+```
+
+**Windows (PowerShell):**
+```powershell
+Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .claude\rules
+```
+
 ## Skills (48)
 
 ### Project Setup
@@ -139,11 +192,6 @@ Comprehensive Java/Spring Boot development toolkit with MyBatis-Plus, Spring Clo
 | `mybatis-plus-conventions` | `**/*Mapper.java`, `**/*Service.java`, `**/*ServiceImpl.java` |
 | `transaction-conventions` | `**/*Service.java`, `**/*ServiceImpl.java` |
 
-## Installation
-
-```bash
-npx skills add dabaicai123/developer-kit -g -y
-```
 
 ## License
 
