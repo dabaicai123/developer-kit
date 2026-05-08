@@ -14,6 +14,7 @@ skills:
   - spring-boot-resilience4j
   - spring-boot-jetcache
   - postgresql-table-design
+  - mapstruct-patterns
 ---
 
 # Java Refactor Expert

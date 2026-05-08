@@ -28,6 +28,8 @@ skills:
   - spring-cloud-gateway
   - spring-cloud-openfeign
   - spring-kafka
+  - spring-boot-amqp
+  - mapstruct-patterns
   - graalvm-native-image
   - postgresql-table-design
 ---
