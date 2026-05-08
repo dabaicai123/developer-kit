@@ -211,7 +211,36 @@ public interface OrderItemDOConverter {
 
 ## Custom Methods for Complex Conversion
 
-Use abstract class when you need injected dependencies or custom logic:
+Use default methods in interfaces for simple custom logic — MapStruct auto-selects them by type matching:
+
+```java
+@Mapper(componentModel = "spring")
+public interface OrderDOConverter {
+    OrderDO toDO(Order order);
+    Order toDomain(OrderDO orderDO);
+
+    default String mapStatus(OrderStatus status) {
+        return status == null ? null : status.name();
+    }
+}
+```
+
+If you need `@Named` qualifiers to distinguish multiple methods with the same source/target type, **use `org.mapstruct.Named`** — never `jakarta.inject.Named`:
+
+```java
+@Mapper(componentModel = "spring")
+public interface UserDOConverter {
+    @Mapping(target = "displayName", qualifiedByName = "fullName")
+    UserDO toDO(User user);
+
+    @Named("fullName")
+    default String toFullName(User user) {
+        return user.getFirstName() + " " + user.getLastName();
+    }
+}
+```
+
+Use abstract class when you need injected dependencies:
 
 ```java
 @Mapper(componentModel = "spring", uses = {RoleDOConverter.class})
