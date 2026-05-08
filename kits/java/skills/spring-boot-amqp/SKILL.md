@@ -64,26 +64,6 @@ public class RabbitConfig {
 
 Spring Boot auto-configures `RabbitTemplate` and `SimpleRabbitListenerContainerFactory` with this converter automatically.
 
-## DLX / DLQ (declare only when needed)
-
-Only declare Queue Beans when you need DLX/DLQ. Simple queues are auto-created by `@RabbitListener`.
-
-```java
-@Bean Queue orderCreatedQueue() {
-    return QueueBuilder.durable("order.created.queue")
-        .withArgument("x-dead-letter-exchange", "order.dlx")
-        .withArgument("x-dead-letter-routing-key", "order.created.dlq")
-        .build();
-}
-
-@Bean DirectExchange orderDlx() { return new DirectExchange("order.dlx"); }
-@Bean Queue orderCreatedDlq() { return QueueBuilder.durable("order.created.dlq").build(); }
-
-@Bean Binding dlqBinding(Queue orderCreatedDlq, DirectExchange orderDlx) {
-    return BindingBuilder.bind(orderCreatedDlq).to(orderDlx).with("order.created.dlq");
-}
-```
-
 ## Producer
 
 ```java
@@ -110,17 +90,28 @@ public record OrderCreatedEvent(UUID eventId, Long orderId, Instant timestamp) {
 
 ## Consumer
 
+Prefer `@RabbitListener` with `bindings` to declare exchange, queue, and DLX inline — no separate `@Bean` needed:
+
 ```java
 @Service
 @RequiredArgsConstructor
 public class OrderNotificationListener {
 
-    @RabbitListener(queues = "order.created.queue")
+    @RabbitListener(bindings = @QueueBinding(
+        value = @Queue(value = "order.created.queue", durable = "true", arguments = {
+            @Argument(name = "x-dead-letter-exchange", value = "order.dlx"),
+            @Argument(name = "x-dead-letter-routing-key", value = "order.created.dlq")
+        }),
+        exchange = @Exchange(value = "order.exchange", type = ExchangeTypes.TOPIC, durable = "true"),
+        key = "order.created.#"
+    ))
     public void handleOrderCreated(OrderCreatedEvent event) {
         notificationService.sendOrderConfirmation(event);
     }
 }
 ```
+
+Use `@Bean` declarations only for producer-only services (no listener) or when multiple listeners share the same exchange/queue.
 
 ### Manual Acknowledgment
 
@@ -166,7 +157,7 @@ public void handleOrderCreated(OrderCreatedEvent event) {
 ## Key Rules
 
 - Configure Jackson converter — Spring Boot picks it up automatically for `RabbitTemplate` and listeners
-- Only declare Queue Beans when you need DLX/DLQ arguments
+- Prefer `@RabbitListener` with `bindings` for inline queue/exchange/DLX declaration — use `@Bean` only for producer-only services or shared resources
 - Never publish inside `@Transactional` without outbox pattern — use `spring-boot-event-driven-patterns`
 - Configure DLX/DLQ for every production queue
 - Keep consumers idempotent using `eventId` deduplication
