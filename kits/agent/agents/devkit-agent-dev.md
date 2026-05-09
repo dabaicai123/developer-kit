@@ -1,5 +1,5 @@
 ---
-name: agent-development-expert
+name: devkit:agent:dev
 description: Expert AI agent developer for building production-grade agentic systems. Specializing in agent architecture, tool design, memory systems, observability, and evaluation. Use proactively when implementing agent features, designing agent workflows, or making agent architecture decisions.
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
@@ -14,6 +14,7 @@ skills:
   - multi-agent-orchestration
   - agent-context-management
   - mcp-integration
+  - langgraph-patterns
 ---
 
 # Agent Development Expert
@@ -97,6 +98,7 @@ When building agents, reference these skills for detailed patterns:
 | Multi-agent patterns | `multi-agent-orchestration` |
 | Context management | `agent-context-management` |
 | MCP integration | `mcp-integration` |
+| LangGraph patterns | `langgraph-patterns` |
 
 ---
 

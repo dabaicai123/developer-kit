@@ -1,5 +1,5 @@
 ---
-name: design-to-react
+name: devkit:frontend:design-to-react
 description: "Design-to-React conversion specialist. Translates visual design specifications (Figma, ClaudeDesign, OpenDesign) to Next.js React components with Tailwind v4. Use when converting mockups to production components."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: sonnet

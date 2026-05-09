@@ -1,5 +1,5 @@
 ---
-name: crewai-development-expert
+name: devkit:agent:crewai
 description: Expert CrewAI developer for building multi-agent systems with Crews (role-based teams) and Flows (event-driven workflows). Use proactively when implementing CrewAI agents, defining crews, or designing Flow orchestration.
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
@@ -15,6 +15,7 @@ skills:
   - multi-agent-orchestration
   - agent-context-management
   - mcp-integration
+  - langgraph-patterns
 ---
 
 # CrewAI Development Expert
@@ -135,6 +136,7 @@ agent = Agent(
 | Multi-agent orchestration | `multi-agent-orchestration` |
 | Context management | `agent-context-management` |
 | MCP integration | `mcp-integration` |
+| LangGraph patterns | `langgraph-patterns` |
 
 ---
 

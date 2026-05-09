@@ -1,5 +1,5 @@
 ---
-name: frontend-testing-expert
+name: devkit:frontend:test
 description: "Frontend testing specialist for Vitest, Testing Library, Server Action testing, and Playwright E2E. Use when writing tests for React components, Server Actions, or setting up testing infrastructure."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: sonnet

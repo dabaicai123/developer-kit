@@ -1,5 +1,5 @@
 ---
-name: frontend-reviewer
+name: devkit:frontend:review
 description: "React/Next.js/TypeScript/Tailwind code review specialist. Use PROACTIVELY when writing React components, implementing data fetching, or reviewing frontend code."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: sonnet

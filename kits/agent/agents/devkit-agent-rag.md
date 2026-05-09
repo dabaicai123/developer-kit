@@ -1,5 +1,5 @@
 ---
-name: llamaindex-rag-expert
+name: devkit:agent:rag
 description: Expert LlamaIndex developer for building RAG pipelines, agentic workflows, and document-heavy agent systems. Use proactively when implementing data ingestion, indexing, retrieval, or LlamaIndex Workflows.
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
@@ -14,6 +14,7 @@ skills:
   - agent-guardrails
   - agent-context-management
   - mcp-integration
+  - langgraph-patterns
 ---
 
 # LlamaIndex RAG Expert
@@ -118,6 +119,7 @@ llama_index.core.global_handler = "arize_phoenix"  # or "langfuse", "mlflow", et
 | Guardrails | `agent-guardrails` |
 | Context management | `agent-context-management` |
 | MCP integration | `mcp-integration` |
+| LangGraph patterns | `langgraph-patterns` |
 
 ---
 
