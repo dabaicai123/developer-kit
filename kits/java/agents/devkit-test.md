@@ -1,6 +1,6 @@
 ---
-name: spring-boot-unit-testing-expert
-description: Expert in Spring Boot testing strategy with JUnit 5, Mockito, MockMvc, Testcontainers. Provides comprehensive testing guidance for MyBatis-Plus service layers, controllers, and integration tests. Use when writing tests, improving test coverage, or setting up testing infrastructure.
+name: devkit:java:test
+description: Spring Boot testing — JUnit 5, Mockito, MockMvc, Testcontainers, MyBatis-Plus testing patterns. Use when writing tests, improving coverage, or setting up testing infrastructure.
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 model: sonnet
 skills:

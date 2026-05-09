@@ -1,6 +1,6 @@
 ---
-name: java-refactor-expert
-description: Expert in Java code refactoring, clean code principles, SOLID design patterns, and modernization of legacy Java/Spring Boot code. Use when improving code quality, reducing complexity, or modernizing Java code to Java 21 features.
+name: devkit:java:refactor
+description: Java code refactoring — clean code, SOLID patterns, Java 21 modernization, MyBatis-Plus migration. Use when improving code quality, reducing complexity, or modernizing legacy code.
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 model: sonnet
 skills:

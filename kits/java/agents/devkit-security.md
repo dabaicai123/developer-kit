@@ -1,6 +1,6 @@
 ---
-name: java-security-expert
-description: Expert in Java/Spring Boot security covering authentication, authorization, JWT, OWASP vulnerabilities, input validation, and secure coding practices. Use when implementing security features, auditing security, or reviewing authentication/authorization.
+name: devkit:java:security
+description: Spring Boot security audit — JWT, OWASP, input validation, authorization, MyBatis-Plus SQL injection prevention. Use when implementing security features or auditing vulnerabilities.
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 model: sonnet
 skills:
@@ -14,6 +14,10 @@ skills:
   - spring-boot-actuator
   - spring-boot-logging
   - spring-boot-openapi-documentation
+  - mybatis-plus-patterns
+  - spring-boot-exception-handling
+  - ddd-cola
+  - postgresql-table-design
 ---
 
 # Java Security Expert

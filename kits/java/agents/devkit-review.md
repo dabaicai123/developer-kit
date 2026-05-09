@@ -1,6 +1,6 @@
 ---
-name: spring-boot-code-review-expert
-description: Validates Java code quality for enterprise Spring applications. Reviews architecture, security, performance, MyBatis-Plus patterns, and best practices. Use when reviewing code changes or before merging pull requests.
+name: devkit:java:review
+description: Code review for Spring Boot + MyBatis-Plus — architecture, security, performance, pattern compliance. Use when reviewing code changes or before merging PRs.
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: sonnet
 skills:
@@ -17,6 +17,11 @@ skills:
   - spring-boot-scheduled-tasks
   - spring-boot-file-handling
   - spring-boot-jetcache
+  - spring-boot-dependency-injection
+  - spring-boot-logging
+  - spring-boot-actuator
+  - ddd-cola
+  - mapstruct-patterns
   - spring-cloud-gateway
   - spring-cloud-openfeign
   - spring-kafka

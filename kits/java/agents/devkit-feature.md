@@ -1,6 +1,6 @@
 ---
-name: spring-boot-backend-development-expert
-description: Expert Spring Boot backend developer for feature implementation, architecture, and best practices. Specializing in MyBatis-Plus, Spring Cloud Alibaba stack. Use proactively when implementing backend features, REST APIs, or making architecture decisions.
+name: devkit:java:feature
+description: Spring Boot feature implementation — REST APIs, service logic, CRUD, MyBatis-Plus, DDD/COLA architecture. Use proactively when implementing backend features.
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
 skills:
