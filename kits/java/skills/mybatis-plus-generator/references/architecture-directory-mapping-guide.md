@@ -180,10 +180,11 @@ src/main/java/{package}/
 │   ├── service/                      # Domain services
 │   └── ability/                      # Domain abilities
 └── infrastructure/                   # Infrastructure layer
-    ├── persistence/                  # Persistence implementation
-    │   ├── mapper/                   # MyBatis Mapper implementations
-    │   │   └── UserMapper.java
-    │   └── entity/                   # Persistence entities (DO)
+    ├── gatewayimpl/                  # Gateway implementations (COLA naming)
+    │   └── UserGatewayImpl.java
+    ├── mapper/                       # MyBatis Mapper + DO classes
+    │   ├── UserMapper.java
+    │   └── dataobject/
     │       └── UserDO.java
     ├── external/                     # External API clients
     └── config/                       # Spring configuration
@@ -192,7 +193,9 @@ src/main/java/{package}/
 **Mapping:**
 - Entity (Domain Model) → `{package}/domain/model/entity/`
 - Mapper (Gateway Interface) → `{package}/domain/gateway/`
-- Mapper (MyBatis Impl) → `{package}/infrastructure/persistence/mapper/`
+- Mapper (MyBatis Impl) → `{package}/infrastructure/mapper/`
+- Gateway Implementation → `{package}/infrastructure/gatewayimpl/`
+- DO (Persistence Entity) → `{package}/infrastructure/mapper/dataobject/`
 - Service (App Service) → `{package}/app/service/`
 - ServiceImpl → `{package}/app/service/impl/`
 - Controller → `{package}/adapter/controller/`
@@ -207,6 +210,8 @@ src/main/java/{package}/
 **COLA V5 Naming Conventions**:
 - Application layer package name is `app` (not `application`)
 - Repository interface is named `gateway` (not `repository`)
+- Gateway implementation is in `gatewayimpl/` package (not `persistence/`)
+- DO + Mapper are in `mapper/` package (not `persistence/entity/` + `persistence/mapper/`)
 - Controllers are placed in `adapter/controller/` (not `adapter/web/controller/`)
 - Uses `Cmd` suffix for command objects, `Qry` suffix for query objects
 - Uses `Exe` suffix for executors

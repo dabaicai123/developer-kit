@@ -6,6 +6,7 @@ model: sonnet
 skills:
   - spring-boot-security
   - spring-boot-security-jwt
+  - spring-boot-rest-client
   - spring-boot-validation
   - spring-boot-file-handling
   - spring-boot-configuration-management

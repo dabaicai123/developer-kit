@@ -75,11 +75,15 @@ com.example.app/
 │   ├── model/              # Domain entities — NO mapper annotations, NO ORM annotations
 │   └── gateway/            # Repository interfaces
 └── infrastructure/
-    ├── persistence/
+    ├── gatewayimpl/
     │   ├── converter/      # Domain ↔ DO mappers (Infrastructure layer)
     │   │   └── OrderDOConverter.java
-    │   ├── dataobject/     # DO classes with MyBatis-Plus annotations
-    │   └── gatewayimpl/    # GatewayImpl uses converter + Mapper
+    │   └── OrderGatewayImpl.java
+    ├── mapper/
+    │   └── dataobject/     # DO classes with MyBatis-Plus annotations
+    │   │   └── OrderDO.java
+    │   └── OrderMapper.java
+    ├── external/
     └── config/
 ```
 

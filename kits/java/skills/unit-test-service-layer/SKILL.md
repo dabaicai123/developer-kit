@@ -130,6 +130,9 @@ For additional patterns (multiple dependencies, argument captors, async services
 - Do not test private methods directly; test them through public method behavior.
 - Argument matchers (`any()`, `eq()`) cannot be mixed with actual values in the same stub.
 - Avoid over-verifying; verify only interactions important to the test scenario.
+- **Strict stubbing conflict**: `@BeforeEach setUp()` stubs that aren't used in all test paths cause `UnnecessaryStubbingException`. Use `@MockitoSettings(strictness = Strictness.LENIENT)` or move stubs into individual test methods.
+- **Mock delegation**: Mockito mocks do NOT internally delegate — `mock.method2Param()` will NOT invoke `mock.method3Param()` even if real code delegates. Stub each called signature separately.
+- **Mock default returns**: `String` returns `null` (not ""), so `anyString()` won't match null. Use `any()` for nullable parameters, or stub explicitly.
 
 ## References
 

@@ -372,6 +372,7 @@ public class PaymentController {
 - **Log 4xx at WARN, 5xx at ERROR with full stack trace** — client errors are expected, server errors indicate bugs
 - **Never log sensitive data** — passwords, tokens, PII must not appear in log messages
 - **Define a structured error code system** — per-module prefixes give clients programmatic error handling
+- **Avoid duplicate error code names** — even if two scenarios seem similar (both "not found"), use distinct names reflecting the specific semantics. `STRATEGY_CONFIG_NOT_FOUND` vs `CHANNEL_STRATEGY_MISSING` is better than `STRATEGY_NOT_FOUND` appearing twice with different codes.
 - **Use `@Order(Ordered.HIGHEST_PRECEDENCE)` on global handler** — ensures it runs before any framework handlers
 - **Local handlers override global handlers** — use sparingly, only for controller-specific scenarios
 - **Throw `BusinessException` subclasses from service layer** — let the global handler catch and format them
@@ -388,6 +389,7 @@ public class PaymentController {
 - **Re-validating in service layer after controller `@Valid`** — redundant and wasteful. Validate at the controller boundary only.
 - **Catch-all handler that returns the exception message verbatim** — `return Result.fail(500, e.getMessage())` leaks internal details. Return a fixed generic message for 5xx.
 - **Multiple `@RestControllerAdvice` classes handling the same exception type** — causes ambiguous handler resolution. Use a single global handler with `@Order`.
+- **Duplicate enum constant names in ErrorCodes** — never define the same constant name twice with different codes (e.g., `STRATEGY_NOT_FOUND = 404` and `STRATEGY_NOT_FOUND = 5002`). Java enum/constants must be unique by name. When two errors have similar names but different semantics, use distinct names: `STRATEGY_CONFIG_NOT_FOUND = 404` vs `CHANNEL_STRATEGY_MISSING = 5002`.
 
 ## Constraints and Warnings
 

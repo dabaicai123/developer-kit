@@ -27,7 +27,7 @@ com.example.user/
 ├── adapter/         → controller, web (VO)
 ├── app/             → service, executor
 ├── domain/          → entity (bare name, no suffix), gateway, event
-├── infrastructure/  → persistence (Mapper, OrderDO, GatewayImpl), config, gateway (clients)
+├── infrastructure/  → gatewayimpl (GatewayImpl), mapper (DO, Mapper), config, external
 ```
 
 For full COLA/DDD architecture details, use the `ddd-cola` skill.

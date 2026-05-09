@@ -5,6 +5,7 @@ tools: ["Read", "Grep", "Glob", "Bash"]
 model: sonnet
 skills:
   - spring-boot-rest-api-standards
+  - spring-boot-rest-client
   - spring-boot-security
   - spring-boot-exception-handling
   - mybatis-plus-patterns

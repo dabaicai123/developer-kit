@@ -85,6 +85,69 @@ Maven snippet:
 - For JSON responses, use `jsonPath`
 - For exceptions: `assertThatThrownBy(...)`
 
+## Mockito Pitfalls
+
+### Strict Stubbing vs setUp()
+
+When `@BeforeEach setUp()` stubs mocks globally (e.g., `when(strategy.supportedChannel()).thenReturn(...)`),
+but some test paths throw exceptions before reaching the stubbed call, Mockito throws `UnnecessaryStubbingException`.
+
+Fix options:
+1. **Preferred**: Move stubs into each test method — keeps stubs minimal per scenario
+2. `@MockitoSettings(strictness = Strictness.LENIENT)` on the test class — disables strict stubbing checks
+
+```java
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class PushExecutorTest { ... }
+```
+
+### Mock Delegation Trap
+
+**Mockito mock objects do NOT delegate internally** — calling `mock.method2Param()` on a mock will NOT invoke
+`mock.method3Param()` even if the real `method2Param()` calls `method3Param()` internally. Each method signature
+on a mock is independent; you must stub every method that will be called.
+
+```java
+// Real code: httpClient.postJson(url, body) internally calls httpClient.postJson(url, body, Map.of())
+// ❌ Stubbing only the 2-param version — 3-param call returns null
+when(httpClient.postJson(anyString(), anyString())).thenReturn(response);
+
+// ✅ Stub BOTH signatures if both may be called
+when(httpClient.postJson(anyString(), anyString())).thenReturn(response);
+when(httpClient.postJson(anyString(), anyString(), anyMap())).thenReturn(response);
+```
+
+### Mock Default Returns
+
+Mockito mocks return **default values** when a stub doesn't match:
+- `String` → `null` (not empty string)
+- `int/long` → `0`
+- `boolean` → `false`
+
+`anyString()` will NOT match `null`. If a mock method returns null by default, use `any()` instead of
+`anyString()`, or stub the method explicitly to return a non-null value.
+
+### MockRestServiceServer URL Parameter Ordering
+
+When testing with `MockRestServiceServer`, never use exact URL string matching for query parameters.
+`Map.of()` does not guarantee insertion order, and `UriComponentsBuilder.queryParam()` may alphabetically
+sort parameters. Expected `key=value&name=test` may arrive as `name=test&key=value`.
+
+```java
+// Required Hamcrest imports
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+
+// ❌ Exact URL matching — fails due to parameter order
+mockServer.expect(requestTo("/api?key=value&name=test"))
+
+// ✅ Flexible matching — ignores parameter order
+mockServer.expect(requestTo(containsString("/api")))
+  .andExpect(queryParam("key", equalTo("value")))
+  .andExpect(queryParam("name", equalTo("test")));
+```
+
 ## Test Data Builders
 
 ```java
@@ -101,6 +164,8 @@ class MarketBuilder {
 - Gradle: `./gradlew test jacocoTestReport`
 
 **Remember**: Keep tests fast, isolated, and deterministic. Test behavior, not implementation details.
+
+- **Verify imports after writing test files**: common missing imports include `java.util.Map`, Hamcrest matchers (`containsString`, `equalTo`), and sealed interface types
 
 ## Related Skills
 

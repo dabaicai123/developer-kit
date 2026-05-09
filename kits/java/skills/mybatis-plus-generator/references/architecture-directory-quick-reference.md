@@ -24,7 +24,7 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/domain/repository/` (repository interfaces)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper) |
 | Hexagonal | `{package}/application/ports/outbound/` (port interfaces)<br>`{package}/infrastructure/adapter/outbound/persistence/mapper/` (MyBatis Mapper) |
 | Clean | `{package}/application/ports/output/` or `{package}/domain/repository/` (interfaces)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper) |
-| COLA | `{package}/domain/gateway/` (gateway interfaces, COLA uses gateway not repository)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper implementations) |
+| COLA | `{package}/domain/gateway/` (gateway interfaces, COLA uses gateway not repository)<br>`{package}/infrastructure/mapper/` (MyBatis Mapper implementations) |
 
 ### Service (Service Interfaces)
 
@@ -95,7 +95,7 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/infrastructure/persistence/entity/` |
 | Hexagonal | `{package}/infrastructure/adapter/outbound/persistence/entity/` |
 | Clean | `{package}/infrastructure/persistence/entity/` |
-| COLA | `{package}/infrastructure/persistence/entity/` |
+| COLA | `{package}/infrastructure/mapper/dataobject/` |
 
 ### Repository/Gateway Implementation
 
@@ -104,7 +104,7 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/infrastructure/persistence/repository/` |
 | Hexagonal | `{package}/infrastructure/adapter/outbound/persistence/repositoryimpl/` |
 | Clean | `{package}/infrastructure/persistence/repository/` |
-| COLA | `{package}/infrastructure/persistence/mapper/` (Gateway implementation via MyBatis Mapper) |
+| COLA | `{package}/infrastructure/gatewayimpl/` (Gateway implementation) |
 
 ## Complete Path Examples
 
@@ -202,9 +202,12 @@ src/main/java/com/example/order/
 │   ├── gateway/UserGateway.java
 │   └── service/
 └── infrastructure/
-    ├── persistence/
-    │   ├── mapper/UserMapper.java
-    │   └── entity/UserDO.java
+    ├── gatewayimpl/
+    │   └── UserGatewayImpl.java
+    ├── mapper/
+    │   ├── UserMapper.java
+    │   └── dataobject/
+    │   │   └── UserDO.java
     ├── external/
     └── config/
 ```
@@ -222,6 +225,8 @@ src/main/java/com/example/order/
 | Query objects | `Qry` suffix | `Query` / `Request` | e.g., `GetUserQry` |
 | Executors | `Exe` suffix | `Handler` / `UseCase` | e.g., `UserCreateCmdExe` |
 | Persistence objects | `DO` suffix | `Entity` / `PO` | e.g., `UserDO` |
+| Infra package | `gatewayimpl` + `mapper` | `persistence` | COLA uses gatewayimpl for impl, mapper for DO+Mapper |
+| Gateway impl | `GatewayImpl` suffix | `RepositoryImpl` | e.g., `UserGatewayImpl` |
 
 ## Usage Steps
 

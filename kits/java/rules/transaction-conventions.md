@@ -24,6 +24,8 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 
 7. **Use `TransactionTemplate` for programmatic control** — when transaction boundaries are conditional or need fine-grained control within a single method.
 
+8. **Re-save after modification within same transaction** — MyBatis-Plus does not auto-flush. After `save(record)` then `record.setXxx()`, call `updateById(record)` to persist changes. Do NOT call `save()` again — it will INSERT and cause primary key conflict.
+
 ## Anti-Patterns
 
 - `@Transactional` on Service interface
@@ -34,5 +36,6 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 - Catching and swallowing exceptions inside `@Transactional`
 - Casual use of `Propagation.REQUIRES_NEW`
 - No timeout on batch operations
+- Modifying a saved entity without updating — changes silently lost (use `updateById()`, not `save()` again)
 
 For detailed examples and explanations, use the `spring-boot-transaction-management` skill.

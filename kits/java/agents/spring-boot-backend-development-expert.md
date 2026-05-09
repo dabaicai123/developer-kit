@@ -9,6 +9,7 @@ skills:
   - spring-boot-dependency-injection
   - spring-boot-event-driven-patterns
   - spring-boot-rest-api-standards
+  - spring-boot-rest-client
   - spring-boot-security-jwt
   - spring-boot-actuator
   - spring-boot-openapi-documentation

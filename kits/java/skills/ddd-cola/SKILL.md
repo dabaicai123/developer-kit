@@ -152,6 +152,39 @@ services:
 | `mvn dependency:analyze` | Find unused/undeclared deps |
 | `mvn versions:display-dependency-updates` | Check for updates |
 | `mvn -B verify` | Batch mode build |
+| `mvnd -t 4 compile` | mvnd parallel compile (4 threads) |
+
+### 7. mvnd + JDK 21 + Lombok Compatibility
+
+When using **mvnd (Maven Daemon)** with **JDK 21** and **Lombok**, annotation processing silently fails.
+mvnd uses the JSR 199 `javax.tools.JavaCompiler` API, which blocks Lombok from accessing `com.sun.tools.javac.*`
+internal APIs needed for AST modification. Symptoms include:
+- `log` not found (from `@Slf4j`)
+- `getId()` not found (from `@Data`)
+- `builder()` not found (from `@Builder`)
+- Constructor type inference failures (from `@AllArgsConstructor`)
+
+**Fix**: Add `<forceLegacyJavacApi>true</forceLegacyJavacApi>` to `maven-compiler-plugin`:
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <configuration>
+    <forceLegacyJavacApi>true</forceLegacyJavacApi>
+  </configuration>
+</plugin>
+```
+
+This forces mvnd to use the legacy javac API, restoring Lombok's annotation processing capability.
+
+### 8. External HTTP Client
+
+- Use **RestClient** (Spring 6.1+, included in `spring-boot-starter-web`, no extra dependency)
+- **OkHttp3**: only for WebSocket or custom interceptor scenarios; not managed by Spring Boot parent
+- For detailed configuration and usage → see `spring-boot-rest-client` skill
+
+> **Note**: Dependencies not managed by `spring-boot-starter-parent` (e.g., OkHttp3, Fastjson2) require explicit `<version>`.
 
 ## COLA Layer Structure
 
@@ -170,9 +203,10 @@ com.example.app/
 │   ├── service/           # Domain services
 │   └── gateway/           # Repository and external service interfaces (ports)
 └── infrastructure/
-    ├── persistence/       # GatewayImpl + DO + Mapper (MyBatis-Plus)
-    ├── external/          # External API clients
-    └── config/            # Spring configuration
+    ├── gatewayimpl/        # Gateway implementations (implements domain gateway interfaces)
+    ├── mapper/             # MyBatis Mapper interfaces + DO classes
+    ├── external/           # External API clients (RestClient)
+    └── config/             # Spring configuration
 ```
 
 ### Naming Per Layer
@@ -218,9 +252,10 @@ public class Order {
     }
 }
 
-// Domain gateway (port)
+// Domain gateway (port) — define both insert and update methods
 public interface OrderGateway {
     void save(Order order);
+    void update(Order order);
     Optional<Order> findById(String id);
 }
 
@@ -269,6 +304,7 @@ public class OrderDO {
 }
 
 // Infrastructure gateway implementation (MyBatis-Plus)
+// Package: infrastructure/gatewayimpl/
 @Repository
 public class OrderGatewayImpl implements OrderGateway {
     private final OrderMapper orderMapper;
@@ -277,7 +313,12 @@ public class OrderGatewayImpl implements OrderGateway {
 
     @Override
     public void save(Order order) {
-        orderMapper.insert(OrderDO.fromDomain(order));
+        orderMapper.insert(OrderDO.fromDomain(order));  // INSERT — for new records
+    }
+
+    @Override
+    public void update(Order order) {
+        orderMapper.updateById(OrderDO.fromDomain(order));  // UPDATE — for existing records
     }
 
     @Override
@@ -302,15 +343,20 @@ public class OrderGatewayImpl implements OrderGateway {
 - Use `@Transactional(readOnly = true)` for query executors → see `spring-boot-transaction-management`
 - Use `LambdaQueryWrapper` in Infrastructure persistence, never raw `QueryWrapper`
 - Use MapStruct converters at layer boundaries instead of manual `fromDomain()/toDomain()` → see `mapstruct-patterns`
+- **Sealed interface pattern**: when using `sealed interface` for commands/events:
+  1. Import the sealed interface alongside its permit-listed subtypes — `import AuthorizeAccountCmd;` is required even when only casting to `OAuthAuthorizeCmd`
+  2. Call subtype-specific methods only after pattern-match or explicit cast — sealed interface itself has no methods (`if (cmd instanceof OAuthAuthorizeCmd oauth) { oauth.clientId(); }`)
+- **Verify import completeness** — after writing source or test files, check all symbols have explicit imports. Common misses: `java.util.Map`, sealed interface types, Hamcrest matchers
 
 ## Related Skills
 
 - `ddd-event-driven` — domain event design, event stores, aggregate boundaries
 - `spring-boot-transaction-management` — @Transactional patterns for executor and service layer
+- `spring-boot-rest-client` — RestClient/WebClient/OkHttp selection, configuration, and testing for `infrastructure/external/`
 - `mybatis-plus-patterns` — MyBatis-Plus persistence patterns for Infrastructure layer (MVC IService pattern)
 - `mapstruct-patterns` — MapStruct converters for Domain ↔ DO and Domain ↔ DTO at layer boundaries
 - `spring-boot-dependency-injection` — constructor injection, Bean lifecycle for COLA layers
 
 ## Keywords
 
-cola, COLA architecture, COLA V5, DDD, project setup, spring boot project creation, adapter, application, domain, infrastructure, gateway, executor, dependency inversion
+cola, COLA architecture, COLA V5, DDD, project setup, spring boot project creation, adapter, application, domain, infrastructure, gateway, gatewayimpl, mapper, executor, dependency inversion, RestClient

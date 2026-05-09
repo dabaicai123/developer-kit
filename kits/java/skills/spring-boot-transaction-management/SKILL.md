@@ -334,6 +334,39 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 - **Seata for distributed transactions**: CAUTION — only use when truly distributed across multiple services that must be atomically consistent. Seata adds significant complexity (undo_log table, global lock, performance overhead) and risk of partial commit. Prefer local transaction + Outbox + Saga for microservices. See `references/distributed-transaction-patterns.md` for full comparison of Saga vs 2PC and choreography vs orchestration patterns.
 - **Transaction timeout**: always set a timeout for long-running transactions (`@Transactional(timeout = 30)`) to prevent connection pool exhaustion from stuck or slow transactions.
 - **Never catch exceptions inside `@Transactional` methods and swallow them** — this prevents rollback because the proxy only sees a normal method return. Either re-throw the exception or use `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()` to force rollback.
+- **Re-save after in-transaction modification**: modifying a persisted entity's fields within the same `@Transactional` method does NOT auto-persist the changes. MyBatis-Plus has no auto-flush/dirty-checking. After `save(record)` then `record.setXxx()`, call `updateById(record)` to persist changes. Do NOT call `save()` again — `save()` = INSERT and will cause primary key conflict on an already-inserted record.
+
+### Example 6: Re-saving modified entity within same transaction
+
+```java
+@Service
+@RequiredArgsConstructor
+public class PushExecutor {
+
+    private final RecordGateway recordGateway;
+
+    @Transactional(rollbackFor = Exception.class)
+    public void execute(PushCmd cmd) {
+        PushRecord record = new PushRecord();
+        record.setStatus(PushStatus.PENDING);
+        recordGateway.save(record);  // First: INSERT
+
+        // ... execute push logic ...
+
+        // Modify after initial insert — use updateById(), NOT save() again!
+        // save() = INSERT; calling it twice causes primary key conflict
+        record.setRetryCount(record.getRetryCount() + 1);
+        record.setNextRetryTime(LocalDateTime.now().plusMinutes(5));
+        record.setStatus(PushStatus.RETRYING);
+        recordGateway.updateById(record);  // Second: UPDATE — without this, changes are lost
+    }
+}
+```
+
+> **Why**: MyBatis-Plus has no auto-flush/dirty-checking. Unlike JPA's managed entities, every state change
+> requires an explicit call — but use the correct method: `save()` for INSERT, `updateById()` for UPDATE.
+> Calling `save()` on an already-inserted record throws a primary key conflict.
+> In DDD Gateway pattern, define distinct `save()` (insert) and `update()` methods on the gateway interface.
 
 ## References
 

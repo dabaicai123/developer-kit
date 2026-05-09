@@ -19,6 +19,7 @@ skills:
   - unit-test-config-properties
   - unit-test-utility-methods
   - unit-test-wiremock-rest-api
+  - spring-boot-rest-client
   - spring-boot-tdd
   - spring-boot-transaction-management
   - spring-boot-database-migration

@@ -221,19 +221,17 @@ src/main/java/com/example/order/
 ├── domain/                          # Domain layer
 │   ├── model/
 │   │   ├── entity/
-│   │   │   └── User.java           # Entity
+│   │   │   └── User.java           # Entity (bare name, no suffix)
 │   │   └── valueobject/
 │   │       └── Email.java
-│   ├── repository/
-│   │   └── UserRepository.java     # Repository interface (Mapper interface)
 │   ├── gateway/
-│   │   └── UserGateway.java
+│   │   └── UserGateway.java        # Gateway interface (COLA uses gateway, not repository)
 │   ├── service/
 │   │   └── UserDomainService.java
 │   └── ability/
 │       └── UserAbility.java
-├── application/                     # Application layer
-│   ├── executor/                   # Executor (CQRS)
+├── app/                             # Application layer (COLA V5 uses app, not application)
+│   ├── executor/                    # Executor (CQRS)
 │   │   ├── command/
 │   │   │   └── user/
 │   │   │       └── UserCreateCmdExe.java
@@ -243,7 +241,7 @@ src/main/java/com/example/order/
 │   ├── service/
 │   │   ├── UserAppService.java     # Application service interface
 │   │   └── impl/
-│   │       └── UserAppServiceImpl.java  # Application service implementation
+│   │       └── UserAppServiceImpl.java
 │   └── model/
 │       ├── command/
 │       │   └── UserCreateCmd.java
@@ -251,9 +249,17 @@ src/main/java/com/example/order/
 │       │   └── UserGetQry.java
 │       └── dto/
 │           └── UserDTO.java
-└── adapter/                        # Adapter layer
-    └── web/
-        ├── controller/
+├── infrastructure/                  # Infrastructure layer
+│   ├── gatewayimpl/                 # Gateway implementations (COLA naming)
+│   │   └── UserGatewayImpl.java
+│   ├── mapper/                      # MyBatis Mapper + DO classes
+│   │   ├── UserMapper.java
+│   │   └── dataobject/
+│   │       └── UserDO.java
+│   ├── external/                    # External API clients
+│   └── config/                      # Spring configuration
+└── adapter/                         # Adapter layer
+    └── controller/
         │   └── UserController.java  # Controller
         └── dto/
             ├── UserCreateRequest.java
@@ -263,13 +269,14 @@ src/main/java/com/example/order/
 ### File Path Examples
 
 - Domain Entity: `src/main/java/com/example/order/domain/model/entity/User.java`
-- Repository Interface: `src/main/java/com/example/order/domain/repository/UserRepository.java`
-- Application Service: `src/main/java/com/example/order/application/service/UserAppService.java`
-- Application Service Impl: `src/main/java/com/example/order/application/service/impl/UserAppServiceImpl.java`
-- Command Executor: `src/main/java/com/example/order/application/executor/command/user/UserCreateCmdExe.java`
-- Query Executor: `src/main/java/com/example/order/application/executor/query/user/UserGetQryExe.java`
-- Controller: `src/main/java/com/example/order/adapter/web/controller/UserController.java`
-- DTO: `src/main/java/com/example/order/adapter/web/dto/UserCreateRequest.java`
+- Gateway Interface: `src/main/java/com/example/order/domain/gateway/UserGateway.java`
+- Gateway Implementation: `src/main/java/com/example/order/infrastructure/gatewayimpl/UserGatewayImpl.java`
+- DO: `src/main/java/com/example/order/infrastructure/mapper/dataobject/UserDO.java`
+- Mapper: `src/main/java/com/example/order/infrastructure/mapper/UserMapper.java`
+- Application Service: `src/main/java/com/example/order/app/service/UserAppService.java`
+- Application Service Impl: `src/main/java/com/example/order/app/service/impl/UserAppServiceImpl.java`
+- Command Executor: `src/main/java/com/example/order/app/executor/command/user/UserCreateCmdExe.java`
+- Controller: `src/main/java/com/example/order/adapter/controller/UserController.java`
 
 ## How to Determine Output Directory
 
@@ -329,7 +336,7 @@ In DDD, Hexagonal, and Clean architectures, both types of entities are typically
 - **DDD**: Repository interface in `{package}/domain/repository/`, MyBatis Mapper in `{package}/infrastructure/persistence/mapper/`
 - **Hexagonal**: Port interface in `{package}/application/ports/outbound/`, MyBatis Mapper in `{package}/infrastructure/adapter/outbound/persistence/mapper/`
 - **Clean**: Output port in `{package}/application/ports/output/`, MyBatis Mapper in `{package}/infrastructure/persistence/mapper/`
-- **COLA**: `{package}/domain/repository/`
+- **COLA**: Gateway interface in `{package}/domain/gateway/`, GatewayImpl in `{package}/infrastructure/gatewayimpl/`, Mapper in `{package}/infrastructure/mapper/`
 
 ### Q3: How to determine the location of DTOs?
 

@@ -203,6 +203,7 @@ public record UserResponse(Long id, String name, String email) {}
 4. **Always paginate large result sets** - Prevent performance issues and DDoS vulnerabilities
 5. **Validate all input data** - Use Jakarta validation annotations on request DTOs
 6. **Never expose sensitive data** - Don't log or expose passwords, tokens, PII
+7. **`Result<T>` and `PageResult<T>` constructors depend on Lombok** — `@AllArgsConstructor` and `@Data` generate constructors used by `Result.success(data)` and `PageResult.of(page).map()`. If Lombok annotation processing fails (e.g., mvnd + JDK 21 without `forceLegacyJavacApi=true`), these constructors won't exist, causing type inference errors. See `ddd-cola` skill for the mvnd fix.
 
 ## References
 

@@ -27,4 +27,5 @@ Enforce consistent error handling patterns across Spring Boot + MyBatis-Plus pro
 - Swallowing exceptions silently — always log or throw
 - Returning null instead of throwing — fail explicitly
 - String error codes — use integer HTTP status codes
+- Duplicate error code names with different values — use distinct names for different semantics
 - Bare objects in API responses — use `Result<T>` wrapper

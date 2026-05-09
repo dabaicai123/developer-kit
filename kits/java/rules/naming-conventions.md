@@ -53,7 +53,7 @@ Enforce consistent naming conventions across Java/Spring Boot projects following
 | Adapter | `adapter.controller`, `adapter.web` | `com.example.adapter.controller` |
 | Application | `app.service`, `app.executor` | `com.example.app.service` |
 | Domain | `domain.entity`, `domain.gateway` | `com.example.domain.entity` |
-| Infrastructure | `infrastructure.persistence`, `infrastructure.config` | `com.example.infrastructure.persistence` |
+| Infrastructure | `infrastructure.gatewayimpl`, `infrastructure.mapper`, `infrastructure.config` | `com.example.infrastructure.gatewayimpl` |
 
 ## Examples
 

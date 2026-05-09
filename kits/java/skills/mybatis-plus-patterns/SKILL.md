@@ -81,6 +81,8 @@ public class UserDO {
 }
 ```
 
+> **mvnd + JDK 21 + Lombok**: If using mvnd with JDK 21, Lombok annotations (`@Data`, `@Builder`, `@Slf4j`) silently fail. Add `<forceLegacyJavacApi>true</forceLegacyJavacApi>` to `maven-compiler-plugin`. See `ddd-cola` skill for full configuration.
+
 ## Service Interface & Implementation (MVC Pattern)
 
 ```java
@@ -98,7 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 }
 ```
 
-**DDD/COLA projects** use the Gateway pattern instead — see `ddd-cola` skill for `OrderGateway` / `OrderGatewayImpl` pattern.
+**DDD/COLA projects** use the Gateway pattern instead — see `ddd-cola` skill for `OrderGateway` (with `save()` + `update()`) / `OrderGatewayImpl` (in `infrastructure/gatewayimpl/`) pattern.
 
 ## Pagination Configuration
 

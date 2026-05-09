@@ -6,6 +6,7 @@ model: sonnet
 skills:
   - ddd-cola
   - ddd-event-driven
+  - spring-boot-rest-client
   - spring-boot-dependency-injection
   - spring-boot-transaction-management
   - spring-boot-configuration-management

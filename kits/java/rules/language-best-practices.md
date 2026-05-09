@@ -27,6 +27,8 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 
 9. **Add Javadoc to classes, public methods, and fields** — every class must have a one-line description of its responsibility. Every public method must explain WHAT it does. Every field in domain objects, DTOs, VOs, and DOs must have a Javadoc comment explaining its meaning — especially in DDD where field names alone may not convey business intent (e.g., `/** Order total amount including tax */ BigDecimal totalAmount`). Only write comments for WHY, not for obvious WHAT.
 
+10. **Verify import completeness** — after writing source or test files, check all symbols have explicit imports. Common misses: `java.util.Map`, sealed interfaces, Hamcrest matchers.
+
 ## Anti-Patterns
 
 - `SELECT *` — always specify needed columns
