@@ -1,181 +1,97 @@
 ---
 name: spring-boot-rest-api-standards
-description: "REST API design standards for Spring Boot: endpoints, DTOs, error handling, pagination, security headers, HATEOAS, and architecture patterns. Use when creating or reviewing REST endpoints in Spring Boot projects."
+description: "COLA/DDD 项目的 REST API 设计规范：适配层控制器、Result<T> 统一响应、PageResult 分页、Cmd/Qry/VO 数据契约、异常处理。用于在 DDD/COLA 项目中设计或审查 REST 接口、DTO 模型、分页与错误响应。"
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# Spring Boot REST API Standards
+# Spring Boot REST API Standards (COLA/DDD Mode)
 
 ## When to use this skill
 
-- Creating REST endpoints and API routes
-- Designing DTOs and API contracts
-- Implementing error handling and validation
-- Setting up pagination and filtering
-- Configuring security headers and CORS
-- Reviewing REST API architecture
+- Creating REST endpoints in the COLA **adapter layer**
+- Designing Cmd/Qry/VO/DTO contracts for the **app layer**
+- Implementing `Result<T>` / `PageResult<T>` unified response format
+- Setting up pagination, filtering, and error handling patterns
+- Reviewing REST API architecture in DDD projects
+
+## Prerequisite
+
+This skill assumes the project follows COLA/DDD architecture → see `ddd-cola`. REST controllers belong to the **adapter layer** (`adapter/controller/`), request/response models span the **app layer** (`app/` — Cmd, Qry, VO, DTO).
 
 ## Instructions
 
-### To Build RESTful API Endpoints
+### 1. Design Resource-Based URLs → [cola-rest-patterns.md](references/cola-rest-patterns.md)
 
-1. **Design Resource-Based URLs**
-   - Use plural nouns for resource names
-   - Follow REST conventions: GET /users, POST /users, PUT /users/{id}
-   - Avoid action-based URLs like /getUserList
+Use plural nouns, REST conventions (`GET /v1/orders`, `POST /v1/orders`). Never action-based URLs like `/getOrderList`.
 
-2. **Use Correct HTTP Methods** — GET (retrieve), POST (create), PUT (replace), PATCH (partial update), DELETE (remove)
+### 2. Use Result<T> Unified Response → [unified-result-pattern.md](references/unified-result-pattern.md)
 
-3. **Use Appropriate Result Codes** — combine proper HTTP status codes with a `Result<T>` wrapper for business-level detail
-   - 200: Successful GET / PUT / PATCH (resource retrieved or updated)
-   - 201: Resource created (POST)
-   - 204: Successful DELETE (no content)
-   - 400: Validation errors, invalid input
-   - 401: Missing or invalid auth
-   - 403: No permission
-   - 404: Resource not found
-   - 409: Duplicate, state conflict
-   - 500: Unexpected server errors
+All API responses follow `{code, msg, data}` format. Never use `ResponseEntity`, `ProblemDetail`, or raw entity returns.
 
-4. **Create Request/Response DTOs**
-   - Separate API contracts from domain entities
-   - Use Java records or Lombok `@Data`/`@Value`
-   - Apply Jakarta validation annotations
-   - Keep DTOs immutable when possible
+### 3. Create COLA Controller (Adapter Layer) → [cola-rest-patterns.md](references/cola-rest-patterns.md)
 
-5. **Implement Validation**
-   - Use `@Valid` annotation on `@RequestBody` parameters
-   - Apply validation constraints (`@NotBlank`, `@Email`, `@Size`, etc.)
-   - Handle validation errors with `MethodArgumentNotValidException`
+Controllers in `adapter/controller/` delegate to `app/service/`. They contain no business logic, only routing + `Result<T>` wrapping.
 
-6. **Set Up Error Handling**
-   - Use `@RestControllerAdvice` for global exception handling
-   - Return unified `Result<T>` responses with `code`, `msg`, `data` fields
-   - Use `BusinessException` subclasses (`NotFoundException`, `ValidationException`, etc.) with `Result.fail(code, msg)`
+### 4. Design Cmd/Qry/VO/DTO Contracts (App Layer) → [cola-rest-patterns.md](references/cola-rest-patterns.md)
 
-7. **Configure Pagination**
-   - Use `PageResult<T>` for paginated responses (wrap MyBatis-Plus `Page<T>` with `PageResult.of(mpPage).map()`)
-   - Include page, pageSize, total, records fields
-   - Return `Result<PageResult<T>>` from controller endpoints
+- **Cmd**: write-path request body (e.g., `CreateOrderCmd`)
+- **Qry**: read-path query parameters (e.g., `OrderQry`)
+- **VO/DTO**: response body (e.g., `OrderDTO`)
+- Never expose domain entities or DO objects directly
 
-8. **Security Headers and CORS** — For security headers and CORS, see `spring-boot-security` skill.
+### 5. Implement Validation → `spring-boot-validation`
 
-## Examples
+Use `@Valid` on `@RequestBody`, Jakarta annotations (`@NotBlank`, `@Size`). Validation messages use Chinese.
 
-### Basic CRUD Controller
+### 6. Handle Errors → `spring-boot-exception-handling`
 
-```java
-@RestController
-@RequestMapping("/v1/users")
-@RequiredArgsConstructor
-@Slf4j
-public class UserController {
-    private final UserService userService;
+`@RestControllerAdvice` catches `BusinessException` → `Result.fail(code, msg)`. Validation errors → `Result.fail(400, msg)`. Never let raw exceptions bubble up.
 
-    @GetMapping
-    public Result<PageResult<UserResponse>> getAllUsers(
-            @RequestParam(defaultValue = "1") long page,
-            @RequestParam(defaultValue = "10") long pageSize) {
-        log.debug("Fetching users page {} size {}", page, pageSize);
-        return Result.success(userService.getAll(page, pageSize));
-    }
+### 7. Configure Pagination → [cola-rest-patterns.md](references/cola-rest-patterns.md)
 
-    @GetMapping("/{id}")
-    public Result<UserResponse> getUserById(@PathVariable Long id) {
-        return Result.success(userService.getById(id));
-    }
+Return `Result<PageResult<T>>` for paginated endpoints. Use `PageResult.of(mpPage).map()` to convert MyBatis-Plus `Page<DO>` → `PageResult<VO>`.
 
-    @PostMapping
-    public Result<Void> createUser(@Valid @RequestBody CreateUserRequest request) {
-        userService.create(request);
-        return Result.success();
-    }
+### 8. Security Headers and CORS → `spring-boot-security`
 
-    @PutMapping("/{id}")
-    public Result<UserResponse> updateUser(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateUserRequest request) {
-        return Result.success(userService.update(id, request));
-    }
+## COLA Layer Mapping
 
-    @DeleteMapping("/{id}")
-    public Result<Void> deleteUser(@PathVariable Long id) {
-        userService.delete(id);
-        return Result.success();
-    }
-}
-```
+| REST Element | COLA Layer | Package | Notes |
+|-------------|-----------|---------|-------|
+| Controller | Adapter | `adapter/controller/` | Inbound handler, no business logic |
+| Cmd (request body) | App | `app/` | Write-path input |
+| Qry (query params) | App | `app/` | Read-path input |
+| VO/DTO (response) | App | `app/` | Response output |
+| Result<T>, PageResult<T> | Common | `common/result/` | Unified wrapper |
+| GlobalExceptionHandler | Common | `common/exception/` | `@RestControllerAdvice` |
+| **Never expose** | Domain | `domain/model/entity/` | Entities are internal |
+| **Never expose** | Infrastructure | `infrastructure/mapper/` | DO objects are persistence-only |
 
-### Request/Response DTOs
+## Rules
 
-```java
-// Request DTO
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateUserRequest {
-    @NotBlank(message = "User name cannot be blank")
-    private String name;
-
-    @Email(message = "Valid email required")
-    private String email;
-}
-
-// Response DTO
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserResponse {
-    private Long id;
-    private String name;
-    private String email;
-    private LocalDateTime createdAt;
-}
-```
-
-### Global Exception Handler
-
-```java
-@RestControllerAdvice
-@Slf4j
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<Void> handleValidationException(MethodArgumentNotValidException ex) {
-        String msg = ex.getBindingResult().getFieldErrors().stream()
-                .map(f -> f.getField() + ": " + f.getDefaultMessage())
-                .collect(Collectors.joining("; "));
-        log.warn("Validation error: {}", msg);
-        return Result.fail(400, msg);
-    }
-
-    @ExceptionHandler(BusinessException.class)
-    public Result<Void> handleBusinessException(BusinessException ex) {
-        log.warn("Business error: {} - {}", ex.getCode(), ex.getMsg());
-        return Result.fail(ex.getCode(), ex.getMsg());
-    }
-}
-```
-
-## Constraints and Warnings
-
-1. **Never expose entities directly** - Use DTOs to separate API contracts from domain models
-2. **Handle all exceptions globally** - Use `@RestControllerAdvice`, never let raw exceptions bubble up
-3. **Always paginate large result sets** - Prevent performance issues and DDoS vulnerabilities
-4. **Never expose sensitive data** - Don't log or expose passwords, tokens, PII
-5. **`Result<T>` and `PageResult<T>` constructors depend on Lombok** — `@AllArgsConstructor` and `@Data` generate constructors used by `Result.success(data)` and `PageResult.of(page).map()`. If Lombok annotation processing fails (e.g., mvnd + JDK 21 without `forceLegacyJavacApi=true`), these constructors won't exist, causing type inference errors. See `ddd-cola` skill for the mvnd fix.
+- **Never expose domain entities or DO objects** — use Cmd/Qry/VO/DTO at the adapter boundary
+- **All API responses use `Result<T>`** — never `ResponseEntity`, `ProblemDetail`, or raw objects
+- **Validation messages use Chinese** — `@NotBlank(message = "客户 ID 不能为空")`
+- **Handle all exceptions globally** — `@RestControllerAdvice`, never let raw exceptions bubble up
+- **Always paginate large result sets** — `Result<PageResult<T>>`, prevent DDoS/performance issues
+- **Never expose sensitive data** — no passwords, tokens, PII in responses or logs
+- **Integer error codes only** — never String codes like "NOT_FOUND"; always use HTTP status integers
+- **URL prefix `/v1/`** — version your API routes from the start
 
 ## References
 
-- See `references/` directory for comprehensive reference material including HTTP status codes, Spring annotations, and detailed examples
-- Refer to the `spring-boot-code-review-expert` agent for code review guidelines
-- Review `spring-boot-dependency-injection` for dependency injection patterns
+- **[unified-result-pattern.md](references/unified-result-pattern.md)** — Result<T>, PageResult<T>, BusinessException, GlobalExceptionHandler full source
+- **[cola-rest-patterns.md](references/cola-rest-patterns.md)** — COLA controller + Cmd/Qry/VO + pagination + filtering patterns
+- **[annotations-reference.md](references/annotations-reference.md)** — Core Spring Web + Jakarta validation annotations
 
 ## Related Skills
 
+- `ddd-cola` — COLA architecture, naming, CQRS paths (prerequisite)
+- `spring-boot-exception-handling` — BusinessException hierarchy, error codes, GlobalExceptionHandler
 - `spring-boot-validation` — @Valid, @NotBlank, MethodArgumentNotValidException
-- `spring-boot-exception-handling` — @RestControllerAdvice, BusinessException, Result<T>
-- `spring-boot-security-jwt` — JWT authentication for REST endpoints
-- `spring-boot-openapi-documentation` — OpenAPI/Swagger documentation for REST APIs
+- `spring-boot-openapi-documentation` — Swagger/OpenAPI docs for REST endpoints
+
+## Keywords
+
+REST API, Result, PageResult, Cmd, Qry, VO, DTO, adapter layer, COLA, DDD, pagination, error handling, BusinessException, validation
