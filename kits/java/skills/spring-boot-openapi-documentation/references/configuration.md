@@ -2,79 +2,84 @@
 
 ## Basic Configuration
 
-### application.properties
-
-```properties
-# API Documentation Path
-springdoc.api-docs.path=/api-docs
-springdoc.api-docs.enabled=true
-
-# Swagger UI Configuration
-springdoc.swagger-ui.path=/swagger-ui.html
-springdoc.swagger-ui.enabled=true
-springdoc.swagger-ui.operationsSorter=method
-springdoc.swagger-ui.tagsSorter=alpha
-springdoc.swagger-ui.tryItOutEnabled=true
-
-# Package and Path Filtering
-springdoc.packages-to-scan=com.example.controller
-springdoc.paths-to-match=/api/**
-```
-
-### application.yml
-
 ```yaml
 springdoc:
   api-docs:
     path: /api-docs
-    enabled: true
   swagger-ui:
     path: /swagger-ui.html
-    enabled: true
     operationsSorter: method
     tagsSorter: alpha
-    tryItOutEnabled: true
-  packages-to-scan: com.example.controller
-  paths-to-match: /api/**
+  packages-to-scan: com.example.app.adapter.controller
+  paths-to-match: /v1/**
 ```
 
 ## Access Endpoints
 
-After configuration:
-- **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
-- **OpenAPI YAML**: `http://localhost:8080/v3/api-docs.yaml`
-- **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
+- **OpenAPI JSON**: `/v3/api-docs`
+- **OpenAPI YAML**: `/v3/api-docs.yaml`
+- **Swagger UI**: `/swagger-ui/index.html`
 
-## Advanced Configuration Options
+## OpenAPI Bean (Infrastructure Config)
 
-### Disable Specific Features
+```java
+// infrastructure/config/OpenApiConfig.java
+@Configuration
+public class OpenApiConfig {
 
-```properties
-# Disable Swagger UI
-springdoc.swagger-ui.enabled=false
-
-# Disable API docs
-springdoc.api-docs.enabled=false
-
-# Disable try-it-out
-springdoc.swagger-ui.tryItOutEnabled=false
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+            .info(new Info()
+                .title("订单服务 API")
+                .version("v1.0")
+                .description("订单管理服务接口文档"))
+            .components(new Components()
+                .addSecuritySchemes("bearer-jwt", new SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")));
+    }
+}
 ```
 
-### Sort Options
+Apply on controllers: `@SecurityRequirement(name = "bearer-jwt")`
 
-- **operationsSorter**: `method` (HTTP method), `alpha` (alphabetical)
-- **tagsSorter**: `alpha` (alphabetical)
-- **defaultModelsExpandDepth**: Controls model expansion in UI
+## API Groups
 
-### Filter by Package/Path
+Group APIs by domain aggregate for better Swagger UI navigation:
 
-```properties
-# Scan multiple packages
-springdoc.packages-to-scan=com.example.controller,vendor.another.controller
-
-# Match multiple paths
-springdoc.paths-to-match=/api/**,/public/**
-
-# Exclude paths
-springdoc.paths-to-exclude=/actuator/**,/admin/**
+```java
+@Bean
+public GroupedOpenApi orderApi() {
+    return GroupedOpenApi.builder()
+        .group("订单")
+        .packagesToScan("com.example.app.adapter.controller")
+        .pathsToMatch("/v1/orders/**")
+        .build();
+}
 ```
+
+## Hide Internal Endpoints
+
+```java
+// Hide single endpoint
+@Operation(hidden = true)
+@GetMapping("/internal")
+public Result<Void> internalEndpoint() { ... }
+
+// Hide entire controller
+@Hidden
+@RestController
+public class InternalController { ... }
+```
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Parameter names missing | Add `<parameters>true</parameters>` to maven-compiler-plugin |
+| Swagger "Unable to render" | Register `ByteArrayHttpMessageConverter` |
+| Endpoints not appearing | Check `packages-to-scan` and `paths-to-match` config |
+| Security blocks Swagger | Permit `/v3/api-docs/**`, `/swagger-ui/**` in SecurityFilterChain |
+| Performance slow | Use specific package scanning + path matching; avoid scanning entire classpath |

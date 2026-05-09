@@ -1,46 +1,40 @@
 # SpringDoc Dependency Setup
 
-## Maven Dependencies
+## Maven
 
 ```xml
-<!-- Standard WebMVC support -->
+<!-- WebMVC (most COLA projects use this) -->
 <dependency>
     <groupId>org.springdoc</groupId>
     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     <version>2.8.13</version>
 </dependency>
-
-<!-- Optional: therapi-runtime-javadoc for JavaDoc support -->
-<dependency>
-    <groupId>com.github.therapi</groupId>
-    <artifactId>therapi-runtime-javadoc</artifactId>
-    <version>0.15.0</version>
-    <scope>provided</scope>
-</dependency>
-
-<!-- WebFlux support -->
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
-    <version>2.8.13</version>
-</dependency>
 ```
 
-## Gradle Dependencies
+## Gradle
 
 ```gradle
-// Standard WebMVC support
 implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
-
-// Optional: therapi-runtime-javadoc for JavaDoc support
-implementation 'com.github.therapi:therapi-runtime-javadoc:0.15.0'
-
-// WebFlux support
-implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13'
 ```
 
-## Version Selection
+## Version Compatibility
 
-- **Spring Boot 3.x**: Use SpringDoc 2.x (e.g., 2.8.13)
-- **Spring Boot 2.x**: Use SpringDoc 1.x
-- Always check for the latest stable version at [Maven Central](https://mvnrepository.com/artifact/org.springdoc)
+| Spring Boot | SpringDoc |
+|------------|-----------|
+| 3.5.x | 2.8.x |
+| 3.4.x | 2.7.x – 2.8.x |
+| 3.3.x | 2.6.x |
+
+Always check [Maven Central](https://mvnrepository.com/artifact/org.springdoc) for the latest stable version.
+
+## COLA Package Scanning
+
+COLA controllers live in `adapter/controller/`. Configure SpringDoc to scan only the adapter layer:
+
+```yaml
+springdoc:
+  packages-to-scan: com.example.app.adapter.controller
+  paths-to-match: /v1/**
+```
+
+This prevents domain/infrastructure internal classes from leaking into API documentation.

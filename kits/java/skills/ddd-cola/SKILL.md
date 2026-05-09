@@ -12,6 +12,16 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Use when creating or structuring a Spring Boot project with COLA/DDD architecture, implementing domain-driven design with dependency-inverted layers.
 
+## Quick Guide
+
+| Your scenario | What to do |
+|---------------|-----------|
+| Starting a new project? | Follow **Project Setup** steps 1–7, then scaffold packages per **COLA Layer Structure** |
+| Adding a new use case? | Pick CQRS path: Write → CmdExe → Domain → Gateway; Read → QryExe → Mapper |
+| Unsure about a layer? | Adapter → `spring-boot-rest-api-standards` / `spring-boot-openapi-documentation`; Domain → this skill's Gateway + Entity examples; Infrastructure → `mybatis-plus-patterns` |
+| Confused about naming? | See **Naming Per Layer** (Entity=none, Gateway=Gateway, DO=DO, CmdExe=CmdExe) |
+| Confused about data flow? | Request → VO → DTO → Entity → DO → DB |
+
 ## Project Setup
 
 ### 1. Generate from Spring Initializr

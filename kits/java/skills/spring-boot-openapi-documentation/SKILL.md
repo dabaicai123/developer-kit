@@ -1,32 +1,33 @@
 ---
 name: spring-boot-openapi-documentation
-description: "SpringDoc OpenAPI 3.0 and Swagger UI for Spring Boot 3.x: API documentation generation, OpenAPI annotations, security documentation, and schema examples. Use when setting up API documentation, configuring Swagger UI, or adding OpenAPI annotations to REST endpoints."
+description: "COLA/DDD 项目的 SpringDoc OpenAPI 3.0 API 文档：适配层控制器注解、Cmd/Qry/VO 的 Schema 标注、Result<T> 响应模式、安全方案文档。用于在 DDD/COLA 项目中为 REST API 生成 Swagger 文档、配置 Swagger UI、标注 controller 及 VO/DTO/Cmd 模型。"
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# Spring Boot OpenAPI Documentation with SpringDoc
+# Spring Boot OpenAPI Documentation (COLA/DDD Mode)
 
 ## When to use this skill
 
 - Set up SpringDoc OpenAPI and generate OpenAPI 3.0 specs for Spring Boot 3.x REST APIs
-- Configure and customize Swagger UI
-- Document controllers, request/response models, and validation with OpenAPI annotations
-- Implement API security documentation (JWT, OAuth2, Basic Auth)
+- Document controllers in the COLA **adapter layer** with OpenAPI annotations
+- Document VO/Cmd/Qry models in the **app layer** with `@Schema` annotations
+- Configure Swagger UI for `Result<T>` unified response format
+- Implement API security documentation (JWT)
 - Document pageable/sortable endpoints and add examples/schemas
-- Customize OpenAPI definitions programmatically, support multiple API groups/versions
-- Document error responses, exception handlers, and Kotlin-based Spring Boot APIs
+
+## Prerequisite
+
+This skill assumes the project follows COLA/DDD architecture → see `ddd-cola`. OpenAPI documentation belongs to the **adapter layer** (`adapter/controller/`), and annotated models span the **app layer** (`app/` — Cmd, Qry, VO) and **domain layer** (only DTO that crosses boundaries).
 
 ## Instructions
 
-### 1. Add Dependencies
+### 1. Add Dependencies → [dependency-setup.md](references/dependency-setup.md)
 
-Add SpringDoc starter for your application type (WebMvc or WebFlux). See [dependency-setup.md](references/dependency-setup.md) for Maven/Gradle configuration.
+### 2. Configure SpringDoc → [configuration.md](references/configuration.md)
 
-### 2. Configure SpringDoc
-
-Set basic configuration in `application.yml`:
+Basic `application.yml`:
 
 ```yaml
 springdoc:
@@ -35,159 +36,86 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+  packages-to-scan: com.example.app.adapter.controller
+  paths-to-match: /v1/**
 ```
 
-See [configuration.md](references/configuration.md) for advanced options.
+### 3. Document Controllers (Adapter Layer) → [cola-openapi-patterns.md](references/cola-openapi-patterns.md)
 
-### 3. Document Controllers
+Controllers in `adapter/controller/` use `@Tag(description=中文)` and `@Operation(summary=中文, description=中文)`. Responses use `Result<T>` and `Result<PageResult<T>>`.
 
-Use OpenAPI annotations to add descriptive information:
+### 4. Document Models (App Layer — Cmd/Qry/VO) → [cola-openapi-patterns.md](references/cola-openapi-patterns.md)
+
+Cmd/Qry/VO/DTO use `@Schema(description=中文)`. **Domain entities and DO objects are never annotated** — they are internal and must not leak into API documentation.
+
+### 5. Configure OpenAPI Bean + Security → [configuration.md](references/configuration.md)
 
 ```java
-@RestController
-@Tag(name = "Book", description = "Book management APIs")
-public class BookController {
-
-    @Operation(summary = "Get book by ID")
-    @ApiResponse(responseCode = "200", description = "Book found")
-    @GetMapping("/{id}")
-    public Book findById(@PathVariable Long id) { }
+// infrastructure/config/OpenApiConfig.java
+@Configuration
+public class OpenApiConfig {
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+            .info(new Info()
+                .title("订单服务 API")
+                .version("v1.0")
+                .description("订单管理服务接口文档"))
+            .components(new Components()
+                .addSecuritySchemes("bearer-jwt", new SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")));
+    }
 }
 ```
 
-See [controller-documentation.md](references/controller-documentation.md) for patterns.
+Apply `@SecurityRequirement(name = "bearer-jwt")` on controllers.
 
-### 4. Document Models
+### 6. Document Pagination & Error Responses → [cola-openapi-patterns.md](references/cola-openapi-patterns.md)
 
-Apply `@Schema` annotations to DTOs:
+Pagination: `@ParameterObject Pageable` with `Result<PageResult<T>>`. Errors: `Result<Void>` with error codes, documented via `@ApiResponse(description=中文)`.
 
-```java
-@Schema(description = "Book data object")
-public class Book {
-    @Schema(example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-    private Long id;
+### 7. Verify → Access Swagger UI at `/swagger-ui/index.html`
 
-    @Schema(example = "Clean Code", required = true)
-    private String title;
-}
-```
+## COLA Layer Mapping
 
-See [model-documentation.md](references/model-documentation.md) for validation patterns.
+| OpenAPI Element | COLA Layer | Package | Annotate? |
+|-----------------|-----------|---------|-----------|
+| `@Tag`, `@Operation` | Adapter | `adapter/controller/` | **Yes** |
+| `@Schema` on Cmd/Qry/VO/DTO | App | `app/` | **Yes** |
+| OpenAPI config, security scheme | Infrastructure | `infrastructure/config/` | **Yes** (bean config) |
+| Domain Entity | Domain | `domain/model/entity/` | **Never** |
+| DO Object | Infrastructure | `infrastructure/mapper/` | **Never** |
 
-### 5. Configure Security
+## Rules
 
-Set up security schemes in OpenAPI bean:
-
-```java
-@Bean
-public OpenAPI customOpenAPI() {
-    return new OpenAPI()
-        .components(new Components()
-            .addSecuritySchemes("bearer-jwt", new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-            )
-        );
-}
-```
-
-Apply with `@SecurityRequirement(name = "bearer-jwt")` on controllers. See [security-configuration.md](references/security-configuration.md).
-
-### 6. Document Pagination
-
-Use `@ParameterObject` for Spring Data `Pageable`:
-
-```java
-@GetMapping("/paginated")
-public Page<Book> findAll(@ParameterObject Pageable pageable) {
-    return repository.findAll(pageable);
-}
-```
-
-See [pagination-support.md](references/pagination-support.md).
-
-### 7. Test Documentation
-
-Access Swagger UI at `/swagger-ui/index.html` to verify documentation completeness.
-
-### 8. Customize for Production
-
-Configure API grouping, versioning, and build plugins. See [advanced-configuration.md](references/advanced-configuration.md) and [build-integration.md](references/build-integration.md).
-
-## Best Practices
-
-- **Use descriptive operation summaries**: concise (< 120 chars), action-oriented (e.g., 'Get user by ID', not 'User endpoint')
-- **Document all response codes**: Include success (2xx), client errors (4xx), server errors (5xx)
-- **Add examples to request/response bodies**: Use `@ExampleObject` for realistic examples
-- **Leverage JSR-303 validation annotations**: SpringDoc auto-generates constraints from validation annotations
-- **Use `@ParameterObject` for complex parameters**: Especially for Pageable, custom filter objects
-- **Group related endpoints with `@Tag`**: Organize API by domain entities or features
-- **Document security requirements**: Apply `@SecurityRequirement` where authentication needed
-- **Hide internal endpoints**: Use `@Hidden` or separate API groups; never expose admin/internal endpoints in public groups
-- **Customize Swagger UI for better UX**: Enable filtering, sorting, try-it-out features
-- **Version your API documentation**: Include version in OpenAPI Info
+- **Never annotate domain entities or DO objects** — internal layers must not leak into API docs
+- **All `@Tag`, `@Operation`, `@Schema`, `@ApiResponse` descriptions use Chinese** — the docs serve Chinese-speaking users
+- **Use `Result<T>` / `PageResult<T>` consistently** → see `spring-boot-rest-api-standards`
+- **Never expose sensitive data** in `@Schema(example=...)` — no passwords, tokens, PII
+- **Keep annotations minimal on controllers** — use global OpenAPI bean config when possible
+- **Hide internal endpoints** with `@Hidden` — never expose admin controllers in public API groups
 
 ## References
 
-- **[dependency-setup.md](references/dependency-setup.md)** — Maven/Gradle dependencies and version selection
-- **[configuration.md](references/configuration.md)** — Basic and advanced configuration options
-- **[controller-documentation.md](references/controller-documentation.md)** — Controller and endpoint documentation patterns
-- **[model-documentation.md](references/model-documentation.md)** — Data Object, DTO, and validation documentation
-- **[security-configuration.md](references/security-configuration.md)** — JWT, OAuth2, Basic Auth, API key configuration
-- **[pagination-support.md](references/pagination-support.md)** — Pageable, Slice, and custom pagination patterns
-- **[advanced-configuration.md](references/advanced-configuration.md)** — API groups, customizers, OpenAPI bean configuration
-- **[exception-handling.md](references/exception-handling.md)** — Exception documentation and error response schemas
-- **[build-integration.md](references/build-integration.md)** — Maven/Gradle plugins and CI/CD integration
-- **[complete-examples.md](references/complete-examples.md)** — Full controller, data object, and configuration examples
-- **[annotations-reference.md](references/annotations-reference.md)** — Complete annotation reference with attributes
-- **[springdoc-official.md](references/springdoc-official.md)** — Official SpringDoc documentation
-- **[troubleshooting.md](references/troubleshooting.md)** — Common issues and solutions
-
-## Constraints and Warnings
-
-- Do not expose sensitive data in API examples or schema descriptions
-- Keep OpenAPI annotations minimal to avoid cluttering controller code; use global configurations when possible
-- Large API definitions can impact Swagger UI performance; consider grouping APIs by domain
-- Schema generation may not work correctly with complex generic types; use explicit `@Schema` annotations
-- Avoid circular references in DTOs as they cause infinite recursion in schema generation
-- Security schemes must be properly configured before using `@SecurityRequirement` annotations
-- Hidden endpoints (`@Operation(hidden = true)`) are still visible in code and may leak through other documentation tools
-
-## Examples
-
-### Documented Model with Validation
-
-```java
-@Schema(description = "Book data object")
-public class Book {
-    @Schema(description = "Unique identifier", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-    private Long id;
-
-    @Schema(description = "Book title", example = "Clean Code", required = true)
-    @NotBlank
-    @Size(min = 1, max = 200)
-    private String title;
-
-    @Schema(description = "Author name", example = "Robert C. Martin")
-    @NotBlank
-    private String author;
-
-    @Schema(description = "Price in USD", example = "29.99", minimum = "0")
-    @NotNull
-    @DecimalMin("0.0")
-    private BigDecimal price;
-}
-```
+- **[dependency-setup.md](references/dependency-setup.md)** — Maven/Gradle, version matrix, COLA package scanning
+- **[configuration.md](references/configuration.md)** — SpringDoc config, OpenAPI bean, security, API groups, troubleshooting
+- **[cola-openapi-patterns.md](references/cola-openapi-patterns.md)** — COLA controller + Cmd/Qry/VO + pagination + error patterns (Chinese descriptions)
+- **[annotations-reference.md](references/annotations-reference.md)** — Core OpenAPI annotation reference
 
 ## Related Skills
 
-- `spring-boot-rest-api-standards` — REST API design standards, URL conventions, Result<T>
-- `spring-boot-validation` — @Valid, @NotBlank, MethodArgumentNotValidException
-- `spring-boot-security-jwt` — JWT security scheme configuration in OpenAPI docs
+- `ddd-cola` — COLA architecture, naming, CQRS paths (prerequisite)
+- `spring-boot-rest-api-standards` — Result<T>, PageResult<T>, URL conventions
+- `spring-boot-exception-handling` — Global handler, Result.fail(), error codes
+- `spring-boot-validation` — @Valid, @NotBlank (auto-documented by SpringDoc)
+
+## Keywords
+
+openapi, swagger, springdoc, API 文档, DDD, COLA, adapter layer, Result, PageResult, Cmd, Qry, VO, DTO, schema annotations, JWT
 
 ## External Resources
 
 - [SpringDoc Official Documentation](https://springdoc.org/)
 - [OpenAPI 3.0 Specification](https://swagger.io/specification/)
-- [Swagger UI Configuration](https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/)
