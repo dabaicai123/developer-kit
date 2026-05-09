@@ -20,6 +20,16 @@
       "author": "Internal Team",
       "license": "MIT",
       "keywords": ["base", "utilities"]
+    },
+    {
+      "name": "developer-kit-frontend",
+      "displayName": "Developer Kit - Frontend",
+      "description": "Next.js + Tailwind v4 + TypeScript frontend toolkit with React patterns, design-to-code workflow, state management, testing, and code review heuristics",
+      "version": "1.0.0",
+      "path": "kits/frontend",
+      "author": "Internal Team",
+      "license": "MIT",
+      "keywords": ["nextjs", "react", "tailwind", "typescript", "frontend"]
     }
   ]
 }

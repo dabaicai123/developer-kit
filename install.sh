@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Usage: bash install.sh [kit] [target_dir]
-#   kit:        java (default) | base | all
+#   kit:        java (default) | frontend | base | all
 #   target_dir: defaults to current directory
 
 KIT="${1:-java}"
@@ -22,7 +22,7 @@ install_kit() {
 }
 
 case "$KIT" in
-  all)  install_kit java; install_kit base ;;
+  all)  install_kit java; install_kit frontend; install_kit base ;;
   *)    install_kit "$KIT" ;;
 esac
 
