@@ -22,6 +22,7 @@ Spring Boot 3.5.x transaction management patterns with MyBatis-Plus — declarat
 - Choosing between Saga choreography vs orchestration for cross-service consistency
 - Implementing Outbox pattern for reliable event publishing in microservices
 - Choosing between MVC (ServiceImpl-level) and DDD (CmdExe-level) transaction ownership patterns
+- Ensuring MQ messages (RabbitMQ/Kafka) are only sent after DB transaction commits — avoiding ghost messages and premature delivery
 
 ## Instructions
 
@@ -240,7 +241,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 }
 ```
 
-### Example 4: Rollback rules — rollbackFor checked exceptions — rollbackFor checked exceptions
+### Example 4: Rollback rules — rollbackFor checked exceptions
 
 ```java
 /**
@@ -539,6 +540,7 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 - **Use `Propagation.REQUIRES_NEW` only for independent audit/logging** — it acquires a second connection while suspending the first, adding connection pool pressure; do not use it casually
 - **Use `Propagation.NESTED` for batch import tolerance** — individual item failure rolls back to savepoint without affecting entire batch
 - **Keep transaction scope minimal** — do not wrap long computations, external API calls, or file I/O inside transactional boundaries; hold DB connections only for DB operations
+- **Never send MQ inside @Transactional directly** — MQ is not a Spring transaction resource; direct publish causes ghost messages (DB rollback but MQ sent) or premature delivery (consumer can't find data). Use `TransactionSynchronizationManager.registerSynchronization(afterCommit)` to defer MQ until DB commits; for stronger guarantees use Outbox pattern or RabbitMQ `channelTransacted=true`
 - **Use `TransactionTemplate` for fine-grained programmatic control** — when conditional transaction boundaries, partial success, or mixed propagation within a single method is needed
 - **Set explicit timeout on batch/long-running methods** — `@Transactional(timeout = 30)` prevents connection leaks from stuck transactions
 - **Place `@Transactional` on ServiceImpl methods (MVC) or CmdExe methods (DDD/COLA)**, not on interfaces or GatewayImpl
@@ -553,6 +555,7 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 - **Never catch exceptions inside `@Transactional` methods and swallow them** — this prevents rollback because the proxy only sees a normal method return. Either re-throw the exception or use `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()` to force rollback.
 - **Re-save after in-transaction modification**: modifying a persisted entity's fields within the same `@Transactional` method does NOT auto-persist the changes. MyBatis-Plus has no auto-flush/dirty-checking. After `save(record)` then `record.setXxx()`, call `updateById(record)` to persist changes. Do NOT call `save()` again — `save()` = INSERT and will cause primary key conflict on an already-inserted record.
 - **Connection pool pressure from REQUIRES_NEW**: `Propagation.REQUIRES_NEW` acquires a second connection while suspending the first. With HikariCP `maximum-pool-size=20`, 10 concurrent REQUIRES_NEW calls can exhaust all connections.
+- **MQ publish inside @Transactional**: Never send MQ messages directly inside a `@Transactional` method. RabbitMQ/Kafka are not Spring transaction resources — the message may be sent before DB commit (consumer can't find data) or before DB rollback (ghost message). Use `TransactionSynchronizationManager.registerSynchronization` with `afterCommit` callback to ensure MQ is only sent after successful DB commit. For stronger guarantees, use Outbox pattern or RabbitMQ `channelTransacted=true` (see `spring-boot-event-driven-patterns` and `spring-boot-amqp`).
 
 ### Example 9: Re-saving modified entity within same transaction
 
@@ -586,6 +589,57 @@ public class PushCmdExe {
 > Calling `save()` on an already-inserted record throws a primary key conflict.
 > In DDD Gateway pattern, define distinct `save()` (insert) and `update()` methods on the gateway interface.
 
+### Example 10: Publishing MQ after transaction commit
+
+RabbitMQ/Kafka are NOT Spring transaction resources — they don't participate in DB transaction commit/rollback. Publishing MQ directly inside `@Transactional` causes two problems:
+
+| Problem | Description |
+|---|---|
+| **Ghost message** | DB rolls back but MQ message was already sent — downstream receives event for data that doesn't exist |
+| **Premature delivery** | MQ message arrives at consumer before DB transaction commits — consumer can't find the record |
+
+```java
+// ❌ Anti-pattern: MQ publish inside @Transactional — no coordination with DB transaction
+@Transactional(rollbackFor = Exception.class)
+public void collectTrack(ChannelCode channelCode, Long trackingId, String sourceData) {
+    callbackRecordGateway.saveCollectRecord(record);
+    passbackProducerService.sendPassbackMessage(record.getId());  // ❌ may send before DB commit or rollback
+}
+```
+
+**Fix**: Use `TransactionSynchronizationManager.registerSynchronization` with `afterCommit` — MQ only sends after DB commit succeeds:
+
+```java
+@Transactional(rollbackFor = Exception.class)
+public void collectTrack(ChannelCode channelCode, Long trackingId, String sourceData) {
+    Tracking tracking = trackingGateway.findById(trackingId)
+            .orElseThrow(() -> new NotFoundException(ErrorCodes.TRACKING_NOT_FOUND, trackingId));
+
+    CollectRecord record = CollectRecord.builder()
+            .trackingId(trackingId).type(TrackingType.TRACK)
+            .channelCode(channelCode).sourceData(sourceData).status("PENDING").build();
+
+    callbackRecordGateway.saveCollectRecord(record);
+
+    // ✅ afterCommit — MQ only sends after DB commit succeeds
+    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        @Override
+        public void afterCommit() {
+            passbackProducerService.sendPassbackMessage(record.getId());
+        }
+    });
+}
+```
+
+Behavior:
+- DB rollback → `afterCommit` not triggered → MQ not sent
+- DB commit → `afterCommit` triggered → MQ sent
+- MQ transient failure → MQ internal retry handles it
+
+> **For mission-critical events** where MQ publish failure must never lose a message, use the Outbox pattern (`spring-boot-event-driven-patterns` → `references/outbox-pattern.md`) which guarantees eventual delivery via atomic event storage + scheduled publisher.
+>
+> **Alternative**: RabbitMQ `channelTransacted=true` makes the MQ channel participate in Spring transaction coordination — DB and MQ commit/rollback atomically. Simpler than Outbox, but slower throughput and ties DB success to MQ broker availability. See `spring-boot-amqp`.
+
 ## References
 
 - `references/transaction-propagation-scenarios.md`
@@ -600,4 +654,4 @@ public class PushCmdExe {
 
 ## Keywords
 
-transaction, propagation, isolation, rollback, @Transactional, TransactionTemplate, Seata, self-invocation, nested, readOnly, rollbackFor, noRollbackFor, savepoint, distributed transaction, saga, outbox, choreography, orchestration, compensating transaction, idempotency, Axon, 2PC, HikariCP, connection pool, REQUIRES_NEW, NESTED, SUPPORTS, setRollbackOnly, IService, saveBatch
+transaction, propagation, isolation, rollback, @Transactional, TransactionTemplate, Seata, self-invocation, nested, readOnly, rollbackFor, noRollbackFor, savepoint, distributed transaction, saga, outbox, choreography, orchestration, compensating transaction, idempotency, Axon, 2PC, HikariCP, connection pool, REQUIRES_NEW, NESTED, SUPPORTS, setRollbackOnly, IService, saveBatch, afterCommit, MQ publish timing, ghost message, TransactionSynchronizationManager
