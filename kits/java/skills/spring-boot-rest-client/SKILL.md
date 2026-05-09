@@ -264,7 +264,6 @@ public class ClientConfig {
 }
 ```
 
-> Spring Boot 4.x will add `@ImportHttpServices` for zero-config declarative clients — not yet released.
 
 ## Best Practices
 

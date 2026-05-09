@@ -125,6 +125,6 @@ public class ExternalServiceHealth implements HealthIndicator {
 
 ## Related Skills
 
-- `spring-boot-logging` — structured JSON logging, MDC correlation for observability
+- `spring-boot-logging` — structured JSON logging, ThreadContext correlation for observability
 - `spring-boot-resilience4j` — circuit breaker, retry, rate limiter health indicators
 - `spring-boot-security-jwt` — securing management endpoints with JWT

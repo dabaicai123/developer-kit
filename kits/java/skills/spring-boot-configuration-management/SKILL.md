@@ -36,7 +36,7 @@ Use Nacos Config Center (spring-cloud-starter-alibaba-nacos-config) for centrali
 
 Steps:
 
-1. **Add Nacos Config dependency** — Include `spring-cloud-starter-alibaba-nacos-config` and `spring-cloud-starter-bootstrap` (Spring Boot 3.x requires bootstrap context).
+1. **Add Nacos Config dependency** — Include `spring-cloud-starter-alibaba-nacos-config` and `spring-cloud-starter-bootstrap` (bootstrap context is required for Nacos config loading, not for all Spring Boot 3.x applications).
 2. **Create bootstrap.yml** — Configure Nacos server address, namespace, group, shared configs, and extension configs. The Data ID follows the convention `${spring.application.name}-${profile}.${file-extension}`.
 3. **Use @RefreshScope for dynamic refresh** — Annotate beans that need live config updates with `@RefreshScope`. When Nacos config changes, Spring destroys and recreates the proxy bean with new values.
 4. **Use ConfigListener for programmatic change detection** — Register a `ConfigListener` on the `NacosConfigService` to react to config changes in code (e.g., re-initializing a cache pool).

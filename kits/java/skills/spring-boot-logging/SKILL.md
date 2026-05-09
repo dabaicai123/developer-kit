@@ -1,21 +1,42 @@
 ---
 name: spring-boot-logging
-description: "Spring Boot logging with Logback, structured JSON logging, log levels per-package, and MDC correlation. Use when configuring application logging for production observability."
+description: "Spring Boot logging with Log4j2, structured JSON logging, log levels per-package, and ThreadContext correlation. Use when configuring application logging for production observability."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# Spring Boot Logging
+# Spring Boot Logging (Log4j2)
 
-Logging configuration patterns for Spring Boot 3.5.x.
+Logging configuration patterns for Spring Boot 3.5.x with Log4j2.
 
 ## When to use this skill
 
-- Configuring Logback for structured logging
+- Configuring Log4j2 for structured logging
 - Setting log levels per package or class
-- Adding MDC (Mapped Diagnostic Context) for request correlation
+- Adding ThreadContext (MDC equivalent) for request correlation
 - Switching to JSON logging for production
+
+## Dependency Setup
+
+Exclude default Logback and use Log4j2:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-log4j2</artifactId>
+</dependency>
+```
 
 ## Configuration
 
@@ -28,60 +49,98 @@ logging:
     com.example.service: DEBUG
     org.springframework.web: WARN
     org.mybatis: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: ${LOG_PATH:/var/log/app}/application.log
-    max-size: 50MB
-    max-history: 30
-    total-size-cap: 1GB
 ```
 
-### JSON Structured Logging (logback-spring.xml)
+### log4j2-spring.xml
 
 ```xml
-<configuration>
-    <springProfile name="prod">
-        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <includeContext>true</includeContext>
-                <includeMdc>true</includeMdc>
-                <customFields>{"app_name":"${spring.application.name}"}</customFields>
-            </encoder>
-        </appender>
-        <root level="INFO">
-            <appender-ref ref="JSON"/>
-        </root>
-    </springProfile>
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Property>
+        <Property name="LOG_PATH">${sys:LOG_PATH:-/var/log/app}</Property>
+    </Properties>
 
-    <springProfile name="dev">
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
-            </encoder>
-        </appender>
-        <root level="DEBUG">
-            <appender-ref ref="CONSOLE"/>
-        </root>
-    </springProfile>
-</configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <RollingFile name="File" fileName="${LOG_PATH}/application.log"
+                     filePattern="${LOG_PATH}/application-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_PATH}" maxDepth="1">
+                    <IfFileName glob="application-*.log.gz"/>
+                    <IfAccumulatedFileSize exceeds="1GB"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
 ```
 
-Dependency for JSON encoder:
+### JSON Structured Logging
+
+Use Log4j2's built-in `JsonTemplateLayout` (no external dependency needed):
+
 ```xml
-<dependency>
-    <groupId>net.logstash.logback</groupId>
-    <artifactId>logstash-logback-encoder</artifactId>
-    <version>8.0</version>
-</dependency>
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="JSON-Console" target="SYSTEM_OUT">
+            <JsonTemplateLayout eventTemplateUri="classpath:JsonLayout.json"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <SpringProfile name="prod">
+            <Root level="INFO">
+                <AppenderRef ref="JSON-Console"/>
+            </Root>
+        </SpringProfile>
+
+        <SpringProfile name="dev">
+            <Root level="DEBUG">
+                <AppenderRef ref="Console"/>
+            </Root>
+        </SpringProfile>
+    </Loggers>
+</Configuration>
 ```
 
-## MDC Request Correlation
+Minimal `JsonLayout.json` (place in `src/main/resources/`):
+
+```json
+{
+  "timestamp": {"$resolver": "timestamp"},
+  "level": {"$resolver": "level"},
+  "logger": {"$resolver": "loggerName"},
+  "message": {"$resolver": "message"},
+  "thread": {"$resolver": "threadName"},
+  "traceId": {"$resolver": "mdc", "key": "traceId"},
+  "requestPath": {"$resolver": "mdc", "key": "requestPath"},
+  "appName": {"$resolver": "mdc", "key": "appName"}
+}
+```
+
+## ThreadContext (MDC) Request Correlation
 
 ```java
 @Component
 @Order(1)
-public class MdcFilter extends OncePerRequestFilter {
+public class TraceIdFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -92,12 +151,12 @@ public class MdcFilter extends OncePerRequestFilter {
             if (traceId == null) {
                 traceId = UUID.randomUUID().toString();
             }
-            MDC.put("traceId", traceId);
-            MDC.put("requestPath", request.getRequestURI());
-            MDC.put("method", request.getMethod());
+            ThreadContext.put("traceId", traceId);
+            ThreadContext.put("requestPath", request.getRequestURI());
+            ThreadContext.put("method", request.getMethod());
             chain.doFilter(request, response);
         } finally {
-            MDC.clear();
+            ThreadContext.clearAll();
         }
     }
 }
@@ -143,12 +202,13 @@ logging:
 ## Best Practices
 
 - Use parameterized logging: `log.info("userId={}", id)` — not string concatenation
-- Add `traceId` via MDC filter for request correlation across logs
+- Add `traceId` via ThreadContext filter for request correlation across logs
 - Use JSON structured logging in production for easy parsing by ELK/Loki
 - Set per-package levels: `DEBUG` for your code, `WARN` for framework code
 - Never log sensitive data (passwords, tokens, PII)
-- Use `logback-spring.xml` with `<springProfile>` for environment-specific config
-- Always clear MDC in filter's `finally` block to prevent context leaking
+- Use `log4j2-spring.xml` with `<SpringProfile>` for environment-specific config
+- Always clear ThreadContext in filter's `finally` block to prevent context leaking
+- Exclude `spring-boot-starter-logging` when using Log4j2 — Spring Boot defaults to Logback
 
 ## Related Skills
 

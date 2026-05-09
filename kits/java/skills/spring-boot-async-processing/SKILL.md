@@ -16,7 +16,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 - Configuring `ThreadPoolTaskExecutor` beans with proper pool sizing and rejection policies
 - Handling exceptions in `@Async` void methods via `AsyncUncaughtExceptionHandler`
 - Combining `@Async` with `@Transactional` — understanding thread and transaction boundary issues
-- Propagating security context, request context, or MDC to async threads via `TaskDecorator`
+- Propagating security context, request context, or ThreadContext to async threads via `TaskDecorator`
 
 > For unit testing `@Async` methods, see `unit-test-scheduled-async`. For event-driven architecture with `@TransactionalEventListener`, see `spring-boot-event-driven-patterns`.
 
@@ -355,19 +355,19 @@ public class OrderTransactionService {
 - Configure thread pool sizing: `corePoolSize` = CPU cores, `maxPoolSize` = 2*CPU cores, `queueCapacity` = 100-500
 - Use `CallerRunsPolicy` as rejection handler — prevents silent task loss
 - Set `waitForTasksToCompleteOnShutdown=true` and `awaitTerminationSeconds` for graceful shutdown
-- Use `TaskDecorator` to propagate security context, MDC, and request context to async threads
+- Use `TaskDecorator` to propagate security context, ThreadContext, and request context to async threads
 
 ## Constraints and Warnings
 
 - **Self-invocation:** `@Async` on same-class method calls is silently ignored (same as `@Transactional` — Spring AOP proxy limitation)
 - **Transaction boundary:** `@Async` methods run in a separate thread — they don't inherit the caller's transaction context. Each `@Async` method needs its own `@Transactional`
 - **Thread pool exhaustion:** without proper `TaskExecutor` configuration, async tasks may silently fail or queue indefinitely
-- **Context propagation:** Spring Security context, `RequestContextHolder`, and MDC are NOT automatically propagated to async threads — use `TaskDecorator` to propagate
+- **Context propagation:** Spring Security context, `RequestContextHolder`, and ThreadContext are NOT automatically propagated to async threads — use `TaskDecorator` to propagate
 - **Never `@Async` + `@Transactional` on the same method** — it creates confusing proxy ordering and unpredictable behavior
 
 ## References
 
-- **[async-method-patterns.md](references/async-method-patterns.md)** — @Async patterns: void, CompletableFuture, executor selection, class-level, exception handling, MdcTaskDecorator
+- **[async-method-patterns.md](references/async-method-patterns.md)** — @Async patterns: void, CompletableFuture, executor selection, class-level, exception handling, ThreadContextTaskDecorator
 - **[completable-future-chaining.md](references/completable-future-chaining.md)** — CompletableFuture operations, chaining, combining, error handling, parallel data fetch
 - **[threadpool-taskexecutor-config.md](references/threadpool-taskexecutor-config.md)** — ThreadPoolTaskExecutor bean configuration, sizing guidelines, multiple executors, monitoring, yml approach
 - [Spring @Async Documentation](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Async.html)

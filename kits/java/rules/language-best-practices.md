@@ -29,6 +29,8 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 
 10. **Verify import completeness** — after writing source or test files, check all symbols have explicit imports. Common misses: `java.util.Map`, sealed interfaces, Hamcrest matchers.
 
+11. **Never loop individual IO operations** — for-loop DB calls, HTTP requests, MQ publishes, or file reads are N+1 anti-patterns. Use batch methods (`saveBatch`, `listByIds`, `IN` clause), parallel/async calls (`CompletableFuture`), or batch APIs instead. For DB patterns, see `mybatis-plus-patterns`. For HTTP patterns, see `spring-boot-rest-client`.
+
 ## Anti-Patterns
 
 - `SELECT *` — always specify needed columns
@@ -42,4 +44,5 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 - `Entity` suffix for persistence objects — use `DO` suffix
 - Table name prefix (`t_xxx`) — use plain snake_case (`xxx`)
 - Classes, methods, or fields without Javadoc — always document responsibility and meaning
+- For-loop IO operations (DB insert/select/update, HTTP calls, MQ publish, file read/write) — use batch methods, IN clause, parallel calls, or async instead of looping individual calls
 - Comments that repeat the code (`// set the name`) — write WHY, not WHAT

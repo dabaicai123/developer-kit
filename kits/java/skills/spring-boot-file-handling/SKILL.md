@@ -242,7 +242,7 @@ public class UserExportDTO {
 }
 ```
 
-### Example 5: EasyExcel import — ReadListener pattern for processing rows in batch
+### Example 4: EasyExcel import — ReadListener pattern for processing rows in batch
 
 ```java
 @Slf4j
@@ -321,7 +321,7 @@ public class UserImportDTO {
 }
 ```
 
-### Example 6: File download as HTTP response with proper Content-Disposition header
+### Example 5: File download as HTTP response with proper Content-Disposition header
 
 ```java
 @GetMapping("/{id}/download")

@@ -530,22 +530,6 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 }
 ```
 
-## Best Practices
-
-- **Use `@Transactional(readOnly = true)` on multi-step query methods** — MyBatis-Plus has no persistence context (unlike JPA), so `readOnly` provides no flush/dirty-check optimization. Only use when a method runs multiple SQL statements (consistent snapshot, defensive write prevention). Skip for single-statement queries — auto-commit is sufficient.
-- **Always specify `rollbackFor = Exception.class`** — default only rolls back unchecked exceptions; checked exceptions will silently commit
-- **IService internal transactions**: `saveBatch/saveOrUpdateBatch` have internal `@Transactional`; single methods (`save/updateById/removeById`) do NOT — add `@Transactional(rollbackFor=Exception.class)` on your method for multi-step writes
-- **Use `Propagation.SUPPORTS + readOnly=true` for multi-step read methods** — works both inside and outside an existing transaction
-- **Avoid self-invocation** — extract internal transactional logic to a separate Service bean; `@Transactional` on same-class method calls is silently ignored by Spring AOP proxy
-- **Use `Propagation.REQUIRES_NEW` only for independent audit/logging** — it acquires a second connection while suspending the first, adding connection pool pressure; do not use it casually
-- **Use `Propagation.NESTED` for batch import tolerance** — individual item failure rolls back to savepoint without affecting entire batch
-- **Keep transaction scope minimal** — do not wrap long computations, external API calls, or file I/O inside transactional boundaries; hold DB connections only for DB operations
-- **Never send MQ inside @Transactional directly** — MQ is not a Spring transaction resource; direct publish causes ghost messages (DB rollback but MQ sent) or premature delivery (consumer can't find data). Use `TransactionSynchronizationManager.registerSynchronization(afterCommit)` to defer MQ until DB commits; for stronger guarantees use Outbox pattern or RabbitMQ `channelTransacted=true`
-- **Use `TransactionTemplate` for fine-grained programmatic control** — when conditional transaction boundaries, partial success, or mixed propagation within a single method is needed
-- **Set explicit timeout on batch/long-running methods** — `@Transactional(timeout = 30)` prevents connection leaks from stuck transactions
-- **Place `@Transactional` on ServiceImpl methods (MVC) or CmdExe methods (DDD/COLA)**, not on interfaces or GatewayImpl
-- **Configure HikariCP leak-detection** — `leak-detection-threshold: 60000` catches connections held longer than expected
-
 ## Constraints and Warnings
 
 - **Self-invocation**: `@Transactional` on same-class method calls is silently ignored. Spring AOP proxies intercept external calls only; `this.internalMethod()` bypasses the proxy entirely. Fix: extract to a separate Service bean or use `AopContext.currentProxy()` (requires `@EnableAspectJAutoProxy(exposeProxy = true)`).
@@ -553,9 +537,17 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 - **Seata for distributed transactions**: CAUTION — only use when truly distributed across multiple services that must be atomically consistent. Seata adds significant complexity (undo_log table, global lock, performance overhead) and risk of partial commit. Prefer local transaction + Outbox + Saga for microservices. See `references/distributed-transaction-patterns.md` for full comparison of Saga vs 2PC and choreography vs orchestration patterns.
 - **Transaction timeout**: always set a timeout for long-running transactions (`@Transactional(timeout = 30)`) to prevent connection pool exhaustion from stuck or slow transactions.
 - **Never catch exceptions inside `@Transactional` methods and swallow them** — this prevents rollback because the proxy only sees a normal method return. Either re-throw the exception or use `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()` to force rollback.
+- **Always specify `rollbackFor = Exception.class`** — default only rolls back unchecked exceptions; checked exceptions will silently commit
 - **Re-save after in-transaction modification**: modifying a persisted entity's fields within the same `@Transactional` method does NOT auto-persist the changes. MyBatis-Plus has no auto-flush/dirty-checking. After `save(record)` then `record.setXxx()`, call `updateById(record)` to persist changes. Do NOT call `save()` again — `save()` = INSERT and will cause primary key conflict on an already-inserted record.
-- **Connection pool pressure from REQUIRES_NEW**: `Propagation.REQUIRES_NEW` acquires a second connection while suspending the first. With HikariCP `maximum-pool-size=20`, 10 concurrent REQUIRES_NEW calls can exhaust all connections.
-- **MQ publish inside @Transactional**: Never send MQ messages directly inside a `@Transactional` method. RabbitMQ/Kafka are not Spring transaction resources — the message may be sent before DB commit (consumer can't find data) or before DB rollback (ghost message). Use `TransactionSynchronizationManager.registerSynchronization` with `afterCommit` callback to ensure MQ is only sent after successful DB commit. For stronger guarantees, use Outbox pattern or RabbitMQ `channelTransacted=true` (see `spring-boot-event-driven-patterns` and `spring-boot-amqp`).
+- **Connection pool pressure from REQUIRES_NEW**: `Propagation.REQUIRES_NEW` acquires a second connection while suspending the first. Use only for independent audit/logging. With HikariCP `maximum-pool-size=20`, 10 concurrent REQUIRES_NEW calls can exhaust all connections.
+- **MQ publish inside @Transactional**: Never send MQ messages directly inside a `@Transactional` method. RabbitMQ/Kafka are not Spring transaction resources — the message may be sent before DB commit (consumer can't find data) or before DB rollback (ghost message). Use `TransactionSynchronizationManager.registerSynchronization` with `afterCommit` callback. For stronger guarantees, use Outbox pattern or RabbitMQ `channelTransacted=true` (see `spring-boot-event-driven-patterns` and `spring-boot-amqp`).
+- **Use `@Transactional(readOnly = true)` on multi-step query methods** — MyBatis-Plus has no persistence context (unlike JPA). Only use when a method runs multiple SQL statements; skip for single-statement queries.
+- **IService internal transactions**: `saveBatch/saveOrUpdateBatch` have internal `@Transactional`; single methods (`save/updateById/removeById`) do NOT — add `@Transactional(rollbackFor=Exception.class)` on your method for multi-step writes
+- **Use `Propagation.SUPPORTS + readOnly=true` for multi-step read methods** — works both inside and outside an existing transaction
+- **Keep transaction scope minimal** — do not wrap long computations, external API calls, or file I/O inside transactional boundaries; hold DB connections only for DB operations
+- **Use `TransactionTemplate` for fine-grained programmatic control** — when conditional transaction boundaries or partial success is needed
+- **Place `@Transactional` on ServiceImpl methods (MVC) or CmdExe methods (DDD/COLA)**, not on interfaces or GatewayImpl
+- **Configure HikariCP leak-detection** — `leak-detection-threshold: 60000` catches connections held longer than expected
 
 ### Example 9: Re-saving modified entity within same transaction
 

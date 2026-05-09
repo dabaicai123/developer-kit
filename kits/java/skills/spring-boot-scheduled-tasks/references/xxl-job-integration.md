@@ -339,7 +339,7 @@ public class ReportJobHandler {
 
 ## Log handling: XxlJobHelper.log() for task execution logs
 
-`XxlJobHelper.log()` writes logs that are visible in the XXL-Job admin console's execution log page. These logs are separate from application logs (SLF4J/Logback).
+`XxlJobHelper.log()` writes logs that are visible in the XXL-Job admin console's execution log page. These logs are separate from application logs (SLF4J/Log4j2).
 
 ```java
 @XxlJob("dataMigration")

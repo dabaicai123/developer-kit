@@ -49,7 +49,7 @@ spring:
 
 ## Jackson Converter (required)
 
-Spring Boot defaults to `SimpleMessageConverter` (Java serialization) — insecure and not cross-language. Spring Boot **provides no configuration property** to switch to JSON; you must define the bean manually.
+Spring Boot defaults to `SimpleMessageConverter` (Java serialization) when Jackson is NOT on the classpath — insecure and not cross-language. When Jackson IS on the classpath (default in most Spring Boot 3.x projects), Spring Boot auto-configures a `Jackson2JsonMessageConverter`. If you need explicit control or custom ObjectMapper settings, define the bean manually.
 
 ```java
 @Configuration

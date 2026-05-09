@@ -370,18 +370,6 @@ public class ParamAwareHandler {
 }
 ```
 
-## Best Practices
-
-- Use `@Scheduled` only for single-instance tasks — not suitable for distributed deployments where multiple instances would execute the same task concurrently
-- Use XXL-Job for distributed scheduling when multiple service instances exist — it provides task dispatch, failover, and sharding
-- Always set proper transaction scope on scheduled methods that touch the database → see `spring-boot-transaction-management` for full patterns
-- Configure thread pool for `@Scheduled`: `spring.task.scheduling.pool.size` (default is 1 — dangerous for multiple tasks)
-- Use cron expressions from configuration, not hardcoded — allows runtime adjustment via Nacos or properties
-- Log task start/end with execution time for monitoring: `log.info("[TaskName] start")` and `log.info("[TaskName] completed in {}ms", elapsed)`
-- Handle misfire scenarios: decide whether to skip or catch up on missed executions — prefer skip for reporting tasks, catch-up for data sync
-- For batch processing, use iterative batch deletion (LIMIT + loop) to avoid large single transactions → see `spring-boot-transaction-management` for transaction scope patterns
-- Use `@ConditionalOnProperty` to enable/disable scheduled tasks per environment
-
 ## Constraints and Warnings
 
 - **`@Scheduled` default pool size is 1** — all tasks share one thread. Configure `spring.task.scheduling.pool.size > 1` for multiple tasks
@@ -390,6 +378,12 @@ public class ParamAwareHandler {
 - **Cron timezone**: use `spring.task.scheduling.time-zone` to set correct timezone for cron expressions, especially for time-sensitive tasks like "daily at 9:00 AM"
 - **Never block a scheduled task thread** with long-running operations — break into async steps or use XXL-Job's sharding feature
 - **XXL-Job `ReturnT` is required** — always return `XxlJobHelper.handleSuccess()` or `XxlJobHelper.handleFail()` from handler methods
+- **Always set proper transaction scope on scheduled methods that touch the database** → see `spring-boot-transaction-management` for full patterns
+- **Use cron expressions from configuration, not hardcoded** — allows runtime adjustment via Nacos or properties
+- **Log task start/end with execution time for monitoring**: `log.info("[TaskName] start")` and `log.info("[TaskName] completed in {}ms", elapsed)`
+- **Handle misfire scenarios**: decide whether to skip or catch up on missed executions — prefer skip for reporting tasks, catch-up for data sync
+- **For batch processing, use iterative batch deletion (LIMIT + loop)** to avoid large single transactions → see `spring-boot-transaction-management` for transaction scope patterns
+- **Use `@ConditionalOnProperty`** to enable/disable scheduled tasks per environment
 - **`fixedRate` can cause task pile-up** — if execution takes longer than the rate interval, tasks queue up. Use `fixedDelay` for long-running tasks
 - **Transaction scope in scheduled tasks** — `@Transactional` on `@Scheduled` methods works, but avoid self-invocation (same-class internal calls bypass proxy). See `spring-boot-transaction-management` for full details
 

@@ -20,7 +20,7 @@ public class AsyncExecutorConfig {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);  // Wait for tasks on application shutdown
         executor.setAwaitTerminationSeconds(30);  // Maximum wait time on shutdown
-        executor.setTaskDecorator(new MdcTaskDecorator());  // Propagate MDC to async threads
+        executor.setTaskDecorator(new ThreadContextTaskDecorator());  // Propagate ThreadContext to async threads
         executor.initialize();
         return executor;
     }
@@ -39,7 +39,7 @@ public class AsyncExecutorConfig {
 | **rejectedExecutionHandler** | Strategy for handling tasks that cannot be accepted (queue full, pool at maxPoolSize). See rejection policies section. |
 | **waitForTasksToCompleteOnShutdown** | When true, the executor waits for currently executing tasks to finish on application shutdown. Essential for graceful shutdown. |
 | **awaitTerminationSeconds** | Maximum time in seconds to wait for task completion on shutdown. After this timeout, remaining tasks are interrupted. |
-| **taskDecorator** | Decorator applied to each Runnable before execution. Used for context propagation (MDC, SecurityContext). |
+| **taskDecorator** | Decorator applied to each Runnable before execution. Used for context propagation (ThreadContext, SecurityContext). |
 
 ### Thread creation flow
 
@@ -224,7 +224,7 @@ public class AsyncExecutorConfig {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(15);  // quick shutdown — notifications can retry
-        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setTaskDecorator(new ThreadContextTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -240,7 +240,7 @@ public class AsyncExecutorConfig {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);  // allow batch operations to finish
-        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setTaskDecorator(new ThreadContextTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -256,7 +256,7 @@ public class AsyncExecutorConfig {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(120);  // reports take time
-        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setTaskDecorator(new ThreadContextTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -401,7 +401,7 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
-        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setTaskDecorator(new ThreadContextTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -491,7 +491,7 @@ public class AsyncExecutorConfig {
         executor.setKeepAliveSeconds(props.keepAliveSeconds());
         executor.setThreadNamePrefix(props.threadNamePrefix());
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setTaskDecorator(new ThreadContextTaskDecorator());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
         executor.initialize();
@@ -508,7 +508,7 @@ public class AsyncExecutorConfig {
         executor.setKeepAliveSeconds(props.keepAliveSeconds());
         executor.setThreadNamePrefix(props.threadNamePrefix());
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setTaskDecorator(new ThreadContextTaskDecorator());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
         executor.initialize();

@@ -192,8 +192,8 @@ class AsyncEventListenerTest {
     User user = new User(1L, "Alice", "alice@example.com");
     listener.onUserCreatedAsync(new UserCreatedEvent(user));
 
-    Thread.sleep(200); // checkpoint: allow async executor to run
-    verify(slowService).processUser(user);
+    Awaitility.await().atMost(2, TimeUnit.SECONDS)
+        .untilAsserted(() -> verify(slowService).processUser(user));
   }
 }
 ```
@@ -204,7 +204,7 @@ class AsyncEventListenerTest {
 - Capture events with `ArgumentCaptor` and assert field-level equality, not just type
 - Test listeners in isolation: construct them with mocked dependencies and call the handler method directly
 - Cover error paths: listeners must not propagate exceptions to publishers
-- Async listeners: prefer Awaitility over `Thread.sleep()` for deterministic waits
+- Async listeners: use Awaitility (`await().atMost(2, SECONDS).untilAsserted(...)`) instead of `Thread.sleep()` for deterministic waits — requires `org.awaitility:awaitility` dependency
 - Keep events immutable and serializable — test both if events cross JVM boundaries
 
 ## Constraints and Warnings

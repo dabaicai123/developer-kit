@@ -142,10 +142,66 @@ crew = Crew(
     agents=[manager, researcher, analyst, writer],
     process=Process.hierarchical,
     manager_agent=manager,
+    manager_llm=ChatOpenAI(model="gpt-4o"),  # Separate model for delegation decisions
 )
 ```
 
+`manager_llm` lets you specify a different model for the manager's coordination decisions — typically a stronger model than the worker agents.
+
 **YAML configuration is preferred over inline Python.** YAML separates definition from code, making it easier to modify agent composition without touching logic. Define agents and tasks in `config/agents.yaml` and `config/tasks.yaml`, then load them in Python.
+
+**`@CrewBase` decorator pattern** — CrewAI's project scaffolding loads YAML configs into a decorated class. Each method returns an Agent or Task built from the YAML entry matching its method name:
+
+```yaml
+# config/agents.yaml
+researcher:
+  role: "Senior Research Analyst"
+  goal: "Find comprehensive, accurate information on {topic}"
+  backstory: |
+    Expert researcher with years of experience in gathering
+    and analyzing information. Known for thorough, accurate research.
+  tools:
+    - SerperDevTool
+    - WebsiteSearchTool
+  verbose: true
+
+# config/tasks.yaml
+research_task:
+  description: "Research the topic: {topic}. Focus on key facts, recent developments, expert opinions."
+  agent: researcher
+  expected_output: "A comprehensive research report with executive summary, key findings, and sources cited"
+```
+
+```python
+from crewai import Agent, Task, Crew, Process
+from crewai.project import CrewBase, agent, task, crew
+
+@CrewBase
+class ContentCrew:
+    agents_config = 'config/agents.yaml'
+    tasks_config = 'config/tasks.yaml'
+
+    @agent
+    def researcher(self) -> Agent:
+        return Agent(config=self.agents_config['researcher'])
+
+    @task
+    def research_task(self) -> Task:
+        return Task(config=self.tasks_config['research_task'])
+
+    @crew
+    def crew(self) -> Crew:
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            process=Process.sequential,
+            verbose=True,
+        )
+
+# Run
+crew = ContentCrew()
+result = crew.crew().kickoff(inputs={"topic": "AI Agents in 2025"})
+```
 
 ## Flow Design
 
@@ -257,6 +313,61 @@ crew = Crew(
 
 For production, configure a persistent embedder for long-term memory. Default uses OpenAI embeddings; swap to local models for cost control.
 
+```python
+from crewai import Crew
+from crewai.memory import LongTermMemory, ShortTermMemory
+
+crew = Crew(
+    agents=[researcher, analyst, writer],
+    tasks=[research_task, analysis_task, writing_task],
+    memory=True,
+    long_term_memory=LongTermMemory(storage=CustomStorage()),
+    short_term_memory=ShortTermMemory(storage=CustomStorage()),
+    embedder={
+        "provider": "openai",
+        "config": {"model": "text-embedding-3-small"},
+    },
+)
+```
+
+## Custom Tools
+
+Agents need tools to interact with external systems. Two approaches:
+
+**Class-based** — for tools with complex input validation or reusable logic:
+
+```python
+from crewai.tools import BaseTool
+from pydantic import BaseModel, Field
+
+class SearchInput(BaseModel):
+    query: str = Field(..., description="Search query")
+
+class WebSearchTool(BaseTool):
+    name: str = "web_search"
+    description: str = "Search the web for information"
+    args_schema: type[BaseModel] = SearchInput
+
+    def _run(self, query: str) -> str:
+        results = search_api.search(query)
+        return format_results(results)
+```
+
+**Decorator-based** — for simple, one-off tools:
+
+```python
+from crewai import tool
+
+@tool("Database Query")
+def query_database(sql: str) -> str:
+    """Execute SQL query and return results."""
+    return db.execute(sql)
+```
+
+Assign tools to agents: `researcher = Agent(role="Researcher", ..., tools=[WebSearchTool(), query_database])`.
+
+Pre-built integrations: `SerperDevTool` (search), `FileReadTool`, `DirectoryReadTool`, `WebsiteSearchTool`.
+
 ## Planning
 
 AgentPlanner creates a step-by-step execution plan before the agent starts working. Useful for complex tasks where ordering matters. Enable with `planning=True` on the Crew.
@@ -266,10 +377,11 @@ crew = Crew(
     agents=[researcher, analyst],
     tasks=[complex_task],
     planning=True,
+    planning_llm=ChatOpenAI(model="gpt-4o"),  # Separate model for planning
 )
 ```
 
-The planner generates a plan, then each agent follows the planned steps instead of improvising. Use for tasks with known dependencies. Skip for simple or creative tasks where improvisation is better.
+The planner generates a plan, then each agent follows the planned steps instead of improvising. Use for tasks with known dependencies. Skip for simple or creative tasks where improvisation is better. Access the generated plan via `crew.plan` after kickoff.
 
 ## Human-in-the-Loop
 
@@ -337,6 +449,17 @@ result = await flow.akickoff()
 | YAML definitions mixed with Python logic | Hard to maintain, unclear boundaries | YAML for definition, Python for orchestration |
 | Ignoring memory configuration | Agents lose context, repeat work | Enable memory and choose the right type for your use case |
 | Running `kickoff()` in async frameworks | Blocks the event loop | Use `akickoff()` for native async contexts |
+
+## Ecosystem
+
+| Category | Components |
+|---|---|
+| Framework | CrewAI, CrewAI Tools |
+| LLM Providers | OpenAI, Anthropic, Ollama (local) |
+| Search | SerperDevTool, WebsiteSearchTool |
+| File I/O | FileReadTool, DirectoryReadTool |
+| Custom | BaseTool (class-based), `@tool` (decorator) |
+| Deployment | Python applications, FastAPI backends, enterprise |
 
 ## References
 

@@ -143,8 +143,8 @@ The unified `reachability-metadata.json` format (recommended for GraalVM 23+) co
     "includes": [
       {"pattern": "application\\.yml"},
       {"pattern": "application-.*\\.yml"},
-      {"pattern": "logback\\.xml"},
-      {"pattern": "logback-spring\\.xml"},
+      {"pattern": "log4j2\\.xml"},
+      {"pattern": "log4j2-spring\\.xml"},
       {"pattern": "META-INF/services/.*"},
       {"pattern": "templates/.*\\.html"},
       {"pattern": "static/.*"},

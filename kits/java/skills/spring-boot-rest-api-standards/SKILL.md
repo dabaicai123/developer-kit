@@ -39,8 +39,10 @@ Follow these steps to create well-designed REST API endpoints:
    - PATCH: Partial updates (not idempotent)
    - DELETE: Remove resources (idempotent)
 
-3. **Use Appropriate Result Codes** (all responses use HTTP 200, business code in `Result.code`)
-   - 200: All successful operations (GET/POST/PUT/DELETE)
+3. **Use Appropriate Result Codes** — combine proper HTTP status codes with a `Result<T>` wrapper for business-level detail
+   - 200: Successful GET / PUT / PATCH (resource retrieved or updated)
+   - 201: Resource created (POST)
+   - 204: Successful DELETE (no content)
    - 400: Validation errors, invalid input
    - 401: Missing or invalid auth
    - 403: No permission

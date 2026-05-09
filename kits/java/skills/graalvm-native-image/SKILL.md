@@ -361,7 +361,7 @@ com.oracle.svm.core.jdk.UnsupportedFeatureError:
       "allDeclaredMethods": true,
       "allDeclaredFields": true
     }
-  
+  ]
 }
 ```
 

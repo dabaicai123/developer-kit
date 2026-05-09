@@ -182,7 +182,7 @@ public class AuthController {
 - Set short access token lifetimes (15 min); use refresh tokens for longer sessions
 - Implement token rotation: revoke old refresh token when issuing a new one
 - Use `SecurityFilterChain` bean — never extend `WebSecurityConfigurerAdapter`
-- Use `@EnableMethodSecurity` instead of the deprecated pre-Security-6 method security annotation
+- Use `@EnableMethodSecurity` instead of the deprecated `@EnableGlobalMethodSecurity`
 - Do not store sensitive data (passwords, PII) in JWT claims
 
 ## References

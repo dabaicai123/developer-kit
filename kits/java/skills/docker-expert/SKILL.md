@@ -10,7 +10,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Docker containerization expert specializing in Java and Spring Boot applications. Covers multi-stage builds with Maven and Gradle, JVM container-aware optimization, GraalVM native image compilation, Docker Compose orchestration with PostgreSQL and Redis, security hardening, and production deployment strategies.
 
-### When invoked:
+## When invoked:
 
 1. Analyze the container setup comprehensively:
 

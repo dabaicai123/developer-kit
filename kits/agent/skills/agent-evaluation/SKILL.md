@@ -1,7 +1,7 @@
 ---
 name: agent-evaluation
-description: "Agent evaluation strategies: trajectory evaluation, LLM-as-judge, deterministic mocks, and continuous evals. Use when testing agent behavior, building eval datasets, or setting up CI evaluation pipelines."
-version: "1.0.0"
+description: "Testing and benchmarking LLM agents including behavioral testing, capability assessment, reliability metrics, and production monitoring—where even top agents achieve less than 50% on real-world benchmarks"
+version: "1.1.0"
 type: skill
 allowed-tools:
   - Read
@@ -14,7 +14,7 @@ allowed-tools:
 
 # Agent Evaluation
 
-Evaluate full agent trajectories, not just final answers. Build structured eval datasets, deterministic mocks, and continuous evaluation pipelines.
+Testing and benchmarking LLM agents including behavioral testing, capability assessment, reliability metrics, and production monitoring—where even top agents achieve less than 50% on real-world benchmarks.
 
 ## When to Use This Skill
 
@@ -23,6 +23,45 @@ Evaluate full agent trajectories, not just final answers. Build structured eval 
 - Choosing between LLM-as-judge and deterministic evaluation
 - Evaluating prompt changes, retrieval changes, or full agent upgrades
 - Setting up continuous evaluation on production traces
+- Testing agent behavioral invariants and safety boundaries
+- Catching capability degradation on agent updates
+
+## Capabilities
+
+- agent-testing
+- benchmark-design
+- capability-assessment
+- reliability-metrics
+- regression-testing
+
+## Prerequisites
+
+- Knowledge: Testing methodologies, Statistical analysis basics, LLM behavior patterns
+- Skills recommended: autonomous-agents, multi-agent-orchestration
+- Required skills: testing-fundamentals, llm-fundamentals
+
+## Scope
+
+- Does not cover: Model training evaluation (loss, perplexity), Fairness and bias testing, User experience testing
+- Boundaries: Focus is agent capability and reliability, Covers functional and behavioral testing
+
+## Ecosystem
+
+### Primary Tools
+
+- AgentBench — Multi-environment benchmark for LLM agents (ICLR 2024)
+- τ-bench (Tau-bench) — Sierra's real-world agent benchmark
+- ToolEmu — Risky behavior detection for agent tool use
+- Langsmith — LLM tracing and evaluation platform
+
+### Alternatives
+
+- Braintrust — When: Need production monitoring integration
+- PromptFoo — When: Focus on prompt-level evaluation
+- DeepEval — When: Built-in metrics for agents, RAG, hallucination
+- RAGAS — When: Retrieval-focused metrics: faithfulness, relevance, context recall
+- Langfuse — When: Score-based evals on traces, LLM-as-judge templates
+- PydanticAI — When: Type-safe evaluation with deterministic + LLM judges
 
 ## Evaluate Full Trajectories, Not Just Final Answers
 
@@ -48,7 +87,6 @@ Run a prompt in isolation against known inputs. Fast, cheap, isolates prompt qua
 - Scope: Single LLM call with fixed input
 - Speed: Seconds per test case
 - Use when: Tweaking system prompts, testing instruction clarity, comparing model choices
-- Method: Feed the same input to the prompt, compare output against expected answer
 
 ### Level 2: RAG Experiments
 
@@ -57,7 +95,6 @@ Test retrieval pipeline changes against expected documents. Evaluates retrieval 
 - Scope: Retrieval + reranking pipeline
 - Speed: Seconds per test case
 - Use when: Changing embedding model, adjusting chunk size, swapping vector store, tuning reranker
-- Method: Query the retrieval pipeline, verify returned documents match expected set (recall and precision)
 
 ### Level 3: Full-Agent Experiments
 
@@ -66,7 +103,6 @@ Validate end-to-end agent behavior before promoting to production. Most expensiv
 - Scope: Complete agent run with all tools and retrieval
 - Speed: Minutes per test case (real API calls)
 - Use when: Releasing a new agent version, changing tool definitions, modifying orchestration logic
-- Method: Run full agent against test cases, evaluate trajectory and final output
 
 Never skip Level 3 before production deployment. Levels 1 and 2 are for rapid iteration.
 
@@ -74,10 +110,10 @@ Never skip Level 3 before production deployment. Levels 1 and 2 are for rapid it
 
 LLM-as-judge is useful but biased. Apply these constraints:
 
-- **Bias toward verbose/confident outputs** -- longer answers and confident tone score higher regardless of accuracy. Mitigate: normalize output length before scoring, penalize unjustified confidence.
-- **Pair with deterministic checks** -- never rely on LLM-as-judge alone. Always add schema validation, fact checking, and policy compliance checks that produce binary pass/fail.
-- **Provide rubric + examples + edge cases** -- the judge needs explicit criteria, reference outputs for each score level, and known failure modes.
-- **Make evals binary (pass/fail)** -- scored ranges (1-5) produce unreliable inter-run consistency. Binary judgments with clear criteria are reproducible.
+- **Bias toward verbose/confident outputs** — longer answers and confident tone score higher regardless of accuracy. Mitigate: normalize output length before scoring, penalize unjustified confidence.
+- **Pair with deterministic checks** — never rely on LLM-as-judge alone. Always add schema validation, fact checking, and policy compliance checks that produce binary pass/fail.
+- **Provide rubric + examples + edge cases** — the judge needs explicit criteria, reference outputs for each score level, and known failure modes.
+- **Make evals binary (pass/fail)** — scored ranges (1-5) produce unreliable inter-run consistency. Binary judgments with clear criteria are reproducible.
 
 ```python
 EVAL_RUBRIC = {
@@ -100,40 +136,122 @@ EVAL_RUBRIC = {
 }
 ```
 
-## Deterministic Tool Mocks in CI
+## Patterns
 
-Mock tool responses to test agent decision-making without real API calls. This makes CI fast, reproducible, and free.
+### Statistical Test Evaluation
 
-```python
-from unittest.mock import MagicMock
+Run tests multiple times and analyze result distributions. LLM outputs are stochastic — single runs are unreliable.
 
-MOCK_TOOL_RESPONSES = {
-    "search_tool": {
-        "query=python testing": [{"title": "pytest docs", "url": "...", "score": 0.95}],
-        "query=invalid query": [],
-    },
-    "database_tool": {
-        "action=read, table=orders, id=123": {"id": 123, "status": "shipped"},
-        "action=delete, table=orders": "MOCK_APPROVAL_REQUIRED",
-    },
+**When to use**: Evaluating stochastic agent behavior
+
+```typescript
+interface TestResult {
+    testId: string;
+    runId: string;
+    passed: boolean;
+    score: number;  // 0-1 for partial credit
+    latencyMs: number;
+    tokensUsed: number;
+    output: string;
+    expectedBehaviors: string[];
+    actualBehaviors: string[];
 }
 
-def create_mock_tool(tool_name: str) -> MagicMock:
-    mock = MagicMock()
-    mock.name = tool_name
-    def side_effect(**kwargs):
-        key = f"{tool_name}:" + ",".join(f"{k}={v}" for k, v in kwargs.items())
-        return MOCK_TOOL_RESPONSES.get(key, f"mock_response_for_{tool_name}")
-    mock.side_effect = side_effect
-    return mock
+interface StatisticalAnalysis {
+    passRate: number;
+    confidence95: [number, number];
+    meanScore: number;
+    stdDevScore: number;
+    meanLatency: number;
+    p95Latency: number;
+    behaviorConsistency: number;
+}
 ```
 
-Rules for deterministic mocks:
+Key metrics:
+- **passRate** — fraction of runs that passed. Below 0.8 is concerning, below 0.5 is critical.
+- **confidence95** — 95% confidence interval for pass rate. Narrow interval = reliable estimate.
+- **behaviorConsistency** — Jaccard similarity of behaviors across runs. Below 0.7 indicates unstable agent.
+- **stdDevScore** — high variance (>0.3) suggests unpredictable quality.
 
-- Return realistic data shapes -- the agent must process real-looking outputs
-- Include error cases -- empty results, permission denied, timeout
-- Cover approval gates -- mock the approval workflow, not just the happy path
-- Never mock the agent's decision logic -- only mock external dependencies
+Minimum 10 runs per test for statistical significance. Use chi-squared test to compare pass rates between versions.
+
+### Behavioral Contract Testing
+
+Define and test agent behavioral invariants — what the agent must do and must not do.
+
+**When to use**: Need to ensure agent stays within behavioral bounds
+
+```typescript
+interface BehavioralContract {
+    name: string;
+    description: string;
+    mustBehaviors: BehaviorAssertion[];
+    mustNotBehaviors: BehaviorAssertion[];
+    contextual?: ConditionalBehavior[];
+}
+
+interface BehaviorAssertion {
+    behavior: string;
+    detector: (output: AgentOutput) => boolean;
+    severity: 'critical' | 'high' | 'medium' | 'low';
+}
+```
+
+Contract categories:
+- **mustBehaviors** — behaviors the agent must exhibit (e.g., respond politely, stay on topic)
+- **mustNotBehaviors** — behaviors the agent must never exhibit (e.g., reveal internal info, make unauthorized promises)
+- **contextual** — behaviors required only in specific contexts (e.g., refer to policy when handling refunds)
+
+Critical violations = deployment blocked. High violations = investigation required. Medium/Low = tracked but not blocking.
+
+### Adversarial Testing
+
+Actively try to break agent behavior through prompt injection, role confusion, boundary testing, and output manipulation.
+
+**When to use**: Need to find edge cases and failure modes before deployment
+
+Attack categories:
+1. **Prompt injection** — direct override ("Ignore all instructions"), system prompt extraction, encoded injection (base64)
+2. **Role confusion** — pretend different role, enable developer mode
+3. **Boundary testing** — extreme length input (100K chars), unicode edge cases, recursive tasks
+4. **Output manipulation** — format forcing, data exfiltration through output
+5. **Tool abuse** — calling tools in unexpected ways, chaining tools for unauthorized actions
+
+Each adversarial test has: input, expected behavior (should_not_comply, should_maintain_role, etc.), and a detector function that checks whether the agent handled it correctly.
+
+### Regression Testing Pipeline
+
+Catch capability degradation on agent model or code changes. Establish baseline, compare new version against it.
+
+**When to use**: Agent model or code changes
+
+```typescript
+class AgentRegressionTester {
+    private baselineResults: Map<string, TestResult[]> = new Map();
+
+    async establishBaseline(agent: Agent, testSuite: TestCase[]): Promise<void> {
+        for (const test of testSuite) {
+            const results: TestResult[] = [];
+            for (let i = 0; i < 10; i++) {
+                results.push(await this.runTest(agent, test, i));
+            }
+            this.baselineResults.set(test.id, results);
+        }
+    }
+
+    async testForRegression(newAgent: Agent, testSuite: TestCase[]): Promise<RegressionReport> {
+        // Compare new results against baseline using chi-squared test
+        // 5% tolerance: currentPassRate < baselinePassRate * 0.95 = regression
+        // pValue < 0.05 = statistically significant regression
+    }
+}
+```
+
+Regression criteria:
+- Pass rate drops more than 5% from baseline = regression
+- Statistical significance via chi-squared test (p < 0.05)
+- Result: "DO NOT DEPLOY" if regressions detected, "OK to deploy" otherwise
 
 ## Eval Set Requirements
 
@@ -161,69 +279,16 @@ Minimum 50 test cases. Production agents need 100+. Each test case specifies:
 
 Coverage must include: tool selection, argument passing, error recovery, safety compliance, multi-step reasoning.
 
-## Continuous Evals
-
-Run unsupervised evaluation on production traces to catch degradation early:
-
-- **Binary pass/fail** -- each trace gets a clear pass or fail, not a fuzzy score
-- **Specific, not generic** -- evaluate "did the agent call the correct tool" not "was the agent good"
-- **Automated replay** -- sample production traces, replay them against updated agent, compare trajectories
-- **Drift detection** -- track pass rate over time; a drop of 5% or more triggers investigation
-
-```python
-CONTINUOUS_EVAL_CONFIG = {
-    "sample_rate": 0.1,
-    "eval_dimensions": [
-        "tool_selection_accuracy",
-        "argument_schema_compliance",
-        "policy_compliance",
-        "output_factuality",
-    ],
-    "pass_threshold": 0.85,
-    "drift_alert_threshold": 0.05,
-    "replay_on_version_change": True,
-}
-```
-
 ## Framework Support
 
 | Framework | Type | Strengths |
 |---|---|---|
 | DeepEval | Open-source | Built-in metrics for agents, RAG, hallucination, bias |
 | RAGAS | Open-source | Retrieval-focused metrics: faithfulness, relevance, context recall |
-| Promptfoo | Open-source | Prompt comparison, red teaming, config-driven evals |
+| PromptFoo | Open-source | Prompt comparison, red teaming, config-driven evals |
 | LangSmith evals | Commercial | Integrated with LangGraph, dataset management, annotation UI |
 | Langfuse evals | Open-source | Score-based evals on traces, LLM-as-judge templates |
-| PydanticAI built-in evals | Open-source | Type-safe evaluation with Pydantic models, deterministic + LLM judges |
-
-## Test Harness: Replay Traces
-
-Build a harness that replays recorded traces against the current agent version to detect behavioral changes:
-
-```python
-class EvalHarness:
-    def __init__(self, eval_dataset_path: str, agent_runner: callable):
-        self.cases = load_eval_dataset(eval_dataset_path)
-        self.agent_runner = agent_runner
-
-    def run_case(self, case: dict) -> dict:
-        result = self.agent_runner(case["input"], mock_tools=True)
-        return {
-            "tool_selection": binary_eval(result.tools, case["expected_tools"]),
-            "argument_validity": schema_eval(result.tool_args, case["expected_tool_args"]),
-            "step_count": len(result.steps) <= case["expected_steps"] + 1,
-            "policy_compliance": policy_eval(result.trace, case["policy_constraints"]),
-            "output_quality": contains_eval(result.output, case["expected_output_contains"]),
-        }
-
-    def run_all(self) -> dict:
-        results = [self.run_case(c) for c in self.cases]
-        return {
-            "total": len(results),
-            "pass_rate": sum(1 for r in results if all(r.values())) / len(results),
-            "failures": [r for r in results if not all(r.values())],
-        }
-```
+| PydanticAI evals | Open-source | Type-safe evaluation with Pydantic models, deterministic + LLM judges |
 
 ## Eval Dataset Structure
 
@@ -242,18 +307,117 @@ tests/
 │   │   ├── latest.json         → Results from current version
 ```
 
+## Sharp Edges
+
+### Agent scores well on benchmarks but fails in production
+
+**Severity: HIGH**
+
+Benchmarks have known answer patterns. Production has long-tail edge cases. User inputs are messier than test data. High benchmark scores don't predict real-world performance.
+
+**Fix**: Bridge benchmark and production evaluation:
+1. Test on real production samples (anonymized) — production accuracy below 80% of benchmark accuracy = gap
+2. Test adversarial variants of benchmark — pass rate below 70% = robustness gap
+3. Test edge cases from production logs — failure rate above 20% = coverage gap
+4. Test latency under production load — p95 above 5s = performance gap
+
+### Same test passes sometimes, fails other times
+
+**Severity: HIGH**
+
+LLM outputs are stochastic. Tests expect deterministic behavior. No retry or statistical handling. CI randomly fails. Tests pass locally, fail in CI.
+
+**Fix**: Handle flaky tests:
+- Minimum 5 runs per test, require 80% pass rate
+- Calculate flakiness = probability of different result on rerun
+- Flaky tests (<20% flakiness): run multiple times in CI
+- Failing tests (>50% flakiness): investigate and improve
+- Aggregate: 90% of tests must pass for merge approval
+
+### Agent optimized for metric, not actual task
+
+**Severity: MEDIUM**
+
+Metrics are proxies for quality. Agents can game specific metrics. Overfitting to evaluation criteria.
+
+**Fix**: Multi-dimensional evaluation:
+- Correctness (0.3 weight), helpfulness (0.2), safety (0.25), efficiency (0.15), user preference (0.1)
+- Detect gaming: high variance across dimensions (>0.15) = likely gaming one metric
+- Human evaluation for dimensions that can be gamed
+
+### Test data accidentally used in training or prompts
+
+**Severity: CRITICAL**
+
+Test data in fine-tuning dataset, examples in system prompt, or RAG retrieves test documents. Perfect scores on specific tests that drop on new versions. Agent "knows" answers it shouldn't.
+
+**Fix**: Prevent data leakage:
+1. Check for exact matches in training data (similarity > 0.95)
+2. Check system prompt for test examples
+3. Memorization test: give partial input, check if agent completes exactly (similarity > 0.8 = leak)
+4. Check if RAG retrieves documents containing expected answers (similarity > 0.7 = leak)
+5. If leaks found: remove leaked tests and create new ones
+
 ## Anti-Patterns
 
-- Only evaluating final answer quality -- trajectory failures are invisible without step-by-step eval
-- LLM-as-judge without rubric -- unguided judges produce inconsistent and biased scores
-- No CI integration -- evals that only run manually are never run when they matter most
-- 10 test cases for production -- insufficient coverage misses edge cases and adversarial inputs
-- Scored ranges instead of binary pass/fail -- ranges (1-5) lack reproducibility; binary judgments with clear criteria are actionable
-- Evaluating in isolation only -- production traces reveal failures that test datasets miss
+- Only evaluating final answer quality — trajectory failures are invisible without step-by-step eval
+- LLM-as-judge without rubric — unguided judges produce inconsistent and biased scores
+- No CI integration — evals that only run manually are never run when they matter most
+- 10 test cases for production — insufficient coverage misses edge cases and adversarial inputs
+- Scored ranges instead of binary pass/fail — ranges (1-5) lack reproducibility
+- Evaluating in isolation only — production traces reveal failures that test datasets miss
+- Same evaluation for all agent types — customer service agents need behavioral contracts; research agents need trajectory accuracy
+
+## Collaboration
+
+### Delegation Triggers
+
+- implement|fix|improve → autonomous-agents (Need to fix issues found in evaluation)
+- orchestration|coordination → multi-agent-orchestration (Need to evaluate orchestration patterns)
+
+### Complete Agent Development Cycle
+
+Skills: agent-evaluation, autonomous-agents, multi-agent-orchestration
+
+Workflow:
+1. Design agent with testability in mind
+2. Create evaluation suite before implementation
+3. Implement agent
+4. Evaluate against suite
+5. Iterate based on results
+
+### Production Agent Monitoring
+
+Skills: agent-evaluation, llm-security-audit
+
+Workflow:
+1. Establish baseline metrics
+2. Deploy with monitoring
+3. Continuous evaluation in production
+4. Alert on regression
+
+### Multi-Agent System Evaluation
+
+Skills: agent-evaluation, multi-agent-orchestration, agent-communication
+
+Workflow:
+1. Evaluate individual agents
+2. Evaluate communication reliability
+3. Evaluate end-to-end system
+4. Load testing for scalability
+
+## Related Skills
+
+Works well with: `multi-agent-orchestration`, `agent-communication`, `autonomous-agents`
+
+## When to Use (Trigger Keywords)
+
+- User mentions or implies: agent testing, agent evaluation, benchmark agents, agent reliability, test agent
 
 ## References
 
 - DeepEval: https://docs.deepeval.com/
 - RAGAS: https://docs.ragas.io/
-- Promptfoo: https://promptfoo.com/docs/
+- PromptFoo: https://promptfoo.com/docs/
 - LangSmith Evaluation: https://docs.smith.langchain.com/
+- AgentBench: https://github.com/THUDM/AgentBench

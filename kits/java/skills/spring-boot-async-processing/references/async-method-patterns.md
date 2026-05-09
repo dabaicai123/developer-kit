@@ -266,35 +266,35 @@ public void sendNotification(String userId, String message) {
 }
 ```
 
-## Context propagation: MdcTaskDecorator pattern
+## Context propagation: ThreadContextTaskDecorator pattern
 
-Spring Security context, `RequestContextHolder`, and MDC are NOT automatically propagated to async threads. Use `TaskDecorator` to copy context from the caller thread to the async thread.
+Spring Security context, `RequestContextHolder`, and ThreadContext are NOT automatically propagated to async threads. Use `TaskDecorator` to copy context from the caller thread to the async thread.
 
-### MdcTaskDecorator — propagate MDC (logging context)
+### ThreadContextTaskDecorator — propagate ThreadContext (logging context)
 
 ```java
-public class MdcTaskDecorator implements TaskDecorator {
+public class ThreadContextTaskDecorator implements TaskDecorator {
     @Override
     public Runnable decorate(Runnable runnable) {
-        // Capture MDC from caller thread
-        Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        // Capture ThreadContext from caller thread
+        Map<String, String> contextMap = ThreadContext.getContext();
         return () -> {
             try {
-                // Set MDC in async thread
+                // Set ThreadContext in async thread
                 if (contextMap != null) {
-                    MDC.setContextMap(contextMap);
+                    ThreadContext.putAll(contextMap);
                 }
                 runnable.run();
             } finally {
-                // Clean up MDC to prevent thread contamination
-                MDC.clear();
+                // Clean up ThreadContext to prevent thread contamination
+                ThreadContext.clearAll();
             }
         };
     }
 }
 ```
 
-### Configure MdcTaskDecorator on executor
+### Configure ThreadContextTaskDecorator on executor
 
 ```java
 @Bean("ioExecutor")
@@ -304,7 +304,7 @@ public Executor ioExecutor() {
     executor.setMaxPoolSize(16);
     executor.setQueueCapacity(200);
     executor.setThreadNamePrefix("io-async-");
-    executor.setTaskDecorator(new MdcTaskDecorator());
+    executor.setTaskDecorator(new ThreadContextTaskDecorator());
     executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
     executor.setWaitForTasksToCompleteOnShutdown(true);
     executor.setAwaitTerminationSeconds(30);
@@ -313,20 +313,20 @@ public Executor ioExecutor() {
 }
 ```
 
-### Combined SecurityContext + MDC TaskDecorator
+### Combined SecurityContext + ThreadContext TaskDecorator
 
 ```java
 public class ContextPropagatingTaskDecorator implements TaskDecorator {
     @Override
     public Runnable decorate(Runnable runnable) {
-        Map<String, String> mdcContext = MDC.getCopyOfContextMap();
+        Map<String, String> threadContext = ThreadContext.getContext();
         SecurityContext securityContext = SecurityContextHolder.getContext();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
         return () -> {
             try {
-                if (mdcContext != null) {
-                    MDC.setContextMap(mdcContext);
+                if (threadContext != null) {
+                    ThreadContext.putAll(threadContext);
                 }
                 SecurityContextHolder.setContext(securityContext);
                 if (requestAttributes != null) {
@@ -334,7 +334,7 @@ public class ContextPropagatingTaskDecorator implements TaskDecorator {
                 }
                 runnable.run();
             } finally {
-                MDC.clear();
+                ThreadContext.clearAll();
                 SecurityContextHolder.clearContext();
                 RequestContextHolder.resetRequestAttributes();
             }
