@@ -45,5 +45,6 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 - Modifying a saved entity without updating — changes silently lost (use `updateById()`, not `save()` again)
 - Assuming `save()` has built-in transaction (it doesn't — only `saveBatch` does)
 - Adding `@Transactional(readOnly=true)` on single-statement queries (unnecessary proxy overhead)
+- For-loop individual DB calls (insert/select/update/delete) instead of batch methods — use `saveBatch`, `listByIds`, `removeByIds`, `updateBatchById`, or `lambdaQuery().in()`
 
 For detailed examples and explanations, use the `spring-boot-transaction-management` skill.

@@ -279,6 +279,116 @@ List<OrderVO> result = orderMapper.selectJoinList(OrderVO.class,
 
 > **Note**: Standard `LambdaQueryWrapper` does not support joins. For complex multi-table queries that `MPJLambdaWrapper` cannot express, use custom `@Select` SQL in Mapper interfaces.
 
+## Batch Operations — Never Loop Individual DB Calls
+
+Replace `for` loops with individual `insert/select/update/delete` with MyBatis-Plus batch methods or `IN` clause queries. Looping individual DB calls causes N+1 roundtrips and is a critical performance anti-pattern.
+
+### Batch INSERT — saveBatch instead of for-loop insert
+
+```java
+// ❌ WRONG: for-loop insert — N roundtrips, no transaction wrapping
+@Override
+public void bindAdPlans(Long strategyId, List<Long> adPlanIds) {
+    for (Long adPlanId : adPlanIds) {
+        StrategyAdPlanDO junction = new StrategyAdPlanDO();
+        junction.setStrategyId(strategyId);
+        junction.setAdPlanId(adPlanId);
+        strategyAdPlanMapper.insert(junction);  // N individual INSERTs
+    }
+}
+
+// ✅ CORRECT: saveBatch — single transaction, reduced roundtrips
+@Override
+@Transactional(rollbackFor = Exception.class)
+public void bindAdPlans(Long strategyId, List<Long> adPlanIds) {
+    List<StrategyAdPlanDO> junctions = adPlanIds.stream()
+        .map(adPlanId -> {
+            StrategyAdPlanDO junction = new StrategyAdPlanDO();
+            junction.setStrategyId(strategyId);
+            junction.setAdPlanId(adPlanId);
+            return junction;
+        })
+        .toList();
+    saveBatch(junctions);  // batch INSERT in one transaction
+}
+```
+
+> **Performance note**: `saveBatch` still executes individual INSERT statements (not multi-row INSERT). For truly high-volume bulk inserts (>1000 rows), use a custom `InsertAllBatch` SQL injector method that generates `INSERT INTO ... VALUES (...),(...),(...)`.
+
+### Batch SELECT — IN clause instead of for-loop query
+
+```java
+// ❌ WRONG: for-loop selectById — N roundtrips
+public List<AdPlanDO> findAdPlans(List<Long> adPlanIds) {
+    List<AdPlanDO> result = new ArrayList<>();
+    for (Long adPlanId : adPlanIds) {
+        result.add(adPlanMapper.selectById(adPlanId));  // N individual SELECTs
+    }
+    return result;
+}
+
+// ✅ CORRECT: listByIds — single SELECT with IN clause
+public List<AdPlanDO> findAdPlans(List<Long> adPlanIds) {
+    return listByIds(adPlanIds);  // SELECT ... WHERE id IN (1, 2, 3, ...)
+}
+
+// ✅ CORRECT: LambdaQueryWrapper with in() — single query by arbitrary field
+public List<StrategyAdPlanDO> findByStrategyId(Long strategyId) {
+    return lambdaQuery().eq(StrategyAdPlanDO::getStrategyId, strategyId).list();
+}
+
+// ✅ CORRECT: in() for batch query by arbitrary field values
+public List<UserDO> findUsersByStatuses(List<UserStatus> statuses) {
+    return lambdaQuery().in(UserDO::getStatus, statuses).list();
+}
+```
+
+### Batch UPDATE — updateBatchById instead of for-loop update
+
+```java
+// ❌ WRONG: for-loop updateById — N roundtrips
+public void updateAllStatuses(List<UserDO> users, UserStatus status) {
+    for (UserDO user : users) {
+        user.setStatus(status);
+        updateById(user);  // N individual UPDATEs
+    }
+}
+
+// ✅ CORRECT: updateBatchById — single transaction batch UPDATE
+@Transactional(rollbackFor = Exception.class)
+public void updateAllStatuses(List<UserDO> users, UserStatus status) {
+    users.forEach(user -> user.setStatus(status));
+    updateBatchById(users);  // batch UPDATE in one transaction
+}
+```
+
+### Batch DELETE — removeByIds instead of for-loop delete
+
+```java
+// ❌ WRONG: for-loop removeById — N roundtrips
+public void deleteAll(List<Long> ids) {
+    for (Long id : ids) {
+        removeById(id);  // N individual DELETE/soft-DELETEs
+    }
+}
+
+// ✅ CORRECT: removeByIds — single batch DELETE
+public void deleteAll(List<Long> ids) {
+    removeByIds(ids);  // single DELETE WHERE id IN (...)
+}
+```
+
+### Batch Method Reference
+
+| Operation | Batch Method | SQL Generated |
+|-----------|-------------|---------------|
+| INSERT multiple | `saveBatch(entities)` or `saveBatch(entities, batchSize)` | Individual INSERTs in one transaction |
+| SELECT by IDs | `listByIds(idList)` | `SELECT ... WHERE id IN (...)` |
+| SELECT by field | `lambdaQuery().in(field, values).list()` | `SELECT ... WHERE field IN (...)` |
+| UPDATE multiple | `updateBatchById(entities)` or `updateBatchById(entities, batchSize)` | Individual UPDATEs in one transaction |
+| DELETE by IDs | `removeByIds(idList)` | `DELETE WHERE id IN (...)` (or soft-delete) |
+| SELECT count | `lambdaQuery().in(field, values).count()` | `SELECT COUNT(*) WHERE field IN (...)` |
+
 ## Best Practices
 
 - **MVC**: Use `IService/ServiceImpl` pattern with `IService<DO>` / `ServiceImpl<Mapper, DO>`
@@ -296,8 +406,9 @@ List<OrderVO> result = orderMapper.selectJoinList(OrderVO.class,
 - Use `DO` suffix for persistence objects, never `Entity` suffix
 - Use `mybatis-plus-spring-boot3-starter` for Spring Boot 3.x (not old `mybatis-plus-boot-starter`)
 - Use `mybatis-plus-join` (`MPJLambdaWrapper`) for type-safe multi-table joins
+- **Never loop individual DB calls** — use `saveBatch`, `listByIds`, `removeByIds`, `updateBatchById`, or `lambdaQuery().in()` instead of for-loop insert/select/update/delete
 - Add detailed JavaDoc comments on classes, methods, and fields
 
 ## Keywords
 
-mybatis-plus, ORM, mapper, DO, LambdaQueryWrapper, lambdaQuery, soft-delete, optimistic-lock, pagination, field-fill, MetaObjectHandler, saveBatch, IService, ServiceImpl, BaseMapper, @TableName, @TableId, @TableLogic, @Version, @TableField, spring-boot3-starter, MPJLambdaWrapper, mybatis-plus-join, Wrappers
+mybatis-plus, ORM, mapper, DO, LambdaQueryWrapper, lambdaQuery, soft-delete, optimistic-lock, pagination, field-fill, MetaObjectHandler, saveBatch, listByIds, removeByIds, updateBatchById, batch-insert, batch-select, IN-clause, N+1-anti-pattern, IService, ServiceImpl, BaseMapper, @TableName, @TableId, @TableLogic, @Version, @TableField, spring-boot3-starter, MPJLambdaWrapper, mybatis-plus-join, Wrappers
