@@ -33,7 +33,7 @@ Enforce MyBatis-Plus best practices for mapper, service, and data object definit
 - Implementation must extend `ServiceImpl<XxxMapper, XxxDO>`
 - Use `lambdaQuery()` / `lambdaUpdate()` inside ServiceImpl (not `new LambdaQueryWrapper`)
 - Use conditional expressions: `.eq(condition, column, value)` for optional filters
-- Use `@Transactional(readOnly = true)` for query methods
+- Use `@Transactional(readOnly = true)` for multi-step query methods only (single-statement queries run fine on auto-commit)
 - Use `@Transactional(rollbackFor = Exception.class)` for write methods
 
 **DDD/COLA projects** use the Gateway pattern instead — see `ddd-cola` skill.

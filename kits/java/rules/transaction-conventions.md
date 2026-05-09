@@ -14,7 +14,7 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 
 2. **Always specify `rollbackFor = Exception.class`** — default rollback only covers `RuntimeException` and `Error`. Checked exceptions (e.g., `IOException`) silently commit the transaction.
 
-3. **Use `@Transactional(readOnly = true)` on all query methods** — hints persistence layer to skip flush and dirty-checking, improving read performance.
+3. **Use `@Transactional(readOnly = true)` on multi-step query methods only** — MyBatis-Plus has no persistence context (unlike JPA), so `readOnly` provides no flush/dirty-check optimization. Single-statement queries (getById, findByEmail) run fine on auto-commit. Use `readOnly = true` only when a method executes multiple SQL statements (consistent snapshot, defensive write prevention).
 
 4. **Avoid self-invocation** — `this.internalMethod()` bypasses the proxy; `@Transactional` on same-class method calls is silently ignored. Extract internal transactional logic to a separate bean.
 
@@ -30,7 +30,7 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 
 - `@Transactional` on Service interface
 - Missing `rollbackFor = Exception.class`
-- Missing `readOnly = true` on query methods
+- Missing `readOnly = true` on multi-step query methods
 - Self-invocation with `@Transactional`
 - Wrapping external API calls or file I/O inside `@Transactional`
 - Catching and swallowing exceptions inside `@Transactional`

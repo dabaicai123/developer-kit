@@ -29,7 +29,7 @@ Spring Boot 3.5.x transaction management patterns with MyBatis-Plus — declarat
 
 2. **Always specify `rollbackFor = Exception.class`** — by default, only unchecked exceptions (`RuntimeException` and subclasses) trigger rollback. Checked exceptions (e.g., `IOException`) will commit the transaction unless explicitly configured.
 
-3. **Use `@Transactional(readOnly = true)` on all query methods** — this hints the persistence layer to optimize for reads (no flush, no dirty-checking) and can improve performance with MyBatis-Plus.
+3. **Use `@Transactional(readOnly = true)` on multi-step query methods only** — MyBatis-Plus has no persistence context (unlike JPA/Hibernate), so `readOnly = true` provides no flush/dirty-check optimization. For single-statement queries (getById, findByEmail), auto-commit is sufficient and adding `@Transactional` only adds proxy overhead. Use `readOnly = true` when a method executes multiple SQL statements to ensure a consistent snapshot, or as a defensive measure to prevent accidental writes in complex query logic.
 
 4. **Keep transaction scope minimal** — only wrap database operations. Do not include long computations, external API calls, or file I/O inside a transactional method; this holds database connections unnecessarily.
 
@@ -114,7 +114,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 }
 ```
 
-### Example 2: @Transactional(readOnly = true) for query methods
+### Example 2: @Transactional(readOnly = true) for multi-step query methods
 
 ```java
 /**
@@ -125,21 +125,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     /**
-     * 根据邮箱查询用户
-     * <p>readOnly = true 提示持久层优化为只读，不触发 flush 和脏检查</p>
+     * 根据邮箱查询用户 — single SQL, no @Transactional needed
+     * <p>Auto-commit is sufficient for single-statement queries</p>
      *
      * @param email 用户邮箱
      * @return 对应的用户实体，不存在则返回 null
      */
     @Override
-    @Transactional(readOnly = true)
     public UserDO findByEmail(String email) {
         return lambdaQuery().eq(UserDO::getEmail, email).one();
     }
 
     /**
-     * 分页查询用户列表
-     * <p>所有查询方法必须标记 readOnly = true</p>
+     * 分页查询用户列表 — multi-step (query + count + transform), readOnly = true needed
+     * <p>Multiple SQL statements need consistent snapshot; readOnly prevents accidental writes</p>
      *
      * @param pageNum  页码
      * @param pageSize 每页条数
@@ -157,6 +156,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         return PageResult.of(mpPage).map(UserConverter::toVO);
     }
 }
+```
+
+> **MyBatis-Plus readOnly nuance**: Unlike JPA/Hibernate, MyBatis has no persistence context — no auto-flush, no dirty-checking.
+> `readOnly = true` does NOT skip flush cycles (they don't exist in MyBatis). Its value is:
+> 1. **Consistent snapshot** — multiple SQL statements in one method see the same data state
+> 2. **Defensive** — PostgreSQL rejects writes on a readOnly connection, preventing accidental INSERT/UPDATE
+> 3. **Not needed** for single-statement queries — auto-commit handles these efficiently without proxy overhead
 ```
 
 ### Example 3: Propagation.REQUIRES_NEW for independent sub-transactions (audit logging)
@@ -318,7 +324,7 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 
 ## Best Practices
 
-- **Always use `@Transactional(readOnly = true)` on query methods** — hints MyBatis-Plus to optimize reads, prevents accidental writes
+- **Use `@Transactional(readOnly = true)` on multi-step query methods** — MyBatis-Plus has no persistence context (unlike JPA), so `readOnly` provides no flush/dirty-check optimization. Only use when a method runs multiple SQL statements (consistent snapshot, defensive write prevention). Skip for single-statement queries — auto-commit is sufficient.
 - **Always specify `rollbackFor = Exception.class`** — default only rolls back unchecked exceptions; checked exceptions will silently commit
 - **Avoid self-invocation** — extract internal transactional logic to a separate Service bean; `@Transactional` on same-class method calls is silently ignored by Spring AOP proxy
 - **Use `Propagation.REQUIRES_NEW` only for independent audit/logging** — it suspends the existing transaction and opens a new one, adding connection pool pressure; do not use it casually

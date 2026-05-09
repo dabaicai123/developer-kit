@@ -340,7 +340,7 @@ public class OrderGatewayImpl implements OrderGateway {
 - Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft delete
 - Use `@TableId(type = IdType.ASSIGN_ID)` for distributed ID generation
 - Use `@TableName("xxx")` with plain snake_case — no prefix
-- Use `@Transactional(readOnly = true)` for query executors → see `spring-boot-transaction-management`
+- Use `@Transactional(readOnly = true)` for multi-step query executors only (not single-statement queries) → see `spring-boot-transaction-management`
 - Use `LambdaQueryWrapper` in Infrastructure persistence, never raw `QueryWrapper`
 - Use MapStruct converters at layer boundaries instead of manual `fromDomain()/toDomain()` → see `mapstruct-patterns`
 - **Sealed interface pattern**: when using `sealed interface` for commands/events:

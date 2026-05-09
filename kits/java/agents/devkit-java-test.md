@@ -124,7 +124,7 @@ void removeById_withSoftDelete_setsDeletedAtTimestamp() {
 - **Arrange-Act-Assert** — Follow AAA pattern consistently
 - **No test interdependency** — Each test runs independently
 - **Mock at boundaries** — Mock Mapper for Service, mock Service for Controller
-- **Use `@Transactional(readOnly = true)`** in integration tests to auto-rollback
+- **Use `@Transactional`** in integration tests for auto-rollback (readOnly is optional — test rollback works regardless)
 
 ## Anti-Patterns to Avoid
 

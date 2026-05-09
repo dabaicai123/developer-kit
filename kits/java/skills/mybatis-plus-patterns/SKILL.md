@@ -93,8 +93,7 @@ public interface UserService extends IService<UserDO> {
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
     @Override
-    @Transactional(readOnly = true)
-    public UserDO findByEmail(String email) {
+    public UserDO findByEmail(String email) {  // single SQL — no @Transactional needed
         return lambdaQuery().eq(UserDO::getEmail, email).one();
     }
 }
@@ -183,7 +182,7 @@ Page<UserDO> result = userMapper.selectPage(page, wrapper);
 
 - **MVC**: Use `IService/ServiceImpl` pattern with `IService<DO>` / `ServiceImpl<Mapper, DO>`
 - **DDD/COLA**: Use Gateway pattern — see `ddd-cola` skill
-- Use `@Transactional(readOnly = true)` on all query methods → see `spring-boot-transaction-management`
+- Use `@Transactional(readOnly = true)` on multi-step query methods only (not single-statement queries) → see `spring-boot-transaction-management`
 - Use `LambdaQueryWrapper` instead of `QueryWrapper` for type safety
 - Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft deletes
 - Use `@Version` for optimistic locking
