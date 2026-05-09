@@ -395,14 +395,16 @@ public class OrderSummaryProjection {
 - **Guarantee reliable event delivery**: Use outbox table + polling for at-least-once delivery; design consumers to be idempotent (deduplicate by event ID)
 - **Use correlation IDs**: trace events across service boundaries for debugging and observability
 
-## Anti-patterns
+## Constraints and Warnings
+
+**Anti-patterns**:
 
 - **Event coupling** — consumers that depend on event payload fields from other services. When the source service changes its event structure, all consumers break. Design events to be self-contained and stable; use additive changes only.
 - **Synchronous event chains** — processing events synchronously in the same thread creates blocking chains. Any failure in the chain blocks the original operation. Use async processing with message brokers.
 - **Snapshot as source of truth** — treating snapshots as the definitive state instead of the event stream. Snapshots are ephemeral and can be rebuilt; the event stream is the authoritative source. Never delete events.
 - **Projection with business logic** — projection handlers that contain business rules or validation. Projections should be simple event-to-read-model translations; business rules belong in the write side.
 
-## Constraints and Warnings
+**Technical constraints**:
 
 - **Event versioning is critical**: never remove or rename fields from existing events. Additive changes (new fields with defaults) are safe. Breaking changes require new event types or topics.
 - **CQRS requires eventual consistency**: the read model may lag behind the write model. Clients must handle stale reads (e.g., "your order has been placed but may not appear in search immediately").

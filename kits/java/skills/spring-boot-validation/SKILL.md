@@ -369,7 +369,9 @@ Spring Boot auto-detects `messages.properties` in the classpath root.
 - **Keep validation annotations on DTOs, not entities** — entities may be constructed in contexts where validation should not apply
 - **Use validation groups sparingly** — prefer separate DTOs for create vs update when the difference is significant
 
-## Anti-patterns
+## Constraints and Warnings
+
+**Anti-patterns**:
 
 - **Manual if-checks for validation** — `if (username == null || username.isEmpty()) throw ...` is repetitive, untestable, and bypasses the validation framework. Use `@NotBlank` instead.
 - **Re-validating in service layer after controller `@Valid`** — redundant and wasteful. Once validated at the controller boundary, the data is clean. Service layer should only validate business rules (not format/constraint checks).
@@ -380,7 +382,7 @@ Spring Boot auto-detects `messages.properties` in the classpath root.
 - **Validation groups for everything** — when create and update DTOs differ significantly, prefer separate DTOs (`CreateUserRequest` vs `UpdateUserRequest`) over a single DTO with groups. Groups add complexity and are easy to misapply.
 - **Business rule validation in annotations** — annotations should validate format and constraints, not business rules (e.g., "order total must not exceed credit limit"). Business rules belong in the service layer.
 
-## Constraints and Warnings
+**Technical constraints**:
 
 - **`@Valid` vs `@Validated`**: `@Valid` is a JSR-380 standard annotation that validates all constraints (no group support). `@Validated` is a Spring extension that supports groups and method-level validation. Use `@Valid` for nested cascading; use `@Validated` for group-based or method-parameter validation.
 - **Path/query parameter validation requires `@Validated` on controller class** — without it, constraints like `@Positive`, `@NotBlank` on `@PathVariable`/`@RequestParam` are silently ignored. This is a common source of validation gaps.

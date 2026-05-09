@@ -295,7 +295,7 @@ public void bindAdPlans(Long strategyId, List<Long> adPlanIds) {
             return junction;
         })
         .toList();
-    saveBatch(junctions);  // batch INSERT in one transaction
+    saveBatch(junctions, 500);  // batchSize 500 per flush
 }
 ```
 

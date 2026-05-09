@@ -6,6 +6,8 @@ type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
+# MyBatis-Plus Generator
+
 ## When to use this skill
 
 Use when scaffolding MyBatis-Plus CRUD code from existing database tables. For manually writing or editing individual modules, use `mybatis-plus-patterns` instead. Do NOT trigger for generic code generation, JPA/Hibernate, or other ORM frameworks.

@@ -6,6 +6,8 @@ type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
+# COLA DDD Architecture
+
 ## When to use this skill
 
 Use when creating or structuring a Spring Boot project with COLA/DDD architecture, implementing domain-driven design with dependency-inverted layers.
@@ -78,7 +80,7 @@ internal APIs needed for AST modification. Symptoms include:
 
 This forces mvnd to use the legacy javac API, restoring Lombok's annotation processing capability.
 
-### 8. External HTTP Client
+### 7. External HTTP Client
 
 - Use **RestClient** (Spring 6.1+, included in `spring-boot-starter-web`, no extra dependency)
 - **OkHttp3**: only for WebSocket or custom interceptor scenarios; not managed by Spring Boot parent
@@ -143,9 +145,10 @@ Controller → Service (thin facade) → Executor (actual handler)
 ```java
 // app/service/ — thin facade, no business logic
 @Service
+@RequiredArgsConstructor
 public class MetricsServiceImpl implements MetricsServiceI {
-    @Resource private ATAMetricAddCmdExe ataMetricAddCmdExe;
-    @Resource private ATAMetricQryExe ataMetricQryExe;
+    private final ATAMetricAddCmdExe ataMetricAddCmdExe;
+    private final ATAMetricQryExe ataMetricQryExe;
 
     @Override
     public Response addATAMetric(ATAMetricAddCmd cmd) {
@@ -160,8 +163,9 @@ public class MetricsServiceImpl implements MetricsServiceI {
 
 // app/executor/ — write handler, goes through Domain
 @Component
+@RequiredArgsConstructor
 public class ATAMetricAddCmdExe {
-    @Autowired private MetricGateway metricGateway;
+    private final MetricGateway metricGateway;
 
     @Transactional
     public Response execute(ATAMetricAddCmd cmd) {
@@ -173,8 +177,9 @@ public class ATAMetricAddCmdExe {
 
 // app/executor/ — read handler, bypasses Domain
 @Component
+@RequiredArgsConstructor
 public class ATAMetricQryExe {
-    @Autowired private MetricMapper metricMapper;
+    private final MetricMapper metricMapper;
 
     public MultiResponse<ATAMetricDTO> execute(ATAMetricQry qry) {
         List<MetricDO> records = metricMapper.selectByQry(qry);

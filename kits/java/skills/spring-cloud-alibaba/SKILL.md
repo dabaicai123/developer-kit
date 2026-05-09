@@ -167,6 +167,7 @@ public class UserService {
 **Message Receiving**:
 
 ```java
+@Slf4j
 @Component
 @RocketMQMessageListener(
     topic = "user-topic",
@@ -175,8 +176,7 @@ public class UserService {
 public class UserEventListener implements RocketMQListener<User> {
     @Override
     public void onMessage(User user) {
-        // Process message
-        System.out.println("Received user: " + user.getName());
+        log.info("Received user: {}", user.getName());
     }
 }
 ```
@@ -269,9 +269,9 @@ For unified configuration management patterns, see `spring-boot-configuration-ma
 
 ## Related Skills
 
-- [spring-boot-event-driven-patterns](../spring-boot-event-driven-patterns/SKILL.md) — Event-driven patterns for eventual consistency and async processing
-- [spring-cloud-gateway](../spring-cloud-gateway/SKILL.md) — API gateway routing and filtering
-- [spring-cloud-openfeign](../spring-cloud-openfeign/SKILL.md) — Declarative HTTP client configuration and best practices
-- [spring-boot-resilience4j](../spring-boot-resilience4j/SKILL.md) — Circuit breaker and resilience patterns (alternative to Sentinel)
-- [spring-boot-actuator](../spring-boot-actuator/SKILL.md) — Monitoring, health checks, and observability
-- [ddd-cola](../ddd-cola/SKILL.md) — DDD architecture and COLA framework for microservice design
+- `spring-boot-event-driven-patterns` — Event-driven patterns for eventual consistency and async processing
+- `spring-cloud-gateway` — API gateway routing and filtering
+- `spring-cloud-openfeign` — Declarative HTTP client configuration and best practices
+- `spring-boot-resilience4j` — Circuit breaker and resilience patterns (alternative to Sentinel)
+- `spring-boot-actuator` — Monitoring, health checks, and observability
+- `ddd-cola` — DDD architecture and COLA framework for microservice design

@@ -165,7 +165,7 @@ public void handleOrderCreated(OrderCreatedEvent event) {
 | DLX | `{domain}.dlx` | `order.dlx` |
 | DLQ | `{domain}.{event}.dlq` | `order.created.dlq` |
 
-## Key Rules
+## Constraints and Warnings
 
 - Never publish inside `@Transactional` without outbox pattern — use `spring-boot-event-driven-patterns`
 - Never use `SimpleMessageConverter` (Java serialization) — always configure Jackson

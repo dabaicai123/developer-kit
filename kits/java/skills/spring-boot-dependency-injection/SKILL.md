@@ -25,7 +25,7 @@ Use this skill when:
 
 Put mandatory collaborators in the constructor (keep fields `final`). Optional ones use `ObjectProvider`, conditional beans, or no-op implementations.
 
-### 3. Resolve optional behavior intentionally
+### 2. Resolve optional behavior intentionally
 
 Good options include:
 - `ObjectProvider<T>` when lazy access is useful
@@ -34,7 +34,7 @@ Good options include:
 
 Nullable collaborators force null checks throughout the class and make behavior unpredictable. Use `ObjectProvider` or no-op implementations instead.
 
-### 4. Use bean selection annotations only when needed
+### 3. Use bean selection annotations only when needed
 
 When multiple beans share the same type:
 - use `@Primary` for the default implementation
@@ -43,7 +43,7 @@ When multiple beans share the same type:
 
 If selection rules become complex, move them into a dedicated configuration class instead of spreading them across services.
 
-### 5. Keep wiring in configuration, not business code
+### 4. Keep wiring in configuration, not business code
 
 Use `@Configuration` and `@Bean` methods when:
 - the object comes from a third-party library
@@ -52,7 +52,7 @@ Use `@Configuration` and `@Bean` methods when:
 
 Business services should not know how infrastructure collaborators are instantiated.
 
-### 6. Validate wiring explicitly
+### 5. Validate wiring explicitly
 
 Verify wiring with a minimal `@ContextConfiguration` test first. Then write constructor-based unit tests (no Spring). Add slice or full-context tests only where they add value.
 

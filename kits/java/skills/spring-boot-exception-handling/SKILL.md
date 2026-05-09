@@ -301,7 +301,9 @@ public class PaymentController {
 - **Throw `BusinessException` subclasses from service layer** — let the global handler catch and format them
 - **Prefer throwing exceptions over returning error Result from service methods** — keeps service signatures clean and lets the handler normalize the response
 
-## Anti-patterns
+## Constraints and Warnings
+
+**Anti-patterns**:
 
 - **Catching `Exception` and swallowing it** — prevents rollback in `@Transactional` methods; the proxy only sees a normal return. Either re-throw or use `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()`.
 - **Exposing stack traces in API responses** — leaks internal architecture, library versions, and file paths to attackers.
@@ -314,7 +316,7 @@ public class PaymentController {
 - **Multiple `@RestControllerAdvice` classes handling the same exception type** — causes ambiguous handler resolution. Use a single global handler with `@Order`.
 - **Duplicate enum constant names in ErrorCodes** — never define the same constant name twice with different codes (e.g., `STRATEGY_NOT_FOUND = 404` and `STRATEGY_NOT_FOUND = 5002`). Java enum/constants must be unique by name. When two errors have similar names but different semantics, use distinct names: `STRATEGY_CONFIG_NOT_FOUND = 404` vs `CHANNEL_STRATEGY_MISSING = 5002`.
 
-## Constraints and Warnings
+**Technical constraints**:
 
 - **`@RestControllerAdvice` only handles exceptions from `@RestController` methods** — it does not catch exceptions from filters, interceptors, or `@Controller` (non-REST) classes. For those, use `@ControllerAdvice` or register error pages.
 - **Validation exception handler must handle both `MethodArgumentNotValidException` (from `@Valid` on `@RequestBody`) and `ConstraintViolationException` (from `@Validated` on path/query params)** — these are separate exception types with different message formats.

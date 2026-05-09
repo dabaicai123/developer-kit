@@ -22,9 +22,9 @@ Provides patterns for parameterized unit tests in Java using JUnit 5. Covers `@V
 ## Instructions
 
 1. **Choose source**: `@ValueSource` for simple values, `@CsvSource` for tabular data, `@MethodSource` for complex objects
-3. **Match parameters**: Test method parameters must match data source types
-4. **Set display names**: Use `name = "{0}..."` for readable output
-5. **Validate**: Run `./gradlew test --info` or `mvn test` and verify all parameter combinations execute
+2. **Match parameters**: Test method parameters must match data source types
+3. **Set display names**: Use `name = "{0}..."` for readable output
+4. **Validate**: Run `./gradlew test --info` or `mvn test` and verify all parameter combinations execute
 
 ## Examples
 

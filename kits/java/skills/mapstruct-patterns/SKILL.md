@@ -276,7 +276,7 @@ public abstract class UserDOConverter {
 - **Don't map entity to entity** — MapStruct is for layer boundary conversion only
 - **Don't put `@Mapper` on domain entities or DO classes** — mappers are separate interfaces/classes
 
-## Anti-patterns
+## Constraints and Warnings
 
 | Anti-pattern | Why | Correct |
 |---|---|---|
