@@ -143,7 +143,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider)
@@ -157,13 +157,13 @@ public class SecurityConfig {
 
 ```java
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/authenticate")
-    public Result<AuthResponse> authenticate(@RequestBody LoginRequest request) {
+    public Result<AuthResponse> authenticate(@RequestBody LoginCmd request) {
         return Result.success(authService.authenticate(request));
     }
 

@@ -122,12 +122,12 @@ class OrderSecurityTest {
 
 ```java
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/v1/admin")
 public class AdminController {
 
   @GetMapping("/users")
   @PreAuthorize("hasRole('ADMIN')")
-  public List<UserDto> listAllUsers() {
+  public Result<List<UserDTO>> listAllUsers() {
     // logic
   }
 
@@ -162,27 +162,27 @@ class AdminControllerSecurityTest {
   @Test
   @WithMockUser(roles = "ADMIN")
   void shouldAllowAdminToListUsers() throws Exception {
-    mockMvc.perform(get("/api/admin/users"))
+    mockMvc.perform(get("/v1/admin/users"))
       .andExpect(status().isOk());
   }
 
   @Test
   @WithMockUser(roles = "USER")
   void shouldDenyUserFromListingUsers() throws Exception {
-    mockMvc.perform(get("/api/admin/users"))
+    mockMvc.perform(get("/v1/admin/users"))
       .andExpect(status().isForbidden());
   }
 
   @Test
   void shouldDenyAnonymousAccessToAdminEndpoint() throws Exception {
-    mockMvc.perform(get("/api/admin/users"))
+    mockMvc.perform(get("/v1/admin/users"))
       .andExpect(status().isUnauthorized());
   }
 
   @Test
   @WithMockUser(roles = "ADMIN")
   void shouldAllowAdminToDeleteUser() throws Exception {
-    mockMvc.perform(delete("/api/admin/users/1"))
+    mockMvc.perform(delete("/v1/admin/users/1"))
       .andExpect(status().isOk());
   }
 }

@@ -35,9 +35,9 @@ dependencies {
 ```java
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-  UserDto toDto(User user);
-  User toDO(UserDto dto);
-  List<UserDto> toDtos(List<User> users);
+  UserDTO toDto(User user);
+  User toDO(UserDTO dto);
+  List<UserDTO> toDtos(List<User> users);
 }
 
 class UserMapperTest {
@@ -46,7 +46,7 @@ class UserMapperTest {
   @Test
   void shouldMapUserToDto() {
     User user = new User(1L, "Alice", "alice@example.com", 25);
-    UserDto dto = userMapper.toDto(user);
+    UserDTO dto = userMapper.toDto(user);
     assertThat(dto)
       .isNotNull()
       .extracting("id", "name", "email", "age")
@@ -55,7 +55,7 @@ class UserMapperTest {
 
   @Test
   void shouldMapDtoToDO() {
-    UserDto dto = new UserDto(1L, "Alice", "alice@example.com", 25);
+    UserDTO dto = new UserDTO(1L, "Alice", "alice@example.com", 25);
     User user = userMapper.toDO(dto);
     assertThat(user)
       .isNotNull()
@@ -69,10 +69,10 @@ class UserMapperTest {
       new User(1L, "Alice", "alice@example.com", 25),
       new User(2L, "Bob", "bob@example.com", 30)
     );
-    List<UserDto> dtos = userMapper.toDtos(users);
+    List<UserDTO> dtos = userMapper.toDtos(users);
     assertThat(dtos)
       .hasSize(2)
-      .extracting(UserDto::getName)
+      .extracting(UserDTO::getName)
       .containsExactly("Alice", "Bob");
   }
 
@@ -100,7 +100,7 @@ class NestedObjectMapperTest {
   void shouldMapNestedAddress() {
     Address address = new Address("123 Main St", "New York", "NY", "10001");
     User user = new User(1L, "Alice", address);
-    UserDto dto = userMapper.toDto(user);
+    UserDTO dto = userMapper.toDto(user);
     assertThat(dto.getAddress())
       .isNotNull()
       .hasFieldOrPropertyWithValue("street", "123 Main St");
@@ -113,10 +113,10 @@ class NestedObjectMapperTest {
       new Phone("987-654-3210", "HOME")
     );
     User user = new User(1L, "Alice", null, phones);
-    UserDto dto = userMapper.toDto(user);
+    UserDTO dto = userMapper.toDto(user);
     assertThat(dto.getPhones())
       .hasSize(2)
-      .extracting(PhoneDto::getNumber)
+      .extracting(PhoneDTO::getNumber)
       .containsExactly("123-456-7890", "987-654-3210");
   }
 
@@ -136,7 +136,7 @@ public interface ProductMapper {
   @Mapping(source = "name", target = "productName")
   @Mapping(source = "price", target = "salePrice")
   @Mapping(target = "discount", expression = "java(product.getPrice() * 0.1)")
-  ProductDto toDto(Product product);
+  ProductDTO toDto(Product product);
 }
 
 class CustomMappingTest {
@@ -145,7 +145,7 @@ class CustomMappingTest {
   @Test
   void shouldMapFieldsWithCustomNames() {
     Product product = new Product(1L, "Laptop", 999.99);
-    ProductDto dto = mapper.toDto(product);
+    ProductDTO dto = mapper.toDto(product);
     assertThat(dto)
       .hasFieldOrPropertyWithValue("productName", "Laptop")
       .hasFieldOrPropertyWithValue("salePrice", 999.99);
@@ -154,7 +154,7 @@ class CustomMappingTest {
   @Test
   void shouldCalculateDiscountFromExpression() {
     Product product = new Product(1L, "Laptop", 100.0);
-    ProductDto dto = mapper.toDto(product);
+    ProductDTO dto = mapper.toDto(product);
     assertThat(dto.getDiscount()).isEqualTo(10.0);
   }
 }
@@ -239,7 +239,7 @@ class BidirectionalMapperTest {
   @Test
   void shouldMaintainDataInRoundTrip() {
     User original = new User(1L, "Alice", "alice@example.com", 25);
-    UserDto dto = mapper.toDto(original);
+    UserDTO dto = mapper.toDto(original);
     User restored = mapper.toDO(dto);
     assertThat(restored)
       .hasFieldOrPropertyWithValue("id", original.getId())
@@ -250,7 +250,7 @@ class BidirectionalMapperTest {
   void shouldPreserveAllFieldsInBothDirections() {
     Address address = new Address("123 Main", "NYC", "NY", "10001");
     User user = new User(1L, "Alice", "alice@example.com", 25, address);
-    UserDto dto = mapper.toDto(user);
+    UserDTO dto = mapper.toDto(user);
     User restored = mapper.toDO(dto);
     assertThat(restored).usingRecursiveComparison().isEqualTo(user);
   }
@@ -262,7 +262,7 @@ class BidirectionalMapperTest {
 ```java
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-  void updateDO(@MappingTarget User user, UserDto dto);
+  void updateDO(@MappingTarget User user, UserDTO dto);
 }
 
 class PartialMapperTest {
@@ -271,7 +271,7 @@ class PartialMapperTest {
   @Test
   void shouldUpdateExistingDO() {
     User existing = new User(1L, "Alice", "alice@old.com", 25);
-    UserDto dto = new UserDto(1L, "Alice", "alice@new.com", 26);
+    UserDTO dto = new UserDTO(1L, "Alice", "alice@new.com", 26);
     mapper.updateDO(existing, dto);
     assertThat(existing)
       .hasFieldOrPropertyWithValue("email", "alice@new.com")
@@ -281,7 +281,7 @@ class PartialMapperTest {
   @Test
   void shouldNotUpdateFieldsNotInDto() {
     User existing = new User(1L, "Alice", "alice@example.com", 25);
-    UserDto dto = new UserDto(1L, "Bob", null, 0);
+    UserDTO dto = new UserDTO(1L, "Bob", null, 0);
     mapper.updateDO(existing, dto);
     assertThat(existing.getEmail()).isEqualTo("alice@example.com");
   }

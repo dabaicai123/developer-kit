@@ -87,14 +87,14 @@ Quarkus provides annotations to register classes for reflection:
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
-public class MyDto {
+public class MyDTO {
     private String name;
     private int age;
     // constructors, getters, setters
 }
 
 // Register multiple classes including nested types
-@RegisterForReflection(targets = {MyDto.class, OrderDto.class},
+@RegisterForReflection(targets = {MyDTO.class, OrderDTO.class},
                        serialization = true)
 public class ReflectionConfig {
 }
@@ -202,7 +202,7 @@ Micronaut minimizes reflection, but when needed:
 import io.micronaut.core.annotation.ReflectiveAccess;
 
 @ReflectiveAccess
-public class MyDto {
+public class MyDTO {
     private String name;
     private int age;
 }
@@ -211,7 +211,7 @@ public class MyDto {
 import io.micronaut.core.annotation.Introspected;
 
 @Introspected
-public class MyDto {
+public class MyDTO {
     private String name;
     private int age;
 }

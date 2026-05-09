@@ -6,12 +6,12 @@
 @Test
 void shouldReturnDifferentStatusCodesForDifferentScenarios() throws Exception {
   // Successful response
-  when(userService.getUserById(1L)).thenReturn(new UserDto(1L, "Alice"));
+  when(userServiceI.getUserById(1L)).thenReturn(new UserDTO(1L, "Alice"));
   mockMvc.perform(get("/api/users/1"))
     .andExpect(status().isOk());
 
   // Not found
-  when(userService.getUserById(999L))
+  when(userServiceI.getUserById(999L))
     .thenThrow(new UserNotFoundException("Not found"));
   mockMvc.perform(get("/api/users/999"))
     .andExpect(status().isNotFound());
@@ -46,7 +46,7 @@ void shouldReturn401WhenNoTokenProvided() throws Exception {
 @Test
 void shouldReturn200WhenValidTokenProvided() throws Exception {
   when(authService.validateToken("valid-token")).thenReturn(true);
-  when(userService.getCurrentUser()).thenReturn(new UserDto(1L, "Alice"));
+  when(userServiceI.getCurrentUser()).thenReturn(new UserDTO(1L, "Alice"));
 
   mockMvc.perform(get("/api/protected")
       .header("Authorization", "Bearer valid-token"))
@@ -82,11 +82,11 @@ void shouldUploadFileSuccessfully() throws Exception {
 ```java
 @Test
 void shouldReturnPaginatedUsers() throws Exception {
-  Page<UserDto> page = new PageImpl<>(
-    List.of(new UserDto(1L, "Alice"), new UserDto(2L, "Bob")),
+  Page<UserDTO> page = new PageImpl<>(
+    List.of(new UserDTO(1L, "Alice"), new UserDTO(2L, "Bob")),
     PageRequest.of(0, 10), 2);
 
-  when(userService.getUsers(any(Pageable.class))).thenReturn(page);
+  when(userServiceI.getUsers(any(Pageable.class))).thenReturn(page);
 
   mockMvc.perform(get("/api/users")
       .param("page", "0")
@@ -106,7 +106,7 @@ void shouldReturnPaginatedUsers() throws Exception {
 ```java
 @Test
 void shouldHandleValidationException() throws Exception {
-  when(userService.createUser(any()))
+  when(userServiceI.createUser(any()))
     .thenThrow(new MethodArgumentNotValidException(
       null, new BeanPropertyBindingResult(null, "user")));
 
@@ -123,9 +123,9 @@ void shouldHandleValidationException() throws Exception {
 ```java
 @Test
 void shouldHandleAsyncResponses() throws Exception {
-  CompletableFuture<UserDto> futureUser = CompletableFuture.completedFuture(
-    new UserDto(1L, "Alice"));
-  when(userService.getUserAsync(1L)).thenReturn(futureUser);
+  CompletableFuture<UserDTO> futureUser = CompletableFuture.completedFuture(
+    new UserDTO(1L, "Alice"));
+  when(userServiceI.getUserAsync(1L)).thenReturn(futureUser);
 
   MvcResult result = mockMvc.perform(get("/api/users/async/1"))
     .andExpect(status().isOk())

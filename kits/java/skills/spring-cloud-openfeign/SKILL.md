@@ -82,14 +82,14 @@ Use `name` matching the Nacos/Eureka service ID for automatic load balancing. Us
 )
 public interface UserClient {
 
-    @GetMapping("/api/v1/users/{id}")
-    Result<UserResponse> getUser(@PathVariable("id") Long id);
+    @GetMapping("/v1/users/{id}")
+    Result<UserDTO> getUser(@PathVariable("id") Long id);
 
-    @PostMapping("/api/v1/users")
-    Result<UserResponse> createUser(@RequestBody CreateUserRequest request);
+    @PostMapping("/v1/users")
+    Result<UserDTO> createUser(@RequestBody CreateUserCmd request);
 
-    @GetMapping("/api/v1/users")
-    Result<PageResult<UserResponse>> searchUsers(
+    @GetMapping("/v1/users")
+    Result<PageResult<UserDTO>> searchUsers(
         @RequestParam("keyword") String keyword,
         @RequestParam("page") int page,
         @RequestParam("pageSize") int pageSize
@@ -100,7 +100,7 @@ public interface UserClient {
 @FeignClient(
     name = "user-service",
     contextId = "userAdminClient",
-    path = "/api/v1/admin/users"
+    path = "/v1/admin/users"
 )
 public interface UserAdminClient {
 
@@ -234,19 +234,19 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
 
         return new UserClient() {
             @Override
-            public Result<UserResponse> getUser(Long id) {
+            public Result<UserDTO> getUser(Long id) {
                 // Graceful degradation — return cached/default value
                 return Result.fail(503, "user-service unavailable, user lookup failed for id: " + id);
             }
 
             @Override
-            public Result<UserResponse> createUser(CreateUserRequest request) {
+            public Result<UserDTO> createUser(CreateUserCmd request) {
                 // Critical operation — throw to propagate failure
                 throw new ServiceUnavailableException("user-service unavailable, cannot create user");
             }
 
             @Override
-            public Result<PageResult<UserResponse>> searchUsers(String keyword, int page, int pageSize) {
+            public Result<PageResult<UserDTO>> searchUsers(String keyword, int page, int pageSize) {
                 // Degraded search — return empty page
                 return Result.fail(503, "user-service unavailable, search temporarily disabled");
             }
@@ -345,8 +345,8 @@ Feign clients can return `PageResult<T>` for paginated remote endpoints:
 @FeignClient(name = "user-service", fallbackFactory = UserClientFallbackFactory.class)
 public interface UserClient {
 
-    @GetMapping("/api/v1/users")
-    Result<PageResult<UserResponse>> searchUsers(
+    @GetMapping("/v1/users")
+    Result<PageResult<UserDTO>> searchUsers(
         @RequestParam("keyword") String keyword,
         @RequestParam("page") int page,
         @RequestParam("pageSize") int pageSize
@@ -354,7 +354,7 @@ public interface UserClient {
 }
 ```
 
-The `Result<PageResult<UserResponse>>` response must match the remote service's `Result` structure exactly. If remote and local `Result` classes differ, use a separate `RemoteResult<T>` DTO for Feign responses.
+The `Result<PageResult<UserDTO>>` response must match the remote service's `Result` structure exactly. If remote and local `Result` classes differ, use a separate `RemoteResult<T>` DTO for Feign responses.
 
 ### 10. File upload and multipart requests
 
@@ -364,7 +364,7 @@ For file uploads, use Spring's `MultipartFile` with `@RequestPart`:
 @FeignClient(name = "storage-service", fallbackFactory = StorageClientFallbackFactory.class)
 public interface StorageClient {
 
-    @PostMapping(value = "/api/v1/files/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/v1/files/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Result<FileResponse> uploadFile(
         @RequestPart("file") MultipartFile file,
         @RequestPart("metadata") FileMetadata metadata

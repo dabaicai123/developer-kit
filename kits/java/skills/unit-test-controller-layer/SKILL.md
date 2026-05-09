@@ -56,7 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
 
   @Mock
-  private UserService userService;
+  private UserServiceI userServiceI;
 
   @InjectMocks
   private UserController userController;
@@ -70,26 +70,26 @@ class UserControllerTest {
 
   @Test
   void shouldReturnAllUsers() throws Exception {
-    List<UserDto> users = List.of(new UserDto(1L, "Alice"), new UserDto(2L, "Bob"));
-    when(userService.getAllUsers()).thenReturn(users);
+    List<UserDTO> users = List.of(new UserDTO(1L, "Alice"), new UserDTO(2L, "Bob"));
+    when(userServiceI.getAllUsers()).thenReturn(Result.success(users));
 
-    mockMvc.perform(get("/api/users"))
+    mockMvc.perform(get("/v1/users"))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$[0].id").value(1))
-      .andExpect(jsonPath("$[0].name").value("Alice"));
+      .andExpect(jsonPath("$.data[0].id").value(1))
+      .andExpect(jsonPath("$.data[0].name").value("Alice"));
 
-    verify(userService, times(1)).getAllUsers();
+    verify(userServiceI, times(1)).getAllUsers();
   }
 
   @Test
   void shouldReturn404WhenUserNotFound() throws Exception {
-    when(userService.getUserById(999L))
+    when(userServiceI.getUserById(999L))
       .thenThrow(new UserNotFoundException("User not found"));
 
-    mockMvc.perform(get("/api/users/999"))
+    mockMvc.perform(get("/v1/users/999"))
       .andExpect(status().isNotFound());
 
-    verify(userService).getUserById(999L);
+    verify(userServiceI).getUserById(999L);
   }
 }
 ```
@@ -99,17 +99,17 @@ class UserControllerTest {
 ```java
 @Test
 void shouldCreateUserAndReturn200() throws Exception {
-  UserDto createdUser = new UserDto(1L, "Alice", "alice@example.com");
-  when(userService.createUser(any())).thenReturn(createdUser);
+  UserDTO createdUser = new UserDTO(1L, "Alice", "alice@example.com");
+  when(userServiceI.createUser(any())).thenReturn(Result.success(createdUser));
 
-  mockMvc.perform(post("/api/users")
+  mockMvc.perform(post("/v1/users")
       .contentType("application/json")
       .content("{\"name\":\"Alice\",\"email\":\"alice@example.com\"}"))
     .andExpect(status().isOk())
-    .andExpect(jsonPath("$.id").value(1))
-    .andExpect(jsonPath("$.name").value("Alice"));
+    .andExpect(jsonPath("$.data.id").value(1))
+    .andExpect(jsonPath("$.data.name").value("Alice"));
 
-  verify(userService).createUser(any(UserCreateRequest.class));
+  verify(userServiceI).createUser(any(CreateUserCmd.class));
 }
 ```
 
@@ -118,16 +118,16 @@ void shouldCreateUserAndReturn200() throws Exception {
 ```java
 @Test
 void shouldUpdateUserAndReturn200() throws Exception {
-  UserDto updatedUser = new UserDto(1L, "Updated");
-  when(userService.updateUser(eq(1L), any())).thenReturn(updatedUser);
+  UserDTO updatedUser = new UserDTO(1L, "Updated");
+  when(userServiceI.updateUser(eq(1L), any())).thenReturn(Result.success(updatedUser));
 
-  mockMvc.perform(put("/api/users/1")
+  mockMvc.perform(put("/v1/users/1")
       .contentType("application/json")
       .content("{\"name\":\"Updated\"}"))
     .andExpect(status().isOk())
-    .andExpect(jsonPath("$.name").value("Updated"));
+    .andExpect(jsonPath("$.data.name").value("Updated"));
 
-  verify(userService).updateUser(eq(1L), any());
+  verify(userServiceI).updateUser(eq(1L), any());
 }
 ```
 
@@ -136,12 +136,12 @@ void shouldUpdateUserAndReturn200() throws Exception {
 ```java
 @Test
 void shouldDeleteUserAndReturn200() throws Exception {
-  doNothing().when(userService).deleteUser(1L);
+  doNothing().when(userServiceI).deleteUser(1L);
 
-  mockMvc.perform(delete("/api/users/1"))
+  mockMvc.perform(delete("/v1/users/1"))
     .andExpect(status().isOk());
 
-  verify(userService).deleteUser(1L);
+  verify(userServiceI).deleteUser(1L);
 }
 ```
 
@@ -150,13 +150,13 @@ void shouldDeleteUserAndReturn200() throws Exception {
 ```java
 @Test
 void shouldFilterUsersByName() throws Exception {
-  when(userService.searchUsers("Alice")).thenReturn(List.of(new UserDto(1L, "Alice")));
+  when(userServiceI.searchUsers("Alice")).thenReturn(Result.success(List.of(new UserDTO(1L, "Alice"))));
 
-  mockMvc.perform(get("/api/users/search").param("name", "Alice"))
+  mockMvc.perform(get("/v1/users/search").param("name", "Alice"))
     .andExpect(status().isOk())
-    .andExpect(jsonPath("$[0].name").value("Alice"));
+    .andExpect(jsonPath("$.data[0].name").value("Alice"));
 
-  verify(userService).searchUsers("Alice");
+  verify(userServiceI).searchUsers("Alice");
 }
 ```
 
@@ -165,11 +165,11 @@ void shouldFilterUsersByName() throws Exception {
 ```java
 @Test
 void shouldGetUserByIdFromPath() throws Exception {
-  when(userService.getUserById(123L)).thenReturn(new UserDto(123L, "Alice"));
+  when(userServiceI.getUserById(123L)).thenReturn(Result.success(new UserDTO(123L, "Alice")));
 
-  mockMvc.perform(get("/api/users/{id}", 123L))
+  mockMvc.perform(get("/v1/users/{id}", 123L))
     .andExpect(status().isOk())
-    .andExpect(jsonPath("$.id").value(123));
+    .andExpect(jsonPath("$.data.id").value(123));
 }
 ```
 
@@ -178,7 +178,7 @@ void shouldGetUserByIdFromPath() throws Exception {
 ```java
 @Test
 void shouldReturn400WhenRequestBodyInvalid() throws Exception {
-  mockMvc.perform(post("/api/users")
+  mockMvc.perform(post("/v1/users")
       .contentType("application/json")
       .content("{\"name\":\"\"}"))
     .andExpect(status().isBadRequest())
@@ -191,9 +191,9 @@ void shouldReturn400WhenRequestBodyInvalid() throws Exception {
 ```java
 @Test
 void shouldReturnCustomHeaders() throws Exception {
-  when(userService.getAllUsers()).thenReturn(List.of());
+  when(userServiceI.getAllUsers()).thenReturn(Result.success(List.of()));
 
-  mockMvc.perform(get("/api/users"))
+  mockMvc.perform(get("/v1/users"))
     .andExpect(status().isOk())
     .andExpect(header().exists("X-Total-Count"))
     .andExpect(header().string("X-Total-Count", "0"));
@@ -205,10 +205,10 @@ void shouldReturnCustomHeaders() throws Exception {
 ```java
 @Test
 void shouldRequireAuthorizationHeader() throws Exception {
-  mockMvc.perform(get("/api/users"))
+  mockMvc.perform(get("/v1/users"))
     .andExpect(status().isUnauthorized());
 
-  mockMvc.perform(get("/api/users").header("Authorization", "Bearer token"))
+  mockMvc.perform(get("/v1/users").header("Authorization", "Bearer token"))
     .andExpect(status().isOk());
 }
 ```
@@ -218,9 +218,9 @@ void shouldRequireAuthorizationHeader() throws Exception {
 ```java
 @Test
 void shouldReturnJsonWhenAcceptHeaderIsJson() throws Exception {
-  when(userService.getUserById(1L)).thenReturn(new UserDto(1L, "Alice"));
+  when(userServiceI.getUserById(1L)).thenReturn(Result.success(new UserDTO(1L, "Alice")));
 
-  mockMvc.perform(get("/api/users/1").accept("application/json"))
+  mockMvc.perform(get("/v1/users/1").accept("application/json"))
     .andExpect(status().isOk())
     .andExpect(content().contentType("application/json"));
 }

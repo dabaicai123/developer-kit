@@ -32,13 +32,13 @@ Provides patterns for unit testing `@Service` classes using Mockito. Mocks repos
 
 ```java
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+class UserServiceITest {
 
   @Mock
   private UserRepository userRepository;
 
   @InjectMocks
-  private UserService userService;
+  private UserServiceI userServiceI;
 
   @Test
   void shouldReturnUserWhenFound() {
@@ -47,7 +47,7 @@ class UserServiceTest {
     when(userRepository.findById(1L)).thenReturn(Optional.of(expected));
 
     // Act
-    User result = userService.getUser(1L);
+    User result = userServiceI.getUser(1L);
 
     // Assert
     assertThat(result.getName()).isEqualTo("Alice");
@@ -60,7 +60,7 @@ class UserServiceTest {
     when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
     // Act & Assert
-    assertThatThrownBy(() -> userService.getUser(999L))
+    assertThatThrownBy(() -> userServiceI.getUser(999L))
       .isInstanceOf(UserNotFoundException.class);
   }
 }

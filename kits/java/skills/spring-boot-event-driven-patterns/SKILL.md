@@ -26,7 +26,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 **Before (Anti-Pattern):**
 ```java
 @Transactional
-public Order processOrder(OrderRequest request) {
+public Order processOrder(CreateOrderCmd request) {
     Order order = orderRepository.save(request);
     inventoryService.reserve(order.getItems()); // Blocking
     paymentService.charge(order.getPayment()); // Blocking
@@ -38,7 +38,7 @@ public Order processOrder(OrderRequest request) {
 **After (Event-Driven):**
 ```java
 @Transactional
-public Order processOrder(OrderRequest request) {
+public Order processOrder(CreateOrderCmd request) {
     Order order = Order.create(request);
     orderRepository.save(order);
 

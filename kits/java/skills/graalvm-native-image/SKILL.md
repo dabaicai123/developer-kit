@@ -262,11 +262,11 @@ For Spring Boot applications, use `paketobuildpacks/builder-jammy-tiny` with Clo
 
 ```java
 @RestController
-@RegisterReflectionForBinding({UserDto.class, OrderDto.class})
+@RegisterReflectionForBinding({UserDTO.class, OrderDTO.class})
 public class UserController {
 
     @GetMapping("/users/{id}")
-    public UserDto getUser(@PathVariable Long id) {
+    public UserDTO getUser(@PathVariable Long id) {
         return userService.findById(id);
     }
 }

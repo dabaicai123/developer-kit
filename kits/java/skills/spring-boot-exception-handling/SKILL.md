@@ -53,7 +53,7 @@ public class BusinessException extends RuntimeException {
 /** Resource not found (404) */
 public class NotFoundException extends BusinessException {
     public NotFoundException(String resource, Object id) {
-        super(404, resource + " not found: " + id);
+        super(404, resource + " 不存在: " + id);
     }
 }
 
@@ -80,7 +80,7 @@ public class ConflictException extends BusinessException {
 /** External service unavailable (503) */
 public class ServiceUnavailableException extends BusinessException {
     public ServiceUnavailableException(String service) {
-        super(503, service + " unavailable");
+        super(503, service + " 服务不可用");
     }
 }
 ```
@@ -112,7 +112,7 @@ public final class ErrorCodes {
 // Usage in service layer
 public UserDO getUser(Long id) {
     return Optional.ofNullable(baseMapper.selectById(id))
-        .orElseThrow(() -> new NotFoundException(ErrorCodes.USER_NOT_FOUND, "User not found: " + id));
+        .orElseThrow(() -> new NotFoundException(ErrorCodes.USER_NOT_FOUND, "用户不存在: " + id));
 }
 ```
 
@@ -161,14 +161,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public Result<Void> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
         log.warn("Method not supported: {} for path {}", e.getMethod(), e.getMessage());
-        return Result.fail(405000, "Method not allowed: " + e.getMethod());
+        return Result.fail(405000, "不支持的请求方法: " + e.getMethod());
     }
 
     /** Catch-all for unexpected errors — never expose stack traces or internal details */
     @ExceptionHandler(Exception.class)
     public Result<Void> handleUnexpected(Exception e) {
         log.error("Unexpected error", e);
-        return Result.fail(500000, "Internal server error");
+        return Result.fail(500000, "服务器内部错误");
     }
 }
 ```
@@ -185,7 +185,7 @@ public record ValidationError(
         List<FieldErrorDetail> details = bindingResult.getFieldErrors().stream()
             .map(f -> new FieldErrorDetail(f.getField(), f.getDefaultMessage(), f.getRejectedValue()))
             .toList();
-        return new ValidationError(code, "Validation failed", details);
+        return new ValidationError(code, "校验失败", details);
     }
 }
 
@@ -208,18 +208,18 @@ Global handlers (via `@RestControllerAdvice`) handle cross-cutting error pattern
  * <p>Local handlers override global handlers for the same exception type on that controller.</p>
  */
 @RestController
-@RequestMapping("/api/v1/orders")
+@RequestMapping("/v1/orders")
 @Slf4j
 public class OrderController {
 
-    private final OrderService orderService;
+    private final OrderServiceI orderServiceI;
 
     /** Local handler for Order-specific conflict scenarios */
     @ExceptionHandler(ConflictException.class)
     public Result<Void> handleOrderConflict(ConflictException e) {
         // More specific handling for order conflicts, e.g., suggesting alternatives
         log.warn("Order conflict: {}", e.getMsg());
-        return Result.fail(e.getCode(), e.getMsg() + " — please review your order and retry");
+        return Result.fail(e.getCode(), e.getMsg() + " — 请检查订单后重试");
     }
 }
 ```
@@ -245,24 +245,24 @@ public class OrderController {
 ```java
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
+public class OrderServiceImpl implements OrderServiceI {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void create(OrderCreateDTO dto) {
+    public void create(CreateOrderCmd cmd) {
         // Validate business rules — throw NotFoundException if user does not exist
-        UserDO user = userMapper.selectById(dto.getUserId());
+        UserDO user = userMapper.selectById(cmd.getUserId());
         if (user == null) {
-            throw new NotFoundException("User", dto.getUserId());
+            throw new NotFoundException("用户", cmd.getUserId());
         }
 
         // Validate business rules — throw ConflictException if duplicate order exists
-        if (lambdaQuery().eq(OrderDO::getExternalRef, dto.getExternalRef()).exists()) {
-            throw new ConflictException("Order already exists with ref: " + dto.getExternalRef());
+        if (lambdaQuery().eq(OrderDO::getExternalRef, cmd.getExternalRef()).exists()) {
+            throw new ConflictException("订单已存在，外部编号: " + cmd.getExternalRef());
         }
 
         // Business logic proceeds...
-        OrderDO order = OrderConverter.toDO(dto);
+        OrderDO order = OrderConverter.toDO(cmd);
         baseMapper.insert(order);
     }
 }
@@ -272,18 +272,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
 ```java
 @RestController
-@RequestMapping("/api/v1/payments")
+@RequestMapping("/v1/payments")
 @Slf4j
 public class PaymentController {
 
-    private final PaymentService paymentService;
+    private final PaymentServiceI paymentServiceI;
 
     /** Local handler — more detailed response for payment-specific service unavailable errors */
     @ExceptionHandler(ServiceUnavailableException.class)
     public Result<Void> handlePaymentUnavailable(ServiceUnavailableException e) {
         log.warn("Payment service unavailable: {}", e.getMsg());
         // Return payment-specific guidance instead of generic 503
-        return Result.fail(305003, "Payment processing is temporarily unavailable. Please retry after 30 seconds.");
+        return Result.fail(305003, "支付服务暂时不可用，请 30 秒后重试");
     }
 }
 ```

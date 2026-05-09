@@ -60,9 +60,9 @@ Use `CompletableFuture` for async methods that need result composition, error ha
 @Service
 public class OrderQueryService {
     @Async
-    public CompletableFuture<OrderDto> findOrderAsync(String orderId) {
+    public CompletableFuture<OrderDTO> findOrderAsync(String orderId) {
         return CompletableFuture.completedFuture(
-            orderRepository.findById(orderId).map(OrderDto::from).orElse(null)
+            orderRepository.findById(orderId).map(OrderDTO::from).orElse(null)
         );
     }
 }
@@ -144,16 +144,16 @@ For full `@Transactional` patterns (propagation, rollback, self-invocation), see
 @Service
 public class ProductQueryService {
     @Async("productExecutor")
-    public CompletableFuture<ProductDetailDto> getProductDetail(String productId) {
+    public CompletableFuture<ProductDetailDTO> getProductDetail(String productId) {
         Product product = productRepository.findById(productId).orElseThrow();
-        return CompletableFuture.completedFuture(ProductDetailDto.from(product));
+        return CompletableFuture.completedFuture(ProductDetailDTO.from(product));
     }
 
     @Async("productExecutor")
-    public CompletableFuture<List<ProductReviewDto>> getProductReviews(String productId) {
+    public CompletableFuture<List<ProductReviewDTO>> getProductReviews(String productId) {
         return CompletableFuture.completedFuture(
             reviewRepository.findByProductId(productId)
-                .stream().map(ProductReviewDto::from).toList()
+                .stream().map(ProductReviewDTO::from).toList()
         );
     }
 }
@@ -163,12 +163,12 @@ public class ProductQueryService {
 public class ProductAggregateService {
     private final ProductQueryService productQueryService;
 
-    public ProductPageDto getProductPage(String productId) {
-        CompletableFuture<ProductDetailDto> detailFuture = productQueryService.getProductDetail(productId);
-        CompletableFuture<List<ProductReviewDto>> reviewsFuture = productQueryService.getProductReviews(productId);
+    public ProductPageDTO getProductPage(String productId) {
+        CompletableFuture<ProductDetailDTO> detailFuture = productQueryService.getProductDetail(productId);
+        CompletableFuture<List<ProductReviewDTO>> reviewsFuture = productQueryService.getProductReviews(productId);
 
         return CompletableFuture.allOf(detailFuture, reviewsFuture)
-            .thenApply(v -> new ProductPageDto(detailFuture.join(), reviewsFuture.join()))
+            .thenApply(v -> new ProductPageDTO(detailFuture.join(), reviewsFuture.join()))
             .get(5, TimeUnit.SECONDS);
     }
 }
@@ -213,7 +213,7 @@ public class AsyncExecutorConfig {
 @Service
 public class ReportService {
     @Async("computeExecutor")
-    public CompletableFuture<ReportDto> generateReport(String reportId) {
+    public CompletableFuture<ReportDTO> generateReport(String reportId) {
         // Uses computeExecutor — CPU-intensive work
         return CompletableFuture.completedFuture(reportEngine.generate(reportId));
     }

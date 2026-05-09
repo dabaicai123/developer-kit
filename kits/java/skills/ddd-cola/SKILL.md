@@ -267,10 +267,10 @@ public class CreateOrderCmdExe {
     }
 
     @Transactional
-    public OrderDto execute(CreateOrderCmd cmd) {
+    public OrderDTO execute(CreateOrderCmd cmd) {
         Order order = Order.create(cmd.getItems(), cmd.getCustomerId());
         orderGateway.save(order);
-        return OrderDto.from(order);
+        return OrderDTO.from(order);
     }
 }
 

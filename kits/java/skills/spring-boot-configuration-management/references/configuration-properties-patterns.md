@@ -219,9 +219,9 @@ app:
       - https://myapp.com
       - https://admin.myapp.com
     public-endpoints:
-      - /api/v1/auth/login
-      - /api/v1/auth/refresh
-      - /api/v1/public/**
+      - /v1/auth/login
+      - /v1/auth/refresh
+      - /v1/public/**
     blocked-ip-ranges:
       - start: 10.0.0.1
         end: 10.0.0.255

@@ -43,7 +43,7 @@ CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 `thenCompose` is used when the next step returns another `CompletableFuture` — it flattens the nested future:
 
 ```java
-CompletableFuture<OrderDto> resultFuture = orderService.findOrderAsync("O001")
+CompletableFuture<OrderDTO> resultFuture = orderService.findOrderAsync("O001")
     .thenCompose(order -> paymentService.findPaymentAsync(order.getPaymentId()));
 ```
 
@@ -51,11 +51,11 @@ Without `thenCompose`, you get nested `CompletableFuture<CompletableFuture<...>>
 
 ```java
 // WRONG — nested future
-CompletableFuture<CompletableFuture<PaymentDto>> nested = orderService.findOrderAsync("O001")
+CompletableFuture<CompletableFuture<PaymentDTO>> nested = orderService.findOrderAsync("O001")
     .thenApply(order -> paymentService.findPaymentAsync(order.getPaymentId()));
 
 // CORRECT — flattened with thenCompose
-CompletableFuture<PaymentDto> flat = orderService.findOrderAsync("O001")
+CompletableFuture<PaymentDTO> flat = orderService.findOrderAsync("O001")
     .thenCompose(order -> paymentService.findPaymentAsync(order.getPaymentId()));
 ```
 
@@ -64,11 +64,11 @@ CompletableFuture<PaymentDto> flat = orderService.findOrderAsync("O001")
 ### thenCombine — combine two independent futures
 
 ```java
-CompletableFuture<ProductDetailDto> detailFuture = productService.getProductDetailAsync("P001");
-CompletableFuture<List<ProductReviewDto>> reviewFuture = reviewService.getProductReviewsAsync("P001");
+CompletableFuture<ProductDetailDTO> detailFuture = productService.getProductDetailAsync("P001");
+CompletableFuture<List<ProductReviewDTO>> reviewFuture = reviewService.getProductReviewsAsync("P001");
 
-CompletableFuture<ProductPageDto> pageFuture = detailFuture.thenCombine(reviewFuture,
-    (detail, reviews) -> new ProductPageDto(detail, reviews)
+CompletableFuture<ProductPageDTO> pageFuture = detailFuture.thenCombine(reviewFuture,
+    (detail, reviews) -> new ProductPageDTO(detail, reviews)
 );
 ```
 
@@ -77,15 +77,15 @@ Both futures must complete before the combiner function executes.
 ### allOf — wait for all futures to complete
 
 ```java
-CompletableFuture<ProductDetailDto> detailFuture = productService.getProductDetailAsync("P001");
-CompletableFuture<List<ProductReviewDto>> reviewFuture = reviewService.getProductReviewsAsync("P001");
-CompletableFuture<PriceHistoryDto> priceFuture = priceService.getPriceHistoryAsync("P001");
+CompletableFuture<ProductDetailDTO> detailFuture = productService.getProductDetailAsync("P001");
+CompletableFuture<List<ProductReviewDTO>> reviewFuture = reviewService.getProductReviewsAsync("P001");
+CompletableFuture<PriceHistoryDTO> priceFuture = priceService.getPriceHistoryAsync("P001");
 
 CompletableFuture<Void> allFutures = CompletableFuture.allOf(detailFuture, reviewFuture, priceFuture);
 
 // After allOf completes, join each future to get results
-ProductPageDto pageDto = allFutures.thenApply(v ->
-    new ProductPageDto(detailFuture.join(), reviewFuture.join(), priceFuture.join())
+ProductPageDTO pageDto = allFutures.thenApply(v ->
+    new ProductPageDTO(detailFuture.join(), reviewFuture.join(), priceFuture.join())
 ).get(5, TimeUnit.SECONDS);
 ```
 
@@ -109,21 +109,21 @@ String result = (String) fastestFuture.get(3, TimeUnit.SECONDS);
 ### exceptionally — handle exception, provide fallback
 
 ```java
-CompletableFuture<ProductDto> future = productService.findProductAsync("P001")
+CompletableFuture<ProductDTO> future = productService.findProductAsync("P001")
     .exceptionally(ex -> {
         log.warn("Product lookup failed: {}", ex.getMessage());
-        return ProductDto.empty();  // fallback value
+        return ProductDTO.empty();  // fallback value
     });
 ```
 
 ### handle — handle both result and exception
 
 ```java
-CompletableFuture<ProductDto> future = productService.findProductAsync("P001")
+CompletableFuture<ProductDTO> future = productService.findProductAsync("P001")
     .handle((result, ex) -> {
         if (ex != null) {
             log.error("Async error: {}", ex.getMessage(), ex);
-            return ProductDto.empty();
+            return ProductDTO.empty();
         }
         return result;
     });
@@ -134,7 +134,7 @@ CompletableFuture<ProductDto> future = productService.findProductAsync("P001")
 ### whenComplete — side effect without modifying result
 
 ```java
-CompletableFuture<ProductDto> future = productService.findProductAsync("P001")
+CompletableFuture<ProductDTO> future = productService.findProductAsync("P001")
     .whenComplete((result, ex) -> {
         if (ex != null) {
             metricsService.recordFailure("product_lookup", ex);
@@ -168,20 +168,20 @@ public class ProductPageService {
     private final ReviewQueryService reviewQueryService;
     private final PriceQueryService priceQueryService;
 
-    public ProductPageDto getProductPage(String productId) {
+    public ProductPageDTO getProductPage(String productId) {
         // Step 1: Launch all async queries concurrently
-        CompletableFuture<ProductDetailDto> detailFuture =
+        CompletableFuture<ProductDetailDTO> detailFuture =
             productQueryService.getProductDetailAsync(productId);
-        CompletableFuture<List<ReviewDto>> reviewFuture =
+        CompletableFuture<List<ReviewDTO>> reviewFuture =
             reviewQueryService.getProductReviewsAsync(productId);
-        CompletableFuture<PriceHistoryDto> priceFuture =
+        CompletableFuture<PriceHistoryDTO> priceFuture =
             priceQueryService.getPriceHistoryAsync(productId);
 
         // Step 2: Wait for all to complete, then aggregate
         try {
             CompletableFuture.allOf(detailFuture, reviewFuture, priceFuture).get(5, TimeUnit.SECONDS);
 
-            return new ProductPageDto(
+            return new ProductPageDTO(
                 detailFuture.join(),
                 reviewFuture.join(),
                 priceFuture.join()
@@ -202,19 +202,19 @@ public class ProductPageService {
 @Service
 public class ProductQueryService {
     @Async("ioExecutor")
-    public CompletableFuture<ProductDetailDto> getProductDetailAsync(String productId) {
+    public CompletableFuture<ProductDetailDTO> getProductDetailAsync(String productId) {
         Product product = productRepository.findById(productId).orElseThrow();
-        return CompletableFuture.completedFuture(ProductDetailDto.from(product));
+        return CompletableFuture.completedFuture(ProductDetailDTO.from(product));
     }
 }
 
 @Service
 public class ReviewQueryService {
     @Async("ioExecutor")
-    public CompletableFuture<List<ReviewDto>> getProductReviewsAsync(String productId) {
+    public CompletableFuture<List<ReviewDTO>> getProductReviewsAsync(String productId) {
         List<Review> reviews = reviewRepository.findByProductId(productId);
         return CompletableFuture.completedFuture(
-            reviews.stream().map(ReviewDto::from).toList()
+            reviews.stream().map(ReviewDTO::from).toList()
         );
     }
 }
@@ -222,9 +222,9 @@ public class ReviewQueryService {
 @Service
 public class PriceQueryService {
     @Async("ioExecutor")
-    public CompletableFuture<PriceHistoryDto> getPriceHistoryAsync(String productId) {
+    public CompletableFuture<PriceHistoryDTO> getPriceHistoryAsync(String productId) {
         List<PriceRecord> records = priceRepository.findByProductIdOrderByDateDesc(productId);
-        return CompletableFuture.completedFuture(PriceHistoryDto.from(records));
+        return CompletableFuture.completedFuture(PriceHistoryDTO.from(records));
     }
 }
 ```
@@ -239,22 +239,22 @@ When you don't need Spring's executor routing, use `supplyAsync` directly:
 public class ProductPageService {
     private final Executor ioExecutor;
 
-    public ProductPageDto getProductPage(String productId) {
-        CompletableFuture<ProductDetailDto> detailFuture = CompletableFuture.supplyAsync(
-            () -> ProductDetailDto.from(productRepository.findById(productId).orElseThrow()),
+    public ProductPageDTO getProductPage(String productId) {
+        CompletableFuture<ProductDetailDTO> detailFuture = CompletableFuture.supplyAsync(
+            () -> ProductDetailDTO.from(productRepository.findById(productId).orElseThrow()),
             ioExecutor
         );
-        CompletableFuture<List<ReviewDto>> reviewFuture = CompletableFuture.supplyAsync(
-            () -> reviewRepository.findByProductId(productId).stream().map(ReviewDto::from).toList(),
+        CompletableFuture<List<ReviewDTO>> reviewFuture = CompletableFuture.supplyAsync(
+            () -> reviewRepository.findByProductId(productId).stream().map(ReviewDTO::from).toList(),
             ioExecutor
         );
-        CompletableFuture<PriceHistoryDto> priceFuture = CompletableFuture.supplyAsync(
-            () -> PriceHistoryDto.from(priceRepository.findByProductIdOrderByDateDesc(productId)),
+        CompletableFuture<PriceHistoryDTO> priceFuture = CompletableFuture.supplyAsync(
+            () -> PriceHistoryDTO.from(priceRepository.findByProductIdOrderByDateDesc(productId)),
             ioExecutor
         );
 
         return CompletableFuture.allOf(detailFuture, reviewFuture, priceFuture)
-            .thenApply(v -> new ProductPageDto(
+            .thenApply(v -> new ProductPageDTO(
                 detailFuture.join(),
                 reviewFuture.join(),
                 priceFuture.join()
@@ -271,32 +271,32 @@ public class ProductPageService {
 ### CompletableFuture.orTimeout (Java 9+)
 
 ```java
-CompletableFuture<ProductDto> future = productService.findProductAsync("P001")
+CompletableFuture<ProductDTO> future = productService.findProductAsync("P001")
     .orTimeout(5, TimeUnit.SECONDS);
 
 // On timeout: CompletableFuture completes with TimeoutException
 future.exceptionally(ex -> {
     if (ex instanceof TimeoutException) {
         log.warn("Product lookup timed out");
-        return ProductDto.empty();
+        return ProductDTO.empty();
     }
-    return ProductDto.empty();
+    return ProductDTO.empty();
 });
 ```
 
 ### CompletableFuture.completeOnTimeout (Java 9+)
 
 ```java
-CompletableFuture<ProductDto> future = productService.findProductAsync("P001")
-    .completeOnTimeout(ProductDto.empty(), 3, TimeUnit.SECONDS);
-// On timeout: completes with ProductDto.empty() instead of TimeoutException
+CompletableFuture<ProductDTO> future = productService.findProductAsync("P001")
+    .completeOnTimeout(ProductDTO.empty(), 3, TimeUnit.SECONDS);
+// On timeout: completes with ProductDTO.empty() instead of TimeoutException
 ```
 
 ### Manual timeout with get()
 
 ```java
 try {
-    ProductDto result = productService.findProductAsync("P001").get(5, TimeUnit.SECONDS);
+    ProductDTO result = productService.findProductAsync("P001").get(5, TimeUnit.SECONDS);
 } catch (TimeoutException ex) {
     // Future is NOT cancelled automatically — cancel it explicitly
     future.cancel(true);

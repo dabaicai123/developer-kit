@@ -125,7 +125,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void create(OrderCreateDTO dto) {
+    public void create(CreateOrderCmd dto) {
         OrderDO order = OrderConverter.toDO(dto);
         baseMapper.insert(order);
         // order items also inserted, within the same transaction as the order main body
@@ -167,7 +167,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
      */
     @Override
     @Transactional(readOnly = true)
-    public PageResult<UserVO> page(int pageNum, int pageSize, UserQueryBO query) {
+    public PageResult<UserVO> page(int pageNum, int pageSize, UserQry query) {
         LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
             .like(StringUtils.isNotBlank(query.getUsername()), UserDO::getUsername, query.getUsername())
             .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
@@ -410,7 +410,7 @@ spring:
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void create(OrderCreateDTO dto) {
+    public void create(CreateOrderCmd dto) {
         baseMapper.insert(order);
         orderItemService.saveBatch(items);
     }
@@ -434,10 +434,10 @@ public class CreateOrderCmdExe {
     private final OrderGateway orderGateway;
 
     @Transactional(rollbackFor = Exception.class)
-    public OrderDto execute(CreateOrderCmd cmd) {
+    public OrderDTO execute(CreateOrderCmd cmd) {
         Order order = Order.create(cmd.getItems(), cmd.getCustomerId());
         orderGateway.save(order);
-        return OrderDto.from(order);
+        return OrderDTO.from(order);
     }
 }
 

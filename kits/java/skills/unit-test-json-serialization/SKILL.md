@@ -58,15 +58,15 @@ dependencies {
 
 ```java
 @JsonTest
-class UserDtoJsonTest {
+class UserDTOJsonTest {
 
   @Autowired
-  private JacksonTester<UserDto> json;
+  private JacksonTester<UserDTO> json;
 
   @Test
   void shouldSerializeUserToJson() throws Exception {
-    UserDto user = new UserDto(1L, "Alice", "alice@example.com", 25);
-    JsonContent<UserDto> result = json.write(user);
+    UserDTO user = new UserDTO(1L, "Alice", "alice@example.com", 25);
+    JsonContent<UserDTO> result = json.write(user);
 
     result
       .extractingJsonPathNumberValue("$.id").isEqualTo(1)
@@ -78,7 +78,7 @@ class UserDtoJsonTest {
   @Test
   void shouldDeserializeJsonToUser() throws Exception {
     String json_content = "{\"id\":1,\"name\":\"Alice\",\"email\":\"alice@example.com\",\"age\":25}";
-    UserDto user = json.parse(json_content).getObject();
+    UserDTO user = json.parse(json_content).getObject();
 
     assertThat(user.getId()).isEqualTo(1L);
     assertThat(user.getName()).isEqualTo("Alice");
@@ -89,7 +89,7 @@ class UserDtoJsonTest {
   @Test
   void shouldHandleNullFields() throws Exception {
     String json_content = "{\"id\":1,\"name\":null,\"email\":\"alice@example.com\"}";
-    UserDto user = json.parse(json_content).getObject();
+    UserDTO user = json.parse(json_content).getObject();
     assertThat(user.getName()).isNull();
   }
 }

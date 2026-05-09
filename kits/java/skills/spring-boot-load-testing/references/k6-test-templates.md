@@ -14,7 +14,7 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
 export function setup() {
   // Obtain JWT token
-  const res = http.post(`${BASE_URL}/api/v1/auth/token`, JSON.stringify({
+  const res = http.post(`${BASE_URL}/v1/auth/token`, JSON.stringify({
     username: __ENV.TEST_USER || 'admin',
     password: __ENV.TEST_PASS || 'admin123',
   }), { headers: { 'Content-Type': 'application/json' } });
@@ -46,7 +46,7 @@ export default function (data) {
   const pageNum = Math.floor(Math.random() * 10) + 1;
   const pageSize = [10, 20, 50][Math.floor(Math.random() * 3)];
 
-  const res = http.get(`${BASE_URL}/api/v1/users?pageNum=${pageNum}&pageSize=${pageSize}`, { headers });
+  const res = http.get(`${BASE_URL}/v1/users?pageNum=${pageNum}&pageSize=${pageSize}`, { headers });
   const body = JSON.parse(res.body);
 
   check(res, {
@@ -107,7 +107,7 @@ export default function () {
   const [min, max] = __ENV.PAGE_RANGE.split('-').map(Number);
   const pageNum = Math.floor(Math.random() * (max - min + 1)) + min;
 
-  const res = http.get(`${BASE_URL}/api/v1/orders?pageNum=${pageNum}&pageSize=20`, { headers });
+  const res = http.get(`${BASE_URL}/v1/orders?pageNum=${pageNum}&pageSize=20`, { headers });
   const body = JSON.parse(res.body);
 
   check(res, {
@@ -153,7 +153,7 @@ export default function () {
 
   // Use same ID to ensure cache hit on second call
   const userId = (__ITER === 0) ? Math.floor(Math.random() * 100) + 1 : 1;
-  const res = http.get(`${BASE_URL}/api/v1/users/${userId}`, { headers });
+  const res = http.get(`${BASE_URL}/v1/users/${userId}`, { headers });
 
   if (__ITER === 0 && isFirstCall) {
     cacheMissDuration.add(res.timings.duration);
@@ -200,16 +200,16 @@ export default function () {
   // Mix of operations to stress different connection patterns
   if (__ITER % 3 === 0) {
     // Read — short connection usage
-    http.get(`${BASE_URL}/api/v1/users?pageNum=1&pageSize=10`, { headers });
+    http.get(`${BASE_URL}/v1/users?pageNum=1&pageSize=10`, { headers });
   } else if (__ITER % 3 === 1) {
     // Write — longer connection hold
-    http.post(`${BASE_URL}/api/v1/users`, JSON.stringify({
+    http.post(`${BASE_URL}/v1/users`, JSON.stringify({
       username: `perf_user_${__VU}_${__ITER}`,
       email: `perf${__VU}${__ITER}@test.com`,
     }), { headers });
   } else {
     // Single read — verify cache behavior
-    http.get(`${BASE_URL}/api/v1/users/1`, { headers });
+    http.get(`${BASE_URL}/v1/users/1`, { headers });
   }
 
   sleep(Math.random() * 1.5);
@@ -259,7 +259,7 @@ export const options = {
 
 export default function () {
   const headers = { 'Authorization': `Bearer ${TOKEN}` };
-  const res = http.get(`${BASE_URL}/api/v1/products?pageNum=1&pageSize=20`, { headers });
+  const res = http.get(`${BASE_URL}/v1/products?pageNum=1&pageSize=20`, { headers });
 
   check(res, {
     'status OK': (r) => r.status === 200 || r.status === 429,  // 429 is acceptable during spike

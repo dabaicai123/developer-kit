@@ -37,11 +37,11 @@ void shouldReturnOrderTotalAsJson() throws Exception {
 ```java
 // BAD - Unmocked service
 @InjectMocks
-private UserController userController;  // userService is null!
+private UserController userController;  // userServiceI is null!
 
 // GOOD - Mocked service
 @Mock
-private UserService userService;
+private UserServiceI userServiceI;
 
 @InjectMocks
 private UserController userController;
@@ -95,7 +95,7 @@ void shouldGetUser() throws Exception {
 // BAD - No verification
 @Test
 void shouldReturnUser() throws Exception {
-  when(userService.getUserById(1L)).thenReturn(new UserDto(1L, "Alice"));
+  when(userServiceI.getUserById(1L)).thenReturn(new UserDTO(1L, "Alice"));
   mockMvc.perform(get("/api/users/1"))
     .andExpect(status().isOk());
   // Service might not have been called at all!
@@ -104,11 +104,11 @@ void shouldReturnUser() throws Exception {
 // GOOD - With verification
 @Test
 void shouldReturnUser() throws Exception {
-  when(userService.getUserById(1L)).thenReturn(new UserDto(1L, "Alice"));
+  when(userServiceI.getUserById(1L)).thenReturn(new UserDTO(1L, "Alice"));
   mockMvc.perform(get("/api/users/1"))
     .andExpect(status().isOk());
 
-  verify(userService).getUserById(1L);  // Verify it was called
+  verify(userServiceI).getUserById(1L);  // Verify it was called
 }
 ```
 
@@ -122,7 +122,7 @@ void shouldReturnUser() throws Exception {
 // BAD - Only happy path
 @Test
 void shouldReturnUser() throws Exception {
-  when(userService.getUserById(1L)).thenReturn(new UserDto(1L, "Alice"));
+  when(userServiceI.getUserById(1L)).thenReturn(new UserDTO(1L, "Alice"));
   mockMvc.perform(get("/api/users/1"))
     .andExpect(status().isOk());
 }
@@ -130,14 +130,14 @@ void shouldReturnUser() throws Exception {
 // GOOD - Happy path AND error path
 @Test
 void shouldReturnUser() throws Exception {
-  when(userService.getUserById(1L)).thenReturn(new UserDto(1L, "Alice"));
+  when(userServiceI.getUserById(1L)).thenReturn(new UserDTO(1L, "Alice"));
   mockMvc.perform(get("/api/users/1"))
     .andExpect(status().isOk());
 }
 
 @Test
 void shouldReturn404WhenUserNotFound() throws Exception {
-  when(userService.getUserById(999L))
+  when(userServiceI.getUserById(999L))
     .thenThrow(new UserNotFoundException("Not found"));
   mockMvc.perform(get("/api/users/999"))
     .andExpect(status().isNotFound());

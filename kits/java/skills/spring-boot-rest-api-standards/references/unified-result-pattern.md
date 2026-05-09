@@ -209,15 +209,15 @@ public class GlobalExceptionHandler {
 
 ```java
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/v1/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+    private final UserServiceI userServiceI;
 
     // Single item → Result<UserVO>
     @GetMapping("/{id}")
     public Result<UserVO> getById(@PathVariable Long id) {
-        return Result.success(userService.getById(id));
+        return Result.success(userServiceI.getById(id));
     }
 
     // Page query → Result<PageResult<UserVO>>
@@ -225,33 +225,33 @@ public class UserController {
     public Result<PageResult<UserVO>> page(
             @RequestParam(defaultValue = "1") long page,
             @RequestParam(defaultValue = "10") long pageSize) {
-        return Result.success(userService.page(page, pageSize));
+        return Result.success(userServiceI.page(page, pageSize));
     }
 
     // List → Result<List<UserVO>>
     @GetMapping("/list")
     public Result<List<UserVO>> list() {
-        return Result.success(userService.list());
+        return Result.success(userServiceI.list());
     }
 
     // Create → Result<Void>
     @PostMapping
     public Result<Void> create(@Valid @RequestBody UserCreateDTO dto) {
-        userService.create(dto);
+        userServiceI.create(dto);
         return Result.success();
     }
 
     // Update → Result<Void>
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
-        userService.update(id, dto);
+        userServiceI.update(id, dto);
         return Result.success();
     }
 
     // Delete → Result<Void>
     @DeleteMapping("/{id}")
     public Result<Void> remove(@PathVariable Long id) {
-        userService.removeById(id);
+        userServiceI.removeById(id);
         return Result.success();
     }
 }
@@ -261,7 +261,7 @@ public class UserController {
 
 ```java
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserServiceI {
 
     @Override
     @Transactional(readOnly = true)

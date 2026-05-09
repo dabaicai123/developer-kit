@@ -95,10 +95,10 @@ class UserMapperCompleteTest {
   @Test
   void shouldMapUserToDto() {
     User user = new User(1L, "Alice", "alice@example.com", 25);
-    UserDto dto = mapper.toDto(user);
+    UserDTO dto = mapper.toDto(user);
     assertThat(dto)
       .isNotNull()
-      .extracting(UserDto::getName, UserDto::getEmail)
+      .extracting(UserDTO::getName, UserDTO::getEmail)
       .containsExactly("Alice", "alice@example.com");
   }
 

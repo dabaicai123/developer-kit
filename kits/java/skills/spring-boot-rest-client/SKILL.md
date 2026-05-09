@@ -141,7 +141,7 @@ public TokenResponse exchangeToken(String code) {
 ### GET with Query Parameters
 
 ```java
-public PageResult<ItemDO> searchItems(String keyword, int page, int size) {
+public PageResult<ItemDTO> searchItems(String keyword, int page, int size) {
     return restClient.get()
         .uri(uriBuilder -> uriBuilder
             .path("/items")
@@ -150,7 +150,7 @@ public PageResult<ItemDO> searchItems(String keyword, int page, int size) {
             .queryParam("size", size)
             .build())
         .retrieve()
-        .body(new ParameterizedTypeReference<PageResult<ItemDO>>() {});
+        .body(new ParameterizedTypeReference<PageResult<ItemDTO>>() {});
     }
 }
 ```

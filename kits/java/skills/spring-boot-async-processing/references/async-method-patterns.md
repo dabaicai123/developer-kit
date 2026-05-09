@@ -32,9 +32,9 @@ Use `CompletableFuture` when you need to compose results, check completion, or h
 @Service
 public class ProductService {
     @Async("productExecutor")
-    public CompletableFuture<ProductDto> findProductAsync(String productId) {
+    public CompletableFuture<ProductDTO> findProductAsync(String productId) {
         Product product = productRepository.findById(productId).orElseThrow();
-        return CompletableFuture.completedFuture(ProductDto.from(product));
+        return CompletableFuture.completedFuture(ProductDTO.from(product));
     }
 }
 ```
@@ -42,18 +42,18 @@ public class ProductService {
 **Caller side:**
 
 ```java
-CompletableFuture<ProductDto> future = productService.findProductAsync("P001");
-ProductDto result = future.get(5, TimeUnit.SECONDS);  // block with timeout
+CompletableFuture<ProductDTO> future = productService.findProductAsync("P001");
+ProductDTO result = future.get(5, TimeUnit.SECONDS);  // block with timeout
 ```
 
 **Composition:**
 
 ```java
-CompletableFuture<ProductDto> productFuture = productService.findProductAsync("P001");
-CompletableFuture<List<ReviewDto>> reviewFuture = reviewService.findReviewsAsync("P001");
+CompletableFuture<ProductDTO> productFuture = productService.findProductAsync("P001");
+CompletableFuture<List<ReviewDTO>> reviewFuture = reviewService.findReviewsAsync("P001");
 
-CompletableFuture<ProductPageDto> pageFuture = productFuture.thenCombine(reviewFuture,
-    (product, reviews) -> new ProductPageDto(product, reviews)
+CompletableFuture<ProductPageDTO> pageFuture = productFuture.thenCombine(reviewFuture,
+    (product, reviews) -> new ProductPageDTO(product, reviews)
 );
 ```
 
@@ -139,17 +139,17 @@ For `@Async` methods returning `CompletableFuture`, exceptions are wrapped in th
 ```java
 // Producer — throw inside CompletableFuture
 @Async
-public CompletableFuture<OrderDto> findOrderAsync(String orderId) {
+public CompletableFuture<OrderDTO> findOrderAsync(String orderId) {
     try {
         Order order = orderRepository.findById(orderId).orElseThrow();
-        return CompletableFuture.completedFuture(OrderDto.from(order));
+        return CompletableFuture.completedFuture(OrderDTO.from(order));
     } catch (Exception ex) {
         return CompletableFuture.failedFuture(ex);
     }
 }
 
 // Consumer — handle with exceptionally() or handle()
-CompletableFuture<OrderDto> future = orderService.findOrderAsync("O001")
+CompletableFuture<OrderDTO> future = orderService.findOrderAsync("O001")
     .exceptionally(ex -> {
         log.warn("Failed to find order: {}", ex.getMessage());
         return null;  // fallback value
@@ -157,7 +157,7 @@ CompletableFuture<OrderDto> future = orderService.findOrderAsync("O001")
     .handle((result, ex) -> {
         if (ex != null) {
             log.error("Async error: {}", ex.getMessage(), ex);
-            return OrderDto.empty();
+            return OrderDTO.empty();
         }
         return result;
     });

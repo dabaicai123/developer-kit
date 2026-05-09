@@ -34,11 +34,11 @@ Identify critical endpoints from production traffic:
 
 | Endpoint Type | Example | Test Focus |
 |---------------|---------|------------|
-| CRUD single item | `GET /api/v1/users/{id}` | Cache hit/miss, single-row lookup |
-| Paginated list | `GET /api/v1/users?pageNum=1&pageSize=20` | MyBatis-Plus pagination, query performance |
-| Create/Update | `POST /api/v1/users` | Write throughput, transaction scope |
+| CRUD single item | `GET /v1/users/{id}` | Cache hit/miss, single-row lookup |
+| Paginated list | `GET /v1/users?pageNum=1&pageSize=20` | MyBatis-Plus pagination, query performance |
+| Create/Update | `POST /v1/users` | Write throughput, transaction scope |
 | Health check | `GET /actuator/health` | Infrastructure baseline |
-| Auth token | `POST /api/v1/auth/token` | JWT signing throughput |
+| Auth token | `POST /v1/auth/token` | JWT signing throughput |
 
 ### 2. Handle Spring Boot response format
 
@@ -70,7 +70,7 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
 // Obtain JWT token per virtual user
 export function setup() {
-  const res = http.post(`${BASE_URL}/api/v1/auth/token`, JSON.stringify({
+  const res = http.post(`${BASE_URL}/v1/auth/token`, JSON.stringify({
     username: 'admin',
     password: 'admin123',
   }), { headers: { 'Content-Type': 'application/json' } });
@@ -83,7 +83,7 @@ export default function (data) {
     'Authorization': `Bearer ${data.token}`,
   };
 
-  const res = http.get(`${BASE_URL}/api/v1/users?pageNum=1&pageSize=20`, { headers });
+  const res = http.get(`${BASE_URL}/v1/users?pageNum=1&pageSize=20`, { headers });
   check(res, {
     'status 200': (r) => r.status === 200,
     'Result code 200': (r) => JSON.parse(r.body).code === 200,
@@ -116,7 +116,7 @@ export const options = {
 export default function () {
   const pageNum = Math.floor(Math.random() * 10) + 1;  // Randomize to avoid cache-only hits
   const pageSize = [10, 20, 50][Math.floor(Math.random() * 3)];
-  const res = http.get(`${BASE_URL}/api/v1/users?pageNum=${pageNum}&pageSize=${pageSize}`, { headers });
+  const res = http.get(`${BASE_URL}/v1/users?pageNum=${pageNum}&pageSize=${pageSize}`, { headers });
   const body = JSON.parse(res.body);
   check(res, {
     'paginated response': (r) => body.data && body.data.total !== undefined,
@@ -165,13 +165,13 @@ Test that JetCache (`@Cached`) or Spring Cache (`@Cacheable`) actually reduces r
 // Warm cache first, then verify second call is faster
 export default function () {
   // First call — cache miss
-  const res1 = http.get(`${BASE_URL}/api/v1/users/1`, { headers });
+  const res1 = http.get(`${BASE_URL}/v1/users/1`, { headers });
   const time1 = res1.timings.duration;
 
   sleep(0.1);  // Brief pause
 
   // Second call — should hit cache
-  const res2 = http.get(`${BASE_URL}/api/v1/users/1`, { headers });
+  const res2 = http.get(`${BASE_URL}/v1/users/1`, { headers });
   const time2 = res2.timings.duration;
 
   check(res2, {

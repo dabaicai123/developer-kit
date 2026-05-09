@@ -30,7 +30,7 @@ The unified `reachability-metadata.json` format (recommended for GraalVM 23+) co
 {
   "reflection": [
     {
-      "type": "com.example.dto.UserDto",
+      "type": "com.example.dto.UserDTO",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
       "allDeclaredFields": true
@@ -39,7 +39,7 @@ The unified `reachability-metadata.json` format (recommended for GraalVM 23+) co
       "condition": {
         "typeReached": "com.example.service.OrderService"
       },
-      "type": "com.example.dto.OrderDto",
+      "type": "com.example.dto.OrderDTO",
       "methods": [
         {"name": "<init>", "parameterTypes": []},
         {"name": "getId", "parameterTypes": []},
@@ -79,7 +79,7 @@ The unified `reachability-metadata.json` format (recommended for GraalVM 23+) co
 ```json
 [
   {
-    "name": "com.example.dto.UserDto",
+    "name": "com.example.dto.UserDTO",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -88,7 +88,7 @@ The unified `reachability-metadata.json` format (recommended for GraalVM 23+) co
     "allPublicFields": true
   },
   {
-    "name": "com.example.dto.OrderDto",
+    "name": "com.example.dto.OrderDTO",
     "methods": [
       {"name": "<init>", "parameterTypes": []},
       {"name": "<init>", "parameterTypes": ["java.lang.Long", "java.lang.String"]},
@@ -182,8 +182,8 @@ Register interfaces for JDK dynamic proxy generation:
 ```json
 {
   "types": [
-    {"name": "com.example.dto.UserDto"},
-    {"name": "com.example.dto.OrderDto"},
+    {"name": "com.example.dto.UserDTO"},
+    {"name": "com.example.dto.OrderDTO"},
     {"name": "java.util.ArrayList"},
     {"name": "java.util.HashMap"}
   ],

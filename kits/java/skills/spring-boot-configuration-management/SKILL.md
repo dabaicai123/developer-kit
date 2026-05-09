@@ -85,7 +85,7 @@ app:
     issuer: my-app
     token:
       access-token-header: Authorization
-      refresh-token-path: /api/v1/auth/refresh
+      refresh-token-path: /v1/auth/refresh
       refresh-token-expiration-days: 7
 
 # Property key naming convention: use kebab-case in YAML
@@ -166,7 +166,7 @@ app:
     issuer: my-app
     token:
       access-token-header: Authorization
-      refresh-token-path: /api/v1/auth/refresh
+      refresh-token-path: /v1/auth/refresh
 
 ---
 # application-dev.yml — development overrides

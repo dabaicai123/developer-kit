@@ -28,12 +28,12 @@ Use `@EnableMethodSecurity` + `@PreAuthorize` for method-level access control:
 
 ```java
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/v1/admin")
 public class AdminController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/users")
-  public List<UserDto> listUsers() { return userService.findAll(); }
+  public Result<List<UserDTO>> listUsers() { return Result.success(userService.findAll()); }
 
   @PreAuthorize("@authz.isOwner(#id, authentication)")
   @DeleteMapping("/users/{id}")

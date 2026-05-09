@@ -86,7 +86,7 @@ public class MyRuntimeHints implements RuntimeHintsRegistrar {
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         // Register reflection
         hints.reflection()
-            .registerType(MyDto.class,
+            .registerType(MyDTO.class,
                 builder -> builder
                     .withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
                                  MemberCategory.INVOKE_DECLARED_METHODS,
@@ -114,11 +114,11 @@ A convenience annotation to register reflection hints for DTOs and data classes:
 
 ```java
 @RestController
-@RegisterReflectionForBinding({UserDto.class, OrderDto.class, AddressDto.class})
+@RegisterReflectionForBinding({UserDTO.class, OrderDTO.class, AddressDTO.class})
 public class UserController {
 
     @GetMapping("/users/{id}")
-    public UserDto getUser(@PathVariable Long id) {
+    public UserDTO getUser(@PathVariable Long id) {
         return userService.findById(id);
     }
 }
@@ -130,7 +130,7 @@ Mark individual classes for reflection registration:
 
 ```java
 @Reflective
-public class MyDto {
+public class MyDTO {
     private String name;
     private int age;
     // getters, setters, constructors
@@ -208,7 +208,7 @@ void shouldRegisterHints() {
     new MyRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
     assertThat(RuntimeHintsPredicates.reflection()
-        .onType(MyDto.class)
+        .onType(MyDTO.class)
         .withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
         .accepts(hints);
 

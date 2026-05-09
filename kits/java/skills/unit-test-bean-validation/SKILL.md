@@ -16,7 +16,7 @@ This skill provides executable patterns for unit testing Jakarta Bean Validation
 
 - Writing unit tests for Jakarta Bean Validation or JSR-380 constraints
 - Testing custom `@Constraint` validators and constraint violation messages
-- Testing bean validation logic in DTOs and request objects
+- Testing bean validation logic in DTOs and Cmd objects
 - Verifying cross-field validation (e.g., password matching)
 - Testing conditional validation with validation groups
 - Fast validation tests without Spring Boot context
@@ -78,26 +78,26 @@ class BaseValidationTest {
 ### Testing Basic Constraints
 
 ```java
-class UserDtoTest extends BaseValidationTest {
+class UserDTOTest extends BaseValidationTest {
 
   @Test
   void shouldPassValidationWithValidUser() {
-    UserDto user = new UserDto("Alice", "alice@example.com", 25);
+    UserDTO user = new UserDTO("Alice", "alice@example.com", 25);
     assertThat(validator.validate(user)).isEmpty();
   }
 
   @Test
   void shouldFailWhenNameIsNull() {
-    UserDto user = new UserDto(null, "alice@example.com", 25);
+    UserDTO user = new UserDTO(null, "alice@example.com", 25);
     assertThat(validator.validate(user))
       .extracting(ConstraintViolation::getMessage)
-      .contains("must not be blank");
+      .contains("用户名不能为空");
   }
 
   @Test
   void shouldFailWhenEmailIsInvalid() {
-    UserDto user = new UserDto("Alice", "invalid-email", 25);
-    Set<ConstraintViolation<UserDto>> violations = validator.validate(user);
+    UserDTO user = new UserDTO("Alice", "invalid-email", 25);
+    Set<ConstraintViolation<UserDTO>> violations = validator.validate(user);
     assertThat(violations)
       .extracting(ConstraintViolation::getPropertyPath)
       .extracting(Path::toString)
@@ -106,15 +106,15 @@ class UserDtoTest extends BaseValidationTest {
 
   @Test
   void shouldFailWhenAgeIsBelowMinimum() {
-    UserDto user = new UserDto("Alice", "alice@example.com", -1);
+    UserDTO user = new UserDTO("Alice", "alice@example.com", -1);
     assertThat(validator.validate(user))
       .extracting(ConstraintViolation::getMessage)
-      .contains("must be greater than or equal to 0");
+      .contains("年龄必须大于等于 0");
   }
 
   @Test
   void shouldFailWhenMultipleConstraintsViolated() {
-    UserDto user = new UserDto(null, "invalid", -5);
+    UserDTO user = new UserDTO(null, "invalid", -5);
     assertThat(validator.validate(user)).hasSize(3);
   }
 }

@@ -40,27 +40,24 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(ResourceNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ErrorResponse handleNotFound(ResourceNotFoundException ex) {
-    return new ErrorResponse(404, "Not Found", ex.getMessage());
+  public Result<Void> handleNotFound(ResourceNotFoundException ex) {
+    return Result.fail(404, ex.getMessage());
   }
 
   @ExceptionHandler(ValidationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorResponse handleValidation(ValidationException ex) {
-    return new ErrorResponse(400, "Bad Request", ex.getMessage());
+  public Result<Void> handleValidation(ValidationException ex) {
+    return Result.fail(400, ex.getMessage());
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ValidationErrorResponse handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+  public Result<Void> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
     Map<String, String> errors = new HashMap<>();
     ex.getBindingResult().getFieldErrors().forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
-    return new ValidationErrorResponse(400, "Validation Failed", errors);
+    return Result.fail(400, "参数校验失败", errors);
   }
 }
-
-public record ErrorResponse(int status, String error, String message) {}
-public record ValidationErrorResponse(int status, String error, Map<String, String> errors) {}
 ```
 
 ### Unit Test
@@ -81,27 +78,27 @@ class GlobalExceptionHandlerTest {
 
   @Test
   void shouldReturn404WhenResourceNotFound() throws Exception {
-    mockMvc.perform(get("/api/users/999"))
+    mockMvc.perform(get("/v1/users/999"))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.status").value(404))
-        .andExpect(jsonPath("$.error").value("Not Found"))
+        .andExpect(jsonPath("$.code").value(404))
         .andExpect(jsonPath("$.message").value("User not found"));
   }
 
   @Test
   void shouldReturn400WithFieldErrorsOnValidationFailure() throws Exception {
-    mockMvc.perform(post("/api/users")
+    mockMvc.perform(post("/v1/users")
         .contentType("application/json")
         .content("{\"name\":\"\",\"email\":\"invalid\"}"))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errors.name").value("must not be blank"))
-        .andExpect(jsonPath("$.errors.email").value("must be a valid email"));
+        .andExpect(jsonPath("$.code").value(400))
+        .andExpect(jsonPath("$.message").value("参数校验失败"))
+        .andExpect(jsonPath("$.data.name").value("不能为空"))
+        .andExpect(jsonPath("$.data.email").value("必须是有效的邮箱地址"));
   }
 }
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/v1")
 class TestController {
   @GetMapping("/users/{id}") public User getUser(@PathVariable Long id) {
     throw new ResourceNotFoundException("User not found");

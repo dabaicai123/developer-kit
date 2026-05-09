@@ -171,7 +171,7 @@ Route tasks to appropriate executors:
 @Service
 public class ReportService {
     @Async("computeExecutor")  // CPU-intensive report generation
-    public CompletableFuture<ReportDto> generateReport(String reportId) { ... }
+    public CompletableFuture<ReportDTO> generateReport(String reportId) { ... }
 
     @Async("ioExecutor")  // IO-intensive file upload
     public void uploadToCloud(String filePath) { ... }

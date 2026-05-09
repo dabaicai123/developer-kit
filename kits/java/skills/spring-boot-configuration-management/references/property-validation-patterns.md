@@ -112,7 +112,7 @@ public record RedisProperties(
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = EndpointValidator.class)
 public @interface ValidEndpoint {
-    String message() default "Invalid endpoint format — must start with / and match /api/v{n}/{resource}";
+    String message() default "Invalid endpoint format — must start with / and match /v{n}/{resource}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
@@ -124,7 +124,7 @@ public @interface ValidEndpoint {
 public class EndpointValidator implements ConstraintValidator<ValidEndpoint, String> {
 
     private static final Pattern ENDPOINT_PATTERN =
-        Pattern.compile("^/api/v[0-9]+/[a-z][a-z0-9-]*(/[a-z0-9-]+)*$");
+        Pattern.compile("^/v[0-9]+/[a-z][a-z0-9-]*(/[a-z0-9-]+)*$");
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -157,10 +157,10 @@ public record ApiProperties(
 ```yaml
 app:
   api:
-    base-path: /api/v1
+    base-path: /v1
     public-endpoints:
-      - /api/v1/auth/login
-      - /api/v1/auth/refresh
+      - /v1/auth/login
+      - /v1/auth/refresh
     request-timeout: 30s
 ```
 

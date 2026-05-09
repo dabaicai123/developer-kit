@@ -65,7 +65,7 @@ app:
     issuer: my-app
     token:
       access-token-header: Authorization
-      refresh-token-path: /api/v1/auth/refresh
+      refresh-token-path: /v1/auth/refresh
 
 server:
   port: 8080

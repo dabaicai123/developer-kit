@@ -66,7 +66,7 @@ com.example.app/
 ├── adapter/
 │   ├── controller/
 │   └── converter/          # Domain ↔ DTO/Cmd mappers (Adapter layer)
-│       ├── OrderDtoConverter.java
+│       ├── OrderDTOConverter.java
 │       └── OrderCmdConverter.java
 ├── app/
 ├── domain/
@@ -134,7 +134,7 @@ Audit fields (`id`, `createdAt`, `updatedAt`, `version`, `deletedAt`) are manage
 
 ```java
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface OrderDtoConverter {
+public interface OrderDTOConverter {
 
     OrderDTO toDTO(Order order);
 
@@ -149,12 +149,12 @@ Use in Controller:
 @RequiredArgsConstructor
 public class OrderController {
     private final CreateOrderCmdExe createOrderCmdExe;
-    private final OrderDtoConverter orderDtoConverter;
+    private final OrderDTOConverter orderDTOConverter;
 
     @PostMapping("/orders")
     public OrderDTO create(@RequestBody CreateOrderCmd cmd) {
         Order order = createOrderCmdExe.execute(cmd);
-        return orderDtoConverter.toDTO(order);
+        return orderDTOConverter.toDTO(order);
     }
 }
 ```

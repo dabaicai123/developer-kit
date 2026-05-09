@@ -10,10 +10,10 @@
 
 ```java
 // Wrong
-mockMvc.perform(post("/api/users").content("{}"));
+mockMvc.perform(post("/v1/users").content("{}"));
 
 // Correct
-mockMvc.perform(post("/api/users")
+mockMvc.perform(post("/v1/users")
     .contentType("application/json")
     .content("{}"));
 ```
@@ -25,7 +25,7 @@ mockMvc.perform(post("/api/users")
 **Solution**: Use `.andDo(print())` to see actual response
 
 ```java
-mockMvc.perform(get("/api/users/1"))
+mockMvc.perform(get("/v1/users/1"))
   .andDo(print())  // Add this to debug
   .andExpect(jsonPath("$.name").value("Alice"));
 ```
@@ -41,11 +41,11 @@ mockMvc.perform(get("/api/users/1"))
 
 ```java
 // Verify controller path
-@RequestMapping("/api/users")  // Matches "/api/users" not "/users"
+@RequestMapping("/v1/users")  // Matches "/v1/users" not "/users"
 
 // Verify mock setup order
-when(userService.getUserById(1L)).thenReturn(user);  // Before perform
-mockMvc.perform(get("/api/users/1"))...
+when(userServiceI.getUserById(1L)).thenReturn(user);  // Before perform
+mockMvc.perform(get("/v1/users/1"))...
 ```
 
 ### Mock Not Being Called
@@ -59,8 +59,8 @@ mockMvc.perform(get("/api/users/1"))...
 
 ```java
 // Use any() for flexible matching
-when(userService.createUser(any())).thenReturn(user);
-verify(userService).createUser(any());  // Not exact argument
+when(userServiceI.createUser(any())).thenReturn(user);
+verify(userServiceI).createUser(any());  // Not exact argument
 ```
 
 ### Response Body Empty
@@ -75,8 +75,8 @@ verify(userService).createUser(any());  // Not exact argument
 ```java
 // Controller should return the object
 @GetMapping("/{id}")
-public UserDto getUser(@PathVariable Long id) {
-  return userService.getUserById(id);  // Return, not void
+public UserDTO getUser(@PathVariable Long id) {
+  return userServiceI.getUserById(id);  // Return, not void
 }
 ```
 
@@ -117,7 +117,7 @@ void setUp() {
 
 ```java
 @Mock
-private UserService userService;
+private UserServiceI userServiceI;
 
 @Mock
 private ValidationService validationService;  // Don't forget this one

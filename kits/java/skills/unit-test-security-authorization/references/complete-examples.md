@@ -118,7 +118,7 @@ public class UserController {
 
 ```java
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/v1/admin")
 public class AdminController {
 
     @GetMapping("/users/{id}")
@@ -146,20 +146,20 @@ class AdminControllerSecurityTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void shouldAllowAdminToGetUser() throws Exception {
-        mockMvc.perform(get("/api/admin/users/1"))
+        mockMvc.perform(get("/v1/admin/users/1"))
             .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void shouldDenyUserFromGettingUser() throws Exception {
-        mockMvc.perform(get("/api/admin/users/1"))
+        mockMvc.perform(get("/v1/admin/users/1"))
             .andExpect(status().isForbidden());
     }
 
     @Test
     void shouldDenyAnonymousAccess() throws Exception {
-        mockMvc.perform(get("/api/admin/users/1"))
+        mockMvc.perform(get("/v1/admin/users/1"))
             .andExpect(status().isUnauthorized());
     }
 }

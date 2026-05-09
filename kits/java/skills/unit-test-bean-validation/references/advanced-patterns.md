@@ -13,7 +13,7 @@ public interface AdminValidation {}
 ### Using Groups in DTOs
 
 ```java
-class UserDto {
+class UserDTO {
   @NotNull(groups = CreateValidation.class)
   private String name;
 
@@ -29,9 +29,9 @@ class ValidationGroupsTest extends BaseValidationTest {
 
   @Test
   void shouldRequireNameOnlyDuringCreation() {
-    UserDto user = new UserDto(null, 25);
+    UserDTO user = new UserDTO(null, 25);
 
-    Set<ConstraintViolation<UserDto>> violations =
+    Set<ConstraintViolation<UserDTO>> violations =
         validator.validate(user, CreateValidation.class);
 
     assertThat(violations)
@@ -42,14 +42,14 @@ class ValidationGroupsTest extends BaseValidationTest {
 
   @Test
   void shouldAllowNullNameDuringUpdate() {
-    UserDto user = new UserDto(null, 25);
+    UserDTO user = new UserDTO(null, 25);
     assertThat(validator.validate(user, UpdateValidation.class)).isEmpty();
   }
 
   @Test
   void shouldValidateMultipleGroups() {
-    UserDto user = new UserDto("Alice", -5);
-    Set<ConstraintViolation<UserDto>> violations =
+    UserDTO user = new UserDTO("Alice", -5);
+    Set<ConstraintViolation<UserDTO>> violations =
         validator.validate(user, CreateValidation.class, UpdateValidation.class);
     assertThat(violations).isNotEmpty();
   }
@@ -70,7 +70,7 @@ class EmailValidationTest extends BaseValidationTest {
     "admin@subdomain.example.com"
   })
   void shouldAcceptValidEmails(String email) {
-    UserDto user = new UserDto("Alice", email);
+    UserDTO user = new UserDTO("Alice", email);
     assertThat(validator.validate(user)).isEmpty();
   }
 
@@ -79,7 +79,7 @@ class EmailValidationTest extends BaseValidationTest {
     "invalid-email", "user@", "@example.com", "user name@example.com"
   })
   void shouldRejectInvalidEmails(String email) {
-    UserDto user = new UserDto("Alice", email);
+    UserDTO user = new UserDTO("Alice", email);
     assertThat(validator.validate(user)).isNotEmpty();
   }
 }
@@ -98,7 +98,7 @@ class RangeValidationTest extends BaseValidationTest {
     "50, 100, true"
   })
   void shouldValidateRange(int min, int max, boolean shouldPass) {
-    RangeDto dto = new RangeDto(min, max);
+    RangeDTO dto = new RangeDTO(min, max);
     var violations = validator.validate(dto);
     assertThat(violations.isEmpty()).isEqualTo(shouldPass);
   }
@@ -117,9 +117,9 @@ class RangeValidationTest extends BaseValidationTest {
 ```java
 @Test
 void debugFailedValidation() {
-  UserDto user = new UserDto("", "invalid");
+  UserDTO user = new UserDTO("", "invalid");
 
-  Set<ConstraintViolation<UserDto>> violations = validator.validate(user);
+  Set<ConstraintViolation<UserDTO>> violations = validator.validate(user);
 
   // Debug output
   violations.forEach(v -> System.out.println(
