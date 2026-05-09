@@ -218,25 +218,13 @@ class DateUtilsTest {
 }
 ```
 
-## Best Practices
-
-- **Test pure functions exclusively** - no side effects or state dependency
-- **Cover happy path and edge cases** - null, empty, whitespace, extreme values
-- **Use descriptive test names** - `shouldReturnNullWhenInputIsNull`
-- **Use `@ParameterizedTest`** for multiple similar inputs (see `references/parameterized-tests.md`)
-- **Test boundary conditions** - min/max values, overflow, precision
-- **Avoid mocking pure functions** - only mock external dependencies like Clock
-- **Keep tests independent** - no order dependency between tests
-
 ## Constraints and Warnings
 
 - **No mocking static methods**: Use reflection utilities only when absolutely necessary
-- **Pure function requirement**: Stateful utilities are harder to test; prefer immutability
-- **Floating point precision**: Never use exact equality; use `isCloseTo(delta)`
-- **Null handling consistency**: Decide whether utility returns null or throws; test accordingly
+- **Stateful utilities are harder to test; prefer immutability**
+- **Null handling consistency**: Assert null return explicitly — utilities should consistently return null or throw, never both for the same input type
 - **Thread safety**: Static utilities must be thread-safe; verify concurrent behavior separately
 - **Immutable inputs**: Document whether utilities modify input parameters
-- **Edge cases reference**: See `references/edge-cases.md` for boundary testing patterns
 
 ## Related Skills
 

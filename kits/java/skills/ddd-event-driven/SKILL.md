@@ -12,31 +12,6 @@ Domain-driven event architecture guidance — domain event design principles, ev
 
 ## When to use this skill
 
-- Designing domain events that represent "facts that have happened" within aggregates
-- Deciding whether to use simple domain events vs event sourcing vs full CQRS
-- Defining what makes a good domain event (structure, naming, payload)
-- Understanding aggregate root event publishing patterns
-- Integrating the outbox pattern for reliable event delivery
-- Evaluating event sourcing trade-offs (snapshooting, projections, rebuilds)
-- Avoiding event-driven anti-patterns (anemic events, synchronous chains, event coupling)
-
-> For Spring Boot implementation details (ApplicationEventPublisher, @TransactionalEventListener, Kafka integration), see `spring-boot-event-driven-patterns`. This skill focuses on architecture-level concepts and design decisions.
-
-## Overview
-
-Event-driven architecture in DDD treats domain events as immutable facts that record what happened in the system. Events decouple aggregates and services, enable eventual consistency across boundaries, and provide an audit trail of state changes. The complexity spectrum ranges from simple domain events (lightweight decoupling) to full event sourcing (state derived from events) with CQRS (separate read/write models).
-
-```
-Complexity Spectrum:
-
-Simple Domain Events    →    Event Sourcing    →    Full CQRS
-(low complexity)              (medium)              (high)
- Decouple services            State = event log      Separate read/write models
- Publish after commit         Replay to rebuild       Optimized read projections
- Easy to adopt                Audit trail built-in    Async projections
-                               Requires migration     Complex infrastructure
-```
-
 | Concept | Description | Complexity |
 |---|---|---|
 | **Domain Events** | Immutable facts published by aggregates after state changes | Low |
@@ -70,11 +45,7 @@ public abstract class DomainEvent {
 }
 
 /**
- * Good domain event design:
- * - Named in past tense (OrderPlaced, not PlaceOrder)
- * - Contains only essential data (aggregate ID + key attributes)
- * - Immutable (all fields final, no setters)
- * - Does NOT carry large payloads or sensitive information
+ * Domain event — past tense naming, essential data only, immutable.
  */
 public record OrderPlacedEvent(
     UUID orderId,
@@ -420,9 +391,8 @@ public class OrderSummaryProjection {
 
 ## Best Practices
 
-- **Define an explicit event versioning strategy**: additive fields only, never remove or rename existing fields; use new event types for breaking changes
 - **Start with simple domain events before adopting event sourcing**: the complexity trade-off must be justified by audit trail or temporal query requirements
-- **Guarantee at-least-once delivery with idempotent consumers**: use an outbox table with polling for reliable publishing
+- **Guarantee reliable event delivery**: Use outbox table + polling for at-least-once delivery; design consumers to be idempotent (deduplicate by event ID)
 - **Use correlation IDs**: trace events across service boundaries for debugging and observability
 
 ## Anti-patterns

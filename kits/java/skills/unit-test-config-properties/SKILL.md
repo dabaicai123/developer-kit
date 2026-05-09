@@ -12,11 +12,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 This skill provides patterns for unit testing `@ConfigurationProperties` bindings, environment-specific configurations, and property validation using JUnit 5. Covers testing property name mapping, type conversions, validation constraints, nested structures, and profile-specific configurations without full Spring context startup.
 
-**Key validation checkpoints:**
-- Property prefix matches between `@ConfigurationProperties` and test properties
-- Validation triggers on `@Validated` classes with invalid values
-- Type conversions work for Duration, DataSize, collections, and maps
-
 ## When to use this skill
 
 - Testing `@ConfigurationProperties` property binding
@@ -206,36 +201,18 @@ class TypeConversionTest {
 
 For **nested properties**, **profile-specific configurations**, **collection binding**, and **advanced validation patterns**, see `references/advanced-examples.md`.
 
-## Best Practices
-
-- **Test all property bindings** including nested structures and collections
-- **Test validation constraints** for all `@NotBlank`, `@Min`, `@Max`, `@Email`, `@Positive` annotations
-- **Test both default and custom values** to verify fallback behavior
-- **Use ApplicationContextRunner** for fast context-free testing
-- **Test profile-specific configurations** separately with `@Profile`
-- **Verify type conversions** for Duration, DataSize, collections, and maps
-- **Test edge cases**: empty strings, null values, type mismatches, out-of-range values
-
 ## Constraints and Warnings
 
 - **Kebab-case to camelCase**: Property `app.my-property` maps to `myProperty` in Java
 - **Loose binding**: Spring Boot uses loose binding by default; use strict binding if needed
-- **`@Validated` required**: Add `@Validated` annotation to enable constraint validation
+- **`@Validated` required**: Add `@Validated` annotation to enable constraint validation — missing annotation means validation is silently skipped
 - **`@ConstructorBinding`**: All parameters must be bindable when using constructor binding
-- **List indexing**: Use `[0]`, `[1]` notation; ensure sequential indexing for lists
+- **List indexing**: Use `[0]`, `[1]` notation; ensure sequential indexing for lists — wrong notation like `(0)`, `(1)` causes binding failure
 - **Duration format**: Accepts ISO-8601 (`PT30S`) or simple syntax (`30s`, `1m`, `2h`)
-- **Context isolation**: Each `ApplicationContextRunner` creates a new context with no shared state
+- **Context isolation**: Each `ApplicationContextRunner` creates a new minimal context with no shared state
 - **Profile activation**: Use `spring.profiles.active=profileName` in `withPropertyValues()` for profile tests
-
-## Troubleshooting
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Properties not binding | Prefix mismatch | Verify `@ConfigurationProperties(prefix="...")` matches property paths |
-| Validation not triggered | Missing `@Validated` | Add `@Validated` annotation to configuration class |
-| Context fails to start | Missing dependencies | Ensure `spring-boot-starter-test` is in test scope |
-| Nested properties null | Inner class missing | Use `@Data` on nested classes or provide getters/setters |
-| Collection binding fails | Wrong indexing | Use `[0]`, `[1]` notation, not `(0)`, `(1)` |
+- **Nested properties null**: Inner classes need `@Data` annotation or explicit getters/setters — missing these causes null nested objects
+- **Context fails to start**: Ensure `spring-boot-starter-test` is in test scope
 
 ## Related Skills
 

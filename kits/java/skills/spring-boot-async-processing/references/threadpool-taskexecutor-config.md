@@ -1,5 +1,7 @@
 # ThreadPoolTaskExecutor Configuration
 
+Primary reference for ThreadPoolTaskExecutor configuration. See async-method-patterns.md for @Async usage patterns.
+
 ## Bean configuration with detailed properties
 
 ### Full Java bean configuration
@@ -120,35 +122,8 @@ executor.setRejectedExecutionHandler((r, executor) -> {
 
 ## Sizing guidelines: CPU-bound vs IO-bound tasks
 
-### CPU-bound tasks (computations, data processing)
-
-```java
-int cpuCores = Runtime.getRuntime().availableProcessors();
-
-ThreadPoolTaskExecutor computeExecutor = new ThreadPoolTaskExecutor();
-computeExecutor.setCorePoolSize(cpuCores);           // e.g., 4 on 4-core machine
-computeExecutor.setMaxPoolSize(cpuCores * 2);        // e.g., 8
-computeExecutor.setQueueCapacity(100);
-computeExecutor.setThreadNamePrefix("compute-async-");
-```
-
-CPU-bound tasks saturate CPU cores. More threads than cores does NOT improve throughput — it increases context-switching overhead.
-
-**Rule:** `corePoolSize ≈ CPU cores`, `maxPoolSize ≈ CPU cores * 2`
-
-### IO-bound tasks (database, HTTP, file operations)
-
-```java
-ThreadPoolTaskExecutor ioExecutor = new ThreadPoolTaskExecutor();
-ioExecutor.setCorePoolSize(cpuCores * 2);            // e.g., 8 on 4-core machine
-ioExecutor.setMaxPoolSize(cpuCores * 4);             // e.g., 16
-ioExecutor.setQueueCapacity(200);
-ioExecutor.setThreadNamePrefix("io-async-");
-```
-
-IO-bound tasks spend most time waiting for external systems. More threads than cores IS beneficial — threads waiting on IO do not consume CPU.
-
-**Rule:** `corePoolSize ≈ CPU cores * 2`, `maxPoolSize ≈ CPU cores * 4-8`, depending on expected IO latency.
+- **CPU-bound**: core ≈ CPU cores, max ≈ cores * 2. More threads than cores increases context-switching overhead without improving throughput.
+- **IO-bound**: core ≈ cores * 2, max ≈ cores * 4-8, depending on expected IO latency. Threads waiting on IO do not consume CPU, so more threads improve throughput.
 
 ### Mixed workload
 
@@ -200,85 +175,6 @@ public class ReportService {
 
     @Async("ioExecutor")  // IO-intensive file upload
     public void uploadToCloud(String filePath) { ... }
-}
-```
-
-## Multiple executor beans for different task types
-
-### Scenario: e-commerce platform with 4 async task categories
-
-```java
-@Configuration
-@EnableAsync
-public class AsyncExecutorConfig {
-    private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
-
-    // 1. Email/SMS notifications — low priority, high volume
-    @Bean("notificationExecutor")
-    public Executor notificationExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(500);  // tolerate high volume
-        executor.setThreadNamePrefix("notification-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(15);  // quick shutdown — notifications can retry
-        executor.setTaskDecorator(new ThreadContextTaskDecorator());
-        executor.initialize();
-        return executor;
-    }
-
-    // 2. Database batch operations — IO-bound, moderate priority
-    @Bean("dbBatchExecutor")
-    public Executor dbBatchExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(CPU_CORES * 2);
-        executor.setMaxPoolSize(CPU_CORES * 4);
-        executor.setQueueCapacity(200);
-        executor.setThreadNamePrefix("db-batch-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(60);  // allow batch operations to finish
-        executor.setTaskDecorator(new ThreadContextTaskDecorator());
-        executor.initialize();
-        return executor;
-    }
-
-    // 3. Report generation — CPU-bound, high priority
-    @Bean("reportExecutor")
-    public Executor reportExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(CPU_CORES);
-        executor.setMaxPoolSize(CPU_CORES * 2);
-        executor.setQueueCapacity(50);  // low queue — reports are expensive
-        executor.setThreadNamePrefix("report-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(120);  // reports take time
-        executor.setTaskDecorator(new ThreadContextTaskDecorator());
-        executor.initialize();
-        return executor;
-    }
-
-    // 4. External API calls — IO-bound, needs timeout awareness
-    @Bean("apiCallExecutor")
-    public Executor apiCallExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(CPU_CORES * 2);
-        executor.setMaxPoolSize(CPU_CORES * 4);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("api-call-");
-        executor.setRejectedExecutionHandler((r, e) -> {
-            log.warn("API call rejected — external service overloaded");
-            throw new RejectedExecutionException("API call rejected — try again later");
-        });
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(10);  // external calls timeout fast
-        executor.setTaskDecorator(new ContextPropagatingTaskDecorator());
-        executor.initialize();
-        return executor;
-    }
 }
 ```
 
@@ -524,30 +420,4 @@ This approach allows:
 
 ## Graceful shutdown configuration
 
-For Spring Boot applications running async tasks, graceful shutdown prevents data loss:
-
-```yaml
-server:
-  shutdown: graceful  # Spring Boot 3.x graceful shutdown
-
-spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 30s  # Max wait for each shutdown phase
-```
-
-Combined with executor configuration:
-
-```java
-executor.setWaitForTasksToCompleteOnShutdown(true);
-executor.setAwaitTerminationSeconds(30);
-```
-
-**Shutdown sequence:**
-1. Spring receives shutdown signal (SIGTERM)
-2. Web server stops accepting new requests (graceful)
-3. `SmartLifecycle` beans start shutdown phase
-4. `ThreadPoolTaskExecutor` waits for running tasks (up to `awaitTerminationSeconds`)
-5. After timeout, remaining tasks are interrupted
-6. Application process exits
-
-**Important:** `awaitTerminationSeconds` should be less than `spring.lifecycle.timeout-per-shutdown-phase` to avoid conflicts.
+Enable: `server.shutdown: graceful` + `spring.lifecycle.timeout-per-shutdown-phase: 30s`. Set `waitForTasksToCompleteOnShutdown(true)` and `awaitTerminationSeconds(30)` on each executor. Ensure `awaitTerminationSeconds` is less than `spring.lifecycle.timeout-per-shutdown-phase`.

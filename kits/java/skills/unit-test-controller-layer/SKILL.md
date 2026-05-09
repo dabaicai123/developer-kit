@@ -228,12 +228,9 @@ void shouldReturnJsonWhenAcceptHeaderIsJson() throws Exception {
 
 ## Best Practices
 
-- Use `standaloneSetup()` for isolated controller testing
-- Mock service layer — controllers handle HTTP, services handle business logic
-- Verify mock interactions: `verify(service).method(args)`
 - Test happy path AND error scenarios (404, 400, 500)
 - Use `jsonPath()` for fluent JSON assertions
-- One focused assertion per test method
+- Assert one behavior per test method — multiple `jsonPath()` checks on the same response are acceptable
 
 ## Constraints and Warnings
 

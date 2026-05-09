@@ -29,6 +29,7 @@ Systematic patterns for testing boundary conditions, corner cases, and limit val
 7. **Handle overflow/underflow**: Use `Math.addExact()` and `Math.subtractExact()` to detect arithmetic overflow
 8. **Test date/time edges**: Verify leap years, month boundaries, timezone transitions
 9. **Iterate based on failures**: When a boundary test fails, analyze the error to discover additional untested boundaries; add test cases for the newly discovered edge conditions
+10. **Document why specific boundaries matter for your domain** — not all boundaries are equally important; explain which ones reflect real business constraints
 
 ## Examples
 
@@ -251,25 +252,12 @@ class ArrayBoundaryTest {
 }
 ```
 
-## Best Practices
-
-- **Test at boundaries explicitly**: don't rely on random testing
-- **Test null and empty separately** from valid inputs
-- **Use parameterized tests** for multiple boundary cases
-- **Test both sides of boundaries** (just below, at, just above)
-- **Verify error messages** for invalid boundary inputs
-- **Document why** specific boundaries matter for your domain
-- **Test overflow/underflow** for all numeric operations
-
 ## Constraints and Warnings
 
 - **Integer overflow**: Use `Math.addExact()` to detect silent overflow
-- **Floating-point precision**: Never use exact equality; always use tolerance-based assertions
-- **NaN behavior**: `NaN != NaN`; use `Float.isNaN()` or `Double.isNaN()`
 - **Collection size limits**: Be mindful of memory with large test collections
 - **String encoding**: Test with Unicode characters for internationalization
 - **Date/time boundaries**: Account for timezone transitions and daylight saving
-- **Array indexing**: Always test index 0, length-1, and out-of-bounds
 
 ## References
 

@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # MyBatis-Plus Patterns
 
-MyBatis-Plus ORM patterns for Spring Boot 3.5.x with PostgreSQL.
-
 ## When to use this skill
 
 - Manually writing or editing a single Mapper/DO/Service (not batch generation)
@@ -100,7 +98,7 @@ public class UserDO {
 
 > **YAML**: Enable camelCase mapping with `mybatis-plus.configuration.map-underscore-to-camel-case: true`. Explicit `@TableField` mapping is only needed when the Java field name doesn't match the expected snake_case column.
 
-> **mvnd + JDK 21 + Lombok**: If using mvnd with JDK 21, Lombok annotations (`@Data`, `@Builder`, `@Slf4j`) silently fail. Add `<forceLegacyJavacApi>true</forceLegacyJavacApi>` to `maven-compiler-plugin`. See `ddd-cola` skill for full configuration.
+> **mvnd + JDK 21 + Lombok**: If using mvnd with JDK 21, Lombok silently fails. See `ddd-cola` for the `<forceLegacyJavacApi>` fix.
 
 ## IService Internal Transaction Behavior
 
@@ -141,19 +139,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
 Since **3.5.9**, the pagination plugin requires a separate `mybatis-plus-jsqlparser` dependency. For **Spring Boot 3.x**, use `mybatis-plus-spring-boot3-starter` (not the old `mybatis-plus-boot-starter`):
 
-```xml
-<dependency>
-    <groupId>com.baomidou</groupId>
-    <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-    <version>3.5.9</version>
-</dependency>
-<!-- Pagination plugin (required since 3.5.9) -->
-<dependency>
-    <groupId>com.baomidou</groupId>
-    <artifactId>mybatis-plus-jsqlparser</artifactId>
-    <version>3.5.9</version>
-</dependency>
-```
+Add `mybatis-plus-spring-boot3-starter` 3.5.9 and `mybatis-plus-jsqlparser` 3.5.9. See `ddd-cola` or `mybatis-plus-generator` for full dependency blocks.
 
 ```java
 @Configuration
@@ -395,19 +381,8 @@ public void deleteAll(List<Long> ids) {
 - **DDD/COLA**: Use Gateway pattern — see `ddd-cola` skill
 - **IService transaction behavior**: `saveBatch/saveOrUpdateBatch` have internal `@Transactional`; single methods (`save`, `updateById`, `removeById`) do NOT — add `@Transactional(rollbackFor=Exception.class)` on your method for multi-step writes
 - Use `@Transactional(readOnly = true)` on multi-step query methods only (not single-statement queries) → see `spring-boot-transaction-management`
-- Use `LambdaQueryWrapper` instead of `QueryWrapper` for type safety; inside ServiceImpl prefer `lambdaQuery()` over `new LambdaQueryWrapper<>`
-- Use `#{param}` (parameterized) in custom SQL — never `${param}` (SQL injection risk)
-- Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft deletes
-- Use `@Version` for optimistic locking — must register `OptimisticLockerInnerInterceptor`
-- Use `Page<>` for pagination, never manually calculate offset
-- Use `@Data + @EqualsAndHashCode(callSuper = false)` for DO classes
-- Use `@TableName("xxx")` with plain snake_case — no `t_` prefix
-- Use `@TableId(type = IdType.ASSIGN_ID)` — application-layer snowflake ID
-- Use `DO` suffix for persistence objects, never `Entity` suffix
-- Use `mybatis-plus-spring-boot3-starter` for Spring Boot 3.x (not old `mybatis-plus-boot-starter`)
 - Use `mybatis-plus-join` (`MPJLambdaWrapper`) for type-safe multi-table joins
-- **Never loop individual DB calls** — use `saveBatch`, `listByIds`, `removeByIds`, `updateBatchById`, or `lambdaQuery().in()` instead of for-loop insert/select/update/delete
-- Add detailed JavaDoc comments on classes, methods, and fields
+- Document each DO class with table mapping, each field with business meaning, each custom Mapper method with parameter descriptions
 
 ## Keywords
 

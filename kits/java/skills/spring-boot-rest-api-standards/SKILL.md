@@ -8,10 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot REST API Standards
 
-## Overview
-
-REST API design standards for Spring Boot covering URL design, HTTP methods, status codes, DTOs, validation, error handling, pagination, and security headers.
-
 ## When to use this skill
 
 - Creating REST endpoints and API routes
@@ -25,19 +21,12 @@ REST API design standards for Spring Boot covering URL design, HTTP methods, sta
 
 ### To Build RESTful API Endpoints
 
-Follow these steps to create well-designed REST API endpoints:
-
 1. **Design Resource-Based URLs**
    - Use plural nouns for resource names
    - Follow REST conventions: GET /users, POST /users, PUT /users/{id}
    - Avoid action-based URLs like /getUserList
 
-2. **Implement Proper HTTP Methods**
-   - GET: Retrieve resources (safe, idempotent)
-   - POST: Create resources (not idempotent)
-   - PUT: Replace entire resources (idempotent)
-   - PATCH: Partial updates (not idempotent)
-   - DELETE: Remove resources (idempotent)
+2. **Use Correct HTTP Methods** — GET (retrieve), POST (create), PUT (replace), PATCH (partial update), DELETE (remove)
 
 3. **Use Appropriate Result Codes** — combine proper HTTP status codes with a `Result<T>` wrapper for business-level detail
    - 200: Successful GET / PUT / PATCH (resource retrieved or updated)
@@ -71,16 +60,7 @@ Follow these steps to create well-designed REST API endpoints:
    - Include page, pageSize, total, records fields
    - Return `Result<PageResult<T>>` from controller endpoints
 
-8. **Add Security Headers**
-   - Configure CORS policies
-   - Set content security policy
-   - Include X-Frame-Options, X-Content-Type-Options
-
-**Validation checkpoints:**
-- After step 1-2: Verify URL structure follows REST conventions (/users not /getUsers)
-- After step 3: Test each endpoint returns correct status codes
-- After step 4-5: Validate DTOs with curl or HTTPie before proceeding
-- After step 6: Confirm error responses match standardized format
+8. **Security Headers and CORS** — For security headers and CORS, see `spring-boot-security` skill.
 
 ## Examples
 
@@ -179,33 +159,13 @@ public class GlobalExceptionHandler {
 }
 ```
 
-## Best Practices
-
-### 1. Use Constructor Injection
-```java
-@Service
-@RequiredArgsConstructor
-public class UserService {
-    private final UserRepository userRepository;
-}
-```
-
-### 2. Prefer Immutable DTOs (Java Records or `@Value`)
-```java
-public record UserResponse(Long id, String name, String email) {}
-```
-
-> For transaction management patterns (`@Transactional`, propagation, rollback rules), see `spring-boot-transaction-management`.
-
 ## Constraints and Warnings
 
 1. **Never expose entities directly** - Use DTOs to separate API contracts from domain models
-2. **Follow REST conventions** - Use nouns for resources (/users), correct HTTP methods, plural names, proper status codes
-3. **Handle all exceptions globally** - Use `@RestControllerAdvice`, never let raw exceptions bubble up
-4. **Always paginate large result sets** - Prevent performance issues and DDoS vulnerabilities
-5. **Validate all input data** - Use Jakarta validation annotations on request DTOs
-6. **Never expose sensitive data** - Don't log or expose passwords, tokens, PII
-7. **`Result<T>` and `PageResult<T>` constructors depend on Lombok** — `@AllArgsConstructor` and `@Data` generate constructors used by `Result.success(data)` and `PageResult.of(page).map()`. If Lombok annotation processing fails (e.g., mvnd + JDK 21 without `forceLegacyJavacApi=true`), these constructors won't exist, causing type inference errors. See `ddd-cola` skill for the mvnd fix.
+2. **Handle all exceptions globally** - Use `@RestControllerAdvice`, never let raw exceptions bubble up
+3. **Always paginate large result sets** - Prevent performance issues and DDoS vulnerabilities
+4. **Never expose sensitive data** - Don't log or expose passwords, tokens, PII
+5. **`Result<T>` and `PageResult<T>` constructors depend on Lombok** — `@AllArgsConstructor` and `@Data` generate constructors used by `Result.success(data)` and `PageResult.of(page).map()`. If Lombok annotation processing fails (e.g., mvnd + JDK 21 without `forceLegacyJavacApi=true`), these constructors won't exist, causing type inference errors. See `ddd-cola` skill for the mvnd fix.
 
 ## References
 

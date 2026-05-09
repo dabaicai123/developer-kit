@@ -8,10 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Unit Testing Security and Authorization
 
-## Overview
-
-This skill provides patterns for unit testing Spring Security authorization logic using `@PreAuthorize`, `@Secured`, `@RolesAllowed`, and custom permission evaluators. It covers testing role-based access control (RBAC), expression-based authorization, custom permission evaluators, and verifying access denied scenarios without full Spring Security context.
-
 ## When to use this skill
 
 Use this skill when:
@@ -27,73 +23,19 @@ Use this skill when:
 Follow these steps to test Spring Security authorization:
 
 ### 1. Set Up Security Testing Dependencies
-Add spring-security-test to your test dependencies:
-
-```xml
-<dependency>
-  <groupId>org.springframework.security</groupId>
-  <artifactId>spring-security-test</artifactId>
-  <scope>test</scope>
-</dependency>
-```
+Add spring-security-test to your test dependencies.
 
 ### 2. Enable Method Security in Test Configuration
-```java
-@Configuration
-@EnableMethodSecurity
-class TestSecurityConfig { }
-```
+Use `@EnableMethodSecurity` on a test `@Configuration` class.
 
 ### 3. Test with `@WithMockUser`
-```java
-@Test
-@WithMockUser(roles = "ADMIN")
-void shouldAllowAdminAccess() {
-  assertThatCode(() -> service.deleteUser(1L))
-    .doesNotThrowAnyException();
-}
-
-@Test
-@WithMockUser(roles = "USER")
-void shouldDenyUserAccess() {
-  assertThatThrownBy(() -> service.deleteUser(1L))
-    .isInstanceOf(AccessDeniedException.class);
-}
-```
+Use `@WithMockUser(roles = "...")` to simulate authenticated users. Assert `doesNotThrowAnyException()` for allowed access and `isInstanceOf(AccessDeniedException.class)` for denied access.
 
 ### 4. Test Custom Permission Evaluators
-```java
-@Test
-void shouldGrantPermissionToOwner() {
-  Authentication auth = new UsernamePasswordAuthenticationToken(
-    "alice", null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
-  );
-  Document doc = new Document(1L, "Test", new User("alice"));
-
-  boolean result = evaluator.hasPermission(auth, doc, "WRITE");
-  assertThat(result).isTrue();
-}
-```
+Construct `Authentication` manually with `UsernamePasswordAuthenticationToken` and `SimpleGrantedAuthority`. Invoke the evaluator directly and assert boolean results.
 
 ### 5. Validate Security is Active
-If tests pass unexpectedly, add this assertion to verify security is enforced:
-```java
-@Test
-void shouldRejectUnauthorizedWhenSecurityEnabled() {
-  assertThatThrownBy(() -> service.deleteUser(1L))
-    .isInstanceOf(AccessDeniedException.class);
-}
-```
-
-## Quick Reference
-
-| Annotation | Description | Example |
-|------------|-------------|---------|
-| `@PreAuthorize` | Pre-invocation authorization | `@PreAuthorize("hasRole('ADMIN')")` |
-| `@PostAuthorize` | Post-invocation authorization | `@PostAuthorize("returnObject.owner == authentication.name")` |
-| `@Secured` | Simple role-based security | `@Secured("ROLE_ADMIN")` |
-| `@RolesAllowed` | JSR-250 standard | `@RolesAllowed({"ADMIN", "MANAGER"})` |
-| `@WithMockUser` | Test annotation | `@WithMockUser(roles = "ADMIN")` |
+If tests pass unexpectedly, add an unauthenticated assertion (`assertThatThrownBy(...).isInstanceOf(AccessDeniedException.class)`) to confirm `@EnableMethodSecurity` is enforced — missing annotation causes all checks to be bypassed silently.
 
 ## Examples
 
@@ -157,13 +99,8 @@ See [references/basic-testing.md](references/basic-testing.md) for more basic pa
 
 ## Best Practices
 
-1. **Use `@WithMockUser`** for setting authenticated user context
-2. **Test both allow and deny cases** for each security rule
-3. **Test with different roles** to verify role-based decisions
-4. **Test expression-based security** comprehensively
-5. **Mock external dependencies** (permission evaluators, etc.)
-6. **Test anonymous access separately** from authenticated access
-7. **Use `@EnableMethodSecurity`** in configuration for method-level security
+1. **Test both allow and deny cases** for each security rule
+2. **Test anonymous access separately** from authenticated access
 
 ## Common Pitfalls
 

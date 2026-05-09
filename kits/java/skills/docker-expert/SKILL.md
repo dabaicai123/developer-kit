@@ -14,50 +14,15 @@ Docker containerization expert specializing in Java and Spring Boot applications
 
 1. Analyze the container setup comprehensively:
 
-   **Use internal tools first (Read, Grep, Glob) for better performance. Shell commands are fallbacks.**
+   Analyze the project for existing Dockerfile patterns, base images, build tool, and running containers. Use Read/Grep/Glob for detection.
 
-   ```bash
-   # Docker environment detection
-   docker --version 2>/dev/null || echo "No Docker installed"
-   docker info | grep -E "Server Version|Storage Driver|Container Runtime" 2>/dev/null
-
-   # Project structure analysis
-   find . -name "Dockerfile*" -type f | head -10
-   find . -name "*compose*.yml" -o -name "*compose*.yaml" -type f | head -5
-   find . -name ".dockerignore" -type f | head -3
-   find . -name "pom.xml" -o -name "build.gradle*" -type f | head -5
-
-   # Container status if running
-   docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" 2>/dev/null | head -10
-   docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null | head -10
-   ```
-
-   **After detection, adapt approach:**
-   - Match existing Dockerfile patterns and base images
-   - Respect multi-stage build conventions (Maven vs Gradle)
-   - Consider development vs production environments
-   - Account for JVM tuning requirements in containers
-   - Account for existing orchestration setup (Compose/Swarm)
+   After detection, match existing conventions (base images, build tool, layer strategy) and adapt for target environment.
 
 2. Identify the specific problem category and complexity level
 
 3. Apply the appropriate solution strategy from the expertise below
 
-4. Validate thoroughly:
-   ```bash
-   # Build and security validation
-   docker build --no-cache -t test-build . 2>/dev/null && echo "Build successful"
-   docker history test-build --no-trunc 2>/dev/null | head -5
-   docker scout quickview test-build 2>/dev/null || echo "No Docker Scout"
-
-   # Runtime validation
-   docker run --rm -d --name validation-test test-build 2>/dev/null
-   docker exec validation-test ps aux 2>/dev/null | head -3
-   docker stop validation-test 2>/dev/null
-
-   # Compose validation
-   docker compose config 2>/dev/null && echo "Compose config valid"
-   ```
+4. Validate: `docker build --no-cache`, verify runtime with `docker run`, check security with `docker scout quickview`.
 
 ## Core Expertise Areas
 
@@ -83,17 +48,12 @@ FROM deps AS build
 COPY src ./src
 RUN mvn package -DskipTests -B
 
-# ---- Stage 3: Runtime ----
+# ---- Stage 3: Runtime (see Security-hardened Dockerfile below for full pattern) ----
 FROM eclipse-temurin:21-jre AS runtime
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 WORKDIR /app
-COPY --from=build --chown=appuser:appgroup /app/target/*.jar app.jar
-USER appuser
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-XX:+UseContainerSupport", \
-            "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-XX:+UseContainerSupport", "-jar", "app.jar"]
 ```
 
 **Gradle alternative** — only the dependency resolution step differs:
@@ -235,13 +195,7 @@ RUN --mount=type=secret,id=keystore_password \
     keytool -importcert -storepass "$KS_PASS" ...
 ```
 
-### 4. Docker Compose Orchestration
-
-**Orchestration expertise:**
-- **Service dependency management**: Health checks, startup ordering with `depends_on`
-- **Network configuration**: Custom networks, service isolation
-- **Environment management**: Dev/staging/prod configurations via override files
-- **Volume strategies**: Named volumes for data persistence, bind mounts for development
+### 4. Docker Compose Orchestration — Production and Development examples below cover dependency management, network isolation, environment config, and volume strategies.
 
 #### Production Compose: Spring Boot + PostgreSQL + Redis
 
@@ -429,11 +383,7 @@ services:
 
 ### 7. Development Workflow Integration
 
-**Development patterns:**
-- **Hot reloading setup**: Volume mount source, run with `spring-boot-devtools`
-- **Debug configuration**: Expose JDWP port (8000) for IDE remote debugging
-- **Testing integration**: Test-specific containers and environments
-- **Build cache mounting**: Mount Maven/Gradle cache volumes for faster rebuilds
+For development, mount source as volume with `spring-boot-devtools`; expose JDWP port 8000 for remote debugging.
 
 **Build cache optimization with BuildKit:**
 
@@ -595,14 +545,3 @@ See **`references/common-issues.md`** for detailed troubleshooting, including sl
 - **graalvm-native-image**: Compile Spring Boot to native executable for sub-second startup and minimal Docker images (~50-80 MB)
 - **spring-boot-database-migration**: Flyway/Liquibase integration with PostgreSQL in Docker Compose, database schema versioning
 - **postgresql-table-design**: Schema design, indexing, and optimization for PostgreSQL containers in Spring Boot applications
-
-## When to Use This Skill
-
-This skill is applicable when working with Docker containerization for Java/Spring Boot applications — writing Dockerfiles, configuring Docker Compose, optimizing JVM settings for containers, building GraalVM native images, or troubleshooting container-related issues.
-
-## Limitations
-
-- Use this skill only when the task clearly matches Docker containerization for Java/Spring Boot.
-- Do not treat the output as a substitute for environment-specific validation, load testing, or production security review.
-- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.
-- This skill does not cover Kubernetes orchestration, CI/CD pipeline configuration, or cloud-specific container services (ECS, Fargate, etc.).

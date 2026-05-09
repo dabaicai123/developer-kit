@@ -8,10 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Event-Driven Patterns
 
-## Overview
-
-Implement Event-Driven Architecture (EDA) patterns in Spring Boot 3.x using domain events, ApplicationEventPublisher, `@TransactionalEventListener`, and distributed messaging with Kafka and Spring Cloud Stream.
-
 ## When to use this skill
 
 - Implementing event-driven microservices with Kafka messaging
@@ -22,17 +18,6 @@ Implement Event-Driven Architecture (EDA) patterns in Spring Boot 3.x using doma
 - Replacing synchronous calls with event-based communication between services
 
 > For architecture-level concepts (event sourcing, CQRS theory), see `ddd-event-driven`. This skill focuses on Spring Boot implementation.
-
-## Quick Reference
-
-| Concept | Description |
-|---------|-------------|
-| **Domain Events** | Immutable events extending `DomainEvent` base class with eventId, occurredAt, correlationId |
-| **Event Publishing** | `ApplicationEventPublisher.publishEvent()` for local, `KafkaTemplate` for distributed |
-| **Event Listening** | `@TransactionalEventListener(phase = AFTER_COMMIT)` for reliable handling |
-| **Kafka** | `@KafkaListener(topics = "...")` for distributed event consumption |
-| **Spring Cloud Stream** | Functional programming model with `Consumer` beans |
-| **Outbox Pattern** | Atomic event storage with business data, scheduled publisher |
 
 ## Examples
 
@@ -134,8 +119,6 @@ public class ProductEventHandler {
 }
 ```
 
-**Validate:** Confirm the event handler fires only after the transaction commits by checking that the database state is committed before the handler executes.
-
 See [event-handling.md](references/event-handling.md) for handling patterns.
 
 ### 4. Configure Kafka Infrastructure
@@ -150,15 +133,11 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 ```
 
-**Validate:** Send a test event via `KafkaTemplate` and confirm it appears in the consumer logs before proceeding to production patterns.
-
 See [dependency-setup.md](references/dependency-setup.md) and [configuration.md](references/configuration.md).
 
 ### 5. Implement Outbox Pattern
 
 The Outbox pattern ensures business data and event records are persisted in the same local transaction. For the full Outbox implementation (table schema, event publisher, poller, Saga choreography/orchestration), see `spring-boot-transaction-management` → `references/distributed-transaction-patterns.md`.
-
-**Validate:** Confirm the scheduled processor picks up pending events by checking the `publishedAt` timestamp is set after the scheduled run.
 
 See [outbox-pattern.md](references/outbox-pattern.md) for event publishing patterns.
 
@@ -174,25 +153,15 @@ public void handleProductEvent(ProductCreatedEventDto event) {
 }
 ```
 
-**Validate:** Confirm messages reach the dead-letter topic after exhausting retries before moving to observability.
+### 7. Observability
 
-### 7. Add Observability
-
-Enable Micrometer Tracing for distributed tracing, monitor metrics.
+For observability (Micrometer tracing, metrics), see `spring-boot-actuator`.
 
 ## Best Practices
 
 - **Use past tense naming**: `ProductCreated` (not `CreateProduct`)
-- **Keep events immutable**: All fields should be final
 - **Include correlation IDs**: For tracing events across services
 - **Use AFTER_COMMIT phase**: Ensures events are published after successful database transaction
-- **Implement idempotent handlers**: Handle duplicate events gracefully
-- **Add retry mechanisms**: For failed event processing with exponential backoff
-- **Implement dead-letter queues**: For events that fail processing after retries
-- **Log all failures**: Include sufficient context for debugging
-- **Make handlers order-independent**: Event ordering is not guaranteed in distributed systems
-- **Batch event processing**: When handling high volumes
-- **Monitor event latencies**: Set up alerts for slow processing
 
 ## References
 

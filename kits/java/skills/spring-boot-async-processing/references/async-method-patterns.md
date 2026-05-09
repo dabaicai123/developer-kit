@@ -83,99 +83,13 @@ public CompletableFuture<Product> findProduct(String id) {
 
 ## @Async with specific executor
 
-When multiple `ThreadPoolTaskExecutor` beans exist, specify which one to use with `@Async("beanName")`.
-
-```java
-@Configuration
-@EnableAsync
-public class AsyncExecutorConfig {
-
-    @Bean("ioExecutor")
-    public Executor ioExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(8);
-        executor.setMaxPoolSize(16);
-        executor.setQueueCapacity(200);
-        executor.setThreadNamePrefix("io-async-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean("computeExecutor")
-    public Executor computeExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("compute-async-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
-        executor.initialize();
-        return executor;
-    }
-}
-
-@Service
-public class ReportService {
-    @Async("computeExecutor")  // CPU-intensive work
-    public CompletableFuture<ReportDto> generateReport(String reportId) {
-        return CompletableFuture.completedFuture(reportEngine.generate(reportId));
-    }
-
-    @Async("ioExecutor")  // IO-intensive work
-    public void exportToCloudStorage(String reportId) {
-        storageClient.upload(reportEngine.generate(reportId).toFile());
-    }
-}
-```
+When multiple `ThreadPoolTaskExecutor` beans exist, specify which one to use with `@Async("beanName")`. See threadpool-taskexecutor-config.md for executor configuration.
 
 **Without `@Async("beanName")`**, Spring uses the default executor returned by `AsyncConfigurer.getAsyncExecutor()`, or `SimpleAsyncTaskExecutor` if no custom executor is configured.
 
 ## @Async on class level vs method level
 
-### Class-level @Async
-
-When `@Async` is placed on a class, ALL public methods become async:
-
-```java
-@Async("ioExecutor")
-@Service
-public class BackgroundNotificationService {
-    // All public methods are async by default
-
-    public void sendEmail(String userId, String subject) { ... }
-    public void sendSms(String userId, String message) { ... }
-}
-```
-
-**Caveats:**
-- All public methods execute asynchronously — including methods that should be synchronous
-- Harder to reason about which methods are async
-- Cannot selectively make some methods synchronous
-
-### Method-level @Async (preferred)
-
-Apply `@Async` only on methods that need async execution — explicit and clear:
-
-```java
-@Service
-public class NotificationService {
-    @Async("ioExecutor")
-    public void sendEmailAsync(String userId, String subject) { ... }
-
-    @Async("ioExecutor")
-    public void sendSmsAsync(String userId, String message) { ... }
-
-    // This method is synchronous — intentional
-    public EmailResult sendEmailSync(String userId, String subject) { ... }
-}
-```
-
-**Recommendation:** Use method-level `@Async`. It is explicit, easier to test, and avoids accidental async execution.
+Avoid class-level `@Async` — it it makes all public methods async including ones that should be synchronous. Use method-level for explicit control.
 
 ## Exception handling
 
@@ -251,7 +165,7 @@ CompletableFuture<OrderDto> future = orderService.findOrderAsync("O001")
 
 ### Manual try-catch inside @Async void methods
 
-For `@Async void` methods, you can also catch exceptions manually before they reach the handler:
+For void methods needing targeted exception handling (e.g., retry queue), use manual try-catch before reaching the handler:
 
 ```java
 @Async

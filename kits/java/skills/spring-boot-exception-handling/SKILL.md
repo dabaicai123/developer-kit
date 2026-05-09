@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Exception Handling
 
-Centralized error handling for Spring Boot 3.5.x using custom exception hierarchy, `@RestControllerAdvice`, `@ExceptionHandler`, and unified `Result<T>` response format.
+Patterns for centralized error handling using `@RestControllerAdvice`, custom exception hierarchy, and unified `Result<T>`.
 
 ## When to use this skill
 
@@ -22,7 +22,7 @@ Centralized error handling for Spring Boot 3.5.x using custom exception hierarch
 
 ## Instructions
 
-### 1. Define custom exception hierarchy
+### 1. Define custom exception hierarchy + error code system
 
 Create a structured exception hierarchy rooted in `BusinessException`. Use integer HTTP status codes, never String codes:
 
@@ -32,13 +32,18 @@ Create a structured exception hierarchy rooted in `BusinessException`. Use integ
  * <p>Carries an integer error code (maps to HTTP status) and a human-readable message.</p>
  */
 public class BusinessException extends RuntimeException {
-    private final int code;
+    private final int code;    // Full business error code (e.g., 104004)
     private final String msg;
 
     public BusinessException(int code, String msg) {
         super(msg);
         this.code = code;
         this.msg = msg;
+    }
+
+    /** HTTP status derived from the last 3 digits of the error code */
+    public int httpStatus() {
+        return ErrorCodes.httpStatus(code);
     }
 
     public int getCode() { return code; }
@@ -80,16 +85,9 @@ public class ServiceUnavailableException extends BusinessException {
 }
 ```
 
-### 2. Establish error code system
-
-Beyond HTTP status codes, define a business-specific error code system for fine-grained error identification. Clients can use these codes to handle specific scenarios programmatically:
+Error code system — each code maps to a specific business scenario. Format: module prefix + sequential number (e.g., USER_1001). HTTP status is derived from the code prefix; business code is returned in Result.code.
 
 ```java
-/**
- * Error code constants — each code maps to a specific business scenario.
- * <p>Format: module prefix + sequential number (e.g., USER_1001).</p>
- * <p>HTTP status is derived from the code prefix; business code is returned in Result.code.</p>
- */
 public final class ErrorCodes {
     // User module (1xxx)
     public static final int USER_NOT_FOUND       = 104004;
@@ -108,26 +106,6 @@ public final class ErrorCodes {
     /** Derive HTTP status from the error code structure */
     public static int httpStatus(int errorCode) {
         return errorCode % 1000;
-    }
-}
-```
-
-Usage in exceptions:
-
-```java
-public class BusinessException extends RuntimeException {
-    private final int code;    // Full business error code (e.g., 104004)
-    private final String msg;
-
-    public BusinessException(int code, String msg) {
-        super(msg);
-        this.code = code;
-        this.msg = msg;
-    }
-
-    /** HTTP status derived from the last 3 digits of the error code */
-    public int httpStatus() {
-        return ErrorCodes.httpStatus(code);
     }
 }
 
@@ -197,13 +175,7 @@ public class GlobalExceptionHandler {
 
 ### 4. Field-level validation error response DTO
 
-For richer validation error responses that include per-field details (useful for form validation on the client side):
-
 ```java
-/**
- * Detailed validation error response — includes per-field error information.
- * <p>Use this when the client needs field-level error details for form validation.</p>
- */
 public record ValidationError(
     int code,
     String msg,
@@ -224,22 +196,7 @@ public record FieldErrorDetail(
 ) {}
 ```
 
-Return field-level errors when the client needs them:
-
-```java
-@RestControllerAdvice
-@Slf4j
-public class DetailedValidationHandler {
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<Void> handleDetailedValidation(MethodArgumentNotValidException ex) {
-        ValidationError validationError = ValidationError.fromBindingResult(400000, ex.getBindingResult());
-        log.warn("Validation error: {}", validationError);
-        return Result.fail(400000, validationError.msg());
-        // If the API contract requires field-level detail, return Result<ValidationError> instead
-    }
-}
-```
+Return `Result<ValidationError>` when the API requires field-level detail; otherwise `Result<Void>`.
 
 ### 5. Decide between global vs local exception handlers
 
@@ -275,43 +232,11 @@ public class OrderController {
 | Controller-specific error detail or alternate response | Local `@ExceptionHandler` on controller | Override global for special cases |
 | Both global and local handle the same exception type | Local wins for that controller | Spring resolves local first |
 
-### 6. Integrate logging with exception handling
+### 6. Logging rules
 
-Log at the appropriate level based on exception severity:
-
-```java
-@RestControllerAdvice
-@Slf4j
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(BusinessException.class)
-    public Result<Void> handleBusiness(BusinessException e) {
-        // 4xx business errors: WARN level — expected scenarios, not bugs
-        log.warn("Business error: code={}, msg={}", e.getCode(), e.getMsg());
-        return Result.fail(e.getCode(), e.getMsg());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<Void> handleValidation(MethodArgumentNotValidException ex) {
-        // 400 validation errors: WARN level — client mistakes, not server bugs
-        String msg = formatFieldErrors(ex.getBindingResult());
-        log.warn("Validation error: {}", msg);
-        return Result.fail(400000, msg);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public Result<Void> handleUnexpected(Exception e) {
-        // 500 unexpected errors: ERROR level with full stack trace — potential bugs
-        log.error("Unexpected error: {}", e.getMessage(), e);
-        return Result.fail(500000, "Internal server error");
-    }
-}
-```
-
-**Logging rules:**
-- 4xx (client errors): `log.warn()` — no stack trace, these are expected
-- 5xx (server errors): `log.error()` — full stack trace, these indicate bugs or infrastructure issues
-- Never log sensitive data (passwords, tokens, PII) in exception messages
+- 4xx (client errors): `log.warn()` — no stack trace; these are expected
+- 5xx (server errors): `log.error()` — full stack trace; these indicate bugs
+- Never log passwords, tokens, JWT secrets, or PII in exception messages
 
 ## Examples
 
@@ -367,14 +292,12 @@ public class PaymentController {
 
 - **All API responses use `Result<T>` wrapper** — `{"code":200,"msg":"success","data":...}`
 - **Errors return `Result.fail(code, msg)`** — never `ProblemDetail` or `ResponseEntity`
-- **Use integer error codes (400, 404, 500 or structured business codes)** — never String codes ("NOT_FOUND", "ERROR")
 - **Never expose stack traces or internal details in responses** — the `Exception.class` catch-all must return a generic message
 - **Log 4xx at WARN, 5xx at ERROR with full stack trace** — client errors are expected, server errors indicate bugs
-- **Never log sensitive data** — passwords, tokens, PII must not appear in log messages
+- **Never log passwords, tokens, JWT secrets, or PII in exception messages**
 - **Define a structured error code system** — per-module prefixes give clients programmatic error handling
 - **Avoid duplicate error code names** — even if two scenarios seem similar (both "not found"), use distinct names reflecting the specific semantics. `STRATEGY_CONFIG_NOT_FOUND` vs `CHANNEL_STRATEGY_MISSING` is better than `STRATEGY_NOT_FOUND` appearing twice with different codes.
 - **Use `@Order(Ordered.HIGHEST_PRECEDENCE)` on global handler** — ensures it runs before any framework handlers
-- **Local handlers override global handlers** — use sparingly, only for controller-specific scenarios
 - **Throw `BusinessException` subclasses from service layer** — let the global handler catch and format them
 - **Prefer throwing exceptions over returning error Result from service methods** — keeps service signatures clean and lets the handler normalize the response
 
@@ -394,8 +317,6 @@ public class PaymentController {
 ## Constraints and Warnings
 
 - **`@RestControllerAdvice` only handles exceptions from `@RestController` methods** — it does not catch exceptions from filters, interceptors, or `@Controller` (non-REST) classes. For those, use `@ControllerAdvice` or register error pages.
-- **Local handlers override global handlers** — if a controller defines `@ExceptionHandler(BusinessException.class)`, the global handler will NOT be invoked for that controller. This can lead to inconsistent error formats if the local handler returns a different response shape.
-- **Never catch and swallow exceptions inside `@Transactional` methods** — this prevents rollback because the Spring AOP proxy only sees a normal method return. Either re-throw the exception or call `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()`.
 - **Validation exception handler must handle both `MethodArgumentNotValidException` (from `@Valid` on `@RequestBody`) and `ConstraintViolationException` (from `@Validated` on path/query params)** — these are separate exception types with different message formats.
 - **The catch-all `@ExceptionHandler(Exception.class)` must be defined last** — Spring resolves handlers by exception type specificity; more specific types are matched first.
 - **Never expose stack traces, SQL statements, or internal class names in error responses** — these are security risks that leak implementation details.

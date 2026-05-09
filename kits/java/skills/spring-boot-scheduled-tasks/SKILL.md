@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Scheduled Tasks
 
-Scheduled task patterns for Spring Boot 3.5.x — from simple `@Scheduled` annotations for single-instance tasks to XXL-Job distributed scheduling for multi-instance deployments.
+@Scheduled and XXL-Job patterns for single-instance and distributed scheduling.
 
 ## When to use this skill
 
@@ -32,17 +32,6 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 }
-```
-
-Thread pool configuration (default pool size is 1 — dangerous):
-
-```yaml
-spring:
-  task:
-    scheduling:
-      pool:
-        size: 4
-      time-zone: Asia/Shanghai
 ```
 
 ### XXL-Job (distributed scheduling)
@@ -69,7 +58,7 @@ Use `@Scheduled` for single-instance applications. Three scheduling modes:
 - `fixedRate` — execute every N milliseconds regardless of previous completion
 - `cron` — schedule by cron expression
 
-Always configure `spring.task.scheduling.pool.size > 1` to prevent task starvation. Extract cron expressions to configuration files for runtime adjustment.
+Extract cron expressions to configuration files for runtime adjustment.
 
 ### Distributed scheduling with XXL-Job
 
@@ -88,7 +77,16 @@ Spring uses 6-field cron (seconds, minutes, hours, day, month, weekday). XXL-Job
 
 ## Examples
 
-### Example 1: @Scheduled fixedDelay — execute after previous completion
+### Example 1: @Scheduled fixedDelay + pool configuration
+
+```yaml
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 4
+      time-zone: Asia/Shanghai
+```
 
 ```java
 @Component
@@ -381,7 +379,7 @@ public class ParamAwareHandler {
 - **Always set proper transaction scope on scheduled methods that touch the database** → see `spring-boot-transaction-management` for full patterns
 - **Use cron expressions from configuration, not hardcoded** — allows runtime adjustment via Nacos or properties
 - **Log task start/end with execution time for monitoring**: `log.info("[TaskName] start")` and `log.info("[TaskName] completed in {}ms", elapsed)`
-- **Handle misfire scenarios**: decide whether to skip or catch up on missed executions — prefer skip for reporting tasks, catch-up for data sync
+- **Handle misfire scenarios**: Spring `@Scheduled` has no built-in misfire policy. XXL-Job supports misfire strategies in admin console (skip vs retry). Prefer skip for reporting tasks, retry for data sync.
 - **For batch processing, use iterative batch deletion (LIMIT + loop)** to avoid large single transactions → see `spring-boot-transaction-management` for transaction scope patterns
 - **Use `@ConditionalOnProperty`** to enable/disable scheduled tasks per environment
 - **`fixedRate` can cause task pile-up** — if execution takes longer than the rate interval, tasks queue up. Use `fixedDelay` for long-running tasks

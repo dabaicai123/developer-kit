@@ -32,7 +32,7 @@ This skill provides patterns for unit testing Spring caching annotations (`@Cach
 7. **Test key generation**: Verify compound keys from SpEL expressions
 8. **Validate conditional caching**: Test `unless` (null results) and `condition` (parameter-based)
 
-**Validation checkpoints:**
+**Debugging tips:**
 - Run test → If cache not working: verify `@EnableCaching` annotation present
 - If proxy issues: ensure method calls go through Spring proxy (no direct `this` calls)
 - If key mismatches: log actual cache key and compare with `@Cacheable(key="...")` expression
@@ -62,7 +62,7 @@ dependencies {
 
 ### Testing `@Cacheable` (Cache Hit/Miss)
 
-> **Important**: `@Cacheable` relies on Spring AOP proxying. Creating a service with `new UserService(userRepository)` bypasses the proxy, so caching annotations are silently ignored — the repository will be called on every invocation. Always use `@Autowired` to inject the service in a Spring context so the proxy wraps caching behavior correctly.
+Requires Spring proxy — see Constraints.
 
 ```java
 // Service
@@ -131,7 +131,7 @@ class UserServiceCachingTest {
 
 ### Testing `@CacheEvict`
 
-> **Important**: `@CacheEvict` relies on Spring AOP proxying. Creating a service with `new ProductService(productRepository)` bypasses the proxy, so eviction annotations are silently ignored. Always use `@Autowired` to inject the service in a Spring context so the proxy handles eviction correctly.
+Requires Spring proxy — see Constraints.
 
 ```java
 // Service
@@ -212,7 +212,7 @@ class ProductCacheEvictTest {
 
 ### Testing `@CachePut`
 
-> **Important**: `@CachePut` relies on Spring AOP proxying. Creating a service with `new OrderService(orderRepository)` bypasses the proxy, so cache update annotations are silently ignored. Always use `@Autowired` to inject the service in a Spring context so the proxy handles cache updates correctly.
+Requires Spring proxy — see Constraints.
 
 ```java
 @Service
@@ -270,7 +270,7 @@ class OrderCachePutTest {
 
 ### Testing Conditional Caching
 
-> **Important**: Conditional caching (`unless`, `condition`) also relies on Spring AOP proxying. The examples below test the **logic** of what should happen when the condition evaluates — they use `new` to demonstrate the uncached baseline. For full proxy-aware testing, use `@SpringBootTest` + `@EnableCaching` + `@Autowired` as shown in the `@Cacheable` section above.
+Requires Spring proxy — see Constraints.
 
 ```java
 @Service
@@ -333,7 +333,7 @@ class ConditionalCachingTest {
 
 ### Testing Cache Keys with SpEL
 
-> **Important**: SpEL key expressions require Spring proxy for cache resolution. Use `@SpringBootTest` + `@EnableCaching` + `@Autowired` for proxy-aware testing.
+Requires Spring proxy — see Constraints.
 
 ```java
 @Service
@@ -385,15 +385,12 @@ class CacheKeyTest {
 
 ## Best Practices
 
-- **Mock repository calls**: Use `verify(mock, times(n))` to assert cache behavior
+- **Clear cache state between tests**: Reset cache in `@BeforeEach` to avoid flaky results
 - **Test both hit and miss scenarios**: Don't just test the happy path
-- **Clear cache state**: Reset between tests to avoid flaky results
-- **Use `ConcurrentMapCacheManager`**: Fast, no external dependencies
-- **Verify eviction**: Always test that `@CacheEvict` actually invalidates cached data
 
 ## Constraints and Warnings
 
-- **`@Cacheable` requires proxy**: Direct method calls (`this.method()`) bypass caching - use dependency injection
+- **Spring AOP proxy required**: `@Cacheable`, `@CachePut`, `@CacheEvict` all rely on Spring proxying — direct `this.method()` calls bypass caching. Use `@Autowired` injection with `@SpringBootTest` + `@EnableCaching` so the proxy wraps caching behavior correctly.
 - **Cache key collisions**: Compound keys from SpEL must be unique per dataset
 - **Null caching**: Null results are cached by default - use `unless = "#result == null"` to exclude
 - **`@CachePut` always executes**: Unlike `@Cacheable`, it always runs the method
@@ -404,8 +401,6 @@ class CacheKeyTest {
 
 | Issue | Solution |
 |-------|----------|
-| Cache not working | Verify `@EnableCaching` on test config |
-| Proxy bypass | Use autowired/constructor injection, not direct `this` calls |
 | Key mismatch | Log cache key with `cache.getNativeKey()` to debug SpEL |
 | Flaky tests | Clear cache in `@BeforeEach` before each test |
 

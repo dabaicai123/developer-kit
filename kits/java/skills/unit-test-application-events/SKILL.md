@@ -27,12 +27,14 @@ Provides actionable patterns for testing Spring event publishers and `@EventList
 2. **Mock ApplicationEventPublisher**: use `@Mock` on the publisher field in the service under test
 3. **Capture events with ArgumentCaptor**: `ArgumentCaptor.forClass(EventType.class)` to inspect published payload
 4. **Verify listener side effects**: invoke listener directly against mocked dependencies
-5. **Test async handlers**: use `Thread.sleep()` or Awaitility — then assert the async operation was called
-6. **Add validation checkpoints**:
-   - After capturing an event, confirm `eventCaptor.getValue()` is not null before asserting fields
-   - If the listener is not invoked, verify `publishEvent()` was called with the correct event type
-   - If async assertions fail, increase wait time and check the executor pool is not saturated
-7. **Cover error scenarios**: assert listeners handle exceptions gracefully
+5. **Test async handlers**: use Awaitility (`await().atMost(2, SECONDS).untilAsserted(...)`) — requires `org.awaitility:awaitility` dependency
+### Debugging tips
+
+- After capturing an event, confirm `eventCaptor.getValue()` is not null before asserting fields
+- If the listener is not invoked, verify `publishEvent()` was called with the correct event type
+- If async assertions fail, increase Awaitility timeout and check the executor pool is not saturated
+
+6. **Cover error scenarios**: assert listeners handle exceptions gracefully
 
 ## Examples
 
@@ -72,8 +74,6 @@ dependencies {
 ```
 
 ### Plain POJO Event and Publisher Test
-
-> Since Spring 4.2+, events no longer need to extend `ApplicationEvent`. Use plain records or classes — they're simpler, immutable, and easier to test.
 
 ```java
 public record UserCreatedEvent(User user) {}
@@ -200,19 +200,15 @@ class AsyncEventListenerTest {
 
 ## Best Practices
 
-- Mock `ApplicationEventPublisher` — never let it post to a real context in unit tests
-- Capture events with `ArgumentCaptor` and assert field-level equality, not just type
-- Test listeners in isolation: construct them with mocked dependencies and call the handler method directly
-- Cover error paths: listeners must not propagate exceptions to publishers
-- Async listeners: use Awaitility (`await().atMost(2, SECONDS).untilAsserted(...)`) instead of `Thread.sleep()` for deterministic waits — requires `org.awaitility:awaitility` dependency
 - Keep events immutable and serializable — test both if events cross JVM boundaries
+- Capture events with `ArgumentCaptor` and assert field-level equality, not just type
 
 ## Constraints and Warnings
 
 - **Do not test Spring's own event infrastructure** — focus on your business logic and event payload
-- **`@Async` requires `@EnableAsync`** — tests using Thread.sleep may still pass even if the async proxy is not wired in the test; use a mock verify instead
+- **`@Async` requires `@EnableAsync`** — tests using Awaitility may still pass even if the async proxy is not wired in the test; use a mock verify instead
 - **Spring does not guarantee listener order** — do not write tests that depend on execution sequence unless you add `@Order`
-- **Avoid `Thread.sleep()` in CI environments** — it makes tests flaky under load; replace with Awaitility `.atMost()` blocks
+- **Avoid `Thread.sleep()` in CI environments** — prefer Awaitility `.atMost()` blocks for deterministic async waits
 - **Events crossing JVM boundaries need serialization tests** — null fields in remote listeners often mean missing `Serializable`
 
 ## References

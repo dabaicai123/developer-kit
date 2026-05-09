@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot REST Client Best Practices
 
-HTTP client selection, configuration, and testing for Spring Boot 3.5.x services.
-
 ## When to use this skill
 
 - Choosing between RestClient, RestTemplate, and OkHttp3 for external API calls
@@ -26,11 +24,7 @@ HTTP client selection, configuration, and testing for Spring Boot 3.5.x services
 | **RestTemplate** | Legacy code maintenance | `spring-boot-starter-web` | Maintenance mode — deprecated Spring 7.1 |
 | **OkHttp3** | WebSocket / custom interceptor | Manual dependency + explicit version | Not managed by Spring Boot parent |
 
-**Rules**:
-- **Default**: use RestClient. Fluent API, no extra dependency, version managed by Spring Boot.
-- **Legacy**: only use RestTemplate for existing code you don't want to migrate.
-- **JDK 21 + virtual threads** + RestClient = best combination.
-- **OkHttp3**: only when you need WebSocket or custom interceptor chains; requires explicit `<version>`.
+**Rules**: Default: RestClient. Use RestTemplate only for legacy code; OkHttp3 only for WebSocket/custom interceptors (requires explicit version).
 
 ## RestClient Configuration
 
@@ -218,13 +212,6 @@ class AuthClientTest {
 }
 ```
 
-### Required Hamcrest Imports
-
-```java
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-```
-
 ### URL Parameter Order Trap
 
 `Map.of()` does not guarantee insertion order; `UriComponentsBuilder.queryParam()` may alphabetically sort.
@@ -264,17 +251,6 @@ public class ClientConfig {
 }
 ```
 
-
-## Best Practices
-
-- **Use RestClient by default** — fluent API, no extra dependency, managed by Spring Boot
-- **Don't use RestTemplate for new code** — maintenance mode, will be deprecated
-- **Configure timeouts explicitly** — default has no timeout; production must set connect + read timeouts
-- **Use `UriBuilder` for query params** — avoid manual URL string construction
-- **Use `onStatus()` for error handling** — don't let raw HTTP errors propagate as uncaught exceptions
-- **Define multiple RestClient beans** for different external services (different base URLs, different timeouts)
-- **Use Apache HttpClient 5 as underlying engine** for connection pooling and timeout control in production
-- **Test with MockRestServiceServer or WireMock** — never call real external services in tests
 
 ## Constraints and Warnings
 

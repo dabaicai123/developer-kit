@@ -8,14 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # GraalVM Native Image for Java Applications
 
-Expert skill for building high-performance native executables from Java applications using GraalVM Native Image, dramatically reducing startup time and memory consumption.
-
-## Overview
-
-GraalVM Native Image compiles Java applications ahead-of-time (AOT) into standalone native executables. These executables start in milliseconds, require significantly less memory than JVM-based deployments, and are ideal for serverless functions, CLI tools, and microservices where fast startup and low resource usage are critical.
-
-This skill provides a structured workflow to migrate JVM applications to native binaries, covering build tool configuration, framework-specific patterns, reflection metadata management, and an iterative approach to resolving native build failures.
-
 ## When to use this skill
 
 Use this skill when:
@@ -33,47 +25,7 @@ Use this skill when:
 
 ### 1. Contextual Project Analysis
 
-Before any configuration, analyze the project to determine the build tool, framework, and dependencies:
-
-**Detect the build tool:**
-
-```bash
-# Check for Maven
-if [ -f "pom.xml" ]; then
-    echo "Build tool: Maven"
-    # Check for Maven wrapper
-    [ -f "mvnw" ] && echo "Maven wrapper available"
-fi
-
-# Check for Gradle
-if [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
-    echo "Build tool: Gradle"
-    [ -f "build.gradle.kts" ] && echo "Kotlin DSL"
-    [ -f "gradlew" ] && echo "Gradle wrapper available"
-fi
-```
-
-**Detect the framework by analyzing dependencies:**
-
-- **Spring Boot**: Look for `spring-boot-starter-*` in `pom.xml` or `build.gradle`
-- **Quarkus**: Look for `quarkus-*` dependencies
-- **Micronaut**: Look for `micronaut-*` dependencies
-- **Plain Java**: No framework dependencies detected
-
-**Check the Java version:**
-
-```bash
-java -version 2>&1
-# GraalVM Native Image requires Java 17+ (recommended: Java 21+)
-```
-
-**Identify potential native image challenges:**
-
-- Reflection-heavy libraries (Jackson, Hibernate, JAXB)
-- Dynamic proxy usage (JDK proxies, CGLIB)
-- Resource bundles and classpath resources
-- JNI or native library dependencies
-- Serialization requirements
+Detect build tool (pom.xml = Maven, build.gradle = Gradle), framework, and Java version. Identify reflection-heavy libraries (Jackson, Hibernate) as potential challenges.
 
 ### 2. Build Tool Configuration
 
@@ -157,18 +109,7 @@ Key points:
 
 Native Image uses a closed-world assumption — all code paths must be known at build time. Dynamic features like reflection, resources, and proxies require explicit metadata configuration.
 
-**Metadata files** are placed in `META-INF/native-image/<group.id>/<artifact.id>/`:
-
-| File | Purpose |
-|------|---------|
-| `reachability-metadata.json` | Unified metadata (reflection, resources, JNI, proxies, bundles, serialization) |
-| `reflect-config.json` | Legacy: Reflection registration |
-| `resource-config.json` | Legacy: Resource inclusion patterns |
-| `proxy-config.json` | Legacy: Dynamic proxy interfaces |
-| `serialization-config.json` | Legacy: Serialization registration |
-| `jni-config.json` | Legacy: JNI access registration |
-
-See the [Reflection & Resource Config Reference](references/reflection-resource-config.md) for complete format and examples.
+**Metadata files** live in `META-INF/native-image/<group>/<artifact>/`. See [reflection-resource-config.md](references/reflection-resource-config.md) for format and examples.
 
 ### 5. The Iterative Fix Engine
 
@@ -397,35 +338,18 @@ curl http://localhost:8080/actuator/health
 ./target/myapp
 ```
 
-## Constraints and Warnings
+## Constraints, Pitfalls, and Troubleshooting
 
-### Critical Constraints
-
-- **GraalVM Native Image requires Java 17+** (Java 21+ recommended for best compatibility)
 - **Closed-world assumption**: All code paths must be known at build time — dynamic class loading, runtime bytecode generation, and `MethodHandles.Lookup` may not work
+- **GraalVM Native Image requires Java 17+** (Java 21+ recommended for best compatibility)
 - **Build time and memory**: Native compilation is resource-intensive — expect 2-10 minutes and 4-8 GB RAM for typical projects
 - **Not all libraries are compatible**: Libraries relying heavily on reflection, dynamic proxies, or CGLIB may require extensive metadata configuration
 - **AOT profiles are fixed at build time**: Spring Boot `@Profile` and `@ConditionalOnProperty` are evaluated during AOT processing, not at runtime
-
-### Common Pitfalls
-
 - **Forgetting `--no-fallback`**: Without this flag, the build may silently produce a JVM fallback image instead of a true native executable
 - **Incomplete tracing agent coverage**: The agent only captures code paths exercised during the run — ensure all features are tested
 - **Version mismatches**: Keep GraalVM JDK, Native Build Tools plugin, and framework versions aligned to avoid incompatibilities
 - **Classpath differences**: The classpath at AOT/build time must match runtime — adding/removing JARs after native compilation causes failures
-
-### Security Considerations
-
-- Native executables are harder to decompile than JARs, but are not tamper-proof
-- Ensure secrets are not embedded in the native image at build time
-- Use environment variables or external config for sensitive data
-
-## Related Skills
-
-- `spring-boot-actuator` — native image health checks and monitoring endpoints
-- `docker-expert` — minimal Docker images for native executables
-
-## Troubleshooting
+- **Native executables are not tamper-proof**. Never embed secrets; pass via environment variables or external config at runtime.
 
 | Issue | Solution |
 |-------|----------|
@@ -434,3 +358,8 @@ curl http://localhost:8080/actuator/health
 | Application crashes at runtime | Missing reflection/resource metadata — run tracing agent |
 | Spring Boot context fails to load | Check `@Conditional` beans and profile-dependent config |
 | Third-party library not compatible | Check GraalVM Reachability Metadata repo or add manual hints |
+
+## Related Skills
+
+- `spring-boot-actuator` — native image health checks and monitoring endpoints
+- `docker-expert` — minimal Docker images for native executables

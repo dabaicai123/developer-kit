@@ -8,14 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Dependency Injection
 
-## Overview
-
-Provides constructor-first dependency injection patterns for Spring Boot:
-- mandatory collaborators via constructor injection
-- optional collaborators via `ObjectProvider` or no-op fallbacks
-- bean selection via `@Primary` and `@Qualifier`
-- validation via minimal context tests before full integration
-
 ## When to use this skill
 
 Use this skill when:
@@ -29,22 +21,9 @@ Use this skill when:
 
 ## Instructions
 
-### 1. Separate mandatory and optional collaborators
+### 1. Constructor injection for mandatory + optional collaborators
 
-For each class, identify:
-- mandatory collaborators required for correct behavior
-- optional collaborators that enable integrations, caching, notifications, or feature-flagged behavior
-
-Mandatory collaborators belong in the constructor. Optional ones need an explicit strategy such as `ObjectProvider`, conditional beans, or a no-op implementation.
-
-### 2. Default to constructor injection
-
-For application services and adapters:
-- inject mandatory dependencies through the constructor
-- keep injected fields `final`
-- instantiate the class directly in unit tests without starting Spring
-
-A single constructor is usually enough; `@Autowired` is unnecessary in that case.
+Put mandatory collaborators in the constructor (keep fields `final`). Optional ones use `ObjectProvider`, conditional beans, or no-op implementations.
 
 ### 3. Resolve optional behavior intentionally
 
@@ -53,7 +32,7 @@ Good options include:
 - `@ConditionalOnProperty` or `@ConditionalOnMissingBean` when wiring should change by configuration
 - a no-op implementation when the caller should not care whether the feature is enabled
 
-Avoid nullable collaborators that leave runtime behavior ambiguous.
+Nullable collaborators force null checks throughout the class and make behavior unpredictable. Use `ObjectProvider` or no-op implementations instead.
 
 ### 4. Use bean selection annotations only when needed
 
@@ -75,22 +54,16 @@ Business services should not know how infrastructure collaborators are instantia
 
 ### 6. Validate wiring explicitly
 
-After writing a new service or configuration:
+Verify wiring with a minimal `@ContextConfiguration` test first. Then write constructor-based unit tests (no Spring). Add slice or full-context tests only where they add value.
 
-1. **Verify the bean loads** with a minimal context test:
-   ```java
-   @SpringBootTest
-   @ContextConfiguration(classes = UserService.class)
-   class UserServiceWiringTest {
-       @Autowired UserService userService;
-       @Test void serviceIsInstantiated() { assertNotNull(userService); }
-   }
-   ```
-2. **Run constructor-based unit tests** for service behavior (no Spring needed).
-3. **Add slice tests** only when MVC, JPA, or messaging integration must be verified.
-4. **Reserve `@SpringBootTest`** for container-wide wiring validation.
-
-Failures at step 1 indicate wiring issues before business logic is added.
+```java
+@SpringBootTest
+@ContextConfiguration(classes = UserService.class)
+class UserServiceWiringTest {
+    @Autowired UserService userService;
+    @Test void serviceIsInstantiated() { assertNotNull(userService); }
+}
+```
 
 ## Examples
 
@@ -165,10 +138,10 @@ Use `@Primary` for the default path and `@Qualifier` only where a specific varia
 
 - Prefer constructor injection for mandatory dependencies.
 - Keep service constructors small; if a class needs too many collaborators, the design probably wants another abstraction.
-- Use no-op or conditional beans instead of nullable optional dependencies.
+- Use no-op or conditional beans instead of nullable optional dependencies — nullable collaborators force null checks throughout the class and make behavior unpredictable.
 - Keep framework-specific creation logic in configuration classes.
 - Test services without Spring first, then add container tests only where they add value.
-- Remove field injection during refactors instead of extending it.
+- During refactors, replace field injection with constructor injection; never add new field-injected fields.
 
 ## Constraints and Warnings
 

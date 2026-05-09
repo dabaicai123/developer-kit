@@ -30,34 +30,15 @@ CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 
 ## Chaining operations
 
-### thenApply — transform the result (sync in async thread)
+| Method | Purpose | Thread Behavior |
+|--------|---------|-----------------|
+| `thenApply` | Transform result (sync) | Runs in the completing thread (same as previous stage) |
+| `thenApplyAsync` | Transform result (async) | Submits to a separate executor — use for CPU-intensive transformations |
+| `thenAccept` | Consume result (no return) | Runs in the completing thread |
+| `thenCompose` | Chain dependent futures (flatMap) | Flattens nested `CompletableFuture<CompletableFuture<...>>` |
+| `thenCombine` | Combine two independent futures | Both must complete before combiner executes |
 
-```java
-CompletableFuture<ProductDto> dtoFuture = productService.findProductAsync("P001")
-    .thenApply(product -> ProductDto.from(product));  // transforms Product -> ProductDto
-```
-
-`thenApply` runs in the same thread that completed the previous stage (the async thread). It does NOT switch threads.
-
-### thenApplyAsync — transform the result in a different thread
-
-```java
-CompletableFuture<ProductDto> dtoFuture = productService.findProductAsync("P001")
-    .thenApplyAsync(product -> ProductDto.from(product), computeExecutor);
-```
-
-`thenApplyAsync` submits the transformation to a separate executor — useful when the transformation is CPU-intensive.
-
-### thenAccept — consume the result (no return)
-
-```java
-productService.findProductAsync("P001")
-    .thenAccept(product -> {
-        log.info("Product found: {}", product.getName());
-    });
-```
-
-### thenCompose — chain dependent futures (flatMap equivalent)
+### thenCompose — chain dependent futures
 
 `thenCompose` is used when the next step returns another `CompletableFuture` — it flattens the nested future:
 
@@ -165,51 +146,15 @@ CompletableFuture<ProductDto> future = productService.findProductAsync("P001")
 
 `whenComplete` does NOT transform the result — it is for side effects only. The original future result (or exception) passes through unchanged.
 
-## CompletableFuture with Spring @Async
-
-Spring `@Async` integrates with `CompletableFuture` by returning a future that completes when the async method finishes:
-
-```java
-@Service
-public class OrderService {
-    @Async("orderExecutor")
-    public CompletableFuture<OrderDto> findOrderAsync(String orderId) {
-        // Spring wraps this in a CompletableFuture
-        // The future completes when this method returns
-        Order order = orderRepository.findById(orderId).orElseThrow();
-        return CompletableFuture.completedFuture(OrderDto.from(order));
-    }
-}
-```
-
-**Important distinction:**
-- `@Async CompletableFuture` — Spring manages the thread, you return a completed future
-- `CompletableFuture.supplyAsync()` — you manage the thread via the executor you provide
-
-**Recommendation:** Use `@Async` when you want Spring to manage thread routing (executor selection via `@Async("beanName")`). Use `supplyAsync` when you need fine-grained control over the executor or want to chain without Spring's proxy mechanism.
-
 ## Async vs sync execution in CompletableFuture chain
 
-Understanding which thread executes each stage is critical for performance and correctness:
+| Method | Thread Behavior | When to Use |
+|--------|-----------------|--------------|
+| `thenApply` (sync) | Runs in the completing thread | Lightweight transformations — avoids thread-switching overhead |
+| `thenApplyAsync` (async) | Submits to a separate executor | Heavy (CPU-intensive) transformations that need a different executor |
+| Default `thenApplyAsync` | Uses `ForkJoinPool.commonPool()` | Never rely on this in production; always pass your executor |
 
-### Default: sync stages execute in the completing thread
-
-```java
-CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> fetchData(), ioExecutor)
-    .thenApply(data -> transform(data));  // runs in ioExecutor thread (the completing thread)
-```
-
-### Explicit: thenApplyAsync / thenComposeAsync switches thread
-
-```java
-CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> fetchData(), ioExecutor)
-    .thenApplyAsync(data -> transform(data), computeExecutor);  // runs in computeExecutor thread
-```
-
-**Guidelines for Chinese Spring Boot teams:**
-- Use `thenApply` (sync) for lightweight transformations — avoids thread-switching overhead
-- Use `thenApplyAsync` (async) only when the transformation is heavy (CPU-intensive) and needs a different executor
-- Default `thenApplyAsync` uses `ForkJoinPool.commonPool()` — never rely on this in production; always pass your executor
+See async-method-patterns.md for `@Async` CompletableFuture patterns.
 
 ## Practical example: parallel data fetch + aggregation
 

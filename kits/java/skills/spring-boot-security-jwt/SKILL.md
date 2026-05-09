@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot JWT Security
 
-JWT authentication and authorization for Spring Boot 3.5.x using Spring Security 6.x and JJWT.
-
 ## When to use this skill
 
 - Implementing JWT authentication / securing REST APIs with tokens
@@ -58,7 +56,7 @@ jwt:
 
 ## Instructions
 
-### Step 1 — JwtService
+### JwtService
 
 ```java
 @Service
@@ -94,7 +92,7 @@ public class JwtService {
 }
 ```
 
-### Step 2 — JWT Filter
+### JWT Filter
 
 ```java
 @Component
@@ -128,7 +126,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 ```
 
-### Step 3 — SecurityFilterChain
+### SecurityFilterChain
 
 ```java
 @Configuration
@@ -155,7 +153,7 @@ public class SecurityConfig {
 }
 ```
 
-### Step 4 — Auth Endpoints
+### Auth Endpoints
 
 ```java
 @RestController
@@ -181,8 +179,6 @@ public class AuthController {
 - Use minimum 256-bit secret keys — load from environment variables, never hardcode
 - Set short access token lifetimes (15 min); use refresh tokens for longer sessions
 - Implement token rotation: revoke old refresh token when issuing a new one
-- Use `SecurityFilterChain` bean — never extend `WebSecurityConfigurerAdapter`
-- Use `@EnableMethodSecurity` instead of the deprecated `@EnableGlobalMethodSecurity`
 - Do not store sensitive data (passwords, PII) in JWT claims
 
 ## References

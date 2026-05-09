@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Validation
 
-Jakarta Bean Validation (JSR-380) patterns for Spring Boot 3.5.x — declarative `@Valid`/`@Validated`, custom validators, validation groups, nested validation, `@ConfigurationProperties` validation, programmatic `Validator`, and response DTOs for validation errors.
+Jakarta Bean Validation (JSR-380) patterns for Spring Boot 3.5.x.
 
 ## When to use this skill
 
@@ -21,17 +21,6 @@ Jakarta Bean Validation (JSR-380) patterns for Spring Boot 3.5.x — declarative
 - Designing response DTOs that carry field-level validation error detail
 - Avoiding common validation anti-patterns (manual if-checks, validation in service layer)
 
-## Overview
-
-Spring Boot 3.5.x uses Jakarta Bean Validation (JSR-380, Hibernate Validator as the provider). Validation should happen at the **controller boundary** — request DTOs are validated before reaching the service layer. This ensures invalid data never enters business logic and keeps service methods clean.
-
-| Concept | Annotation | Scope |
-|---|---|---|
-| Request body validation | `@Valid` on `@RequestBody` | All constraints on the DTO |
-| Path/query param validation | `@Validated` on controller class | Method-level parameter constraints |
-| Group-based validation | `@Validated(Group.class)` on parameter | Only constraints in the specified group |
-| Nested object validation | `@Valid` on nested field | Cascades validation into nested objects |
-| Service method validation | `@Validated` on `@Service` class | Method parameter and return value constraints |
 
 ## Instructions
 
@@ -126,8 +115,6 @@ public class UserController {
     }
 }
 ```
-
-Without `@Validated` on the controller class, `@Positive` on `@PathVariable` and `@NotBlank` on `@RequestParam` are silently ignored.
 
 ### 4. Create custom validators
 
@@ -269,8 +256,6 @@ public record AddressRequest(
 ) {}
 ```
 
-Without `@Valid` on `address`, only `@NotNull` is checked — constraints inside `AddressRequest` are silently ignored.
-
 ### 7. Validate @ConfigurationProperties at startup
 
 Spring Boot can validate `@ConfigurationProperties` at startup, catching configuration errors early:
@@ -371,159 +356,12 @@ public record CreateUserRequest(
 
 Spring Boot auto-detects `messages.properties` in the classpath root.
 
-## Examples
-
-### Example 1: Complete request DTO validation in controller
-
-```java
-public record CreateUserRequest(
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50) String username,
-
-    @NotBlank @Email String email,
-
-    @NotNull @Min(18) @Max(120) Integer age,
-
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d).{8,}$",
-             message = "Password must be 8+ chars with uppercase and digit")
-    String password
-) {}
-
-@RestController
-@RequestMapping("/api/v1/users")
-@Validated
-@RequiredArgsConstructor
-public class UserController {
-
-    private final UserService userService;
-
-    @PostMapping
-    public Result<Void> create(@Valid @RequestBody CreateUserRequest request) {
-        userService.create(request);
-        return Result.success();
-    }
-
-    @GetMapping("/{id}")
-    public Result<UserResponse> get(@PathVariable @Positive Long id) {
-        return Result.success(userService.getById(id));
-    }
-}
-```
-
-### Example 2: Custom validator with database lookup
-
-```java
-@Target({ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = UniqueEmailValidator.class)
-public @interface UniqueEmail {
-    String message() default "Email already exists";
-    Class<?>[] groups() default {};
-    Class<? extends Payload>[] payload() default {};
-}
-
-public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, String> {
-    private final UserRepository userRepository;
-
-    public UniqueEmailValidator(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    @Override
-    public boolean isValid(String email, ConstraintValidatorContext ctx) {
-        if (email == null) return true;
-        return !userRepository.existsByEmail(email);
-    }
-}
-
-// Usage on DTO
-public record CreateUserRequest(
-    @NotBlank @Email @UniqueEmail String email,
-    @NotBlank @Size(min = 3, max = 50) String username
-) {}
-```
-
-### Example 3: Validation groups for create vs update
-
-```java
-public interface OnCreate {}
-public interface OnUpdate {}
-
-public record UserRequest(
-    @NotBlank(groups = OnCreate.class) String username,
-    @NotNull(groups = {OnCreate.class, OnUpdate.class}) String email,
-    @Null(groups = OnCreate.class) Long id
-) {}
-
-@PostMapping
-public Result<Void> create(
-        @Validated(OnCreate.class) @RequestBody UserRequest request) { ... }
-
-@PutMapping("/{id}")
-public Result<Void> update(
-        @PathVariable Long id,
-        @Validated(OnUpdate.class) @RequestBody UserRequest request) { ... }
-```
-
-### Example 4: Nested object validation with @Valid cascade
-
-```java
-public record CreateUserRequest(
-    @NotBlank String username,
-    @Valid @NotNull AddressRequest address,
-    @Valid @Size(min = 1) List<@ValidPhone String> phoneNumbers
-) {}
-
-public record AddressRequest(
-    @NotBlank String street,
-    @NotBlank String city,
-    @Pattern(regexp = "^\\d{5,6}$") String zipCode
-) {}
-```
-
-### Example 5: @ConfigurationProperties validation at startup
-
-```java
-@ConfigurationProperties(prefix = "app.storage")
-@Validated
-public record StorageProperties(
-    @NotBlank String basePath,
-    @NotNull @Size(max = 50) String bucketName,
-    @Duration(min = PT1S, max = PT60S) Duration uploadTimeout
-) {}
-```
-
-### Example 6: Programmatic validation in service layer (sparingly)
-
-```java
-@Service
-@RequiredArgsConstructor
-public class ImportService {
-
-    private final Validator validator;
-
-    /** Use programmatic validation only when objects are constructed dynamically */
-    public void importRecords(List<ImportRecord> records) {
-        for (ImportRecord record : records) {
-            Set<ConstraintViolation<ImportRecord>> violations = validator.validate(record, OnCreate.class);
-            if (!violations.isEmpty()) {
-                String msg = violations.stream()
-                    .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                    .collect(Collectors.joining("; "));
-                throw new ValidationException(msg);
-            }
-            recordMapper.insert(record);
-        }
-    }
-}
-```
-
 ## Best Practices
 
 - **Use `@Valid` for request body validation** (all constraints) and **`@Validated` for groups and path/query params** (method-level constraints)
 - **Add `@Validated` on controller class** when using path/query parameter constraints — without it, they are silently ignored
 - **Define validation messages in `messages.properties`** for i18n and centralization
-- **Validate at controller boundary** — don't re-validate in service layer; the controller is the entry gate
+- **Validate at controller boundary** — don't re-validate in service layer; validate DTOs at the controller, service methods receive pre-validated data
 - **Use `@Validated` on `@Service` classes** only when method-level validation is needed (e.g., internal API contracts between services)
 - **Custom validators must treat `null` as valid** — per JSR-380 spec, `@NotNull` handles null checks separately
 - **Custom validators must include `message()`, `groups()`, `payload()`** — required by the JSR-380 contract

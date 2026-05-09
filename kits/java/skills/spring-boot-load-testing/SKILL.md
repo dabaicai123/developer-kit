@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Load Testing with k6
 
-Load testing patterns for Spring Boot 3.5.x + MyBatis-Plus REST APIs using k6. Covers authenticated scenarios (JWT), paginated queries, connection pool validation, and cache behavior verification under load.
-
 ## When to use this skill
 
 - Running load/stress/spike/soak tests against Spring Boot REST APIs
@@ -198,7 +196,7 @@ Interpret key metrics:
 | p95 response time | < 200ms | 200-500ms | > 500ms |
 | p99 response time | < 500ms | 500-1000ms | > 1000ms |
 | Error rate | < 0.1% | 0.1-1% | > 1% |
-| Throughput (req/s) | Meeting target | Near limit | Below target |
+| Throughput (req/s) | At or above defined SLA target (e.g., > 100 req/s) | Near limit | Below target |
 
 ## Test Types Quick Reference
 
@@ -212,28 +210,7 @@ Interpret key metrics:
 
 ## CI/CD Integration
 
-```yaml
-# GitHub Actions example
-perf-test:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v4
-    - name: Install k6
-      run: |
-        sudo gpg -k
-        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
-        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-        sudo apt-get update && sudo apt-get install k6
-    - name: Run load test
-      env:
-        BASE_URL: ${{ secrets.STAGING_URL }}
-        JWT_TOKEN: ${{ secrets.TEST_TOKEN }}
-      run: k6 run --summary-export=summary.json tests/perf/load-test.js
-    - name: Check thresholds
-      run: |
-        p95=$(jq -r '.metrics.http_req_duration.values.p95' summary.json)
-        if (( $(echo "$p95 > 500" | bc -l) )); then echo "p95=$p95 exceeds 500ms threshold"; exit 1; fi
-```
+In CI/CD, run k6 with `--summary-export=summary.json` and check thresholds via jq.
 
 ## Error Handling
 
@@ -251,7 +228,7 @@ perf-test:
 - **Start with smoke test** — verify script works with 1-5 VUs before scaling
 - **Use `setup()` for JWT auth** — obtain token once, share across VUs
 - **Check `Result<T>` wrapper** — validate `code === 200` not just HTTP status
-- **Monitor Actuator during tests** — check pool, cache, and GC metrics alongside k6 results
+- **Monitor HikariCP active/pending connections, cache hit rates, and GC pause counts** via `/actuator/metrics/` during tests
 - **Never load test production** — use staging/perf environment with production-like data volume
 - **Add warm-up stage** — first 1-2 min at low VUs to warm caches and JIT compilation
 

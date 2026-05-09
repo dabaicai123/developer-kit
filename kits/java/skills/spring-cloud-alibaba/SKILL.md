@@ -13,10 +13,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 - Setting up Spring Cloud Alibaba components (Nacos, Sentinel, RocketMQ, Seata)
 - Implementing service discovery or flow control in microservices
 
-## Overview
-
-Spring Cloud Alibaba provides Nacos (service registration and configuration), Sentinel (flow control), and RocketMQ (message queue). For inter-service communication, use OpenFeign (see `spring-cloud-openfeign`). For distributed transactions, evaluate Seata carefully — it imposes heavy business intrusion; prefer local transactions combined with event-driven eventual consistency (see `spring-boot-transaction-management`).
-
 ## Core Components
 
 ### 1. Nacos (Service Registration and Configuration Center)
@@ -185,9 +181,7 @@ public class UserEventListener implements RocketMQListener<User> {
 }
 ```
 
-### 4. Seata (Distributed Transactions) — Use with Caution
-
-> **Note**: Seata imposes heavy business intrusion (requires proxied data sources, undo_log tables, and global transaction locks). Prefer **local transactions + RocketMQ event-driven eventual consistency** as the primary approach. Use Seata AT mode only when strong consistency is strictly required. For a full comparison of distributed transaction patterns (Saga orchestration/choreography vs 2PC vs Outbox), compensating transaction patterns, and detailed Seata configuration, see `spring-boot-transaction-management` -> `references/distributed-transaction-patterns.md`.
+### 4. Seata (Distributed Transactions)
 
 **Dependency** (only include when strong-consistency distributed transactions are confirmed necessary):
 
@@ -197,11 +191,6 @@ public class UserEventListener implements RocketMQListener<User> {
     <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
 </dependency>
 ```
-
-### 5. OpenFeign
-
-For OpenFeign client patterns, see `spring-cloud-openfeign`.
-
 
 ## Microservice Architecture Example
 
@@ -217,13 +206,6 @@ microservices/
 ```
 
 For unified configuration management patterns, see `spring-boot-configuration-management`.
-
-## Best Practices
-
-- **Service Registration**: Use Nacos discovery with appropriate namespaces/groups; set up health checks.
-- **Configuration Management**: Use Nacos Config Center with namespace isolation (see `spring-boot-configuration-management` for detailed patterns).
-- **Flow Control**: Configure Sentinel rate limiting, circuit breaker, and degradation rules; persist rules in Nacos.
-- **Distributed Transactions**: Prefer local transactions + RocketMQ eventual consistency (see `spring-boot-transaction-management`). Use Seata AT mode only for strict strong-consistency needs.
 
 ## Common Dependencies
 
@@ -271,15 +253,6 @@ For unified configuration management patterns, see `spring-boot-configuration-ma
     <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 ```
-
-## Example Prompts
-
-- "How to build a microservice architecture with Spring Cloud Alibaba?"
-- "How to configure service registration and configuration management with Nacos?"
-- "How to use Sentinel for flow control in Spring Cloud Alibaba?"
-- "How to handle distributed transactions in Spring Cloud Alibaba? Prefer eventual consistency approach"
-- "How to configure RocketMQ message queue?"
-- "Is OpenFeign or Dubbo recommended for inter-service communication?"
 
 ## Constraints / Warnings
 

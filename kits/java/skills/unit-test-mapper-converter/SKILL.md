@@ -30,20 +30,11 @@ ls target/generated-sources/
 ls build/generated/sources/
 ```
 
-**If generated classes are missing:**
-1. Run `mvn compile` (Maven) or `./gradlew compileJava` (Gradle)
-2. Check that the MapStruct annotation processor is configured
-3. Verify `@Mapper` interfaces are in a compiled source set
-
 ### 2. Test Null Handling
 ```java
 assertThat(mapper.toDto(null)).isNull();
 ```
 Configure `nullValueMappingStrategy` in mapper if null should return empty/default.
-
-**If null tests fail:**
-1. Add `nullValueMappingStrategy = NullValueMappingStrategy.RETURN_NULL` to `@Mapper`
-2. Or use `nullValuePropertyMappingStrategy` for nested property handling
 
 ### 3. Test Bidirectional Mapping
 ```java
@@ -51,38 +42,23 @@ User restored = mapper.toDO(mapper.toDto(original));
 assertThat(restored).usingRecursiveComparison().isEqualTo(original);
 ```
 
-**If bidirectional tests fail:**
-1. Check `@Mapping` annotations for field name mismatches
-2. Verify both directions are explicitly mapped if auto-mapping fails
-3. Use `unmappedTargetPolicy = ReportingPolicy.ERROR` to catch missing mappings
-
 ### 4. Test Nested Object Mapping
 ```java
 assertThat(dto.getNested()).usingRecursiveComparison().isEqualTo(expected);
 ```
 
-**If nested tests fail:**
-1. Ensure nested mapper exists or is referenced via `uses = NestedMapper.class`
-2. Check collection element mappings with `elementMappingStrategy`
-
 ### 5. Test Custom Expressions
-Custom expressions in `@Mapping(target = "field", expression = "java(...)")` are not compile-time validated.
-
-**If expression tests fail:**
-1. Verify the expression syntax and method signatures
-2. Check that imported classes are accessible from the expression context
+Custom expressions in `@Mapping(target = "field", expression = "java(...)")` are not compile-time validated — test them explicitly.
 
 ### 6. Test Enum Mappings
 Use `@ValueMapping` for enum-to-enum translations. Test all enum values exhaustively.
 
+### 7. Test Each Public Mapper Method
+Test each public mapper method with at least: valid input, null input, and round-trip.
+
 ## Best Practices
 
-- Use `Mappers.getMapper()` for standalone tests, Spring injection for integration tests
-- Use `usingRecursiveComparison()` for complex nested structures
-- Test all mapper methods including collection transformations
-- Verify null handling for all nullable source fields
-- Test bidirectional mapping catches asymmetries between DO→DTO and DTO→DO
-- Keep mapper tests focused on transformation correctness, not implementation details
+- Test bidirectional mapping catches asymmetries between DO-to-DTO and DTO-to-DO
 
 ## Constraints and Warnings
 
@@ -92,6 +68,16 @@ Use `@ValueMapping` for enum-to-enum translations. Test all enum values exhausti
 - **Circular dependencies**: MapStruct cannot handle circular dependencies between mappers
 - **Collection immutability**: Mapping immutable collections may require special configuration
 - **Date/Time**: Verify date/time objects map correctly across timezones
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Generated classes missing | Run `mvn compile` / `./gradlew compileJava`; verify MapStruct annotation processor is configured; check `@Mapper` interfaces in compiled source set |
+| Null tests fail | Add `nullValueMappingStrategy = NullValueMappingStrategy.RETURN_NULL` to `@Mapper`; use `nullValuePropertyMappingStrategy` for nested property handling |
+| Bidirectional tests fail | Check `@Mapping` for field name mismatches; verify both directions mapped explicitly; use `unmappedTargetPolicy = ReportingPolicy.ERROR` |
+| Nested tests fail | Ensure nested mapper exists via `uses = NestedMapper.class`; check `elementMappingStrategy` |
+| Expression tests fail | Verify expression syntax and method signatures; check imported classes accessible from expression context |
 
 ## Examples
 

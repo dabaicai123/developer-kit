@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot AMQP
 
-Spring AMQP / RabbitMQ for Spring Boot 3.x.
-
 ## When to use this skill
 
 - Implementing producers with `RabbitTemplate` and consumers with `@RabbitListener`
@@ -49,7 +47,7 @@ spring:
 
 ## Jackson Converter (required)
 
-Spring Boot defaults to `SimpleMessageConverter` (Java serialization) when Jackson is NOT on the classpath — insecure and not cross-language. When Jackson IS on the classpath (default in most Spring Boot 3.x projects), Spring Boot auto-configures a `Jackson2JsonMessageConverter`. If you need explicit control or custom ObjectMapper settings, define the bean manually.
+Spring Boot auto-configures `Jackson2JsonMessageConverter` when Jackson is on classpath. For custom ObjectMapper settings, define the bean manually:
 
 ```java
 @Configuration
@@ -62,13 +60,11 @@ public class RabbitConfig {
 }
 ```
 
-Once defined, Spring Boot auto-injects the converter into `RabbitTemplate` and `SimpleRabbitListenerContainerFactory` — no extra wiring needed.
-
 ## Exchange / Queue Declaration
 
 ### Consumer — @RabbitListener bindings (recommended)
 
-Declares and consumes in one annotation — most elegant:
+Declares and consumes in one annotation — inline declaration:
 
 ```java
 @RabbitListener(bindings = @QueueBinding(
@@ -86,7 +82,7 @@ public void handleOrderCreated(OrderCreatedEvent event) {
 
 ### Producer-only or shared infrastructure — Declarables
 
-Scattered `@Bean` declarations are verbose; use `Declarables` to bundle everything:
+Use `Declarables` to bundle everything:
 
 ```java
 @Configuration
@@ -103,8 +99,6 @@ public class OrderAmqpConfig {
     }
 }
 ```
-
-`RabbitAdmin` auto-detects `Declarables` beans and declares them on the broker when a connection is established — no manual invocation needed.
 
 ```java
 @Service
@@ -173,8 +167,5 @@ public void handleOrderCreated(OrderCreatedEvent event) {
 
 ## Key Rules
 
-- Configure Jackson converter — Spring Boot provides no property to switch converters; define the bean manually, and it auto-injects into `RabbitTemplate` and listener factory
-- Consumer: `@RabbitListener(bindings = ...)` for inline declaration; Producer-only: `Declarables` to bundle, avoid scattered `@Bean`
 - Never publish inside `@Transactional` without outbox pattern — use `spring-boot-event-driven-patterns`
-- Configure DLX/DLQ for every production queue
-- Keep consumers idempotent using `eventId` deduplication
+- Never use `SimpleMessageConverter` (Java serialization) — always configure Jackson

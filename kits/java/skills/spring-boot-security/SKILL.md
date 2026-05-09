@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Security Checklist
 
-Security best practices and checklist for Spring Boot services.
-
 ## When to use this skill
 
 - Reviewing security posture before release
@@ -26,9 +24,7 @@ Security best practices and checklist for Spring Boot services.
 
 ## Authorization
 
-- Enable method security: `@EnableMethodSecurity`
-- Use `@PreAuthorize("hasRole('ADMIN')")` or `@PreAuthorize("@authz.canEdit(#id)")`
-- Deny by default; expose only required scopes
+Use `@EnableMethodSecurity` + `@PreAuthorize` for method-level access control:
 
 ```java
 @RestController
@@ -47,11 +43,7 @@ public class AdminController {
 
 ## Input Validation
 
-- Use Bean Validation with `@Valid` on controllers
-- Apply constraints on DTOs: `@NotBlank`, `@Email`, `@Size`, custom validators
-- Sanitize any HTML with a whitelist before rendering
-
-> For detailed validation patterns, see `spring-boot-validation`.
+For input validation, see `spring-boot-validation`.
 
 ## Password Encoding
 
@@ -66,8 +58,7 @@ public PasswordEncoder passwordEncoder() {
 
 ## CSRF Protection
 
-- For browser session apps, keep CSRF enabled
-- For pure APIs with Bearer tokens, disable CSRF and rely on stateless auth
+Disable CSRF for stateless Bearer-token APIs (keep enabled for browser session apps):
 
 ```java
 http.csrf(csrf -> csrf.disable())
@@ -76,8 +67,7 @@ http.csrf(csrf -> csrf.disable())
 
 ## Secrets Management
 
-- No secrets in source; load from env or vault
-- Keep `application.yml` free of credentials; use placeholders
+Never hardcode secrets; use environment variable placeholders:
 
 ```yaml
 # BAD: Hardcoded
@@ -99,8 +89,7 @@ http.headers(headers -> headers
 
 ## CORS Configuration
 
-- Configure CORS at the security filter level, not per-controller
-- Restrict allowed origins — never use `*` in production
+Configure CORS at security filter level; restrict origins (never `*` in production):
 
 ```java
 @Bean
@@ -119,24 +108,15 @@ public CorsConfigurationSource corsConfigurationSource() {
 
 ## Rate Limiting
 
-- Apply Bucket4j or gateway-level limits on expensive endpoints
-- Return 429 with retry hints
+For rate limiting, see `spring-boot-resilience4j` (RateLimiter) or `spring-cloud-gateway` (RequestRateLimiter filter).
 
 ## Dependency Security
 
-- Run OWASP Dependency Check / Snyk in CI
-- Keep Spring Boot and Spring Security on supported versions
-- Fail builds on known CVEs
+Run OWASP Dependency-Check or Snyk in CI; fail builds on known CVEs.
 
 ## Checklist Before Release
 
-- [ ] Auth tokens validated and expired correctly
-- [ ] Authorization guards on every sensitive path
-- [ ] All inputs validated and sanitized
-- [ ] No string-concatenated SQL
-- [ ] CSRF posture correct for app type
-- [ ] Secrets externalized; none committed
-- [ ] Security headers configured
-- [ ] Rate limiting on APIs
-- [ ] Dependencies scanned and up to date
-- [ ] Logs free of sensitive data
+- [ ] `@EnableMethodSecurity` + `@PreAuthorize` on sensitive paths
+- [ ] BCrypt/Argon2 password encoder configured
+- [ ] No hardcoded secrets in application.yml (search for `${` usage)
+- [ ] OWASP Dependency-Check passes in CI

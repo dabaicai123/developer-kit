@@ -6,7 +6,7 @@ type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# Spring Boot Logging (Log4j2)
+# Spring Boot Logging
 
 Logging configuration patterns for Spring Boot 3.5.x with Log4j2.
 
@@ -16,6 +16,7 @@ Logging configuration patterns for Spring Boot 3.5.x with Log4j2.
 - Setting log levels per package or class
 - Adding ThreadContext (MDC equivalent) for request correlation
 - Switching to JSON logging for production
+- Enabling async logging with LMAX Disruptor for production performance
 
 ## Dependency Setup
 
@@ -99,6 +100,9 @@ Use Log4j2's built-in `JsonTemplateLayout` (no external dependency needed):
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+        </Console>
         <Console name="JSON-Console" target="SYSTEM_OUT">
             <JsonTemplateLayout eventTemplateUri="classpath:JsonLayout.json"/>
         </Console>
@@ -106,7 +110,7 @@ Use Log4j2's built-in `JsonTemplateLayout` (no external dependency needed):
 
     <Loggers>
         <SpringProfile name="prod">
-            <Root level="INFO">
+            <Root level="INFO" includeLocation="false">
                 <AppenderRef ref="JSON-Console"/>
             </Root>
         </SpringProfile>
@@ -122,6 +126,8 @@ Use Log4j2's built-in `JsonTemplateLayout` (no external dependency needed):
 
 Minimal `JsonLayout.json` (place in `src/main/resources/`):
 
+> Note: Log4j2's JsonTemplateLayout uses `"mdc"` as the resolver key name for ThreadContext entries. `ThreadContext.put("traceId", ...)` is resolved by `{"$resolver": "mdc", "key": "traceId"}`.
+
 ```json
 {
   "timestamp": {"$resolver": "timestamp"},
@@ -135,7 +141,7 @@ Minimal `JsonLayout.json` (place in `src/main/resources/`):
 }
 ```
 
-## ThreadContext (MDC) Request Correlation
+## ThreadContext Request Correlation
 
 ```java
 @Component
@@ -162,26 +168,113 @@ public class TraceIdFilter extends OncePerRequestFilter {
 }
 ```
 
-## Logging Best Practices in Code
+## Async Logging (Required for Production)
+
+Log4j2 supports two async logging modes. **Production deployments must use async logging** to prevent I/O from blocking business threads.
+
+### Dependency
+
+```xml
+<dependency>
+    <groupId>com.lmax</groupId>
+    <artifactId>disruptor</artifactId>
+    <version>4.0</version>
+    <scope>runtime</scope>
+</dependency>
+```
+
+### Mode 1: All-Async (Recommended)
+
+All loggers become async via LMAX Disruptor ring buffer. Set system property before Spring context starts:
 
 ```java
-@Service
-@Slf4j
-public class OrderService {
-
-    // Good: include key identifiers
-    public Order createOrder(CreateOrderRequest request) {
-        log.info("Creating order for userId={}", request.getUserId());
-        // ...
-        log.debug("Order created: orderId={}", order.getId());
-        return order;
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        // Enable all-async loggers before Spring Boot starts
+        System.setProperty("log4j2.contextSelector",
+            "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
+        SpringApplication.run(Application, args);
     }
-
-    // Bad: log entire objects or use string concatenation
-    // log.info("Order: " + order);  — avoid this
-    // log.info("Creating order for user " + user);  — use parameterized logging
 }
 ```
+
+Or via JVM argument: `-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector`
+
+When all-async is enabled, use **regular `<Logger>` and `<Root>`** in config (no `<AsyncLogger>` needed):
+
+```xml
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATH">${sys:LOG_PATH:-/var/log/app}</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="File" fileName="${LOG_PATH}/application.log"
+                     filePattern="${LOG_PATH}/application-%d{yyyy-MM-dd}-%i.log.gz">
+            <JsonTemplateLayout eventTemplateUri="classpath:JsonLayout.json"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+        <Console name="Console" target="SYSTEM_OUT">
+            <JsonTemplateLayout eventTemplateUri="classpath:JsonLayout.json"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO" includeLocation="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
+
+### Mode 2: Mixed Async (Selective)
+
+Use `<AsyncLogger>` and `<AsyncRoot>` for specific loggers, `<Logger>` for sync ones. No system property needed:
+
+```xml
+<Loggers>
+    <!-- Async: high-frequency business logs -->
+    <AsyncLogger name="com.example" level="DEBUG" includeLocation="false">
+        <AppenderRef ref="File"/>
+        <AppenderRef ref="Console"/>
+    </AsyncLogger>
+
+    <!-- Sync: low-frequency audit logs need immediate flush -->
+    <Logger name="com.example.audit" level="INFO">
+        <AppenderRef ref="File"/>
+    </Logger>
+
+    <AsyncRoot level="INFO" includeLocation="false">
+        <AppenderRef ref="Console"/>
+        <AppenderRef ref="File"/>
+    </AsyncRoot>
+</Loggers>
+```
+
+### Async Tuning (application.yml or JVM args)
+
+```properties
+# Ring buffer size — must be power of 2 (default: 262144 = 256K)
+log4j2.asyncLoggerRingBufferSize=262144
+
+# Wait strategy: Block (highest throughput, lowest latency), Timeout, Sleep, Yield
+log4j2.asyncLoggerWaitStrategy=Timeout
+
+# Queue full policy: Discard (drop DEBUG/TRACE when busy), DiscardOldest, Enqueue (blocks caller)
+log4j2.asyncQueueFullPolicy=Discard
+
+# Discard threshold — events at this level or below are dropped when queue is full
+log4j2.discardThreshold=INFO
+```
+
+### Critical: includeLocation="false"
+
+`includeLocation="false"` disables class/method/line-number in log output. Location lookup is **10x slower** in async mode because it happens on the business thread before enqueue. Production should disable it unless debugging. If you need location for a specific logger, set `includeLocation="true"` only on that logger.
+
+When `includeLocation="false"` is set, log output omits class/method/line-number. Use parameterized logging: `log.info("userId={}", id)` — not string concatenation.
 
 ## Per-Environment Levels
 
@@ -201,14 +294,16 @@ logging:
 
 ## Best Practices
 
+- **Production must use async logging** — add Disruptor dependency + enable AsyncLoggerContextSelector
 - Use parameterized logging: `log.info("userId={}", id)` — not string concatenation
 - Add `traceId` via ThreadContext filter for request correlation across logs
 - Use JSON structured logging in production for easy parsing by ELK/Loki
 - Set per-package levels: `DEBUG` for your code, `WARN` for framework code
-- Never log sensitive data (passwords, tokens, PII)
+- Never log passwords, tokens, JWT secrets, or user PII (email, phone, SSN) in exception messages or log output
 - Use `log4j2-spring.xml` with `<SpringProfile>` for environment-specific config
 - Always clear ThreadContext in filter's `finally` block to prevent context leaking
 - Exclude `spring-boot-starter-logging` when using Log4j2 — Spring Boot defaults to Logback
+- Set `log4j2.asyncQueueFullPolicy=Discard` + `log4j2.discardThreshold=INFO` — drop DEBUG/TRACE when queue is full rather than blocking business threads
 
 ## Related Skills
 

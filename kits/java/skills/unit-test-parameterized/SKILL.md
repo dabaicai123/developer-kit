@@ -21,8 +21,7 @@ Provides patterns for parameterized unit tests in Java using JUnit 5. Covers `@V
 
 ## Instructions
 
-1. **Add dependency**: Ensure `junit-jupiter-params` is on test classpath (included in `junit-jupiter`)
-2. **Choose source**: `@ValueSource` for simple values, `@CsvSource` for tabular data, `@MethodSource` for complex objects
+1. **Choose source**: `@ValueSource` for simple values, `@CsvSource` for tabular data, `@MethodSource` for complex objects
 3. **Match parameters**: Test method parameters must match data source types
 4. **Set display names**: Use `name = "{0}..."` for readable output
 5. **Validate**: Run `./gradlew test --info` or `mvn test` and verify all parameter combinations execute
@@ -197,9 +196,7 @@ static Stream<Arguments> invalidInputs() {
 ## Best Practices
 
 - Use descriptive display names: `name = "{0}..."` for readable output
-- Test boundary values: include min, max, zero, and edge cases
 - Keep test logic focused: single assertion per parameter set
-- Use `@MethodSource` for complex objects, `@CsvSource` for tabular data
 - Organize test data logically — group related scenarios together
 
 ## Constraints and Warnings

@@ -44,19 +44,9 @@ Spring Boot auto-configures Flyway on startup. Migrations are picked up from `sr
 3. Write the SQL targeting PostgreSQL. Use `IF NOT EXISTS` / `IF EXISTS` guards for safety.
 4. Test the migration locally by running the application (Flyway applies it on startup).
 
-### Running migrations (Flyway auto-runs on startup)
+### Running migrations
 
-Spring Boot runs Flyway automatically during application startup. Pending migrations (those with a version higher than the last applied version) are discovered and executed in order. The `flyway_schema_history` table tracks applied migrations with their version, description, checksum, and execution time.
-
-To run manually or in a CI pipeline:
-
-```bash
-# Using Maven plugin
-mvn flyway:migrate
-
-# Using Flyway CLI
-flyway migrate
-```
+Spring Boot auto-runs Flyway on startup; pending migrations applied in order. The `flyway_schema_history` table tracks applied migrations with version, description, checksum, and execution time.
 
 ### Handling migration failures
 
@@ -208,16 +198,9 @@ spring:
 
 ## Best Practices
 
-- Always use `V{version}__description.sql` naming (double underscore) — single underscore creates a different migration type
 - Never modify a migration that has already been applied — create a new migration instead; modifying an applied migration causes checksum validation failure
-- Use `baseline-on-migrate=true` for databases that already exist before Flyway was introduced
-- Keep migrations small and focused — one logical change per migration (e.g., one table, one column addition, one data seed)
-- Test migrations on a copy of production data before deploying to production
-- Add `IF NOT EXISTS` / `IF EXISTS` guards for safety — prevents errors if migrations are re-run or if the schema state is uncertain
-- Never put irreversible operations (`DROP TABLE`, `DROP COLUMN`) in migrations without a documented rollback plan
-- Use `ON CONFLICT DO NOTHING` for data seeding — prevents duplicate data errors
 - Put schema changes and data changes in separate migrations — schema migrations (DDL) should not depend on data migrations (DML)
-- Use `CREATE INDEX CONCURRENTLY` for large tables — avoids locking the table during index creation (cannot run inside a transaction, which Flyway wraps by default; set `flyway.execute-in-transaction=false` if needed)
+- Target <50 lines of SQL per migration; split multi-table changes across separate files
 
 ## Constraints and Warnings
 

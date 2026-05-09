@@ -23,48 +23,25 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Use `@ConfigurationProperties` to bind grouped properties into a single type-safe object. Prefer constructor binding (Java record for Spring Boot 3.x) over setter binding to keep config immutable.
 
-Steps:
-
-1. **Define a configuration class** — Use a Java record with `@ConfigurationProperties(prefix = "...")` and `@Validated` for constructor binding. Each field maps to a property under the prefix.
-2. **Register the config class** — Either use `@ConfigurationPropertiesScan` on the main application class to auto-discover, or use `@EnableConfigurationProperties` on a `@Configuration` class to register explicitly.
-3. **Write matching YAML properties** — Use kebab-case (`my-property`) for property keys in YAML. Spring Boot auto-converts kebab-case to camelCase in Java.
-4. **Inject and use** — Inject the config class via constructor injection into services that need the config values.
+Use Java record with `@ConfigurationProperties(prefix)` and `@Validated` for constructor binding. Register via `@ConfigurationPropertiesScan` (auto-discovery) or `@EnableConfigurationProperties` (explicit).
 
 ### Nacos Config Center integration for dynamic config
 
 Use Nacos Config Center (spring-cloud-starter-alibaba-nacos-config) for centralized, dynamically refreshed configuration in microservices.
 
-Steps:
-
-1. **Add Nacos Config dependency** — Include `spring-cloud-starter-alibaba-nacos-config` and `spring-cloud-starter-bootstrap` (bootstrap context is required for Nacos config loading, not for all Spring Boot 3.x applications).
-2. **Create bootstrap.yml** — Configure Nacos server address, namespace, group, shared configs, and extension configs. The Data ID follows the convention `${spring.application.name}-${profile}.${file-extension}`.
-3. **Use @RefreshScope for dynamic refresh** — Annotate beans that need live config updates with `@RefreshScope`. When Nacos config changes, Spring destroys and recreates the proxy bean with new values.
-4. **Use ConfigListener for programmatic change detection** — Register a `ConfigListener` on the `NacosConfigService` to react to config changes in code (e.g., re-initializing a cache pool).
-5. **Manage shared vs extension configs** — Use `shared-configs` for cross-service settings (e.g., common datasource, Redis); use `extension-configs` for service-specific settings.
+Use `spring-cloud-starter-alibaba-nacos-config` + `spring-cloud-starter-bootstrap`. Configure Nacos in `bootstrap.yml`. Annotate beans with `@RefreshScope` for dynamic refresh. Use `ConfigListener` for programmatic change detection.
 
 ### Profile-based configuration
 
 Use Spring profiles to separate configuration for different environments (dev, test, prod).
 
-Steps:
-
-1. **Create profile-specific YAML files** — Name them `application-{profile}.yml` (e.g., `application-dev.yml`, `application-prod.yml`). Each file contains only the properties that differ from the default.
-2. **Activate a profile** — Set `spring.profiles.active` in `application.yml`, or use the environment variable `SPRING_PROFILES_ACTIVE`, or pass `--spring.profiles.active=dev` as a command-line argument.
-3. **Use multi-document YAML** — Within a single YAML file, use the `---` separator with `spring.config.activate.on-profile` to define profile-specific sections inline.
-4. **Apply @Profile to @ConfigurationProperties** — Use `@Profile("prod")` on config classes that should only activate in specific environments.
-5. **Understand default profile behavior** — Properties in `application.yml` apply to all profiles unless overridden by a profile-specific file.
+Create `application-{profile}.yml` for environment overrides. Activate via `spring.profiles.active`, `SPRING_PROFILES_ACTIVE`, or `--spring.profiles.active`. Use `@Profile` on config classes for environment-specific activation.
 
 ### Property validation
 
 Use JSR-380 (Jakarta Bean Validation) annotations with `@Validated` on `@ConfigurationProperties` classes to catch invalid config at startup.
 
-Steps:
-
-1. **Add validation dependency** — Include `spring-boot-starter-validation`.
-2. **Annotate config fields** — Use `@NotNull`, `@NotBlank`, `@Min`, `@Max`, `@Pattern`, `@Email`, `@Size` on config class fields.
-3. **Add @Validated to the config class** — Spring validates all properties at startup. If validation fails, the application fails to start with a clear `BindValidationException`.
-4. **Validate nested properties** — Add `@Valid` on nested config fields to cascade validation into inner config objects.
-5. **Create custom validators** — For domain-specific rules, create a custom constraint annotation with `@Constraint` and a `ConstraintValidator` implementation.
+Add `spring-boot-starter-validation`. Annotate config fields with JSR-380 constraints (`@NotBlank`, `@Min`, `@Max`, etc.) and add `@Validated` to the config class. Use `@Valid` on nested fields for cascade validation.
 
 ## Examples
 
@@ -283,8 +260,7 @@ public record CacheProperties(
 - Use profile-specific files for environment differences
 - With Nacos: use `shared-configs` for cross-service settings, `extension-configs` for service-specific
 - Never store secrets in plain YAML — use environment variables (`${ENV_VAR}`) or Vault / Nacos encrypted config
-- Use kebab-case for property keys in YAML — Spring Boot auto-maps to camelCase in Java
-- Set defaults in `application.yml` and override only differences in profile-specific files
+- Put common config in `application.yml`; put only environment-specific overrides in `application-{profile}.yml`
 - Register config classes with `@ConfigurationPropertiesScan` for auto-discovery, or `@EnableConfigurationProperties` when you need explicit control
 
 ## Constraints and Warnings

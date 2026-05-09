@@ -30,7 +30,7 @@ Patterns for unit testing Spring `@Scheduled` and `@Async` methods with JUnit 5.
 4. **Call `@Scheduled` methods directly** — do not wait for cron/fixedRate; the annotation is ignored in unit tests
 5. **Test exception paths** — verify `ExecutionException` wrapping on `CompletableFuture.get()`
 
-**Validation checkpoints:**
+**Debugging tips:**
 - After `CompletableFuture.get()`, assert the returned value before verifying mock interactions
 - If `ExecutionException` is thrown, check `.getCause()` to identify the root exception
 - If Awaitility times out, increase `atMost()` duration or reduce `pollInterval()` until the condition is reachable
@@ -99,18 +99,12 @@ Full Maven/Gradle dependencies, additional test classes, and execution count pat
 ## Best Practices
 
 - Always set a **timeout** on `CompletableFuture.get()` to prevent hanging tests
-- **Mock all dependencies** — never call real external services in unit tests
 - Use **Awaitility** only for race conditions; prefer direct calls for simple async methods
-- Test `@Scheduled` **logic** directly — the annotation is ignored in unit tests
-- Assert values before verifying mock interactions; verify **after** async completion
 
 ## Common Pitfalls
 
 - Relying on Spring's async executor instead of calling methods directly
-- Missing timeout on `CompletableFuture.get()`
-- Forgetting to test exception propagation in async methods
 - Not mocking dependencies that async methods invoke internally
-- Waiting for actual cron/fixedRate timing instead of testing logic in isolation
 
 ## Constraints and Warnings
 
@@ -118,7 +112,6 @@ Full Maven/Gradle dependencies, additional test classes, and execution count pat
 - **Thread pool ordering**: `ThreadPoolTaskScheduler` does not guarantee execution order
 - **CompletableFuture chaining**: exceptions in intermediate stages can be silently lost — test each stage
 - **Awaitility timeout**: always set a reasonable `atMost()`; infinite waits hang the test suite
-- **No actual scheduling**: `@Scheduled` is ignored in unit tests — call methods directly
 
 ## References
 

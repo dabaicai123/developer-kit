@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot File Handling
 
-File upload/download, object storage (MinIO & Aliyun OSS), EasyExcel export/import, and storage abstraction for Spring Boot 3.5.x.
+File handling patterns for Spring Boot — upload/download, object storage, EasyExcel, and storage abstraction.
 
 ## When to use this skill
 
@@ -58,49 +58,25 @@ spring:
 
 ## Instructions
 
-### File upload flow (controller -> validation -> storage)
+### File upload flow
 
-1. Controller receives `MultipartFile` via `@PostMapping`
-2. Validate file: check extension whitelist, MIME type, size limit, and content (magic bytes)
-3. Generate unique storage filename: UUID + original extension (never use original filename for storage path)
-4. Save file metadata (original name, size, type, storage path) to database
-5. Upload file to object storage via `FileStorageService` abstraction
-6. Return file metadata (id, download URL or presigned URL) to client
+Validate file type and size, generate a unique storage filename, save metadata to the database, upload to object storage via `FileStorageService`, return file metadata and download URL.
 
-### File download flow (controller -> storage -> response)
+### File download flow
 
-1. Controller receives download request by file id
-2. Query file metadata from database
-3. For direct download: stream file from storage to HTTP response with proper headers
-4. For presigned URL: generate URL via storage provider and return to client (preferred)
-5. Set `Content-Disposition: attachment; filename="xxx"` header
-6. Set correct `Content-Type` header from stored metadata
+Query file metadata from the database. For presigned URL: generate via storage provider and return to client (preferred). For direct download: stream from storage to HTTP response with proper `Content-Disposition` and `Content-Type` headers.
 
-### Excel export flow (query data -> EasyExcel write -> response)
+### Excel export flow
 
-1. Query data from database (use pagination for large datasets)
-2. Map entities to export DTOs with `@ExcelProperty` annotations
-3. Set response headers: `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
-4. Set `Content-Disposition: attachment; filename="xxx.xlsx"`
-5. Write Excel via `EasyExcel.write(response.getOutputStream(), DTO.class).sheet("Sheet1").doWrite(dataList)`
-6. Never load entire dataset into memory — use streaming or pagination
+Query data, map to export DTOs with `@ExcelProperty` annotations, set response headers, write via `EasyExcel.write(response.getOutputStream(), DTO.class).sheet("Sheet1").doWrite(dataList)`. Never load entire dataset into memory.
 
-### Excel import flow (upload -> EasyExcel read listener -> process)
+### Excel import flow
 
-1. Upload Excel file via MultipartFile
-2. Validate file: extension (.xlsx), size, and content structure
-3. Read Excel via `EasyExcel.read(file.getInputStream(), DTO.class, new DataReadListener(service)).sheet().doRead()`
-4. `AnalysisEventListener` processes rows in batches (e.g., 1000 rows per batch insert)
-5. Handle errors in `onException` callback
-6. Return import result: total rows, success count, error rows with details
+Upload Excel via MultipartFile, validate extension and size, read via `EasyExcel.read()` with `AnalysisEventListener` processing rows in batches. Handle errors in `onException` callback. Return import result with total, success, and error details.
 
-### Storage abstraction (interface + MinIO/OSS implementations)
+### Storage abstraction
 
-1. Define `FileStorageService` interface with upload, download, delete, presigned URL methods
-2. Implement `MinioFileStorageService` with `@ConditionalOnProperty(name = "file.storage.type", havingValue = "minio")`
-3. Implement `OssFileStorageService` with `@ConditionalOnProperty(name = "file.storage.type", havingValue = "oss")`
-4. Business code depends only on `FileStorageService` interface — never directly on storage SDK
-5. Switch storage provider by changing config property without any code change
+Define `FileStorageService` interface. Implement `MinioFileStorageService` and `OssFileStorageService` with `@ConditionalOnProperty`. Business code depends only on the interface — never directly on storage SDK. Switch providers by changing config property.
 
 ## Examples
 
@@ -371,8 +347,8 @@ public Result<String> getDownloadUrl(@PathVariable Long id) {
 - **Path traversal**: never use user-provided filenames directly for storage paths — sanitize or generate unique names
 - **File size limits**: configure both Spring (multipart) and storage provider limits
 - **Memory**: avoid loading large files into byte arrays — use streaming APIs (`InputStream.transferTo()`)
-- **Virus/malware scanning**: recommended for user uploads, but not covered in this skill (mention as needed)
-- **MinIO vs OSS**: MinIO is self-hosted (good for private cloud), OSS is cloud-native (good for Aliyun). Choose based on deployment environment
+- **Virus/malware scanning**: consider virus/malware scanning for user uploads (not covered in this skill)
+- **MinIO vs OSS**: MinIO for self-hosted/private cloud deployments; Aliyun OSS for cloud-native deployments on Aliyun infrastructure
 - **EasyExcel vs Apache POI**: EasyExcel uses streaming SAX parser — far less memory than POI's DOM model. Always prefer EasyExcel for large files
 
 ## References

@@ -1,17 +1,6 @@
 # GraalVM Reflection & Resource Configuration
 
-Complete guide for GraalVM metadata files that enable reflection, resources, proxies, and serialization in native images.
-
-## Table of Contents
-
-1. [Configuration File Location](#configuration-file-location)
-2. [Unified Reachability Metadata](#unified-reachability-metadata)
-3. [Reflection Configuration](#reflection-configuration)
-4. [Resource Configuration](#resource-configuration)
-5. [Proxy Configuration](#proxy-configuration)
-6. [Serialization Configuration](#serialization-configuration)
-
----
+Complete guide for GraalVM metadata files that enable reflection, resources, proxy, and serialization in native images.
 
 ## Configuration File Location
 

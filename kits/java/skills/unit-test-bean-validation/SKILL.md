@@ -28,8 +28,8 @@ This skill provides executable patterns for unit testing Jakarta Bean Validation
 1. **Add dependencies**: Include `jakarta.validation-api` and `hibernate-validator` in test scope
 2. **Create base test class**: Build `Validator` once in `@BeforeEach` using `Validation.buildDefaultValidatorFactory()`
 3. **Test valid cases first**: Verify objects pass without violations
-4. **Test invalid cases**: Assert constraint violations include correct property path and message
-5. **Extract violation details**: Use `getPropertyPath()`, `getMessage()`, `getInvalidValue()`
+4. **Test invalid cases**: Assert exact violation count with `hasSize()` and verify property path and message
+5. **Extract violation details**: Use `getPropertyPath()`, `getMessage()` (assert `getMessage()` returns the configured constraint message string), `getInvalidValue()`
 6. **Test custom validators**: See `references/custom-validators.md` for patterns
 7. **Use parameterized tests**: Test multiple inputs efficiently with `@ParameterizedTest`
 8. **Group validation tests**: Use validation groups for conditional rules (see `references/advanced-patterns.md`)
@@ -138,13 +138,9 @@ For validation groups and parameterized tests, see `references/advanced-patterns
 
 ## Best Practices
 
-- **Test both valid and invalid**: Every constraint needs both passing and failing test cases
-- **Assert violation details**: Verify property path, message, and constraint type
-- **Test edge cases**: null, empty string, whitespace-only, boundary values
-- **Keep validators stateless**: Custom validators must not maintain state
-- **Use clear messages**: Constraint messages should be user-friendly
-- **Group related tests**: Extend `BaseValidationTest` to share validator setup
-- **Test error messages**: Ensure messages match requirements
+- **Keep validators stateless**: Custom validators must not maintain state between invocations
+- **Extend `BaseValidationTest`**: Share validator setup across test classes to reduce boilerplate
+- **Test cascading `@Valid`**: Nested objects with `@Valid` trigger recursive validation — verify violations propagate to child fields
 
 ## Common Pitfalls
 
@@ -166,10 +162,6 @@ For validation groups and parameterized tests, see `references/advanced-patterns
 ## Troubleshooting
 
 **ValidatorFactory not found**: Ensure `jakarta.validation-api` and `hibernate-validator` are on test classpath.
-
-**Custom validator not invoked**: Verify `@Constraint(validatedBy = YourValidator.class)` annotation is correct.
-
-**Null values pass validation**: This is expected behavior — constraints ignore null unless `@NotNull` is present.
 
 **Wrong violation count**: Use `hasSize()` to verify exact count, check all fields in the object.
 

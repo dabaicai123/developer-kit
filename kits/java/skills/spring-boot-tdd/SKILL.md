@@ -163,7 +163,7 @@ class MarketBuilder {
 - Maven: `mvn -T 4 test` or `mvn verify`
 - Gradle: `./gradlew test jacocoTestReport`
 
-**Remember**: Keep tests fast, isolated, and deterministic. Test behavior, not implementation details.
+**Remember**: Unit tests must run < 1s each, no shared state between tests, same result on every run. Assert observable behavior (output, state changes), not internal method calls.
 
 - **Verify imports after writing test files**: common missing imports include `java.util.Map`, Hamcrest matchers (`containsString`, `equalTo`), and sealed interface types
 

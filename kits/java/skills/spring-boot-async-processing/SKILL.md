@@ -31,20 +31,13 @@ public class AsyncConfig {
 }
 ```
 
-Maven dependency (included in `spring-boot-starter-web` or `spring-boot-starter`):
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter</artifactId>
-</dependency>
-```
-
 ## Instructions
 
 ### Declarative async with @Async
 
 Annotate a service method with `@Async` to make it execute in a separate thread managed by Spring's task executor. The caller thread returns immediately.
+
+Verify async behavior by confirming methods execute on threads with your configured prefix (not the caller thread).
 
 ```java
 @Service
@@ -56,8 +49,6 @@ public class NotificationService {
     }
 }
 ```
-
-**Validate:** Confirm the method executes on a different thread by logging `Thread.currentThread().getName()` inside the async method vs the caller.
 
 See [async-method-patterns.md](references/async-method-patterns.md) for all `@Async` patterns.
 
@@ -76,8 +67,6 @@ public class OrderQueryService {
     }
 }
 ```
-
-**Validate:** Call `CompletableFuture.get(timeout, unit)` and assert the result before proceeding.
 
 See [completable-future-chaining.md](references/completable-future-chaining.md) for full chaining and composition patterns.
 
@@ -106,8 +95,6 @@ public class AsyncConfig implements AsyncConfigurer {
 }
 ```
 
-**Validate:** After application startup, send multiple concurrent async requests and verify thread names start with your configured prefix in logs.
-
 See [threadpool-taskexecutor-config.md](references/threadpool-taskexecutor-config.md) for detailed configuration, sizing guidelines, and monitoring.
 
 ### Async exception handling
@@ -127,8 +114,6 @@ public class AsyncConfig implements AsyncConfigurer {
     }
 }
 ```
-
-**Validate:** Throw an exception inside an `@Async void` method and confirm it appears in logs via your handler — not silently lost.
 
 See [async-method-patterns.md](references/async-method-patterns.md) for exception handling patterns.
 
@@ -151,39 +136,7 @@ public void processOrderAsync(String orderId) {
 
 For full `@Transactional` patterns (propagation, rollback, self-invocation), see `spring-boot-transaction-management`.
 
-**Validate:** Confirm the `@Transactional` method commits its database changes by checking the database after the async task completes.
-
 ## Examples
-
-### Example 1: @EnableAsync + @Async method on service (basic fire-and-forget)
-
-```java
-@Configuration
-@EnableAsync
-public class AsyncConfig {
-}
-
-@Service
-public class AnalyticsService {
-    @Async
-    public void trackUserActivity(String userId, String action) {
-        activityRepository.save(new UserActivity(userId, action, LocalDateTime.now()));
-    }
-}
-
-// Caller — returns immediately, analytics processed in background
-@RestController
-@RequiredArgsConstructor
-public class UserController {
-    private final AnalyticsService analyticsService;
-
-    @PostMapping("/users/{id}/login")
-    public ResponseEntity<Void> login(@PathVariable String id) {
-        analyticsService.trackUserActivity(id, "LOGIN");  // fire-and-forget
-        return ResponseEntity.ok().build();
-    }
-}
-```
 
 ### Example 2: @Async with CompletableFuture return type (composable async)
 
@@ -273,51 +226,6 @@ public class ReportService {
 }
 ```
 
-### Example 4: AsyncUncaughtExceptionHandler for @Async void methods
-
-```java
-@Slf4j
-@Configuration
-@EnableAsync
-public class AsyncConfig implements AsyncConfigurer {
-
-    @Override
-    public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("async-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
-        executor.initialize();
-        return executor;
-    }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return (ex, method, params) -> {
-            log.error("Uncaught async exception — method: {}, params: {}, exception: {}",
-                method.getName(),
-                Arrays.toString(params),
-                ex.getMessage(),
-                ex);
-            // Optionally: send to monitoring system, alert channel, etc.
-        };
-    }
-}
-
-@Service
-public class EmailService {
-    @Async
-    public void sendNotification(String recipient, String subject) {
-        // If this throws, the handler above catches it
-        emailClient.send(recipient, subject, "body");
-    }
-}
-```
-
 ### Example 5: Async + transaction boundary — proper separation
 
 ```java
@@ -347,11 +255,9 @@ public class OrderTransactionService {
 
 ## Best Practices
 
-- Always use a custom `ThreadPoolTaskExecutor` bean — never rely on `SimpleAsyncTaskExecutor` (creates unbounded threads)
 - Name your executor beans and reference with `@Async("executorName")` to route tasks to appropriate pools
 - Return `CompletableFuture` for methods that need composition or result checking
 - Use `@Async` for fire-and-forget only when the result is truly irrelevant
-- Separate `@Transactional` and `@Async` into different service beans to avoid proxy self-invocation
 - Configure thread pool sizing: `corePoolSize` = CPU cores, `maxPoolSize` = 2*CPU cores, `queueCapacity` = 100-500
 - Use `CallerRunsPolicy` as rejection handler — prevents silent task loss
 - Set `waitForTasksToCompleteOnShutdown=true` and `awaitTerminationSeconds` for graceful shutdown

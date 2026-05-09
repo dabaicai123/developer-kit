@@ -8,98 +8,21 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 ## When to use this skill
 
-Use this skill whenever the user wants to:
-- Create a new Spring Boot + MyBatis-Plus project
-- Structure a project using COLA architecture (Adapter, Application, Domain, Infrastructure)
-- Apply COLA's layered architecture with clear responsibilities per layer
-- Implement domain-driven design with COLA while keeping the domain layer pure and dependency-inverted
+Use when creating or structuring a Spring Boot project with COLA/DDD architecture, implementing domain-driven design with dependency-inverted layers.
 
 ## Project Setup
 
 ### 1. Generate from Spring Initializr
 
-```bash
-curl https://start.spring.io/starter.zip \
-  -d artifactId=demo-java \
-  -d bootVersion=3.5.1 \
-  -d dependencies=lombok,configuration-processor,web,postgresql,data-redis,validation,cache,testcontainers \
-  -d javaVersion=21 \
-  -d packageName=com.example \
-  -d type=maven-project \
-  -o starter.zip
-
-unzip starter.zip -d ./demo-java && rm starter.zip && cd demo-java
-```
+Generate project from Spring Initializr with Java 21, Spring Boot 3.5.1, and dependencies: web, postgresql, data-redis, validation, lombok, configuration-processor, cache, testcontainers.
 
 ### 2. Add Dependencies
 
-```xml
-<!-- MyBatis-Plus -->
-<dependency>
-  <groupId>com.baomidou</groupId>
-  <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-  <version>3.5.9</version>
-</dependency>
-<!-- Pagination plugin (required since 3.5.9) -->
-<dependency>
-  <groupId>com.baomidou</groupId>
-  <artifactId>mybatis-plus-jsqlparser</artifactId>
-  <version>3.5.9</version>
-</dependency>
-<!-- PostgreSQL Driver -->
-<dependency>
-  <groupId>org.postgresql</groupId>
-  <artifactId>postgresql</artifactId>
-  <scope>runtime</scope>
-</dependency>
-<!-- OpenAPI Documentation -->
-<dependency>
-  <groupId>org.springdoc</groupId>
-  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-  <version>2.8.6</version>
-</dependency>
-<!-- Architecture Testing -->
-<dependency>
-  <groupId>com.tngtech.archunit</groupId>
-  <artifactId>archunit-junit5</artifactId>
-  <version>1.2.1</version>
-  <scope>test</scope>
-</dependency>
-```
+Add MyBatis-Plus and pagination plugin dependencies. See `mybatis-plus-patterns` for versions and configuration.
 
 ### 3. .gitignore
 
-Append to the generated `.gitignore`:
-
-```gitignore
-# Build
-target/
-*.jar
-*.war
-
-# IDE
-.idea/
-*.iml
-.vscode/
-.settings/
-.classpath
-.project
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Environment
-.env
-.env.local
-
-# JAVA
-target/
-```
+Use standard Java .gitignore patterns (target/, .idea/, *.iml, .DS_Store, *.log, .env).
 
 ### 4. Configuration
 
@@ -129,32 +52,9 @@ mybatis-plus:
 
 ### 5. Docker Compose
 
-```yaml
-services:
-  postgres:
-    image: postgres:18
-    ports: ["5432:5432"]
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: demo
-  redis:
-    image: redis:7
-    ports: ["6379:6379"]
-```
+Use Docker Compose for PostgreSQL and Redis. See `docker-expert` for production Compose patterns.
 
-### 6. Maven Commands
-
-| Command | Description |
-|---------|------------|
-| `mvn clean test` | Clean build + run tests |
-| `mvn dependency:tree` | View dependency tree |
-| `mvn dependency:analyze` | Find unused/undeclared deps |
-| `mvn versions:display-dependency-updates` | Check for updates |
-| `mvn -B verify` | Batch mode build |
-| `mvnd -t 4 compile` | mvnd parallel compile (4 threads) |
-
-### 7. mvnd + JDK 21 + Lombok Compatibility
+### 6. mvnd + JDK 21 + Lombok Compatibility
 
 When using **mvnd (Maven Daemon)** with **JDK 21** and **Lombok**, annotation processing silently fails.
 mvnd uses the JSR 199 `javax.tools.JavaCompiler` API, which blocks Lombok from accessing `com.sun.tools.javac.*`
@@ -309,15 +209,6 @@ Adapter → Application → Domain ← Infrastructure
 - Never: Domain → Application (upward), Domain → Infrastructure (upward)
 
 ### Data Object Flow Per Layer
-
-Each layer has its own data object type; conversion happens at layer boundaries:
-
-| Layer | Data Object | Role |
-|-------|------------|------|
-| **Adapter** | VO (View Object) | API response for frontend; Controller converts DTO → VO |
-| **Application** | DTO (Data Transfer Object) | Carries data across app boundaries; CmdExe/QryExe input/output |
-| **Domain** | Entity (bare name) | Core business object with behavior; no ORM annotations |
-| **Infrastructure** | DO (Data Object) | Persistence mapping with MyBatis-Plus annotations |
 
 ```
 Request → VO → DTO → Entity → DO → DB

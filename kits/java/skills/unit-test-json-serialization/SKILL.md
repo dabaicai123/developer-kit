@@ -28,7 +28,7 @@ Provides patterns for unit testing JSON serialization and deserialization using 
 3. **Test serialization** → Call `json.write(object)` and assert JSON paths with `extractingJsonPath*`
 4. **Test deserialization** → Call `json.parse(json)` or `json.parseObject(json)` and assert object state
 5. **Validate round-trip** → Serialize, then deserialize, verify same data (if object is properly comparable)
-6. **Test edge cases** → Null values, missing fields, empty collections, invalid JSON
+6. **Test edge cases** → Null values, missing fields, empty collections, invalid JSON, and nesting depth matching your API schema — typically 2-3 levels
 7. **Add validation checkpoints**: After each assertion, verify the test fails meaningfully with wrong data
 
 ## Examples
@@ -248,12 +248,7 @@ class PolymorphicJsonTest {
 
 ## Best Practices
 
-- Test serialization AND deserialization for complete coverage
 - Verify JSON paths individually rather than comparing full JSON strings
-- Test null handling explicitly — null fields may be included or excluded depending on `@JsonInclude`
-- Use `extractingJsonPath*` methods for precise field assertions
-- Test round-trip: serialize an object, deserialize the JSON, verify the result matches
-- Validate edge cases: empty strings, empty collections, deeply nested structures
 - Group related assertions in a single test for clarity
 
 ## Constraints and Warnings
@@ -270,15 +265,11 @@ class PolymorphicJsonTest {
 
 When a JSON test fails, follow this workflow:
 
-| Failure Symptom | Common Cause | How to Verify |
-|----------------|--------------|---------------|
-| `JsonPath` assertion fails | Field name mismatch | Check `@JsonProperty` spelling matches JSON key |
-| Null expected but got value | `@JsonInclude(NON_NULL)` configured | Verify annotation on field/class |
-| Deserialization returns wrong type | Missing `@JsonTypeInfo` | Add type info property to JSON or configure subtype mapping |
-| Date format mismatch | Format string incorrect | Confirm `@JsonFormat(pattern=...)` matches expected string |
-| Missing field in output | `@JsonIgnore` or transient modifier | Check field for `@JsonIgnore` or `transient` keyword |
-| Nested object is null | Inner JSON missing or malformed | Log parsed JSON; verify inner structure matches POJO |
-| `JsonParseException` | Malformed JSON string | Validate JSON syntax; check for unescaped characters |
+| Failure Symptom | How to Verify |
+|----------------|---------------|
+| `JsonPath` assertion fails | Check `@JsonProperty` spelling matches JSON key |
+| Missing field in output | Check field for `@JsonIgnore` or `transient` keyword |
+| `JsonParseException` | Validate JSON syntax; check for unescaped characters |
 
 **Validation checkpoint after fixing**: Re-run the test — if it passes, write a complementary test for the opposite case (e.g., if you fixed null handling, add a test for non-null values to prevent regression).
 

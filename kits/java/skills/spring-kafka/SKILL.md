@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Kafka
 
-Kafka client infrastructure for Spring Boot 3.5.x.
-
 ## When to use this skill
 
 - Configuring Kafka producer/consumer properties and serialization
@@ -133,12 +131,9 @@ public void handleOrderCreated(OrderEvent event, Acknowledgment ack) {
 
 ## Best Practices
 
-- Use `acks: all` for producers to guarantee message delivery
-- Set `retries: 3` with exponential backoff for transient failures
-- Configure DLQ (Dead Letter Queue) for unprocessable messages
-- Use manual acknowledgment for critical business events
-- Always include `orderId` (or similar) as the key for partition ordering
-- Keep consumer logic idempotent — Kafka may redeliver messages
+- Always set message key for partition ordering
+- Keep consumers idempotent (Kafka may redeliver)
+- Configure DLQ for unprocessable messages
 
 ## Related Skills
 

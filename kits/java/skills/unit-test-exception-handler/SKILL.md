@@ -114,20 +114,13 @@ class TestController {
 
 ## Best Practices
 
-- Test each `@ExceptionHandler` method independently with a dedicated exception throw
 - Register exactly one `@ControllerAdvice` instance via `setControllerAdvice()` — never skip it
 - Assert all fields in the error response body, not just the HTTP status
-- For validation errors, verify both the field name key and the error message value
-- Use `MockMvcBuilders.standaloneSetup()` for isolated handler tests without full Spring context
-- Log assertion failures: chain `.andDo(print())` to print request/response when a test fails
 
 ## Common Pitfalls
 
-- Handler not invoked: ensure `setControllerAdvice()` is called on the builder
-- JsonPath mismatch: use `.andDo(print())` to inspect actual response structure
-- Status is 200: missing `@ResponseStatus` on the handler method
+- Status 200 without `@ResponseStatus`: missing annotation causes HTTP 200 instead of the expected error status
 - Duplicate handlers: `@Order` controls precedence; more specific exception types take priority
-- Testing handler logic instead of behavior: mock external dependencies, test only the response transformation
 
 ## Constraints and Warnings
 

@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Cloud Gateway
 
-API gateway patterns for Spring Boot 3.5.x microservices.
-
 ## When to use this skill
 
 - Building an API gateway for microservices
@@ -29,20 +27,7 @@ API gateway patterns for Spring Boot 3.5.x microservices.
 </dependency>
 ```
 
-BOM:
-```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-            <version>2025.0.0.0</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
-```
+BOM: For BOM configuration, see `spring-cloud-alibaba` skill (same version alignment applies).
 
 ## Route Configuration
 
@@ -137,11 +122,7 @@ public KeyResolver ipKeyResolver() {
 
 ## Best Practices
 
-- Use `lb://service-name` URIs with Nacos/Eureka for load balancing
-- Apply global filters for cross-cutting concerns (auth, logging, tracing)
-- Configure circuit breakers per route with fallback URIs
-- Use rate limiting with Redis to protect downstream services
-- Keep gateway stateless — no business logic here
+- Keep gateway stateless — no domain logic or data transformations in the gateway
 
 ## Related Skills
 

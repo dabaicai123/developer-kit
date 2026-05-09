@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # MapStruct Patterns (DDD Context)
 
-MapStruct object mapping within DDD/COLA architecture — replaces manual `fromDomain()` / `toDomain()` conversions at layer boundaries.
-
 ## When to use this skill
 
 - Creating mappers between Domain entities and Infrastructure DOs (Domain ↔ DO)
@@ -107,7 +105,7 @@ No `@Mapping(target = "xxx", ignore = true)` needed for audit fields. `unmappedT
 
 **Only add explicit `@Mapping(target = "xxx", ignore = true)` when source and target share a field name with different semantics** (e.g., Domain `id` = business ID vs DO `id` = database PK).
 
-Use in GatewayImpl:
+Use in GatewayImpl (see `ddd-cola` for the full Gateway pattern context):
 
 ```java
 @Repository
@@ -270,7 +268,7 @@ public abstract class UserDOConverter {
 
 - **Converters belong at layer boundaries**: Domain ↔ DO in `infrastructure/converter/`, Domain ↔ DTO/Cmd in `adapter/converter/`
 - **Domain never depends on converters**: converters import domain types; domain never imports converters
-- **Audit fields auto-excluded**: Domain doesn't have `id`/`createdAt`/`updatedAt`/`version`/`deletedAt`, so `unmappedTargetPolicy = IGNORE` skips them. Only add explicit `@Mapping(target = "xxx", ignore = true)` for same-name-but-different-meaning fields
+- **Audit fields auto-excluded via `unmappedTargetPolicy = IGNORE`** (see Domain <-> DO Mapper section). Only add explicit `@Mapping(target = "xxx", ignore = true)` for same-name-but-different-meaning fields
 - **Use `@BeanMapping(nullValuePropertyMappingStrategy = IGNORE)`** for partial updates — don't overwrite existing values with null
 - **Use `uses` to compose mappers** for nested objects instead of writing `expression = "java(...)"`
 - **Use abstract class** only when you need injected dependencies; use interface for simple mappings

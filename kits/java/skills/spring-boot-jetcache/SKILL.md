@@ -8,14 +8,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # JetCache + Redisson Two-Level Cache and Distributed Services
 
-JetCache two-level caching (Caffeine LOCAL + Redisson REMOTE) and Redisson distributed services, sharing a single Redisson connection pool.
-
 ```
 redisson-spring-boot-starter
     └── RedissonClient            ──→ Distributed lock (RLock), Pub/Sub (RTopic), Rate limiting (RRateLimiter)
     └── RedissonConnectionFactory ──→ RedisTemplate (Spring Data Redis)
     └── JetCache remote           ──→ jetcache-starter-redis-redisson
-All three share the same Redisson connection pool, only need to configure spring.data.redis.* once
 ```
 
 ## When to use this skill
@@ -197,19 +194,13 @@ QuickConfig qc = QuickConfig.newBuilder("user:")
     .build();
 ```
 
-## Best Practices
-
-- **Use JetCache @Cached for caching**, not RedisTemplate or @Cacheable
-- **When using BOTH two-level cache, localExpire < expire**
-- **Always set expire**, JetCache defaults to infinity
-- **Use kryo5 for remote cache valueEncoder**
-- **Prefer DistributedLockUtils for distributed locks**, call unlock in finally block
-- **Multi-instance deployment must configure broadcastChannel + syncLocal(true)**
-- **Add -parameters compiler flag**, otherwise SpEL parameter name references won't work
-
 ## Gotchas
 
-- Using @Cacheable instead of @Cached — always use @Cached
+- Use @Cached (not @Cacheable or RedisTemplate)
+- Add -parameters compiler flag for SpEL
+- Prefer DistributedLockUtils (see references/distributed-lock-utils.md)
+- Use kryo5 for remote valueEncoder
+- Multi-instance: configure broadcastChannel + syncLocal(true)
 - forgetting to set expire — JetCache defaults to infinity, must be explicitly set
 - @CacheInvalidate/@CacheUpdate area/name not matching @Cached — must exactly match
 - Using @CreateCache — deprecated in 2.7+, use QuickConfig instead

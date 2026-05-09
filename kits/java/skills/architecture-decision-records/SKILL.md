@@ -8,39 +8,17 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Architecture Decision Records
 
-Patterns for creating, maintaining, and managing Architecture Decision Records (ADRs).
-
 ## When to use this skill
 
-- Making significant architectural decisions
-- Documenting technology choices
-- Recording design trade-offs
-- Onboarding new team members to historical decisions
-- Establishing decision-making processes
-
-## Do not use this skill when
-
-- You only need to document small implementation details
-- The change is a minor patch or routine maintenance
-- There is no architectural decision to capture
+Use when making significant architectural decisions, documenting technology choices, or recording design trade-offs.
 
 ## Instructions
 
-1. Capture the decision context, constraints, and drivers.
-2. Document considered options with tradeoffs.
-3. Record the decision, rationale, and consequences.
-4. Link related ADRs and update status over time.
+For each ADR: state the context (problem + constraints), list considered options with tradeoffs, record the decision and consequences, link related ADRs.
 
 ## Core Concepts
 
-### What is an ADR?
-
-An Architecture Decision Record captures:
-- **Context**: Why we needed to make a decision
-- **Decision**: What we decided
-- **Consequences**: What happens as a result
-
-### When to Write an ADR
+### When to Write / Skip an ADR
 
 | Write ADR | Skip ADR |
 |-----------|----------|

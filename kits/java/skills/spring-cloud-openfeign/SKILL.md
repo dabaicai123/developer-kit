@@ -8,8 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Cloud OpenFeign
 
-Declarative HTTP client for Spring Boot 3.5.x microservices — configuration, timeout/retry, error decoder, Resilience4j fallback, interceptors, connection pool tuning, pagination, file upload, and anti-patterns.
-
 ## When to use this skill
 
 - Making service-to-service HTTP calls in microservices
@@ -20,19 +18,6 @@ Declarative HTTP client for Spring Boot 3.5.x microservices — configuration, t
 - Propagating JWT tokens and tracing headers via request interceptors
 - Tuning connection pools with Apache HttpClient or OkHttp
 - Supporting pagination, file upload, and multipart requests via Feign
-
-## Overview
-
-Spring Cloud OpenFeign provides a declarative HTTP client that generates implementations from interfaces and annotations. Feign integrates with Spring Cloud service discovery (Nacos/Eureka) for load balancing and Resilience4j for fault tolerance.
-
-| Concept | Description |
-|---|---|
-| **Feign Client** | Interface annotated with `@FeignClient` — Spring generates the implementation |
-| **Service Discovery** | `name` attribute maps to Nacos/Eureka service ID for load balancing |
-| **Error Decoder** | Translates remote HTTP error responses into local exceptions |
-| **Fallback** | Resilience4j circuit breaker fallback when the remote service is unavailable |
-| **Interceptor** | `RequestInterceptor` to propagate headers (JWT, tracing) |
-| **Connection Pool** | Apache HttpClient or OkHttp for connection pooling and tuning |
 
 ## Instructions
 
@@ -91,10 +76,6 @@ public class OrderServiceApplication {
 Use `name` matching the Nacos/Eureka service ID for automatic load balancing. Use `contextId` when multiple clients target the same service:
 
 ```java
-/**
- * Feign client for user-service.
- * <p>name = Nacos service ID, enables load-balanced routing.</p>
- */
 @FeignClient(
     name = "user-service",
     fallbackFactory = UserClientFallbackFactory.class
@@ -115,10 +96,7 @@ public interface UserClient {
     );
 }
 
-/**
- * Second client targeting the same user-service — requires contextId
- * to avoid bean name collision.
- */
+// Second client targeting the same user-service — requires contextId to avoid bean name collision.
 @FeignClient(
     name = "user-service",
     contextId = "userAdminClient",
@@ -184,11 +162,6 @@ logging:
 `ErrorDecoder` translates remote HTTP error responses into local exceptions. Without it, Feign throws generic `FeignException` with no business context:
 
 ```java
-/**
- * Custom ErrorDecoder — translates remote error responses into BusinessException.
- * <p>Ensures remote service errors are handled with the same exception hierarchy
- * as local errors, so the global @RestControllerAdvice handles them uniformly.</p>
- */
 @Component
 @Slf4j
 public class FeignErrorDecoder implements ErrorDecoder {
@@ -251,10 +224,6 @@ spring:
 Combine Feign with Resilience4j circuit breaker for fault tolerance. Use `fallbackFactory` (not plain `fallback`) to access the exception cause for logging:
 
 ```java
-/**
- * FallbackFactory — provides the exception that triggered the fallback.
- * <p>More useful than plain fallback because you can log and handle the root cause.</p>
- */
 @Component
 @Slf4j
 public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
@@ -303,10 +272,6 @@ For circuit breaker configuration (sliding window, failure rate, wait duration, 
 Use `RequestInterceptor` to propagate headers (JWT, tracing) across service boundaries:
 
 ```java
-/**
- * JWT propagation interceptor — forwards Authorization header from
- * the incoming request to all outgoing Feign calls.
- */
 @Component
 public class FeignAuthInterceptor implements RequestInterceptor {
 
@@ -323,29 +288,7 @@ public class FeignAuthInterceptor implements RequestInterceptor {
     }
 }
 
-/**
- * Tracing propagation interceptor — forwards distributed tracing headers
- * (X-Request-Id, X-B3-TraceId) for observability across services.
- */
-@Component
-public class FeignTracingInterceptor implements RequestInterceptor {
-
-    @Override
-    public void apply(RequestTemplate template) {
-        ServletRequestAttributes attrs =
-            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attrs != null) {
-            String requestId = attrs.getRequest().getHeader("X-Request-Id");
-            if (requestId != null) {
-                template.header("X-Request-Id", requestId);
-            }
-            String traceId = attrs.getRequest().getHeader("X-B3-TraceId");
-            if (traceId != null) {
-                template.header("X-B3-TraceId", traceId);
-            }
-        }
-    }
-}
+For tracing header propagation (X-Request-Id, X-B3-TraceId), use the same RequestInterceptor pattern reading from RequestContextHolder.
 ```
 
 ### 7. Configure connection pool tuning
@@ -376,17 +319,6 @@ spring:
 ```
 
 **OkHttp alternative:** Use `io.github.openfeign:feign-okhttp:13.5` dependency and set `spring.cloud.openfeign.okhttp.enabled: true` for HTTP/2 support and lower latency. Connection pool parameters (`max-connections`, `max-connections-per-route`, `connection-timeout`) apply the same way.
-
-**Connection pool sizing guidelines:**
-
-| Parameter | Recommended Value | Calculation |
-|---|---|---|
-| `max-connections` | 200 | Total concurrent Feign calls across all services |
-| `max-connections-per-route` | 50 | Peak concurrent calls to a single target service |
-| `connection-timeout` | 3000 ms | Same as `connect-timeout` in Feign config |
-| `read-timeout` | 5000 ms | Same as `read-timeout` in Feign config |
-
-The pool size must accommodate peak concurrency. Monitor connection pool metrics via Actuator to detect exhaustion.
 
 ### 8. Enable response compression
 
@@ -453,33 +385,9 @@ public class FeignMultipartConfig {
 }
 ```
 
-## Best Practices
-
-- **Always define fallbacks with `fallbackFactory`** — `fallbackFactory` provides the exception cause for logging; plain `fallback` does not
-- **Use `name` matching Nacos service ID** — enables automatic load-balanced routing via Spring Cloud LoadBalancer
-- **Set explicit timeouts per client** — never rely on defaults; fast internal services need shorter timeouts, payment/external services need longer
-- **Implement `ErrorDecoder`** — translate remote error responses into local `BusinessException` subclasses so the global handler processes them uniformly
-- **Propagate JWT via `RequestInterceptor`** — never hardcode tokens; forward the incoming request's Authorization header
-- **Use `@FeignClient(contextId = "...")` for multiple clients targeting the same service** — prevents bean name collision
-- **Configure connection pooling** — never use default `HttpURLConnection` (no pooling); choose Apache HttpClient or OkHttp for production
-- **Log at `BASIC` level in production** — `FULL` logging produces large output and should only be used in development
-- **Return `Result<T>` from Feign methods** — matches the local unified response contract; use `RemoteResult<T>` if remote and local Result differ
-- **Graceful degradation for reads, throw for writes** — fallbacks for read operations return cached/empty data; fallbacks for critical writes throw to propagate the failure
-
-## Anti-patterns
-
-- **No timeout configuration** — relying on Feign's default (no timeout in older versions, 60 seconds in newer) causes long-hanging requests that consume connection pool threads. Always set explicit `connect-timeout` and `read-timeout`.
-- **Feign for @Async service-to-service calls** — when the caller does not need the response immediately, use async messaging (Kafka/RocketMQ) instead of synchronous Feign. Feign blocks the calling thread; async messaging frees it.
-- **Plain `fallback` instead of `fallbackFactory`** — plain fallback receives no exception information, making it impossible to log or handle the root cause. Always use `fallbackFactory`.
-- **No ErrorDecoder** — without a custom error decoder, Feign throws `FeignException` with no business context. The global handler cannot produce meaningful error responses from `FeignException`.
-- **RestTemplate mixed with Feign** — using both `RestTemplate` and `FeignClient` for service-to-service calls creates inconsistency. Choose one approach and use it consistently.
-- **Feign for internal long-polling or streaming** — Feign is designed for request-response calls. Use `WebClient` for streaming, long-polling, or SSE connections.
-- **Hardcoded URLs in `@FeignClient(url = "...")` in production** — this bypasses service discovery and load balancing. Use `url` only for testing or external third-party APIs.
-- **Missing `contextId` for multiple clients targeting the same service** — causes bean name collision and Spring context failure.
-- **Large file downloads via Feign** — Feign buffers the entire response in memory. For large files, use `RestTemplate` with streaming or direct HTTP client.
-
 ## Constraints and Warnings
 
+- Common mistakes: no timeout config, plain fallback (use fallbackFactory), no ErrorDecoder, hardcoded URLs bypassing service discovery, Feign for async/streaming calls (use Kafka/WebClient).
 - **RequestContextHolder only works in servlet-based (non-reactive) applications** — `RequestInterceptor` that reads from `RequestContextHolder` fails in WebFlux/reactive applications. For reactive, use custom header propagation via WebClient.
 - **Fallback methods must match the Feign interface signature** — the anonymous class in `fallbackFactory.create()` must implement every method in the Feign interface. Missing methods cause runtime errors.
 - **Circuit breaker fallback wraps the entire Feign call** — when the circuit is open, ALL methods on that Feign client return fallback values. You cannot selectively fallback on some methods.

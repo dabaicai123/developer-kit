@@ -22,38 +22,9 @@ Provides patterns for unit testing `@Service` classes using Mockito. Mocks repos
 
 ## Instructions
 
-Follow this workflow to test service layer with Mockito, including validation checkpoints:
-
-### 1. Setup Test Class
-
-Use `@ExtendWith(MockitoExtension.class)` to enable Mockito annotations.
-
-### 2. Declare Mocks with `@Mock` and `@InjectMocks`
-
-Use `@Mock` for dependencies (repositories, clients) and `@InjectMocks` for the service under test.
-
-### 3. Arrange-Act-Assert with Validation
-
-**Arrange**: Create test data and configure mock return values using `when().thenReturn()`.
-
-**Act**: Execute the service method being tested.
-
-**Assert**:
-- Verify returned values with AssertJ assertions
-- Verify mock interactions with `verify()`
-- **Validation checkpoint**: Run test and confirm green bar
-
-### 4. Test Exception Scenarios
-
-Configure mocks to throw exceptions with `when().thenThrow()`.
-
-**Validation checkpoint**: Verify exception type and message
-
-### 5. Verify Complete Coverage
-
-- Run full test suite: `mvn test` or `gradle test`
-- Check coverage report: `mvn test jacoco:report`
-- **Validation checkpoint**: Confirm all service methods have corresponding tests
+1. **Use `@ExtendWith(MockitoExtension.class)` with `@Mock`/`@InjectMocks`**: Declare `@Mock` for dependencies (repositories, clients) and `@InjectMocks` for the service under test
+2. **Arrange-Act-Assert pattern**: Create test data, configure mocks with `when().thenReturn()`, execute the service method, and assert results with AssertJ
+3. **Test exception scenarios**: Configure mocks with `when().thenThrow()` and assert with `assertThatThrownBy()`
 
 ## Examples
 
@@ -114,12 +85,8 @@ For additional patterns (multiple dependencies, argument captors, async services
 
 ## Best Practices
 
-- **Use `@ExtendWith(MockitoExtension.class)`** for JUnit 5 integration
-- **Mock only direct dependencies** of the service under test
-- **Verify interactions** to ensure correct collaboration
-- **Test one behavior per test method** - keep tests focused
-- **Use descriptive variable names**: `expectedUser`, `actualUser`, `captor`
-- **Create real instances** for value objects and DTOs (don't mock them)
+- **Mock only direct dependencies** (repositories, clients -- not value objects); create real instances for value objects and DTOs
+- **Test one behavior per test method** — keep tests focused
 
 ## Constraints and Warnings
 
@@ -129,7 +96,7 @@ For additional patterns (multiple dependencies, argument captors, async services
 - Be cautious with `@Spy`; partial mocking is harder to understand and maintain.
 - Do not test private methods directly; test them through public method behavior.
 - Argument matchers (`any()`, `eq()`) cannot be mixed with actual values in the same stub.
-- Avoid over-verifying; verify only interactions important to the test scenario.
+- Use `verify()` only for interactions that matter to the test scenario; avoid over-verifying.
 - **Strict stubbing conflict**: `@BeforeEach setUp()` stubs that aren't used in all test paths cause `UnnecessaryStubbingException`. Use `@MockitoSettings(strictness = Strictness.LENIENT)` or move stubs into individual test methods.
 - **Mock delegation**: Mockito mocks do NOT internally delegate — `mock.method2Param()` will NOT invoke `mock.method3Param()` even if real code delegates. Stub each called signature separately.
 - **Mock default returns**: `String` returns `null` (not ""), so `anyString()` won't match null. Use `any()` for nullable parameters, or stub explicitly.

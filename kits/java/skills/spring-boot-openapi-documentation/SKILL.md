@@ -8,36 +8,15 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot OpenAPI Documentation with SpringDoc
 
-## Overview
-
-SpringDoc OpenAPI automates generation of OpenAPI 3.0 documentation for Spring Boot projects with a Swagger UI web interface for exploring and testing APIs.
-
 ## When to use this skill
 
-- Set up SpringDoc OpenAPI in Spring Boot 3.x projects
-- Generate OpenAPI 3.0 specifications for REST APIs
+- Set up SpringDoc OpenAPI and generate OpenAPI 3.0 specs for Spring Boot 3.x REST APIs
 - Configure and customize Swagger UI
-- Add detailed API documentation with annotations
-- Document request/response models with validation
+- Document controllers, request/response models, and validation with OpenAPI annotations
 - Implement API security documentation (JWT, OAuth2, Basic Auth)
-- Document pageable and sortable endpoints
-- Add examples and schemas to API endpoints
-- Customize OpenAPI definitions programmatically
-- Support multiple API groups and versions
-- Document error responses and exception handlers
-- Add JSR-303 Bean Validation to API documentation
-- Support Kotlin-based Spring Boot APIs
-
-## Quick Reference
-
-| Concept | Description |
-|---------|-------------|
-| **Dependencies** | `springdoc-openapi-starter-webmvc-ui` for WebMvc, `springdoc-openapi-starter-webflux-ui` for WebFlux |
-| **Configuration** | `application.yml` with `springdoc.api-docs.*` and `springdoc.swagger-ui.*` properties |
-| **Access Points** | OpenAPI JSON: `/v3/api-docs`, Swagger UI: `/swagger-ui/index.html` |
-| **Core Annotations** | `@Tag`, `@Operation`, `@ApiResponse`, `@Parameter`, `@Schema`, `@SecurityRequirement` |
-| **Security** | Configure security schemes in OpenAPI bean, apply with `@SecurityRequirement` |
-| **Pagination** | Use `@ParameterObject` with Spring Data `Pageable` |
+- Document pageable/sortable endpoints and add examples/schemas
+- Customize OpenAPI definitions programmatically, support multiple API groups/versions
+- Document error responses, exception handlers, and Kotlin-based Spring Boot APIs
 
 ## Instructions
 
@@ -138,14 +117,14 @@ Configure API grouping, versioning, and build plugins. See [advanced-configurati
 
 ## Best Practices
 
-- **Use descriptive operation summaries**: Short (< 120 chars), clear statements
+- **Use descriptive operation summaries**: concise (< 120 chars), action-oriented (e.g., 'Get user by ID', not 'User endpoint')
 - **Document all response codes**: Include success (2xx), client errors (4xx), server errors (5xx)
 - **Add examples to request/response bodies**: Use `@ExampleObject` for realistic examples
 - **Leverage JSR-303 validation annotations**: SpringDoc auto-generates constraints from validation annotations
 - **Use `@ParameterObject` for complex parameters**: Especially for Pageable, custom filter objects
 - **Group related endpoints with `@Tag`**: Organize API by domain entities or features
 - **Document security requirements**: Apply `@SecurityRequirement` where authentication needed
-- **Hide internal endpoints appropriately**: Use `@Hidden` or create separate API groups
+- **Hide internal endpoints**: Use `@Hidden` or separate API groups; never expose admin/internal endpoints in public groups
 - **Customize Swagger UI for better UX**: Enable filtering, sorting, try-it-out features
 - **Version your API documentation**: Include version in OpenAPI Info
 
@@ -177,35 +156,6 @@ Configure API grouping, versioning, and build plugins. See [advanced-configurati
 
 ## Examples
 
-### Basic Controller Documentation
-
-```java
-@RestController
-@Tag(name = "Books", description = "Book management APIs")
-@RequestMapping("/api/books")
-public class BookController {
-
-    @Operation(
-        summary = "Get book by ID",
-        description = "Retrieves detailed information about a specific book"
-    )
-    @ApiResponse(responseCode = "200", description = "Book found")
-    @ApiResponse(responseCode = "404", description = "Book not found")
-    @GetMapping("/{id}")
-    public Book getBook(@PathVariable Long id) {
-        return bookService.findById(id);
-    }
-
-    @Operation(summary = "Create new book")
-    @SecurityRequirement(name = "bearer-jwt")
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Book createBook(@Valid @RequestBody CreateBookRequest request) {
-        return bookService.create(request);
-    }
-}
-```
-
 ### Documented Model with Validation
 
 ```java
@@ -227,28 +177,6 @@ public class Book {
     @NotNull
     @DecimalMin("0.0")
     private BigDecimal price;
-}
-```
-
-### Security Configuration
-
-```java
-@Bean
-public OpenAPI customOpenAPI() {
-    return new OpenAPI()
-        .info(new Info()
-            .title("Book API")
-            .version("1.0.0")
-            .description("REST API for book management"))
-        .components(new Components()
-            .addSecuritySchemes("bearer-jwt", new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT"))
-            .addSecuritySchemes("api-key", new SecurityScheme()
-                .type(SecurityScheme.Type.APIKEY)
-                .in(SecurityScheme.In.HEADER)
-                .name("X-API-Key")));
 }
 ```
 

@@ -28,12 +28,6 @@ Patterns for testing external REST API integrations with WireMock: stubbing resp
 5. **Execute and assert**: Call service methods, validate results with AssertJ
 6. **Verify requests**: `verify()` to ensure correct API usage
 
-**If stub not matching**: Check URL encoding, header names, use `urlEqualTo` for query params.
-
-**If tests hanging**: Configure connection timeouts in HTTP client; use `withFixedDelay()` for timeout simulation.
-
-**If port conflicts**: Always use `wireMockConfig().dynamicPort()`.
-
 ## Examples
 
 ### Maven Dependencies
@@ -94,20 +88,23 @@ See `references/advanced-examples.md` for error scenarios, body verification, ti
 
 ## Best Practices
 
-- **Dynamic port**: Prevents conflicts in parallel test execution
-- **Verify requests**: Ensures correct API usage by the client
-- **Test errors**: Cover timeouts, 4xx, 5xx scenarios
 - **Focused stubs**: One concern per test
-- **Auto-reset**: `@RegisterExtension` resets WireMock between tests
 - **Never call real APIs**: Always stub third-party endpoints
 
 ## Constraints and Warnings
 
-- **Dynamic ports required**: Fixed ports cause parallel execution conflicts
 - **HTTPS testing**: Configure WireMock TLS settings if testing TLS connections
 - **Stub precedence**: More specific stubs take priority over general ones
 - **Performance**: WireMock adds overhead; mock at client layer for faster tests
 - **API changes**: Keep stubs synchronized with actual API contracts
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Stub not matching | Check URL encoding, header names; use `urlEqualTo` for query params |
+| Tests hanging | Configure connection timeouts in HTTP client; use `withFixedDelay()` for timeout simulation |
+| Port conflicts | Always use `wireMockConfig().dynamicPort()` |
 
 ## References
 

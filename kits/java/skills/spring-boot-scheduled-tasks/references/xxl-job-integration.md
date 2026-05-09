@@ -11,12 +11,7 @@
 </dependency>
 ```
 
-XXL-Job is the most widely used distributed scheduling framework in Chinese Spring Boot teams. It provides:
-- Centralized task management via admin console
-- Task dispatch to a single executor instance (no concurrent execution across instances)
-- Sharding broadcast for parallel processing across instances
-- Execution logs, failure alerts, and retry mechanisms
-- Support for GLUE mode (inline code editing) and Bean mode (handler registration)
+XXL-Job is a distributed scheduling framework with admin console, sharding broadcast, and failure retry.
 
 ## XxlJobConfig bean configuration
 
@@ -72,12 +67,8 @@ xxl:
 ```
 
 Configuration notes:
-- `adminAddresses` — URL of XXL-Job admin console. Multiple addresses for HA: comma-separated
-- `appname` — executor name registered in admin console. Each Spring Boot application uses a unique appname
-- `port` — executor embedded server port for receiving dispatch requests from admin. Default 9999. Must be different from application port
-- `logPath` — local directory for execution log files
-- `logRetentionDays` — days to retain log files before auto-cleanup
-- `accessToken` — security token matching admin console configuration. Set in admin console's `application.properties`
+- `port` must differ from application port
+- `accessToken` must match admin console configuration
 
 ## @XxlJob handler method registration
 
@@ -154,28 +145,7 @@ Key methods from `XxlJobHelper`:
 
 ### Deploy admin console
 
-1. Download from [xuxueli/xxl-job releases](https://github.com/xuxueli/xxl-job)
-2. Initialize database using `tables_xxl_job.sql` from the source code
-3. Configure `application.properties` in admin:
-
-```properties
-# XXL-Job Admin application.properties
-spring.datasource.url=jdbc:mysql://localhost:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
-spring.datasource.username=root
-spring.datasource.password=your_password
-
-xxl.job.accessToken=default_token
-
-# Alert email configuration (optional)
-xxl.job.mail.host=smtp.example.com
-xxl.job.mail.port=25
-xxl.job.mail.username=alert@example.com
-xxl.job.mail.password=mail_password
-xxl.job.mail.sendNick=XxlJobAlert
-```
-
-4. Start admin: `java -jar xxl-job-admin-2.4.2.jar`
-5. Access console: `http://localhost:8080/xxl-job-admin` (default account: admin / 123456)
+Deploy from xuxueli/xxl-job releases. Initialize DB with `tables_xxl_job.sql`. Console: http://localhost:8080/xxl-job-admin (default: admin/123456).
 
 ### Configure a task in admin console
 
@@ -376,57 +346,9 @@ Log notes:
 
 XXL-Job executor auto-registers with the admin console on startup. The executor embeds a Netty server on the configured port to receive dispatch requests.
 
-```java
-@Bean
-public XxlJobSpringExecutor xxlJobExecutor() {
-    XxlJobSpringExecutor executor = new XxlJobSpringExecutor();
-    executor.setAdminAddresses(adminAddresses);
-    executor.setAppname(appname);
-    executor.setPort(port);
-    executor.setLogPath(logPath);
-    executor.setAccessToken(accessToken);
-    return executor;
-}
-```
-
-Registration flow:
-1. Executor starts embedded Netty server on `port`
-2. Executor sends registration request to admin console
-3. Admin console stores executor address in database
-4. Admin console dispatches tasks to registered executor addresses
-5. Executor executes the handler and returns `ReturnT` result
-
-For multi-instance deployment:
-- Each instance registers with the same `appname` but different IP:port
-- Admin console shows all registered instances in Executor Management
-- Route strategy determines which instance receives the task dispatch
-
-Graceful shutdown:
-
-```java
-@PreDestroy
-public void destroyXxlJobExecutor() {
-    // XxlJobSpringExecutor destroys automatically on application shutdown
-    // It unregisters from admin console and stops the embedded server
-}
-```
+Executors auto-register via embedded Netty server. Same appname, different IP:port. Graceful shutdown: auto-unregister on app stop.
 
 ## Common integration patterns
-
-### Pattern 1: Bean mode handler (recommended)
-
-Standard handler registration with `@XxlJob` annotation. Most common and recommended for production.
-
-```java
-@Component
-public class MyJobHandler {
-    @XxlJob("myJobHandler")
-    public ReturnT<String> execute() {
-        // business logic
-        return XxlJobHelper.handleSuccess("done");
-    }
-}
-```
 
 ### Pattern 2: GLUE mode (inline script)
 

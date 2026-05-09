@@ -8,10 +8,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Spring Boot Resilience4j Patterns
 
-## Overview
-
-Provides Resilience4j patterns (circuit breaker, retry, rate limiter, bulkhead, time limiter, fallback) for Spring Boot 3.x fault tolerance with configuration and testing workflows.
-
 ## When to use this skill
 
 - Implementing fault tolerance and preventing cascading failures
@@ -51,8 +47,6 @@ implementation "io.github.resilience4j:resilience4j-spring-boot3:2.4.0"
 implementation "org.springframework.boot:spring-boot-starter-aop"
 implementation "org.springframework.boot:spring-boot-starter-actuator"
 ```
-
-Enable AOP annotation processing with `@EnableAspectJAutoProxy` (auto-configured by Spring Boot).
 
 ### 2. Circuit Breaker Pattern
 
@@ -349,30 +343,14 @@ Access monitoring endpoints:
 - `GET /actuator/circuitbreakers` - Circuit breaker states
 - `GET /actuator/metrics` - Custom resilience metrics
 
-### Testing & Verification Workflow
+### Testing & Verification
 
-1. **Circuit Breaker**: Call endpoint with failures → check `GET /actuator/circuitbreakers` shows `OPEN` → wait `waitDurationInOpenState` → verify state transitions to `HALF_OPEN` → `CLOSED`
-
-2. **Retry**: Enable `resilience4j.retry.metrics.enabled: true` → invoke endpoint → verify `retry.{instance}.successful-calls-with-retry-attempts` metric increases
-
-3. **Rate Limiter**: Send requests exceeding `limitForPeriod` → verify 429 status → check `GET /actuator/ratelimiters` shows `LIMITED`
-
-4. **Bulkhead**: Load test with concurrent requests exceeding `maxConcurrentCalls` → verify excess requests fail immediately with `BulkheadFullException`
-
-5. **Time Limiter**: Mock async delay beyond `timeoutDuration` → verify fallback triggers after timeout
-
-See references/testing-patterns.md for unit and integration testing strategies.
+Verify each pattern via Actuator: `/actuator/circuitbreakers` (state transitions), `/actuator/ratelimiters` (limited counts), `/actuator/metrics` (retry counts). For test strategies, see `references/testing-patterns.md`.
 
 ## Best Practices
 
-- **Provide fallback methods**: Ensure graceful degradation with meaningful responses
-- **Use exponential backoff**: Prevent overwhelming recovering services (`exponentialBackoffMultiplier: 2`)
-- **Set appropriate thresholds**: `failureRateThreshold` between 50-70%
-- **Use constructor injection**: Never use field injection for Resilience4j dependencies
-- **Enable health indicators**: Set `registerHealthIndicator: true` for all patterns
-- **Retry only transient errors**: Network timeouts, 5xx; skip 4xx and business exceptions
-- **Size bulkheads based on load**: Calculate thread pool and semaphore sizes from expected concurrency
-- **Document fallback behavior**: Make fallback logic clear and predictable
+- **Retry only transient errors** (5xx, timeouts; skip 4xx and business exceptions)
+- **Size bulkheads based on expected concurrency**
 
 ## Constraints and Warnings
 
@@ -383,56 +361,6 @@ See references/testing-patterns.md for unit and integration testing strategies.
 - Rate limiters can cause thread blocking; configure appropriate wait durations
 - Be cautious with `@Retry` on non-idempotent operations like POST requests
 - Monitor memory when using thread pool bulkheads with high concurrency
-
-## Examples
-
-### Before → After: Circuit Breaker
-
-```java
-// BEFORE: No protection
-public PaymentResponse processPayment(PaymentRequest request) {
-    return paymentClient.processPayment(request);
-}
-
-// AFTER: Circuit breaker with fallback
-@CircuitBreaker(name = "paymentService", fallbackMethod = "paymentFallback")
-public PaymentResponse processPayment(PaymentRequest request) {
-    return paymentClient.processPayment(request);
-}
-private PaymentResponse paymentFallback(PaymentRequest request, Exception ex) {
-    return PaymentResponse.builder().status("PENDING").message("Service temporarily unavailable").build();
-}
-```
-
-### Before → After: Retry with Backoff
-
-```java
-// BEFORE: Single attempt
-public Order getOrder(Long orderId) {
-    return orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-}
-
-// AFTER: Retry with exponential backoff (maxAttempts and waitDuration configured in application.yml)
-@Retry(name = "orderService", fallbackMethod = "getOrderFallback")
-public Order getOrder(Long orderId) {
-    return orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-}
-private Order getOrderFallback(Long orderId, Exception ex) { return Order.cachedOrder(orderId); }
-```
-
-### Before → After: Rate Limiting
-
-```java
-// BEFORE: Unbounded requests
-@GetMapping("/api/data") public Data fetchData() { return dataService.process(); }
-
-// AFTER: Rate limited
-@RateLimiter(name = "dataService", fallbackMethod = "rateLimitFallback")
-@GetMapping("/api/data") public Data fetchData() { return dataService.process(); }
-private Result<Void> rateLimitFallback(Exception ex) {
-    return Result.fail(429, "Rate limit exceeded");
-}
-```
 
 ## Related Skills
 
