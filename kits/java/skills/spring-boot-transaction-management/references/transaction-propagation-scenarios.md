@@ -10,11 +10,11 @@ All 7 Spring transaction propagation types with explanation and usage guidance.
 
 ```java
 /**
- * 创建用户 — REQUIRED 是默认传播行为
- * <p>如果调用方已有事务则加入，否则新建事务</p>
+ * Create user — REQUIRED is the default propagation behavior
+ * <p>If the caller already has a transaction, join it; otherwise, start a new transaction</p>
  */
 @Override
-@Transactional(rollbackFor = Exception.class)  // propagation = Propagation.REQUIRED 是默认值
+@Transactional(rollbackFor = Exception.class)  // propagation = Propagation.REQUIRED is the default
 public void create(UserCreateDTO dto) {
     UserDO dataObject = UserConverter.toDO(dto);
     baseMapper.insert(dataObject);
@@ -29,8 +29,8 @@ public void create(UserCreateDTO dto) {
 
 ```java
 /**
- * 查询用户数量 — SUPPORTS 传播行为
- * <p>有事务则加入（readOnly 优化生效），无事务则非事务执行</p>
+ * Count users by status — SUPPORTS propagation behavior
+ * <p>Join existing transaction (readOnly optimization applies), or execute non-transactionally if no transaction</p>
  */
 @Override
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -47,8 +47,8 @@ public long countByStatus(UserStatus status) {
 
 ```java
 /**
- * 批量更新用户状态 — MANDATORY 传播行为
- * <p>强制要求调用方已有事务，否则抛出 IllegalTransactionStateException</p>
+ * Batch update user status — MANDATORY propagation behavior
+ * <p>Requires the caller to already have a transaction; otherwise throws IllegalTransactionStateException</p>
  */
 @Override
 @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Exception.class)
@@ -71,8 +71,8 @@ public void batchUpdateStatus(List<Long> ids, UserStatus status) {
 
 ```java
 /**
- * 记录操作审计日志 — REQUIRES_NEW 独立事务
- * <p>无论主事务是否回滚，审计日志独立提交</p>
+ * Log operation audit record — REQUIRES_NEW independent transaction
+ * <p>Audit log commits independently, regardless of whether the main transaction rolls back</p>
  */
 @Override
 @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
@@ -94,13 +94,13 @@ public void logOperation(String action, String target, String detail) {
 
 ```java
 /**
- * 发送邮件通知 — NOT_SUPPORTED 非事务执行
- * <p>挂起调用方事务，避免邮件发送失败导致事务回滚</p>
+ * Send email notification — NOT_SUPPORTED non-transactional execution
+ * <p>Suspends caller transaction, preventing email send failure from causing transaction rollback</p>
  */
 @Override
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public void sendNotification(String email, String subject, String content) {
-    // 非事务操作：邮件发送不应影响数据库事务
+    // Non-transactional operation: email sending should not affect database transaction
     mailSender.send(new SimpleMailMessage(email, subject, content));
 }
 ```
@@ -113,13 +113,13 @@ public void sendNotification(String email, String subject, String content) {
 
 ```java
 /**
- * 全量数据导出 — NEVER 传播行为
- * <p>强制非事务执行，如果调用方有事务则抛出异常</p>
+ * Full data export — NEVER propagation behavior
+ * <p>Enforces non-transactional execution; throws exception if caller has a transaction</p>
  */
 @Override
 @Transactional(propagation = Propagation.NEVER)
 public List<UserExportVO> exportAll() {
-    // 大批量导出不应占用事务连接
+    // Large batch export should not hold a transaction connection
     return baseMapper.selectList(null)
         .stream()
         .map(UserConverter::toExportVO)
@@ -137,18 +137,18 @@ public List<UserExportVO> exportAll() {
 
 ```java
 /**
- * 批量导入用户 — NESTED 传播行为
- * <p>每条记录的导入可以在 savepoint 上独立回滚，不影响整体批次</p>
+ * Batch import users — NESTED propagation behavior
+ * <p>Each record's import can independently rollback to a savepoint, without affecting the overall batch</p>
  */
 @Override
 @Transactional(rollbackFor = Exception.class)
 public void batchImport(List<UserImportDTO> dtoList) {
     for (UserImportDTO dto : dtoList) {
         try {
-            // NESTED 事务：单条导入失败只回滚到 savepoint，整体批次继续
+            // NESTED transaction: single import failure only rolls back to savepoint, overall batch continues
             importSingleUser(dto);
         } catch (Exception e) {
-            log.warn("导入失败，跳过: username={}", dto.getUsername(), e);
+            log.warn("Import failed, skipping: username={}", dto.getUsername(), e);
         }
     }
 }

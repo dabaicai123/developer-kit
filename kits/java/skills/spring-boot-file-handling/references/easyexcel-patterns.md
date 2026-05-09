@@ -20,7 +20,7 @@ public void exportUsers(HttpServletResponse response) throws IOException {
     // 1. Set response headers (required before writing)
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     response.setCharacterEncoding("utf-8");
-    String filename = URLEncoder.encode("用户列表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+    String filename = URLEncoder.encode("User List", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
     response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xlsx");
 
     // 2. Query data
@@ -28,7 +28,7 @@ public void exportUsers(HttpServletResponse response) throws IOException {
 
     // 3. Write Excel to response output stream
     EasyExcel.write(response.getOutputStream(), UserExportDTO.class)
-            .sheet("用户列表")
+            .sheet("User List")
             .doWrite(data);
 }
 ```
@@ -38,23 +38,23 @@ public void exportUsers(HttpServletResponse response) throws IOException {
 ```java
 @Data
 public class UserExportDTO {
-    @ExcelProperty("用户ID")
+    @ExcelProperty("User ID")
     private Long id;
 
-    @ExcelProperty("用户名")
+    @ExcelProperty("Username")
     private String username;
 
-    @ExcelProperty("邮箱")
+    @ExcelProperty("Email")
     private String email;
 
-    @ExcelProperty(value = "状态", converter = StatusConverter.class)
+    @ExcelProperty(value = "Status", converter = StatusConverter.class)
     private String status;
 
-    @ExcelProperty(value = "注册时间")
+    @ExcelProperty(value = "Registration Time")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
-    @ExcelProperty(value = "薪资")
+    @ExcelProperty(value = "Salary")
     @NumberFormat("#,##0.00")
     private BigDecimal salary;
 }
@@ -78,8 +78,8 @@ public void exportUsersDynamic(
     List<List<String>> heads = columns.stream()
             .map(col -> {
                 Map<String, String> colNameMap = Map.of(
-                    "id", "用户ID", "username", "用户名",
-                    "email", "邮箱", "createdAt", "注册时间"
+                    "id", "User ID", "username", "Username",
+                    "email", "Email", "createdAt", "Registration Time"
                 );
                 return List.of(colNameMap.getOrDefault(col, col));
             })
@@ -90,7 +90,7 @@ public void exportUsersDynamic(
 
     EasyExcel.write(response.getOutputStream())
             .head(heads)
-            .sheet("用户列表")
+            .sheet("User List")
             .doWrite(data);
 }
 ```
@@ -107,12 +107,12 @@ public void exportMultiSheet(HttpServletResponse response) throws IOException {
     ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).build();
 
     // Sheet 1: Users
-    WriteSheet userSheet = EasyExcel.writerSheet(0, "用户列表").head(UserExportDTO.class).build();
+    WriteSheet userSheet = EasyExcel.writerSheet(0, "User List").head(UserExportDTO.class).build();
     List<UserExportDTO> users = userService.findAllForExport();
     excelWriter.write(users, userSheet);
 
     // Sheet 2: Orders
-    WriteSheet orderSheet = EasyExcel.writerSheet(1, "订单列表").head(OrderExportDTO.class).build();
+    WriteSheet orderSheet = EasyExcel.writerSheet(1, "Order List").head(OrderExportDTO.class).build();
     List<OrderExportDTO> orders = orderService.findAllForExport();
     excelWriter.write(orders, orderSheet);
 
@@ -156,7 +156,7 @@ public class HeaderStyleWriteHandler extends AbstractCellWriteHandler {
 // Usage in export
 EasyExcel.write(response.getOutputStream(), UserExportDTO.class)
         .registerWriteHandler(new HeaderStyleWriteHandler())
-        .sheet("用户列表")
+        .sheet("User List")
         .doWrite(data);
 ```
 
@@ -263,16 +263,16 @@ public Result<ImportResult> importUsers(@RequestParam("file") MultipartFile file
 ```java
 @Data
 public class UserImportDTO {
-    @ExcelProperty("用户名")
+    @ExcelProperty("Username")
     private String username;
 
-    @ExcelProperty("邮箱")
+    @ExcelProperty("Email")
     private String email;
 
-    @ExcelProperty("年龄")
+    @ExcelProperty("Age")
     private Integer age;
 
-    @ExcelProperty(value = "入职日期", converter = LocalDateConverter.class)
+    @ExcelProperty(value = "Join Date", converter = LocalDateConverter.class)
     private LocalDate hireDate;
 }
 ```
@@ -288,7 +288,7 @@ EasyExcel.read(file.getInputStream(), UserImportDTO.class, listener)
 
 // Read specific sheet by name or index
 EasyExcel.read(file.getInputStream(), UserImportDTO.class, listener)
-        .sheet("用户数据")  // by sheet name
+        .sheet("User Data")  // by sheet name
         .doRead();
 
 EasyExcel.read(file.getInputStream(), UserImportDTO.class, listener)
@@ -353,7 +353,7 @@ public void onException(Exception exception, AnalysisContext context) {
 @Data
 public class OrderExportDTO {
     // Map by column name (matches Excel header text)
-    @ExcelProperty("订单编号")
+    @ExcelProperty("Order Number")
     private String orderNo;
 
     // Map by column index (0-based, useful when header names vary)
@@ -361,7 +361,7 @@ public class OrderExportDTO {
     private String productName;
 
     // Map with converter
-    @ExcelProperty(value = "订单状态", converter = OrderStatusConverter.class)
+    @ExcelProperty(value = "Order Status", converter = OrderStatusConverter.class)
     private OrderStatus status;
 }
 ```
@@ -371,15 +371,15 @@ public class OrderExportDTO {
 ```java
 @Data
 public class SalesReportDTO {
-    // Two-level header: "销售数据" > "订单数"
-    @ExcelProperty(value = {"销售数据", "订单数"})
+    // Two-level header: "Sales Data" > "Order Count"
+    @ExcelProperty(value = {"Sales Data", "Order Count"})
     private Integer orderCount;
 
-    @ExcelProperty(value = {"销售数据", "金额"})
+    @ExcelProperty(value = {"Sales Data", "Amount"})
     @NumberFormat("#,##0.00")
     private BigDecimal amount;
 
-    @ExcelProperty(value = {"客户信息", "客户名"})
+    @ExcelProperty(value = {"Customer Info", "Customer Name"})
     private String customerName;
 }
 ```
@@ -389,11 +389,11 @@ public class SalesReportDTO {
 ### Number Format
 
 ```java
-@ExcelProperty(value = "薪资")
+@ExcelProperty(value = "Salary")
 @NumberFormat("#,##0.00")  // display as "12,500.00"
 private BigDecimal salary;
 
-@ExcelProperty(value = "百分比")
+@ExcelProperty(value = "Percentage")
 @NumberFormat("0.00%")  // display as "85.50%"
 private Double percentage;
 ```
@@ -401,11 +401,11 @@ private Double percentage;
 ### Date Format
 
 ```java
-@ExcelProperty(value = "注册时间")
+@ExcelProperty(value = "Registration Time")
 @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
 private LocalDateTime createdAt;
 
-@ExcelProperty(value = "生日")
+@ExcelProperty(value = "Birthday")
 @DateTimeFormat("yyyy-MM-dd")
 private LocalDate birthday;
 ```
@@ -419,10 +419,10 @@ public class OrderStatusConverter implements CellConverter {
                                                  GlobalConfiguration globalConfiguration) {
         // Enum -> Excel cell display text
         Map<OrderStatus, String> labelMap = Map.of(
-            OrderStatus.PENDING, "待处理",
-            OrderStatus.CONFIRMED, "已确认",
-            OrderStatus.SHIPPED, "已发货",
-            OrderStatus.COMPLETED, "已完成"
+            OrderStatus.PENDING, "Pending",
+            OrderStatus.CONFIRMED, "Confirmed",
+            OrderStatus.SHIPPED, "Shipped",
+            OrderStatus.COMPLETED, "Completed"
         );
         return new WriteCellData<>(labelMap.getOrDefault(value, value.name()));
     }
@@ -433,10 +433,10 @@ public class OrderStatusConverter implements CellConverter {
         // Excel cell text -> Enum
         String text = cellData.getStringValue();
         Map<String, OrderStatus> reverseMap = Map.of(
-            "待处理", OrderStatus.PENDING,
-            "已确认", OrderStatus.CONFIRMED,
-            "已发货", OrderStatus.SHIPPED,
-            "已完成", OrderStatus.COMPLETED
+            "Pending", OrderStatus.PENDING,
+            "Confirmed", OrderStatus.CONFIRMED,
+            "Shipped", OrderStatus.SHIPPED,
+            "Completed", OrderStatus.COMPLETED
         );
         return reverseMap.getOrDefault(text, OrderStatus.valueOf(text));
     }

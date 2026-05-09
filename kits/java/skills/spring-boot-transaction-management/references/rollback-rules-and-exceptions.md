@@ -10,15 +10,15 @@ This is a common source of bugs: developers assume any exception will rollback t
 
 ```java
 /**
- * ❌ 默认行为：checked exception 不触发回滚
- * <p>IOException 是 checked exception，抛出后事务仍然提交</p>
+ * Default behavior: checked exceptions do NOT trigger rollback
+ * <p>IOException is a checked exception; after it is thrown, the transaction still commits</p>
  */
 @Override
-@Transactional  // 默认：仅 RuntimeException 和 Error 触发回滚
+@Transactional  // Default: only RuntimeException and Error trigger rollback
 public void importData(String filePath) throws IOException {
     List<DataDO> data = parseCsv(filePath);  // IOException — checked exception
     saveBatch(data);
-    // 如果 parseCsv() 抛出 IOException，已插入的数据不会回滚！
+    // If parseCsv() throws IOException, already-inserted data will NOT be rolled back!
 }
 ```
 
@@ -28,15 +28,15 @@ The recommended practice is to always specify `rollbackFor = Exception.class`, w
 
 ```java
 /**
- * ✅ 正确做法：rollbackFor = Exception.class 确保所有异常触发回滚
- * <p>IOException 等 checked exception 也会导致事务回滚</p>
+ * Correct approach: rollbackFor = Exception.class ensures all exceptions trigger rollback
+ * <p>IOException and other checked exceptions will also cause transaction rollback</p>
  */
 @Override
 @Transactional(rollbackFor = Exception.class)
 public void importData(String filePath) throws IOException {
-    List<DataDO> data = parseCsv(filePath);  // IOException — 触发回滚
+    List<DataDO> data = parseCsv(filePath);  // IOException — triggers rollback
     saveBatch(data);
-    // 如果 parseCsv() 抛出 IOException，所有插入的数据都会回滚
+    // If parseCsv() throws IOException, all inserted data will be rolled back
 }
 ```
 
@@ -48,8 +48,8 @@ Use `noRollbackFor` to exclude specific exception types from triggering rollback
 
 ```java
 /**
- * 排除特定异常不触发回滚
- * <p>DuplicateDataException 是业务上可接受的异常，事务仍然提交</p>
+ * Exclude specific exceptions from triggering rollback
+ * <p>DuplicateDataException is a business-acceptable exception; the transaction still commits</p>
  */
 @Override
 @Transactional(rollbackFor = Exception.class, noRollbackFor = DuplicateDataException.class)
@@ -58,8 +58,8 @@ public void processBatch(List<BatchItemDTO> items) {
         try {
             processItem(item);
         } catch (DuplicateDataException e) {
-            // 重复数据是可接受的，不影响整体批次的提交
-            log.info("跳过重复数据: {}", item.getId());
+            // Duplicate data is acceptable; does not prevent the overall batch from committing
+            log.info("Skipping duplicate data: {}", item.getId());
         }
     }
 }
@@ -71,8 +71,8 @@ The most critical rollback pitfall: **catching and swallowing exceptions inside 
 
 ```java
 /**
- * ❌ 错误：内部 catch 异常导致事务不回滚
- * <p>Spring 代理只看方法返回值，catch 后正常返回 = 事务提交</p>
+ * Wrong: catching exception internally prevents transaction rollback
+ * <p>Spring proxy only checks method return value; catch + normal return = transaction commits</p>
  */
 @Override
 @Transactional(rollbackFor = Exception.class)
@@ -86,14 +86,14 @@ public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
         to.setBalance(to.getBalance().add(amount));
         accountMapper.updateById(to);
     } catch (Exception e) {
-        // ❌ 吞掉异常：from 账户扣款已提交，to 账户加款失败但事务仍然提交！
-        log.error("转账失败", e);
+        // Swallowing exception: from-account deduction is committed, to-account credit failed but transaction still commits!
+        log.error("Transfer failed", e);
     }
 }
 
 /**
- * ✅ 正确做法：让异常传播到代理层触发回滚
- * <p>不要在 @Transactional 方法内 catch 并吞掉异常</p>
+ * Correct approach: let the exception propagate to the proxy layer to trigger rollback
+ * <p>Do not catch and swallow exceptions inside @Transactional methods</p>
  */
 @Override
 @Transactional(rollbackFor = Exception.class)
@@ -105,12 +105,12 @@ public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
     AccountDO to = accountMapper.selectById(toId);
     to.setBalance(to.getBalance().add(amount));
     accountMapper.updateById(to);
-    // 异常自然传播到代理层 → 事务回滚，两个账户都不变更
+    // Exception naturally propagates to proxy layer → transaction rolls back, neither account is modified
 }
 
 /**
- * ✅ 如果必须 catch：手动标记回滚
- * <p>使用 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()</p>
+ * If you must catch: manually mark for rollback
+ * <p>Use TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()</p>
  */
 @Override
 @Transactional(rollbackFor = Exception.class)
@@ -124,8 +124,8 @@ public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
         to.setBalance(to.getBalance().add(amount));
         accountMapper.updateById(to);
     } catch (Exception e) {
-        log.error("转账失败", e);
-        // ✅ 手动标记回滚，即使异常被 catch
+        log.error("Transfer failed", e);
+        // Manually mark for rollback, even if the exception was caught
         TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     }
 }

@@ -68,10 +68,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
     public void processOrder(OrderCommand cmd) {
         if (cmd.isDryRun()) {
-            // 不需要事务的预检查逻辑
+            // pre-check logic that doesn't need a transaction
             validateOnly(cmd);
         } else {
-            // 仅对需要事务的部分使用 TransactionTemplate
+            // use TransactionTemplate only for the parts that need a transaction
             transactionTemplate.execute(status -> {
                 doCreateOrder(cmd);
                 return null;
@@ -112,25 +112,25 @@ See `references/rollback-rules-and-exceptions.md` for detailed flow diagrams and
 
 ```java
 /**
- * 订单服务实现类
- * <p>继承 ServiceImpl 获得 CRUD 基础方法，通过 baseMapper 访问数据层</p>
+ * Order service implementation
+ * <p>Extends ServiceImpl for CRUD base methods, accesses data layer via baseMapper</p>
  */
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
 
     /**
-     * 创建订单
-     * <p>包含订单主体和订单明细的写入，需要在同一事务中完成</p>
+     * Create order
+     * <p>Includes order main body and order item writes, must complete in the same transaction</p>
      *
-     * @param dto 创建订单请求
+     * @param dto create order request
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(OrderCreateDTO dto) {
         OrderDO order = OrderConverter.toDO(dto);
         baseMapper.insert(order);
-        // 订单明细也插入，与订单主体在同一事务中
+        // order items also inserted, within the same transaction as the order main body
         orderItemService.saveBatch(OrderConverter.toItemDOs(dto.getItems(), order.getId()));
     }
 }
@@ -140,18 +140,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
 ```java
 /**
- * 用户服务实现类
- * <p>继承 ServiceImpl 获得 CRUD 基础方法</p>
+ * User service implementation
+ * <p>Extends ServiceImpl for CRUD base methods</p>
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     /**
-     * 根据邮箱查询用户 — single SQL, no @Transactional needed
+     * Find user by email — single SQL, no @Transactional needed
      * <p>Auto-commit is sufficient for single-statement queries</p>
      *
-     * @param email 用户邮箱
-     * @return 对应的用户实体，不存在则返回 null
+     * @param email user email
+     * @return corresponding user entity, returns null if not found
      */
     @Override
     public UserDO findByEmail(String email) {
@@ -159,13 +159,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
 
     /**
-     * 分页查询用户列表 — multi-step (query + count + transform), readOnly = true needed
+     * Paginated user list query — multi-step (query + count + transform), readOnly = true needed
      * <p>Multiple SQL statements need consistent snapshot; readOnly prevents accidental writes</p>
      *
-     * @param pageNum  页码
-     * @param pageSize 每页条数
-     * @param query    查询条件
-     * @return 分页结果
+     * @param pageNum  page number
+     * @param pageSize items per page
+     * @param query    query conditions
+     * @return paginated result
      */
     @Override
     @Transactional(readOnly = true)
@@ -191,20 +191,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
 ```java
 /**
- * 操作审计日志服务
- * <p>使用 REQUIRES_NEW 确保审计日志独立提交，不受主业务事务回滚影响</p>
+ * Operation audit log service
+ * <p>Uses REQUIRES_NEW to ensure audit logs commit independently, unaffected by main business transaction rollback</p>
  */
 @Service
 @RequiredArgsConstructor
 public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLogDO> implements AuditLogService {
 
     /**
-     * 记录操作审计日志
-     * <p>即使主业务事务回滚，审计日志仍然保留</p>
+     * Record operation audit log
+     * <p>Even if the main business transaction rolls back, audit logs are still retained</p>
      *
-     * @param action 操作类型
-     * @param target 操作目标
-     * @param detail 操作详情
+     * @param action operation type
+     * @param target operation target
+     * @param detail operation details
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
@@ -218,7 +218,7 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLogDO>
     }
 }
 
-// 主业务服务调用审计日志 — 即使主事务回滚，审计日志已独立提交
+// Main business service calls audit log — even if main transaction rolls back, audit log has already committed independently
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
@@ -228,15 +228,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long orderId) {
-        // 主业务：取消订单
+        // Main business: cancel order
         OrderDO order = baseMapper.selectById(orderId);
         order.setStatus(OrderStatus.CANCELLED);
         baseMapper.updateById(order);
 
-        // 审计日志：独立事务，不受主事务回滚影响
-        auditLogService.log("CANCEL_ORDER", "Order:" + orderId, "订单取消");
+        // Audit log: independent transaction, unaffected by main transaction rollback
+        auditLogService.log("CANCEL_ORDER", "Order:" + orderId, "Order cancelled");
 
-        // 如果此处抛出异常导致主事务回滚，审计日志仍然保留
+        // If an exception thrown here causes main transaction rollback, audit log is still retained
     }
 }
 ```
@@ -245,36 +245,36 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
 ```java
 /**
- * 文件导入服务
- * <p>涉及文件读取（可能抛出 IOException）和数据库写入，需要确保 IOException 也触发回滚</p>
+ * File import service
+ * <p>Involves file reading (may throw IOException) and database writes, must ensure IOException also triggers rollback</p>
  */
 @Service
 @RequiredArgsConstructor
 public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImportDO> implements DataImportService {
 
     /**
-     * 从 CSV 文件导入数据
-     * <p>默认只回滚 RuntimeException，IOException 是 checked exception 不会触发回滚，
-     * 必须显式指定 rollbackFor = Exception.class</p>
+     * Import data from CSV file
+     * <p>By default only RuntimeException triggers rollback; IOException is a checked exception that
+     * does not trigger rollback, must explicitly specify rollbackFor = Exception.class</p>
      *
-     * @param filePath CSV 文件路径
+     * @param filePath CSV file path
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importFromCsv(String filePath) throws IOException {
-        List<DataImportDO> dataObjects = parseCsv(filePath);  // 可能抛出 IOException
+        List<DataImportDO> dataObjects = parseCsv(filePath);  // may throw IOException
         saveBatch(entities);
     }
 
     /**
-     * 特定异常不回滚 — 业务上允许某些可接受的异常正常提交
-     * <p>使用 noRollbackFor 排除特定异常（慎用）</p>
+     * Specific exceptions do not trigger rollback — business allows certain acceptable exceptions to commit normally
+     * <p>Uses noRollbackFor to exclude specific exceptions (use sparingly)</p>
      */
     @Override
     @Transactional(rollbackFor = Exception.class, noRollbackFor = BusinessException.class)
     public void processWithAcceptableError(Long id) {
         DataImportDO dataObject = baseMapper.selectById(id);
-        // 如果抛出 BusinessException，事务仍然提交
+        // If BusinessException is thrown, the transaction still commits
         validateAndProcess(dataObject);
     }
 }
@@ -284,7 +284,7 @@ public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImp
 
 ```java
 /**
- * 批量导入服务 — NESTED propagation allows individual item failure without rolling back entire batch
+ * Batch import service — NESTED propagation allows individual item failure without rolling back entire batch
  * <p>Each item runs in a nested transaction (savepoint). If one item fails, only that savepoint rolls back;
  * the outer transaction and other items continue.</p>
  */
@@ -470,46 +470,46 @@ public class OrderGatewayImpl implements OrderGateway {
 
 ```java
 /**
- * ❌ 错误示例：自调用导致 @Transactional 失效
- * <p>Spring AOP 基于代理，同类内部方法调用绕过代理，@Transactional 注解被静默忽略</p>
+ * ❌ Wrong example: self-invocation causes @Transactional to be ineffective
+ * <p>Spring AOP is proxy-based; same-class internal method calls bypass the proxy, @Transactional annotation is silently ignored</p>
  */
 @Service
 public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> implements PaymentService {
 
     /**
-     * 支付流程 — 内部调用 processRefund()，后者的事务注解无效
+     * Payment flow — internal call to processRefund(), the latter's transaction annotation is ineffective
      */
     public void handlePayment(PaymentDTO dto) {
         PaymentDO payment = PaymentConverter.toDO(dto);
         baseMapper.insert(payment);
 
-        // ❌ this.processRefund() 绕过了 Spring AOP 代理
-        // 即使 processRefund() 上有 @Transactional，也不会生效
+        // ❌ this.processRefund() bypasses Spring AOP proxy
+        // Even though processRefund() has @Transactional, it will not take effect
         this.processRefund(payment.getId(), dto.getRefundAmount());
     }
 
-    /** ❌ 此处的 @Transactional 不会被代理拦截（自调用） */
+    /** ❌ @Transactional here will not be intercepted by the proxy (self-invocation) */
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void processRefund(Long paymentId, BigDecimal amount) {
-        // 退款逻辑 — 但事务注解无效！
+        // Refund logic — but transaction annotation is ineffective!
     }
 }
 
 /**
- * ✅ 正确做法：将独立事务逻辑提取到单独的 Service bean
- * <p>通过注入其他 Service 调用，确保经过 Spring AOP 代理</p>
+ * ✅ Correct approach: extract independent transaction logic to a separate Service bean
+ * <p>By injecting other Services for invocation, ensures calls go through Spring AOP proxy</p>
  */
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> implements PaymentService {
 
-    private final RefundService refundService;  // ✅ 注入独立的服务
+    private final RefundService refundService;  // ✅ Inject independent service
 
     public void handlePayment(PaymentDTO dto) {
         PaymentDO payment = PaymentConverter.toDO(dto);
         baseMapper.insert(payment);
 
-        // ✅ 通过 Spring 代理调用 refundService，@Transactional 生效
+        // ✅ Invoke refundService through Spring proxy, @Transactional takes effect
         refundService.processRefund(payment.getId(), dto.getRefundAmount());
     }
 }
@@ -518,7 +518,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> im
 @RequiredArgsConstructor
 public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> implements RefundService {
 
-    /** ✅ 独立 bean 上的 @Transactional 会被代理正确拦截 */
+    /** ✅ @Transactional on independent bean will be properly intercepted by proxy */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void processRefund(Long paymentId, BigDecimal amount) {

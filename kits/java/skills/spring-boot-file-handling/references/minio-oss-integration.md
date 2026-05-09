@@ -329,42 +329,42 @@ public String generatePresignedUrl(String storagePath, int expiryMinutes) {
 
 ```java
 /**
- * 文件存储服务抽象接口
- * <p>定义文件上传、下载、删除、生成预签名URL的标准操作</p>
- * <p>业务代码只依赖此接口，不依赖具体存储实现</p>
+ * File storage service abstraction interface
+ * <p>Defines standard operations for file upload, download, delete, and presigned URL generation</p>
+ * <p>Business code depends only on this interface, not on specific storage implementations</p>
  */
 public interface FileStorageService {
 
     /**
-     * 上传文件
+     * Upload file
      *
-     * @param file           MultipartFile 上传文件
-     * @param storageFilename 存储文件名（UUID生成的唯一名称）
-     * @return 存储路径
+     * @param file           MultipartFile uploaded file
+     * @param storageFilename Storage filename (UUID-generated unique name)
+     * @return Storage path
      */
     String upload(MultipartFile file, String storageFilename);
 
     /**
-     * 下载文件（返回流，避免大文件内存占用）
+     * Download file (returns stream to avoid memory usage for large files)
      *
-     * @param storagePath 存储路径
-     * @return 文件内容流
+     * @param storagePath Storage path
+     * @return File content stream
      */
     InputStream download(String storagePath);
 
     /**
-     * 删除文件
+     * Delete file
      *
-     * @param storagePath 存储路径
+     * @param storagePath Storage path
      */
     void delete(String storagePath);
 
     /**
-     * 生成预签名下载URL
+     * Generate presigned download URL
      *
-     * @param storagePath   存储路径
-     * @param expiryMinutes URL有效时长（分钟）
-     * @return 预签名URL字符串
+     * @param storagePath   Storage path
+     * @param expiryMinutes URL validity duration (minutes)
+     * @return Presigned URL string
      */
     String generatePresignedUrl(String storagePath, int expiryMinutes);
 }

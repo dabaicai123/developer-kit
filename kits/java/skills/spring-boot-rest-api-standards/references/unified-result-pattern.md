@@ -273,7 +273,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         return UserConverter.toVO(entity);
     }
 
-    // PageResult.of(mpPage).map() 统一转换
+    // PageResult.of(mpPage).map() unified conversion
     @Override
     @Transactional(readOnly = true)
     public PageResult<UserVO> page(long page, long pageSize) {

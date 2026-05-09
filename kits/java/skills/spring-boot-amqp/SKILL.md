@@ -49,7 +49,7 @@ spring:
 
 ## Jackson Converter (required)
 
-Always configure Jackson — never use default Java serialization.
+Spring Boot defaults to `SimpleMessageConverter` (Java serialization) — insecure and not cross-language. Spring Boot **provides no configuration property** to switch to JSON; you must define the bean manually.
 
 ```java
 @Configuration
@@ -62,9 +62,49 @@ public class RabbitConfig {
 }
 ```
 
-Spring Boot auto-configures `RabbitTemplate` and `SimpleRabbitListenerContainerFactory` with this converter automatically.
+Once defined, Spring Boot auto-injects the converter into `RabbitTemplate` and `SimpleRabbitListenerContainerFactory` — no extra wiring needed.
 
-## Producer
+## Exchange / Queue Declaration
+
+### Consumer — @RabbitListener bindings (recommended)
+
+Declares and consumes in one annotation — most elegant:
+
+```java
+@RabbitListener(bindings = @QueueBinding(
+    value = @Queue(value = "order.created.queue", durable = "true", arguments = {
+        @Argument(name = "x-dead-letter-exchange", value = "order.dlx"),
+        @Argument(name = "x-dead-letter-routing-key", value = "order.created.dlq")
+    }),
+    exchange = @Exchange(value = "order.exchange", type = ExchangeTypes.TOPIC, durable = "true"),
+    key = "order.created.#"
+))
+public void handleOrderCreated(OrderCreatedEvent event) {
+    notificationService.sendOrderConfirmation(event);
+}
+```
+
+### Producer-only or shared infrastructure — Declarables
+
+Scattered `@Bean` declarations are verbose; use `Declarables` to bundle everything:
+
+```java
+@Configuration
+public class OrderAmqpConfig {
+
+    @Bean
+    Declarables orderInfrastructure() {
+        return new Declarables(
+            new DirectExchange("order.exchange", true, false),
+            new Queue("order.created.queue", true),
+            new Binding("order.created.queue", DestinationType.QUEUE,
+                "order.exchange", "order.created", null)
+        );
+    }
+}
+```
+
+`RabbitAdmin` auto-detects `Declarables` beans and declares them on the broker when a connection is established — no manual invocation needed.
 
 ```java
 @Service
@@ -89,29 +129,6 @@ public record OrderCreatedEvent(UUID eventId, Long orderId, Instant timestamp) {
 ```
 
 ## Consumer
-
-Prefer `@RabbitListener` with `bindings` to declare exchange, queue, and DLX inline — no separate `@Bean` needed:
-
-```java
-@Service
-@RequiredArgsConstructor
-public class OrderNotificationListener {
-
-    @RabbitListener(bindings = @QueueBinding(
-        value = @Queue(value = "order.created.queue", durable = "true", arguments = {
-            @Argument(name = "x-dead-letter-exchange", value = "order.dlx"),
-            @Argument(name = "x-dead-letter-routing-key", value = "order.created.dlq")
-        }),
-        exchange = @Exchange(value = "order.exchange", type = ExchangeTypes.TOPIC, durable = "true"),
-        key = "order.created.#"
-    ))
-    public void handleOrderCreated(OrderCreatedEvent event) {
-        notificationService.sendOrderConfirmation(event);
-    }
-}
-```
-
-Use `@Bean` declarations only for producer-only services (no listener) or when multiple listeners share the same exchange/queue.
 
 ### Manual Acknowledgment
 
@@ -156,8 +173,8 @@ public void handleOrderCreated(OrderCreatedEvent event) {
 
 ## Key Rules
 
-- Configure Jackson converter — Spring Boot picks it up automatically for `RabbitTemplate` and listeners
-- Prefer `@RabbitListener` with `bindings` for inline queue/exchange/DLX declaration — use `@Bean` only for producer-only services or shared resources
+- Configure Jackson converter — Spring Boot provides no property to switch converters; define the bean manually, and it auto-injects into `RabbitTemplate` and listener factory
+- Consumer: `@RabbitListener(bindings = ...)` for inline declaration; Producer-only: `Declarables` to bundle, avoid scattered `@Bean`
 - Never publish inside `@Transactional` without outbox pattern — use `spring-boot-event-driven-patterns`
 - Configure DLX/DLQ for every production queue
 - Keep consumers idempotent using `eventId` deduplication

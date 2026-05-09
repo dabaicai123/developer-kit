@@ -213,7 +213,7 @@ public class ExcelExportController {
         // 1. Set response headers
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
-        String filename = URLEncoder.encode("用户列表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        String filename = URLEncoder.encode("User List", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xlsx");
 
         // 2. Query data
@@ -221,23 +221,23 @@ public class ExcelExportController {
 
         // 3. Write Excel
         EasyExcel.write(response.getOutputStream(), UserExportDTO.class)
-                .sheet("用户列表")
+                .sheet("User List")
                 .doWrite(data);
     }
 }
 
 @Data
 public class UserExportDTO {
-    @ExcelProperty("用户ID")
+    @ExcelProperty("User ID")
     private Long id;
 
-    @ExcelProperty("用户名")
+    @ExcelProperty("Username")
     private String username;
 
-    @ExcelProperty("邮箱")
+    @ExcelProperty("Email")
     private String email;
 
-    @ExcelProperty(value = "注册时间", converter = LocalDateTimeConverter.class)
+    @ExcelProperty(value = "Registration Time", converter = LocalDateTimeConverter.class)
     private LocalDateTime createdAt;
 }
 ```
@@ -310,13 +310,13 @@ public class UserImportReadListener extends AnalysisEventListener<UserImportDTO>
 
 @Data
 public class UserImportDTO {
-    @ExcelProperty("用户名")
+    @ExcelProperty("Username")
     private String username;
 
-    @ExcelProperty("邮箱")
+    @ExcelProperty("Email")
     private String email;
 
-    @ExcelProperty("年龄")
+    @ExcelProperty("Age")
     private Integer age;
 }
 ```

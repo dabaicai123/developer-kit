@@ -114,8 +114,8 @@ Compensation       Compensation        Compensation
 
 ```java
 /**
- * 编排式 Saga：订单服务监听支付结果
- * <p>每个服务自主决定下一步动作，无中央协调器</p>
+ * Choreography Saga: Order service listens for payment results
+ * <p>Each service autonomously decides the next action, no central coordinator</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -125,7 +125,7 @@ public class OrderEventHandler {
     private final KafkaTemplate<String, Object> kafka;
 
     /**
-     * 监听支付完成事件 → 触发库存预留
+     * Listen for payment completion event → trigger inventory reservation
      */
     @KafkaListener(topics = "payment.processed", groupId = "order-service")
     public void onPaymentProcessed(PaymentProcessedEvent event) {
@@ -133,7 +133,7 @@ public class OrderEventHandler {
             InventoryReservedEvent result = orderService.reserveInventory(event.toInventoryRequest());
             kafka.send("inventory.reserved", result);
         } catch (InsufficientInventoryException e) {
-            // 库存不足 → 发布补偿事件
+            // Insufficient inventory → publish compensation event
             kafka.send("inventory.insufficient",
                 new InsufficientInventoryEvent(event.getOrderId(), event.getPaymentId()));
         }
@@ -174,8 +174,8 @@ A saga orchestrator manages the entire workflow, sending commands to participant
 
 ```java
 /**
- * 协调式 Saga：中央编排器管理订单流程
- * <p>所有步骤由编排器控制，失败时触发补偿链</p>
+ * Orchestration Saga: Central orchestrator manages the order flow
+ * <p>All steps are controlled by the orchestrator; on failure, compensation chain is triggered</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -185,7 +185,7 @@ public class OrderSagaOrchestrator {
     private final SagaStateRepository sagaStateRepo;
 
     /**
-     * 启动订单 Saga
+     * Start order Saga
      */
     public void startSaga(OrderRequest request) {
         String sagaId = UUID.randomUUID().toString();
@@ -194,7 +194,7 @@ public class OrderSagaOrchestrator {
     }
 
     /**
-     * 处理支付失败 → 触发补偿链
+     * Handle payment failure → trigger compensation chain
      */
     @KafkaListener(topics = "payment.failed")
     public void handlePaymentFailed(PaymentFailedEvent event) {
@@ -211,8 +211,8 @@ For complex orchestrations with many participants, Axon Framework provides event
 
 ```java
 /**
- * Axon Framework Saga：订单流程编排
- * <p>Axon 自动管理 Saga 生命周期和状态持久化</p>
+ * Axon Framework Saga: Order flow orchestration
+ * <p>Axon automatically manages Saga lifecycle and state persistence</p>
  */
 @Saga
 public class OrderManagementSaga {
@@ -223,27 +223,27 @@ public class OrderManagementSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(OrderCreatedEvent event) {
-        // 步骤1：发起支付命令
+        // Step 1: Send payment command
         commandGateway.send(new ProcessPaymentCommand(event.getOrderId(), event.getTotalAmount()));
     }
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentCompletedEvent event) {
-        // 步骤2：支付成功 → 发起库存预留命令
+        // Step 2: Payment succeeded → send inventory reservation command
         commandGateway.send(new ReserveInventoryCommand(event.getOrderId()));
     }
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(InventoryReservedEvent event) {
-        // 步骤3：库存预留成功 → 发起发货命令
+        // Step 3: Inventory reservation succeeded → send shipment command
         commandGateway.send(new PrepareShipmentCommand(event.getOrderId()));
-        // 流程完成，结束 Saga
+        // Flow complete, end Saga
         SagaLifecycle.end();
     }
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentFailedEvent event) {
-        // 补偿：支付失败 → 取消订单
+        // Compensation: Payment failed → cancel order
         commandGateway.send(new CancelOrderCommand(event.getOrderId(), event.getReason()));
         SagaLifecycle.end();
     }
@@ -258,8 +258,8 @@ Every forward operation MUST have a corresponding compensating transaction. Comp
 
 ```java
 /**
- * 支付补偿：退款操作 — 必须幂等
- * <p>使用数据库约束确保重复调用不会重复退款</p>
+ * Payment compensation: Refund operation — must be idempotent
+ * <p>Use database constraints to ensure repeated calls do not result in duplicate refunds</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -268,7 +268,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> im
     private final OutboxEventPublisher outboxEventPublisher;
 
     /**
-     * 处理支付（正向操作）
+     * Process payment (forward operation)
      */
     @Transactional(rollbackFor = Exception.class)
     public void processPayment(PaymentRequest request) {
@@ -283,13 +283,13 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentDO> im
     }
 
     /**
-     * 退款补偿 — 幂等实现
-     * <p>使用状态检查确保已退款的支付不会重复退款</p>
+     * Refund compensation — idempotent implementation
+     * <p>Use state check to ensure refunded payments are not refunded again</p>
      */
     @Transactional(rollbackFor = Exception.class)
     public void refundPayment(String paymentId) {
         baseMapper.selectById(paymentId).ifPresent(payment -> {
-            // 幂等检查：如果已经退款，跳过（不抛异常）
+            // Idempotency check: if already refunded, skip (do not throw exception)
             if (payment.getStatus() == PaymentStatus.REFUNDED) {
                 return;
             }
@@ -369,8 +369,8 @@ CREATE TABLE outbox_event (
 
 ```java
 /**
- * Outbox 事件发布器
- * <p>将域事件写入 Outbox 表，与业务数据在同一事务中</p>
+ * Outbox Event Publisher
+ * <p>Writes domain events to the Outbox table within the same transaction as business data</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -394,8 +394,8 @@ public class OutboxEventPublisher {
 
 ```java
 /**
- * Outbox 事件轮询器
- * <p>定时扫描 PENDING 状态的事件，发送到 Kafka/RocketMQ</p>
+ * Outbox Event Poller
+ * <p>Periodically scans PENDING events and publishes them to Kafka/RocketMQ</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -405,13 +405,13 @@ public class OutboxEventPoller {
     private final OutboxEventMapper outboxEventMapper;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Scheduled(fixedDelay = 1000)  // 每 1 秒扫描一次
+    @Scheduled(fixedDelay = 1000)  // Scan every 1 second
     @Transactional(rollbackFor = Exception.class)
     public void pollAndPublish() {
         LambdaQueryWrapper<OutboxEventDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(OutboxEventDO::getStatus, OutboxStatus.PENDING)
                .orderByAsc(OutboxEventDO::getCreatedAt)
-               .last("LIMIT 100");  // 每次最多处理 100 条
+               .last("LIMIT 100");  // Process at most 100 events per batch
 
         List<OutboxEventDO> events = outboxEventMapper.selectList(wrapper);
         for (OutboxEventDO event : events) {
@@ -421,8 +421,8 @@ public class OutboxEventPoller {
                 event.setPublishedAt(LocalDateTime.now());
                 outboxEventMapper.updateById(event);
             } catch (Exception e) {
-                log.error("发布事件失败: eventType={}, eventId={}", event.getEventType(), event.getId(), e);
-                // 失败事件保留 PENDING 状态，下次重试
+                log.error("Event publish failed: eventType={}, eventId={}", event.getEventType(), event.getId(), e);
+                // Failed events remain in PENDING status, will be retried next cycle
             }
         }
     }
@@ -435,8 +435,8 @@ Track saga execution status to enable monitoring, recovery, and troubleshooting:
 
 ```java
 /**
- * Saga 状态实体
- * <p>持久化 Saga 流程状态，用于监控和故障恢复</p>
+ * Saga State Entity
+ * <p>Persists Saga flow state for monitoring and failure recovery</p>
  */
 @Data
 @TableName("saga_state")
@@ -446,8 +446,8 @@ public class SagaStateDO {
     private String sagaId;
     private String sagaType;          // e.g., "OrderCreateSaga"
     private SagaStatus status;        // STARTED, COMPLETED, COMPENSATING, FAILED
-    private Integer currentStep;      // 当前执行步骤编号
-    private String lastError;         // 最近一次失败的错误信息
+    private Integer currentStep;      // Current execution step number
+    private String lastError;         // Most recent failure error message
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
@@ -475,8 +475,8 @@ public class KafkaSagaConfig {
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);  // 幂等生产者
-        props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "saga-producer");  // 事务性生产者
+        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);  // Idempotent producer
+        props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "saga-producer");  // Transactional producer
         return new DefaultKafkaProducerFactory<>(props);
     }
 
@@ -487,7 +487,7 @@ public class KafkaSagaConfig {
             new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(new DefaultErrorHandler(
-            new FixedBackOff(1000L, 3L)));  // 重试 3 次，间隔 1 秒
+            new FixedBackOff(1000L, 3L)));  // Retry 3 times, 1-second interval
         return factory;
     }
 }
@@ -496,7 +496,7 @@ public class KafkaSagaConfig {
 ## Event Classes (Immutable with Java Records)
 
 ```java
-// 使用 Java record 确保事件不可变
+// Use Java records to ensure events are immutable
 public record OrderCreatedEvent(String orderId, BigDecimal totalAmount, List<String> items) {}
 public record PaymentProcessedEvent(String paymentId, String orderId) {}
 public record PaymentFailedEvent(String orderId, String reason) {}
