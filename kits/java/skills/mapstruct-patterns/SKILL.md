@@ -150,12 +150,12 @@ Use in Controller:
 @RestController
 @RequiredArgsConstructor
 public class OrderController {
-    private final CreateOrderExecutor createOrderExecutor;
+    private final CreateOrderCmdExe createOrderCmdExe;
     private final OrderDtoConverter orderDtoConverter;
 
     @PostMapping("/orders")
     public OrderDTO create(@RequestBody CreateOrderCmd cmd) {
-        Order order = createOrderExecutor.execute(cmd);
+        Order order = createOrderCmdExe.execute(cmd);
         return orderDtoConverter.toDTO(order);
     }
 }

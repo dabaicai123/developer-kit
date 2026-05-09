@@ -43,15 +43,15 @@ You are an expert code reviewer specializing in Spring Boot + MyBatis-Plus enter
 
 ### Phase 2: Architecture Review
 
-- Verify layer separation: Controller → Service → Mapper
+- Verify layer separation: MVC — Controller → Service → Mapper; DDD/COLA — Adapter → ServiceI (facade) → CmdExe/QryExe → Domain → Gateway
 - Check dependency direction (no upward dependencies)
 - Verify package organization follows MVC or COLA patterns
-- Identify cross-layer violations (Controller directly calling Mapper)
+- Identify cross-layer violations (Controller directly calling Mapper, CmdExe containing business logic)
 
 ### Phase 3: MyBatis-Plus Pattern Verification
 
 - **Must use**: `LambdaQueryWrapper` (never `QueryWrapper`)
-- **Must use**: `IService/ServiceImpl` pattern for MVC; Gateway pattern for DDD/COLA
+- **Must use**: `IService/ServiceImpl` pattern for MVC; ServiceI facade + CmdExe/QryExe + Gateway pattern for DDD/COLA
 - **Must use**: `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft delete
 - **Must use**: `DO` suffix for persistence objects (never `Entity` suffix)
 - **Must use**: `lambdaQuery()` / `lambdaUpdate()` in ServiceImpl

@@ -25,7 +25,9 @@ com.example.module/
 ```
 com.example.user/
 ├── adapter/         → controller, web (VO)
-├── app/             → service, executor
+├── app/
+│   ├── service/     → ServiceI (facade — delegates to executors)
+│   └── executor/    → CmdExe (write), QryExe (read)
 ├── domain/          → entity (bare name, no suffix), gateway, event
 ├── infrastructure/  → gatewayimpl (GatewayImpl), mapper (DO, Mapper), config, external
 ```
@@ -41,9 +43,8 @@ For full COLA/DDD architecture details, use the `ddd-cola` skill.
 
 ## Dependency Direction
 
-- **Controller** → depends on **Service** (only)
-- **Service** → depends on **Mapper** and **DO** (only)
-- **Mapper** → depends on **DO** (only)
+- **MVC**: Controller → Service → Mapper (only)
+- **DDD/COLA**: Adapter → Service (facade) → CmdExe/QryExe → Domain/Gateway (no upward deps)
 
 ## Anti-Patterns
 

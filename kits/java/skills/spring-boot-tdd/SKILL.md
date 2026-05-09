@@ -99,7 +99,7 @@ Fix options:
 ```java
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class PushExecutorTest { ... }
+class PushCmdExeTest { ... }
 ```
 
 ### Mock Delegation Trap

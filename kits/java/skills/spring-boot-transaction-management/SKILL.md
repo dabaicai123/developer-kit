@@ -17,9 +17,11 @@ Spring Boot 3.5.x transaction management patterns with MyBatis-Plus — declarat
 - Configuring rollback rules (rollbackFor, noRollbackFor) for checked vs unchecked exceptions
 - Debugging self-invocation issues where `@Transactional` is silently ignored on internal calls
 - Deciding between declarative `@Transactional` and programmatic `TransactionTemplate`
+- Understanding how MyBatis-Plus IService methods interact with `@Transactional` (saveBatch has internal transaction, save/updateById do not)
 - Evaluating whether distributed transactions (Seata) are truly necessary for a given scenario
 - Choosing between Saga choreography vs orchestration for cross-service consistency
 - Implementing Outbox pattern for reliable event publishing in microservices
+- Choosing between MVC (ServiceImpl-level) and DDD (CmdExe-level) transaction ownership patterns
 
 ## Instructions
 
@@ -32,6 +34,25 @@ Spring Boot 3.5.x transaction management patterns with MyBatis-Plus — declarat
 3. **Use `@Transactional(readOnly = true)` on multi-step query methods only** — MyBatis-Plus has no persistence context (unlike JPA/Hibernate), so `readOnly = true` provides no flush/dirty-check optimization. For single-statement queries (getById, findByEmail), auto-commit is sufficient and adding `@Transactional` only adds proxy overhead. Use `readOnly = true` when a method executes multiple SQL statements to ensure a consistent snapshot, or as a defensive measure to prevent accidental writes in complex query logic.
 
 4. **Keep transaction scope minimal** — only wrap database operations. Do not include long computations, external API calls, or file I/O inside a transactional method; this holds database connections unnecessarily.
+
+### MyBatis-Plus IService Built-in Transaction Behavior
+
+Understanding which IService methods have internal transactions is critical for avoiding duplicate or missing `@Transactional`:
+
+| IService Method | Built-in `@Transactional`? | Implication |
+|-----------------|---------------------------|-------------|
+| `save(T)` | **No** | Single INSERT — auto-commit. For multi-step writes, add `@Transactional` on YOUR method |
+| `updateById(T)` | **No** | Single UPDATE — auto-commit |
+| `removeById(Serializable)` | **No** | Single DELETE/soft-delete — auto-commit |
+| `getById(Serializable)` | **No** | Single SELECT — auto-commit |
+| `saveBatch(Collection, int)` | **Yes** — `@Transactional(rollbackFor=Exception.class)` | Entire batch in one transaction |
+| `saveOrUpdateBatch(Collection, int)` | **Yes** — `@Transactional(rollbackFor=Exception.class)` | Entire batch in one transaction |
+
+**Common mistake**: Calling `save(entityA)` then `save(entityB)` without `@Transactional` on your method — each INSERT auto-commits independently, so entityB failure does NOT roll back entityA. Always add `@Transactional(rollbackFor=Exception.class)` on your method when multiple DB operations must share one transaction.
+
+> **saveBatch joins outer transaction**: When called from within your own `@Transactional` method, `saveBatch` joins the existing transaction (REQUIRED propagation) — not a separate scope. This means both your writes and the batch share the same transaction boundary.
+
+> **saveBatch is NOT multi-row INSERT**: `saveBatch` loops through individual `INSERT` statements, not a single `INSERT INTO ... VALUES (...),(...),(...)`. For truly efficient bulk inserts, use a custom SQL injector method.
 
 ### Programmatic TransactionTemplate approach
 
@@ -66,12 +87,12 @@ Choose propagation based on the relationship between caller and callee transacti
 | Propagation | Use when |
 |---|---|
 | `REQUIRED` (default) | Most write operations — join existing or start new |
-| `SUPPORTS` | Query methods that can run inside or outside a transaction |
+| `SUPPORTS` | Multi-step query methods with `readOnly=true` — can run inside or outside an existing transaction. Pattern: `@Transactional(propagation = SUPPORTS, readOnly = true)` |
 | `MANDATORY` | Methods that must only be called within an existing transaction (enforced constraint) |
 | `REQUIRES_NEW` | Independent sub-transactions that must commit/rollback independently (audit logging) |
 | `NOT_SUPPORTED` | Non-transactional operations that should suspend any existing transaction |
 | `NEVER` | Methods that must never run in a transactional context |
-| `NESTED` | Sub-operations that can rollback independently while the outer transaction continues |
+| `NESTED` | Sub-operations that can rollback independently while the outer transaction continues — useful for batch import tolerance (individual item failure doesn't roll back entire batch) |
 
 See `references/transaction-propagation-scenarios.md` for detailed scenarios and code snippets for each propagation type.
 
@@ -219,7 +240,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 }
 ```
 
-### Example 4: Rollback rules — rollbackFor checked exceptions
+### Example 4: Rollback rules — rollbackFor checked exceptions — rollbackFor checked exceptions
 
 ```java
 /**
@@ -258,7 +279,193 @@ public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImp
 }
 ```
 
-### Example 5: Self-invocation pitfall — why @Transactional doesn't work on internal calls and how to fix
+### Example 5: Propagation.NESTED for batch import tolerance
+
+```java
+/**
+ * 批量导入服务 — NESTED propagation allows individual item failure without rolling back entire batch
+ * <p>Each item runs in a nested transaction (savepoint). If one item fails, only that savepoint rolls back;
+ * the outer transaction and other items continue.</p>
+ */
+@Service
+@RequiredArgsConstructor
+public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImportDO> implements DataImportService {
+
+    /**
+     * Batch import — outer transaction, individual items use NESTED savepoints
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchImport(List<UserImportDTO> dtoList) {
+        for (UserImportDTO dto : dtoList) {
+            try {
+                importSingleUser(dto);  // NESTED — savepoint rollback on failure
+            } catch (Exception e) {
+                log.warn("Import failed, skipping: username={}", dto.getUsername(), e);
+                // Only this item's savepoint rolls back; batch continues
+            }
+        }
+    }
+
+    /**
+     * Import single user — NESTED savepoint
+     * <p>Failure rolls back to savepoint without affecting outer transaction</p>
+     */
+    @Override
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
+    public void importSingleUser(UserImportDTO dto) {
+        baseMapper.insert(UserConverter.toDO(dto));
+    }
+}
+```
+
+> **Constraint**: NESTED requires a single DataSource and JDBC 3.0 savepoint support. Not available with JTA-managed transactions.
+
+### Example 6: TransactionTemplate for batch tolerance (alternative to NESTED)
+
+When NESTED is unavailable (JTA, multiple DataSource), use `TransactionTemplate` for independent item-level transactions:
+
+```java
+@Service
+@RequiredArgsConstructor
+public class DataImportServiceImpl extends ServiceImpl<DataImportMapper, DataImportDO> implements DataImportService {
+
+    private final TransactionTemplate transactionTemplate;
+
+    /**
+     * Batch import with tolerance — each item in independent transaction
+     * <p>Individual item failure rolls back only that item; batch continues</p>
+     */
+    public void batchImportWithTolerance(List<UserImportDTO> dtoList) {
+        for (UserImportDTO dto : dtoList) {
+            try {
+                transactionTemplate.execute(status -> {
+                    importSingleItem(dto);
+                    return null;
+                });
+            } catch (Exception e) {
+                log.warn("Item import failed, continuing: id={}", dto.getId(), e);
+                // Individual item transaction rolled back, but loop continues
+            }
+        }
+    }
+}
+```
+
+### Example 7: Force rollback with setRollbackOnly() inside catch block
+
+```java
+/**
+ * When you must catch exceptions inside @Transactional but still want rollback
+ * <p>Catching and swallowing prevents rollback because the proxy only sees normal return.
+ * Use setRollbackOnly() to force rollback without re-throwing.</p>
+ */
+@Service
+@RequiredArgsConstructor
+public class TransferServiceImpl extends ServiceImpl<TransferMapper, TransferDO> implements TransferService {
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
+        try {
+            // ... DB operations ...
+        } catch (Exception e) {
+            log.error("Transfer failed", e);
+            // Force rollback without re-throwing — proxy sees normal return but transaction is marked rollback-only
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+    }
+}
+```
+
+> **Prefer re-throwing** over `setRollbackOnly()` when possible — it's cleaner and lets callers handle the exception. Use `setRollbackOnly()` only when you need to log the error and mark rollback without propagating the exception upstream.
+
+### Connection Pool Considerations (HikariCP)
+
+Transactions hold one HikariCP connection for their entire duration. Key configuration for MyBatis-Plus:
+
+```yaml
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20            # adjust based on concurrent transaction count
+      minimum-idle: 5
+      idle-timeout: 300000             # 5 minutes
+      max-lifetime: 1800000            # 30 minutes
+      connection-timeout: 30000        # 30 seconds — fail fast if pool exhausted
+      leak-detection-threshold: 60000  # log connections held > 60 seconds
+```
+
+**Critical impacts**:
+- `Propagation.REQUIRES_NEW` acquires a **second** connection while suspending the first — both connections are held simultaneously. With `maximum-pool-size=20` and 10 concurrent REQUIRES_NEW calls, you can exhaust all 20 connections.
+- External API calls, file I/O, or long computations inside `@Transactional` exhaust the pool.
+- Always set `@Transactional(timeout = 30)` on batch methods to prevent indefinite connection holding.
+
+### Transaction Ownership: MVC vs DDD/COLA
+
+**MVC pattern** — transaction on ServiceImpl:
+
+```java
+// @Transactional on ServiceImpl method (MVC pattern)
+@Service
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void create(OrderCreateDTO dto) {
+        baseMapper.insert(order);
+        orderItemService.saveBatch(items);
+    }
+}
+```
+
+**DDD/COLA pattern** — transaction on Application-layer CmdExe, NOT on GatewayImpl:
+
+```java
+// Domain gateway interface — NO transaction annotations
+public interface OrderGateway {
+    void save(Order order);     // INSERT only
+    void update(Order order);   // UPDATE only — eliminates save/re-save ambiguity
+    Optional<Order> findById(String id);
+}
+
+// Application CmdExe — transaction boundary HERE
+@Component
+@RequiredArgsConstructor
+public class CreateOrderCmdExe {
+    private final OrderGateway orderGateway;
+
+    @Transactional(rollbackFor = Exception.class)
+    public OrderDto execute(CreateOrderCmd cmd) {
+        Order order = Order.create(cmd.getItems(), cmd.getCustomerId());
+        orderGateway.save(order);
+        return OrderDto.from(order);
+    }
+}
+
+// Infrastructure gateway impl — NO transaction annotations (thin persistence adapter)
+@Repository
+@RequiredArgsConstructor
+public class OrderGatewayImpl implements OrderGateway {
+    private final OrderMapper orderMapper;
+
+    @Override
+    public void save(Order order) {
+        orderMapper.insert(OrderDO.fromDomain(order));
+    }
+
+    @Override
+    public void update(Order order) {
+        orderMapper.updateById(OrderDO.fromDomain(order));
+    }
+}
+```
+
+**Why DDD Gateway pattern is superior for transaction management**:
+1. **Explicit transaction ownership** — CmdExe clearly declares where the transaction starts/ends
+2. **No `save()` ambiguity** — Gateway `save()` = INSERT, `update()` = UPDATE. No risk of calling INSERT on an already-persisted entity
+3. **GatewayImpl stays thin** — pure persistence adapter with no transaction annotations, no business logic
+
+### Example 8: Self-invocation pitfall — why @Transactional doesn't work on internal calls
 
 ```java
 /**
@@ -326,12 +533,16 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 
 - **Use `@Transactional(readOnly = true)` on multi-step query methods** — MyBatis-Plus has no persistence context (unlike JPA), so `readOnly` provides no flush/dirty-check optimization. Only use when a method runs multiple SQL statements (consistent snapshot, defensive write prevention). Skip for single-statement queries — auto-commit is sufficient.
 - **Always specify `rollbackFor = Exception.class`** — default only rolls back unchecked exceptions; checked exceptions will silently commit
+- **IService internal transactions**: `saveBatch/saveOrUpdateBatch` have internal `@Transactional`; single methods (`save/updateById/removeById`) do NOT — add `@Transactional(rollbackFor=Exception.class)` on your method for multi-step writes
+- **Use `Propagation.SUPPORTS + readOnly=true` for multi-step read methods** — works both inside and outside an existing transaction
 - **Avoid self-invocation** — extract internal transactional logic to a separate Service bean; `@Transactional` on same-class method calls is silently ignored by Spring AOP proxy
-- **Use `Propagation.REQUIRES_NEW` only for independent audit/logging** — it suspends the existing transaction and opens a new one, adding connection pool pressure; do not use it casually
+- **Use `Propagation.REQUIRES_NEW` only for independent audit/logging** — it acquires a second connection while suspending the first, adding connection pool pressure; do not use it casually
+- **Use `Propagation.NESTED` for batch import tolerance** — individual item failure rolls back to savepoint without affecting entire batch
 - **Keep transaction scope minimal** — do not wrap long computations, external API calls, or file I/O inside transactional boundaries; hold DB connections only for DB operations
-- **Use `TransactionTemplate` for fine-grained programmatic control** — when conditional transaction boundaries or mixed propagation within a single method is needed
+- **Use `TransactionTemplate` for fine-grained programmatic control** — when conditional transaction boundaries, partial success, or mixed propagation within a single method is needed
 - **Set explicit timeout on batch/long-running methods** — `@Transactional(timeout = 30)` prevents connection leaks from stuck transactions
-- **Place `@Transactional` on ServiceImpl methods, not on Service interface** — proxy mode may not honor interface-level annotations
+- **Place `@Transactional` on ServiceImpl methods (MVC) or CmdExe methods (DDD/COLA)**, not on interfaces or GatewayImpl
+- **Configure HikariCP leak-detection** — `leak-detection-threshold: 60000` catches connections held longer than expected
 
 ## Constraints and Warnings
 
@@ -341,13 +552,14 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 - **Transaction timeout**: always set a timeout for long-running transactions (`@Transactional(timeout = 30)`) to prevent connection pool exhaustion from stuck or slow transactions.
 - **Never catch exceptions inside `@Transactional` methods and swallow them** — this prevents rollback because the proxy only sees a normal method return. Either re-throw the exception or use `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()` to force rollback.
 - **Re-save after in-transaction modification**: modifying a persisted entity's fields within the same `@Transactional` method does NOT auto-persist the changes. MyBatis-Plus has no auto-flush/dirty-checking. After `save(record)` then `record.setXxx()`, call `updateById(record)` to persist changes. Do NOT call `save()` again — `save()` = INSERT and will cause primary key conflict on an already-inserted record.
+- **Connection pool pressure from REQUIRES_NEW**: `Propagation.REQUIRES_NEW` acquires a second connection while suspending the first. With HikariCP `maximum-pool-size=20`, 10 concurrent REQUIRES_NEW calls can exhaust all connections.
 
-### Example 6: Re-saving modified entity within same transaction
+### Example 9: Re-saving modified entity within same transaction
 
 ```java
 @Service
 @RequiredArgsConstructor
-public class PushExecutor {
+public class PushCmdExe {
 
     private final RecordGateway recordGateway;
 
@@ -388,4 +600,4 @@ public class PushExecutor {
 
 ## Keywords
 
-transaction, propagation, isolation, rollback, @Transactional, TransactionTemplate, Seata, self-invocation, nested, readOnly, rollbackFor, noRollbackFor, savepoint, distributed transaction, saga, outbox, choreography, orchestration, compensating transaction, idempotency, Axon, 2PC
+transaction, propagation, isolation, rollback, @Transactional, TransactionTemplate, Seata, self-invocation, nested, readOnly, rollbackFor, noRollbackFor, savepoint, distributed transaction, saga, outbox, choreography, orchestration, compensating transaction, idempotency, Axon, 2PC, HikariCP, connection pool, REQUIRES_NEW, NESTED, SUPPORTS, setRollbackOnly, IService, saveBatch

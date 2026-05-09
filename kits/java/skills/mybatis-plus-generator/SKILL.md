@@ -12,7 +12,166 @@ This skill is for **batch code generation** from database tables. For manually w
 
 Use when the user mentions MyBatis-Plus code generation, mybatis-plus-generator, or scaffolding MyBatis-Plus CRUD code from existing database tables. Do NOT trigger for generic code generation, JPA/Hibernate, or other ORM frameworks.
 
-Supported: MVC / DDD / Layered / Clean architectures; Java and Kotlin; Entity, Mapper, Service, ServiceImpl, Controller, DTO, VO, BO.
+Supported: MVC / DDD / COLA / Layered / Clean architectures; Java and Kotlin; Entity, Mapper, Service, ServiceImpl, Controller, DTO, VO, BO.
+
+## Spring Boot 3.x Dependency
+
+For **Spring Boot 3.x**, use `mybatis-plus-spring-boot3-starter` (Jakarta namespace), not the old `mybatis-plus-boot-starter` (javax namespace, Spring Boot 2.x):
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+    <version>3.5.9</version>
+</dependency>
+<!-- Pagination plugin (required since 3.5.9) -->
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-jsqlparser</artifactId>
+    <version>3.5.9</version>
+</dependency>
+```
+
+**Generator dependency** (separate from runtime starter):
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-generator</artifactId>
+    <version>3.5.9</version>
+</dependency>
+<dependency>
+    <groupId>org.freemarker</groupId>
+    <artifactId>freemarker</artifactId>
+    <version>2.3.32</version>
+</dependency>
+```
+
+> **MySQL driver**: Use `com.mysql.cj.jdbc.Driver` (not `com.mysql.jdbc.Driver`, removed in Connector/J 8.x).
+
+### FastAutoGenerator Builder API (Recommended)
+
+The official API uses `FastAutoGenerator` with builder pattern (preferred over legacy `AutoGenerator` setter pattern):
+
+```java
+FastAutoGenerator.create("jdbc:postgresql://localhost:5432/mydb", "user", "password")
+    .globalConfig(builder -> {
+        builder.author("Your Name")
+            .outputDir(projectPath + "/src/main/java")
+            .disableOpenDir();
+    })
+    .packageConfig(builder -> {
+        builder.parent("com.example")
+            .moduleName("app")
+            .entity("domain.model.entity")
+            .mapper("infrastructure.mapper")
+            .service("service")
+            .serviceImpl("service.impl")
+            .controller("adapter.controller")
+            .pathInfo(Collections.singletonMap(OutputFile.xml,
+                projectPath + "/src/main/resources/mapper"));
+    })
+    .strategyConfig(builder -> {
+        builder.addInclude("user", "order")
+            .addTablePrefix("tbl_")
+            .entityBuilder()
+            .enableLombok()
+            .enableTableFieldAnnotation()
+            .idType(IdType.ASSIGN_ID)
+            .logicDeleteColumnName("deleted_at")
+            .versionColumnName("version")
+            .addTableFills(new Column("created_at", FieldFill.INSERT))
+            .addTableFills(new Property("updatedAt", FieldFill.INSERT_UPDATE))
+            .controllerBuilder()
+            .enableRestStyle()
+            .enableHyphenStyle()
+            .serviceBuilder()
+            .formatServiceFileName("%sService")
+            .formatServiceImplFileName("%sServiceImpl");
+    })
+    .injectionConfig(builder -> {
+        // Generate DTO/VO/BO via CustomFile.Builder (see Custom Artifact Generation below)
+        builder.customFile(new CustomFile.Builder()
+            .fileName("entityDTO.java")
+            .templatePath("templates/entityDTO.java.ftl")
+            .packageName("dto")
+            .build());
+    })
+    .templateEngine(new FreemarkerTemplateEngine())
+    .execute();
+```
+
+### Custom Artifact Generation (DTO/VO/BO)
+
+Since 3.5.3, the `CustomFile.Builder` API generates additional artifact types (DTO, VO, BO, Cmd, etc.):
+
+```java
+FastAutoGenerator.create(url, username, password)
+    .injectionConfig(injectConfig -> {
+        // Inject custom template variables (accessible via ${cfg.xxx} in templates)
+        // FastAutoGenerator uses customMap(); legacy AutoGenerator uses InjectionConfig.initMap()
+        Map<String, Object> customMap = new HashMap<>();
+        customMap.put("enableSwagger", true);
+        injectConfig.customMap(customMap);
+
+        // Generate DTO
+        injectConfig.customFile(new CustomFile.Builder()
+            .fileName("entityDTO.java")
+            .templatePath("templates/entityDTO.java.ftl")
+            .packageName("dto")
+            .build());
+
+        // Generate VO
+        injectConfig.customFile(new CustomFile.Builder()
+            .fileName("entityVO.java")
+            .templatePath("templates/entityVO.java.ftl")
+            .packageName("vo")
+            .build());
+    })
+    .templateEngine(new FreemarkerTemplateEngine())
+    .execute();
+```
+
+> **OpenAPI 3 vs Swagger 2**: The generator's `enableSwagger()` produces **Swagger 2 annotations** (`@ApiModel`, `@ApiModelProperty`) by default. For Spring Boot 3.x with springdoc-openapi, create custom templates that generate **OpenAPI 3 annotations** (`@Schema`, `@Tag`, `@Operation`) instead. Use `springdoc-openapi-starter-webmvc-ui` dependency.
+
+### IFileCreate — Protecting Existing Custom Code
+
+When re-running the generator, use `IFileCreate` to prevent overwriting files that have been manually customized:
+
+```java
+InjectionConfig injectionConfig = new InjectionConfig() {
+    @Override
+    public IFileCreate getFileCreate() {
+        return new IFileCreate() {
+            @Override
+            public boolean isCreate(File file) {
+                return !file.exists() || file.length() == 0;  // skip if file already has content
+            }
+        };
+    }
+};
+```
+
+**Best practice**: Run the generator once for initial scaffolding, then manually customize. Never re-run the generator on files that have been modified unless you use `IFileCreate` to protect existing content.
+
+### DDD/COLA Architecture Generation Limitation
+
+The generator **cannot natively produce** COLA's 4-layer structure. To generate DDD/COLA code:
+
+1. Use `CustomFile.Builder` to generate files into each COLA layer (Gateway, GatewayImpl, Cmd, Executor)
+2. Create custom FreeMarker templates for each COLA artifact type
+3. Use `pathInfo` to route files to the correct package directories
+
+**Key distinction**: Domain entities use **bare names** (no suffix, no ORM annotations), while infrastructure DOs use the **DO suffix** with full MyBatis-Plus annotations. The generator's default entity template produces the latter; you need a custom template for the domain entity.
+
+### Kotlin Support Note
+
+MyBatis-Plus generator has **no official Kotlin template engine**. Kotlin generation requires:
+- Custom FreeMarker templates with Kotlin syntax (data classes, companion objects, val/var)
+- `.kt` file extension via `CustomFile.Builder`
+- Manual handling of Kotlin-specific features
+
+The `.kt.ftl` templates referenced in this skill are community-driven, not officially provided by baomidou.
 
 ## How to use this skill
 

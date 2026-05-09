@@ -19,7 +19,12 @@ Enforce consistent naming conventions across Java/Spring Boot projects following
 | Domain Entity (DDD) | PascalCase, no suffix | `Order`, `Customer` |
 | Mapper | PascalCase + Mapper suffix | `UserMapper`, `OrderMapper` |
 | Service Interface | PascalCase + Service suffix | `UserService`, `OrderService` |
-| Service Impl | PascalCase + ServiceImpl suffix | `UserServiceImpl` |
+| Service Impl | PascalCase + ServiceImpl suffix | `UserServiceImpl`, `OrderServiceImpl` |
+| Application Service Interface (COLA) | PascalCase + ServiceI suffix | `MetricsServiceI`, `OrderServiceI` |
+| Command Executor (COLA) | PascalCase + CmdExe suffix | `ATAMetricAddCmdExe`, `CreateOrderCmdExe` |
+| Query Executor (COLA) | PascalCase + QryExe suffix | `ATAMetricQryExe`, `OrderListQryExe` |
+| Command (COLA) | PascalCase + Cmd suffix | `CreateOrderCmd`, `ATAMetricAddCmd` |
+| Query (COLA) | PascalCase + Qry suffix | `ATAMetricQry`, `OrderListQry` |
 | Gateway (DDD) | PascalCase + Gateway suffix | `OrderGateway` |
 | Gateway Impl (DDD) | PascalCase + GatewayImpl suffix | `OrderGatewayImpl` |
 | Controller | PascalCase + Controller suffix | `UserController` |
@@ -51,7 +56,7 @@ Enforce consistent naming conventions across Java/Spring Boot projects following
 | Layer | Package | Example |
 |-------|---------|---------|
 | Adapter | `adapter.controller`, `adapter.web` | `com.example.adapter.controller` |
-| Application | `app.service`, `app.executor` | `com.example.app.service` |
+| Application | `app.service` (facade), `app.executor` (CmdExe/QryExe) | `com.example.app.service` |
 | Domain | `domain.entity`, `domain.gateway` | `com.example.domain.entity` |
 | Infrastructure | `infrastructure.gatewayimpl`, `infrastructure.mapper`, `infrastructure.config` | `com.example.infrastructure.gatewayimpl` |
 

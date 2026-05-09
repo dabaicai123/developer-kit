@@ -194,8 +194,8 @@ com.example.app/
 │   ├── controller/        # HTTP inbound handlers
 │   └── scheduler/         # Scheduled tasks
 ├── app/
-│   ├── executor/          # Use case executors (command handlers)
-│   └── service/           # Application services (orchestration, transactions)
+│   ├── executor/          # Command/Query executors — actual use case handlers
+│   └── service/           # Application service facade — delegates to executors
 ├── domain/
 │   ├── model/             # Entities, Value Objects, Aggregates
 │   │   ├── entity/        # Bare names (Order, Customer) — no suffix, no ORM annotations
@@ -217,11 +217,85 @@ com.example.app/
 | Domain | Gateway | Gateway | `OrderGateway` |
 | Domain | Value Object | none | `Money` |
 | Domain | Domain Event | Event | `OrderCreatedEvent` |
-| Application | Executor | Executor | `CreateOrderExecutor` |
+| Application | Service | none (interface ends with `I`) | `MetricsServiceI` |
+| Application | Executor (Command) | CmdExe | `ATAMetricAddCmdExe` |
+| Application | Executor (Query) | QryExe | `ATAMetricQryExe` |
 | Application | Command | Cmd | `CreateOrderCmd` |
+| Application | Query | Qry | `ATAMetricQry` |
 | Infrastructure | Data Object | DO | `OrderDO` |
 | Infrastructure | Gateway Impl | GatewayImpl | `OrderGatewayImpl` |
 | Adapter | Controller | Controller | `OrderController` |
+
+### App Layer: Service vs Executor
+
+**Service** is the facade (entry point), **Executor** is the processor. They work together, not as alternatives.
+
+```
+Controller → Service (thin facade) → Executor (actual handler)
+```
+
+| Component | Package | Responsibility | Contains Logic? |
+|-----------|---------|---------------|----------------|
+| **Application Service** | `app/service/` | Implements client API interface; delegates each method to a specific Executor | No — pure delegation/routing |
+| **Command Executor** | `app/executor/` | Handles write operations: orchestrates domain objects, manages transaction boundaries | Yes — coordinates Domain + Gateway |
+| **Query Executor** | `app/executor/` | Handles read operations: queries Infrastructure directly, bypasses Domain for performance | Yes — assembles query results |
+
+```java
+// app/service/ — thin facade, no business logic
+@Service
+public class MetricsServiceImpl implements MetricsServiceI {
+    @Resource private ATAMetricAddCmdExe ataMetricAddCmdExe;
+    @Resource private ATAMetricQryExe ataMetricQryExe;
+
+    @Override
+    public Response addATAMetric(ATAMetricAddCmd cmd) {
+        return ataMetricAddCmdExe.execute(cmd);
+    }
+
+    @Override
+    public MultiResponse<ATAMetricDTO> listATAMetrics(ATAMetricQry qry) {
+        return ataMetricQryExe.execute(qry);
+    }
+}
+
+// app/executor/ — write handler, goes through Domain
+@Component
+public class ATAMetricAddCmdExe {
+    @Autowired private MetricGateway metricGateway;
+
+    @Transactional
+    public Response execute(ATAMetricAddCmd cmd) {
+        Metric metric = new Metric(cmd);
+        metricGateway.save(metric);
+        return Response.buildSuccess();
+    }
+}
+
+// app/executor/ — read handler, bypasses Domain
+@Component
+public class ATAMetricQryExe {
+    @Autowired private MetricMapper metricMapper;
+
+    public MultiResponse<ATAMetricDTO> execute(ATAMetricQry qry) {
+        List<MetricDO> records = metricMapper.selectByQry(qry);
+        return MultiResponse.of(records.stream().map(MetricDTO::fromDO).toList());
+    }
+}
+```
+
+> **Single-module (cola-archetype-light)**: Service can be omitted — Controller calls Executor directly.
+> **Multi-module with Client**: Service is required — it implements the client API interface and is the only entry point to the Application layer.
+
+### CQRS Paths
+
+| Type | Path | Notes |
+|------|------|-------|
+| **Command (Write)** | Controller → Service → CmdExe → Domain → Gateway → DB | Must go through Domain layer to enforce business rules |
+| **Query (Read)** | Controller → Service → QryExe → Mapper → DB | Bypasses Domain layer; queries Infrastructure directly for performance |
+
+Key differences:
+- **Write**: Domain entity handles validation and business logic; Gateway (port) abstracts persistence; Infrastructure implements Gateway
+- **Read**: No domain entity needed; Query executor calls Mapper directly; returns DTO, never Domain entity or DO
 
 ### Dependency Direction
 
@@ -233,6 +307,24 @@ Adapter → Application → Domain ← Infrastructure
 - **Application** depends on Domain
 - **Adapter/Infrastructure** depend on Application and Domain
 - Never: Domain → Application (upward), Domain → Infrastructure (upward)
+
+### Data Object Flow Per Layer
+
+Each layer has its own data object type; conversion happens at layer boundaries:
+
+| Layer | Data Object | Role |
+|-------|------------|------|
+| **Adapter** | VO (View Object) | API response for frontend; Controller converts DTO → VO |
+| **Application** | DTO (Data Transfer Object) | Carries data across app boundaries; CmdExe/QryExe input/output |
+| **Domain** | Entity (bare name) | Core business object with behavior; no ORM annotations |
+| **Infrastructure** | DO (Data Object) | Persistence mapping with MyBatis-Plus annotations |
+
+```
+Request → VO → DTO → Entity → DO → DB
+Response → DO → Entity → DTO → VO
+```
+
+Conversion tools: MapStruct at each boundary → see `mapstruct-patterns`
 
 ### Example: Use Case Executor
 
@@ -259,12 +351,12 @@ public interface OrderGateway {
     Optional<Order> findById(String id);
 }
 
-// Application executor
+// Application executor (write — command handler)
 @Component
-public class CreateOrderExecutor {
+public class CreateOrderCmdExe {
     private final OrderGateway orderGateway;
 
-    public CreateOrderExecutor(OrderGateway orderGateway) {
+    public CreateOrderCmdExe(OrderGateway orderGateway) {
         this.orderGateway = orderGateway;
     }
 
@@ -335,7 +427,7 @@ public class OrderGatewayImpl implements OrderGateway {
 - Domain logic belongs exclusively in the Domain layer; Application only orchestrates and manages transaction boundaries → see `spring-boot-transaction-management`
 - Define ports (interfaces) in Domain or Application; Infrastructure implements them
 - Avoid business logic in Adapter layer; DTO/domain conversion at boundary
-- Follow COLA naming: `Cmd` for commands, `Executor` for handlers, `Gateway` for ports
+- Follow COLA naming: `Cmd` for commands, `CmdExe` for command handlers, `QryExe` for query handlers, `Gateway` for ports, `ServiceI` for application service interfaces
 - Domain entities use **bare names** (no suffix); Infrastructure DOs use **DO suffix**
 - Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft delete
 - Use `@TableId(type = IdType.ASSIGN_ID)` for distributed ID generation
