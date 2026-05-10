@@ -109,13 +109,17 @@ com.example.app/
 │   ├── executor/          # Command/Query executors — actual use case handlers
 │   └── service/           # Application service facade — delegates to executors
 ├── domain/
-│   ├── model/             # Entities, Value Objects, Aggregates
-│   │   ├── entity/        # Bare names (Order, Customer) — no suffix, no ORM annotations
-│   │   └── valueobject/
-│   ├── service/           # Domain services
-│   └── gateway/           # Repository and external service interfaces (ports)
+│   ├── metrics/           # Metrics domain (first by domain, then by function)
+│   │   ├── Metric.java          # Domain entity — plain Java class, bare name
+│   │   └── MetricGateway.java   # Gateway interface (persistence + external service ports)
+│   ├── customer/          # Customer domain
+│   │   ├── Customer.java
+│   │   └── CustomerGateway.java
+│   └── service/           # Domain services (cross-entity logic within a domain)
 └── infrastructure/
     ├── gatewayimpl/        # Gateway implementations (implements domain gateway interfaces)
+    │   ├── metrics/       # Metrics gateway impls
+    │   └── customer/      # Customer gateway impls
     ├── mapper/             # MyBatis Mapper interfaces + DO classes
     ├── external/           # External API clients (RestClient)
     └── config/             # Spring configuration
@@ -125,8 +129,8 @@ com.example.app/
 
 | Layer | Class Type | Suffix | Example |
 |-------|-----------|--------|---------|
-| Domain | Entity | none | `Order` |
-| Domain | Gateway | Gateway | `OrderGateway` |
+| Domain | Entity | none | `Metric` (plain Java class, bare name, no suffix) |
+| Domain | Gateway | Gateway | `MetricGateway` (persistence + external service ports) |
 | Domain | Value Object | none | `Money` |
 | Domain | Domain Event | Event | `OrderCreatedEvent` |
 | Application | Service | none (interface ends with `I`) | `MetricsServiceI` |
@@ -149,7 +153,7 @@ Controller → Service (thin facade) → Executor (actual handler)
 | Component | Package | Responsibility | Contains Logic? |
 |-----------|---------|---------------|----------------|
 | **Application Service** | `app/service/` | Implements client API interface; delegates each method to a specific Executor | No — pure delegation/routing |
-| **Command Executor** | `app/executor/` | Handles write operations: orchestrates domain objects, manages transaction boundaries | Yes — coordinates Domain + Gateway |
+| **Command Executor** | `app/executor/` | Handles write operations: for simple cases, logic stays here; for complex domains, delegates to Domain entity | Yes (simple) / Delegates (complex) |
 | **Query Executor** | `app/executor/` | Handles read operations: queries Infrastructure directly, bypasses Domain for performance | Yes — assembles query results |
 
 ```java
@@ -205,7 +209,7 @@ public class ATAMetricQryExe {
 
 | Type | Path | Notes |
 |------|------|-------|
-| **Command (Write)** | Controller → Service → CmdExe → Domain → Gateway → DB | Must go through Domain layer to enforce business rules |
+| **Command (Write)** | Controller → Service → CmdExe → Domain (for complex) → Gateway → DB | Simple cases: logic in CmdExe directly; Complex domains: CmdExe delegates to Domain entity |
 | **Query (Read)** | Controller → Service → QryExe → Mapper → DB | Bypasses Domain layer; queries Infrastructure directly for performance |
 
 Key differences:
@@ -235,7 +239,7 @@ Conversion tools: MapStruct at each boundary → see `mapstruct-patterns`
 ### Example: Use Case Executor
 
 ```java
-// Domain entity — bare name, no suffix, no ORM annotations
+// Domain entity — plain Java class, bare name, no suffix, no annotations
 public class Order {
     private String orderId;
     private List<OrderItem> items;
@@ -250,11 +254,16 @@ public class Order {
     }
 }
 
-// Domain gateway (port) — define both insert and update methods
+// Domain gateway (port) — broader than Repository: includes persistence AND external service access
 public interface OrderGateway {
-    void save(Order order);
-    void update(Order order);
+    void save(Order order);   // INSERT only
+    void update(Order order); // UPDATE only — no ambiguity, no risk of double INSERT
     Optional<Order> findById(String id);
+}
+
+// Domain gateway for external service access (not just DB)
+public interface InventoryGateway {
+    boolean deductStock(String orderId, int quantity);
 }
 
 // Application executor (write — command handler)
@@ -306,8 +315,6 @@ public class OrderDO {
 @Repository
 public class OrderGatewayImpl implements OrderGateway {
     private final OrderMapper orderMapper;
-    // Option A: Manual conversion (simple, few fields)
-    // Option B: MapStruct converter → see mapstruct-patterns
 
     @Override
     public void save(Order order) {
@@ -330,11 +337,13 @@ public class OrderGatewayImpl implements OrderGateway {
 
 ## Best Practices
 
-- Domain logic belongs exclusively in the Domain layer; Application only orchestrates and manages transaction boundaries → see `spring-boot-transaction-management`
-- Define ports (interfaces) in Domain or Application; Infrastructure implements them
+- Domain model is optional — COLA is application architecture, not strict DDD. For simple cases, business logic in Executor + Gateway is sufficient; for complex domains, invest in rich domain entities. "无有必要勿增实体，不要为了DDD而DDD"
+- Package structure: organize by domain first, then by function within each domain — `domain/metrics/`, `domain/customer/`, not `domain/model/entity/` + `domain/model/valueobject/`
+- Domain entities are plain Java classes with **bare names** (no suffix, no special annotations); Infrastructure DOs use **DO suffix**
+- Gateway is broader than Repository — it covers persistence AND external service access contracts. Define in Domain layer, implement in Infrastructure
+- Gateway `save()` = INSERT, `update()` = UPDATE — no ambiguity, no risk of calling INSERT on an already-persisted entity
 - Avoid business logic in Adapter layer; DTO/domain conversion at boundary
 - Follow COLA naming: `Cmd` for commands, `CmdExe` for command handlers, `QryExe` for query handlers, `Gateway` for ports, `ServiceI` for application service interfaces
-- Domain entities use **bare names** (no suffix); Infrastructure DOs use **DO suffix**
 - Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft delete
 - Use `@TableId(type = IdType.ASSIGN_ID)` for distributed ID generation
 - Use `@TableName("xxx")` with plain snake_case — no prefix

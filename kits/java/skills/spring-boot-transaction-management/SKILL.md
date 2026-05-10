@@ -474,7 +474,7 @@ public class OrderGatewayImpl implements OrderGateway {
 
 **Why DDD Gateway pattern is superior for transaction management**:
 1. **Explicit transaction ownership** — CmdExe clearly declares where the transaction starts/ends
-2. **No `save()` ambiguity** — Gateway `save()` = INSERT, `update()` = UPDATE. No risk of calling INSERT on an already-persisted entity
+2. **Gateway `save()` covers both insert and update** — determines by checking ID (null = insert, non-null = update). No separate `save()` + `update()` methods
 3. **GatewayImpl stays thin** — pure persistence adapter with no transaction annotations, no business logic
 
 ### Example 8: Self-invocation pitfall — why @Transactional doesn't work on internal calls
@@ -588,7 +588,7 @@ public class PushCmdExe {
 > **Why**: MyBatis-Plus has no auto-flush/dirty-checking. Unlike JPA's managed entities, every state change
 > requires an explicit call — but use the correct method: `save()` for INSERT, `updateById()` for UPDATE.
 > Calling `save()` on an already-inserted record throws a primary key conflict.
-> In DDD Gateway pattern, define distinct `save()` (insert) and `update()` methods on the gateway interface.
+> In DDD Gateway pattern, `save()` covers both insert and update — determined by checking ID (null = insert, non-null = update).
 
 ### Example 10: Publishing MQ after transaction commit
 
