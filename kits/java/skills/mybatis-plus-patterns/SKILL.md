@@ -242,27 +242,42 @@ LambdaQueryWrapper<UserDO> wrapper = Wrappers.lambdaQuery(User.class)
 
 ## Multi-Table Join Queries
 
-For type-safe multi-table joins, use the `mybatis-plus-join` library (`MPJLambdaWrapper`):
+**Prefer single-table queries** — design your schema and service layer to minimize joins. When joins are necessary, limit to **no more than 3 tables**. Beyond 3 tables, query planning complexity increases, indexes become less effective, and maintenance burden grows. For complex cross-domain data needs, query separately and assemble in application code, or use a read-optimized view/materialized table.
+
+For multi-table queries, write raw SQL in **Mapper XML** files. XML gives full control over JOIN logic, column selection, and result mapping, without coupling to a third-party wrapper library.
 
 ```xml
-<dependency>
-    <groupId>com.github.yulichang</groupId>
-    <artifactId>mybatis-plus-join-boot-starter</artifactId>
-    <version>1.4.13</version>
-</dependency>
+<!-- resources/mapper/OrderMapper.xml -->
+<select id="findOrderWithItems" resultMap="orderWithItemsResultMap">
+    SELECT o.id, o.status, o.total_amount,
+           i.product_name, i.quantity, i.unit_price
+    FROM order o
+    LEFT JOIN order_item i ON i.order_id = o.id
+    WHERE o.status = #{status} AND o.deleted_at IS NULL
+</select>
+
+<resultMap id="orderWithItemsResultMap" type="OrderVO">
+    <id column="id" property="id"/>
+    <result column="status" property="status"/>
+    <result column="total_amount" property="totalAmount"/>
+    <collection property="items" ofType="OrderItemVO">
+        <result column="product_name" property="productName"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit_price" property="unitPrice"/>
+    </collection>
+</resultMap>
 ```
 
 ```java
-// MPJLambdaWrapper for type-safe join queries
-List<OrderVO> result = orderMapper.selectJoinList(OrderVO.class,
-    new MPJLambdaWrapper<OrderDO>()
-        .selectAll(OrderDO.class)
-        .select(OrderItemDO::getProductName)
-        .leftJoin(OrderItemDO.class, OrderItemDO::getOrderId, OrderDO::getId)
-        .eq(OrderDO::getStatus, OrderStatus.COMPLETED));
+@Mapper
+public interface OrderMapper extends BaseMapper<OrderDO> {
+    List<OrderVO> findOrderWithItems(@Param("status") OrderStatus status);
+}
 ```
 
-> **Note**: Standard `LambdaQueryWrapper` does not support joins. For complex multi-table queries that `MPJLambdaWrapper` cannot express, use custom `@Select` SQL in Mapper interfaces.
+> **SQL Injection Prevention**: Always use `#{param}` in XML — never `${param}` for values. `${param}` is only acceptable for dynamic column/table names where parameterization is impossible, with input validation.
+
+> **Note**: Standard `LambdaQueryWrapper` does not support joins. For single-table queries, prefer `LambdaQueryWrapper` or `lambdaQuery()`. For multi-table joins, use Mapper XML.
 
 ## Batch Operations — Never Loop Individual DB Calls
 
@@ -380,9 +395,10 @@ public void deleteAll(List<Long> ids) {
 - **DDD/COLA**: Use Gateway pattern — see `ddd-cola` skill
 - **IService transaction behavior**: `saveBatch/saveOrUpdateBatch` have internal `@Transactional`; single methods (`save`, `updateById`, `removeById`) do NOT — add `@Transactional(rollbackFor=Exception.class)` on your method for multi-step writes
 - Do not add `@Transactional(readOnly = true)` on pure query methods — auto-commit is sufficient for MyBatis
-- Use `mybatis-plus-join` (`MPJLambdaWrapper`) for type-safe multi-table joins
+- Prefer single-table queries — limit JOINs to 3 tables max; for complex data needs, query separately and assemble in application code
+- Use Mapper XML for multi-table JOIN queries
 - Document each DO class with table mapping, each field with business meaning, each custom Mapper method with parameter descriptions
 
 ## Keywords
 
-mybatis-plus, ORM, mapper, DO, LambdaQueryWrapper, lambdaQuery, soft-delete, optimistic-lock, pagination, field-fill, MetaObjectHandler, saveBatch, listByIds, removeByIds, updateBatchById, batch-insert, batch-select, IN-clause, N+1-anti-pattern, IService, ServiceImpl, BaseMapper, @TableName, @TableId, @TableLogic, @Version, @TableField, spring-boot3-starter, MPJLambdaWrapper, mybatis-plus-join, Wrappers
+mybatis-plus, ORM, mapper, DO, LambdaQueryWrapper, lambdaQuery, soft-delete, optimistic-lock, pagination, field-fill, MetaObjectHandler, saveBatch, listByIds, removeByIds, updateBatchById, batch-insert, batch-select, IN-clause, N+1-anti-pattern, IService, ServiceImpl, BaseMapper, @TableName, @TableId, @TableLogic, @Version, @TableField, spring-boot3-starter, Wrappers, Mapper XML, resultMap, join query
