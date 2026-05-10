@@ -8,34 +8,54 @@ Generate COLA architecture code for the `user` table, including DO, Mapper, Gate
 
 ```
 Database: PostgreSQL, table: user
-Architecture: COLA V5 (DDD)
+Architecture: COLA (DDD)
 Language: Java
-Package: com.example.app
+Package: com.example
 Lombok: enabled
 OpenAPI 3: enabled
 ```
 
 ## COLA Package Mapping
 
+> This mapping follows the **flat per-domain** layout defined in `ddd-cola` SKILL.md. Each domain's files are grouped together, not split into nested sub-packages.
+
 ```
-com.example.app/
-├── adapter/
-│   ├── controller/           # UserController
-│   └── converter/            # UserDTOConverter (MapStruct)
-├── app/
-│   ├── executor/             # UserAddCmdExe, UserQryExe
-│   └── service/              # UserServiceI (interface)
-├── domain/
-│   ├── model/
-│   │   └── entity/           # User (bare name, no suffix)
-│   └── gateway/              # UserGateway (port interface)
-└── infrastructure/
-    ├── gatewayimpl/
-│   │   ├── converter/        # UserDOConverter (MapStruct)
-│   │   └── UserGatewayImpl
-│   └── mapper/
-│       ├── dataobject/       # UserDO (with MyBatis-Plus annotations)
-│       └── UserMapper
+com.example/                              # Across 6 Maven modules
+├── client/                               # demo-client module
+│   ├── api/
+│   │   ├── UserServiceI.java             # Service interface (returns Result<T>)
+│   │   └── UserFeignClient.java          # @FeignClient (optional)
+│   ├── dto/
+│   │   ├── UserAddCmd.java               # extends Command
+│   │   ├── UserUpdateCmd.java            # extends Command
+│   │   └── UserQry.java                  # extends Query
+│   ├── dto/data/
+│   │   └── UserDTO.java                  # Data Transfer Object
+│   ├── common.result/                    # Result, PageResult (shared)
+│   ├── common.exception/                 # BusinessException (shared)
+│   └── common.dto/                       # Command, Query marker base classes
+├── adapter/                              # demo-adapter module
+│   └── web/
+│       └── UserController.java           # @RestController
+├── app/                                  # demo-app module
+│   └── user/
+│       ├── UserServiceImpl.java          # Implements UserServiceI
+│       └── executor/
+│           ├── UserAddCmdExe.java        # Write handler
+│           └── query/
+│               └── UserQryExe.java       # Read handler
+├── domain/                               # demo-domain module
+│   └── user/
+│       ├── User.java                     # Entity (@Data, bare name)
+│       ├── UserStatus.java               # Enum
+│       └── gateway/
+│           └── UserGateway.java          # Persistence port interface
+└── infrastructure/                       # demo-infrastructure module
+    └── user/
+        ├── UserGatewayImpl.java          # Implements UserGateway
+        ├── UserDO.java                   # @TableName, @Data
+        ├── UserMapper.java               # MyBatis-Plus Mapper
+        └── UserDOConverter.java          # MapStruct Domain ↔ DO
 ```
 
 ## Functional Requirements
@@ -54,7 +74,7 @@ User management features:
 ### 1. Domain Entity — User (bare name, no ORM annotations)
 
 ```java
-package com.example.app.domain.model.entity;
+package com.example.domain.user;
 
 /**
  * User domain entity — represents a registered user.
@@ -87,7 +107,7 @@ public class User {
 ### 2. DO — UserDO (infrastructure, full MyBatis-Plus annotations)
 
 ```java
-package com.example.app.infrastructure.mapper.dataobject;
+package com.example.user;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -121,7 +141,7 @@ public class UserDO {
 ### 3. Gateway (port interface — domain layer)
 
 ```java
-package com.example.app.domain.gateway;
+package com.example.domain.user.gateway;
 
 public interface UserGateway {
     void save(User user);
@@ -133,7 +153,7 @@ public interface UserGateway {
 ### 4. Converter — UserDOConverter (MapStruct, infrastructure)
 
 ```java
-package com.example.app.infrastructure.gatewayimpl.converter;
+package com.example.user;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserDOConverter {
@@ -148,7 +168,7 @@ public interface UserDOConverter {
 ### 5. GatewayImpl (infrastructure, implements Gateway)
 
 ```java
-package com.example.app.infrastructure.gatewayimpl;
+package com.example.user;
 
 @Repository
 @RequiredArgsConstructor
@@ -178,26 +198,32 @@ public class UserGatewayImpl implements UserGateway {
 }
 ```
 
-### 6. Cmd (request object)
+### 6. Cmd (request object — in client module)
 
 ```java
-package com.example.app.app.executor.command;
+package com.example.dto;
 
-public record UserAddCmd(
-    @NotBlank String username,
-    @NotBlank @Email String email
-) {}
+public class UserAddCmd extends Command {
+    @NotBlank
+    private String username;
 
-public record UserUpdateCmd(
-    @NotBlank String userId,
-    @NotBlank @Email String newEmail
-) {}
+    @NotBlank @Email
+    private String email;
+}
+
+public class UserUpdateCmd extends Command {
+    @NotBlank
+    private String userId;
+
+    @NotBlank @Email
+    private String newEmail;
+}
 ```
 
 ### 7. CmdExe (write handler — goes through Domain)
 
 ```java
-package com.example.app.app.executor;
+package com.example.user.executor;
 
 @Component
 @RequiredArgsConstructor
@@ -205,10 +231,10 @@ public class UserAddCmdExe {
     private final UserGateway userGateway;
 
     @Transactional(rollbackFor = Exception.class)
-    public UserDTO execute(UserAddCmd cmd) {
-        User user = User.create(cmd.username(), cmd.email());
+    public Result<Void> execute(UserAddCmd cmd) {
+        User user = User.create(cmd.getUsername(), cmd.getEmail());
         userGateway.save(user);
-        return UserDTO.from(user);
+        return Result.success();
     }
 }
 ```
@@ -216,7 +242,7 @@ public class UserAddCmdExe {
 ### 8. QryExe (read handler — bypasses Domain, queries Mapper directly)
 
 ```java
-package com.example.app.app.executor;
+package com.example.user.executor.query;
 
 @Component
 @RequiredArgsConstructor
@@ -224,18 +250,19 @@ public class UserQryExe {
     private final UserMapper userMapper;
     private final UserDOConverter userDOConverter;
 
-    public UserDTO findById(String userId) {
+    public Result<UserDTO> findById(String userId) {
         return Optional.ofNullable(userMapper.selectOne(
             new LambdaQueryWrapper<UserDO>().eq(UserDO::getUserId, userId)))
             .map(userDOConverter::toDomain)
             .map(UserDTO::from)
+            .map(Result::success)
             .orElseThrow(() -> new NotFoundException("User", userId));
     }
 
-    public PageResult<UserDTO> page(int pageNum, int pageSize, UserQueryBO query) {
+    public PageResult<UserDTO> page(int pageNum, int pageSize, UserQry qry) {
         LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<UserDO>()
-            .like(StringUtils.isNotBlank(query.getUsername()), UserDO::getUsername, query.getUsername())
-            .eq(StringUtils.isNotBlank(query.getStatus()), UserDO::getStatus, query.getStatus())
+            .like(StringUtils.isNotBlank(qry.getUsername()), UserDO::getUsername, qry.getUsername())
+            .eq(StringUtils.isNotBlank(qry.getStatus()), UserDO::getStatus, qry.getStatus())
             .orderByDesc(UserDO::getCreatedAt);
         Page<UserDO> mpPage = userMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
         return PageResult.of(mpPage).map(userDOConverter::toDomain).map(UserDTO::from);
@@ -246,7 +273,7 @@ public class UserQryExe {
 ### 9. Controller (adapter layer)
 
 ```java
-package com.example.app.adapter.controller;
+package com.example.web;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -254,19 +281,18 @@ package com.example.app.adapter.controller;
 @RequiredArgsConstructor
 @Validated
 public class UserController {
-    private final UserAddCmdExe userAddCmdExe;
-    private final UserQryExe userQryExe;
+    private final UserServiceI userService;
 
     @Operation(summary = "Create user")
     @PostMapping
-    public Result<UserDTO> create(@Valid @RequestBody UserAddCmd cmd) {
-        return Result.success(userAddCmdExe.execute(cmd));
+    public Result<Void> create(@Valid @RequestBody UserAddCmd cmd) {
+        return userService.addUser(cmd);
     }
 
     @Operation(summary = "Get user by ID")
     @GetMapping("/{userId}")
     public Result<UserDTO> get(@PathVariable @NotBlank String userId) {
-        return Result.success(userQryExe.findById(userId));
+        return userService.getUser(userId);
     }
 }
 ```
@@ -276,16 +302,16 @@ public class UserController {
 ### Dependency Direction
 
 ```
-Adapter → Application → Domain ← Infrastructure
+start → adapter → app → {client, infrastructure → domain → client}
 ```
 
-Domain depends on nothing; Application depends on Domain; Adapter/Infrastructure depend on Application and Domain.
+Domain depends on client (Result/BusinessException only); Infrastructure implements Domain Gateway; App depends on client + infrastructure (read path shortcut).
 
 ### CQRS Paths
 
 | Type | Path |
 |---|---|
-| Write | Controller → ServiceI → CmdExe → Domain → Gateway → DB |
+| Write | Controller → ServiceI → CmdExe → Domain → Gateway → GatewayImpl → DB |
 | Read | Controller → ServiceI → QryExe → Mapper → DB |
 
 ### Key Distinctions from Generic DDD
@@ -294,8 +320,8 @@ Domain depends on nothing; Application depends on Domain; Adapter/Infrastructure
 - Infrastructure DOs: **DO suffix** with MyBatis-Plus annotations
 - Persistence port: **Gateway** (not Repository)
 - Persistence impl: **GatewayImpl** (not RepositoryImpl)
-- Request objects: **Cmd** (create) / **Qry** (query), not generic DTO
+- Request objects: **Cmd** (create) / **Qry** (query) — in **client module**, not app
 - Write handler: **CmdExe**, not Application Service directly
 - Read handler: **QryExe**, bypasses Domain for performance
 - Object mapping: **Converter** (MapStruct), not Assembler
-- Service interface: **ServiceI** (COLA naming convention)
+- Service interface: **ServiceI** (COLA naming convention) — in **client module**

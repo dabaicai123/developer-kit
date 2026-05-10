@@ -1,9 +1,30 @@
 ---
 name: ddd-event-driven
-description: "Domain-driven event architecture for Spring Boot: domain event design, event sourcing, CQRS, aggregate root event publishing, outbox pattern, snapshooting, projections, and anti-patterns. Use when designing event-driven architecture, evaluating event sourcing vs simple events, or implementing CQRS."
-version: "1.0.0"
+description: "Domain-driven event architecture for Spring Boot: domain event design, event sourcing, CQRS, aggregate root event publishing, outbox pattern, snapshooting, projections. Use when designing event-driven architecture WITHIN a DDD domain, implementing event sourcing, or building CQRS read models. Do NOT use for simple request-response or when only inter-service messaging is needed (use spring-kafka instead)."
+version: "1.1.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+parameters:
+  - name: event_complexity
+    description: "Which event model to use — determines how events are designed and published"
+    type: enum
+    values: ["simple_events", "aggregate_events", "event_sourcing"]
+    required: true
+  - name: use_projections
+    description: "Whether to build separate read models from event streams (CQRS with projections)"
+    type: boolean
+    required: false
+    default: false
+  - name: use_outbox
+    description: "Whether to use the outbox pattern for reliable event delivery"
+    type: boolean
+    required: false
+    default: true
+  - name: integration_with_cola
+    description: "Whether this is used within a COLA DDD project (adjusts entity style and module layout)"
+    type: boolean
+    required: false
+    default: false
 ---
 
 # DDD Event-Driven Architecture
@@ -12,14 +33,32 @@ Domain-driven event architecture guidance — domain event design principles, ev
 
 ## When to use this skill
 
-| Concept | Description | Complexity |
-|---|---|---|
-| **Domain Events** | Immutable facts published by aggregates after state changes | Low |
-| **Event Sourcing** | Aggregate state is derived by replaying its event history | Medium |
-| **CQRS** | Separate models for writes (commands) and reads (queries) | High |
-| **Outbox Pattern** | Persist events in same transaction as aggregate, poll to publish | Low-Medium |
-| **Snapshooting** | Periodic aggregate state snapshot to avoid full replay | Medium |
-| **Projection** | Build read models from event stream for query optimization | Medium |
+Use when designing event-driven architecture within a DDD domain — specifically when your domain entities need to publish events, you're evaluating event sourcing, or building CQRS read models with projections.
+
+**Do NOT use when:**
+- Only need inter-service messaging (Kafka/RocketMQ) without domain events → use `spring-kafka`
+- Simple request-response pattern without domain complexity → use `spring-boot-rest-api-standards`
+- Only need application-level events (not domain events) → use `spring-boot-event-driven-patterns`
+
+**Decision tree — which event complexity level?**
+
+```
+Do you need to rebuild aggregate state from events? ──── YES → event_sourcing
+        │
+        NO
+        │
+Do aggregates publish multiple events per operation? ──── YES → aggregate_events
+        │
+        NO
+        │
+Do you just need to notify other services after a write? ──── YES → simple_events
+```
+
+| Level | Complexity | When to use |
+|-------|-----------|-------------|
+| **simple_events** | Low | Publish events after state change; no event replay needed; just notify other services |
+| **aggregate_events** | Medium | Aggregate publishes 1+ events per operation; need consistent event collection; no replay |
+| **event_sourcing** | High | Aggregate state derived from event replay; audit trail required; temporal queries needed |
 
 ## Instructions
 
@@ -408,6 +447,52 @@ public class OrderSummaryProjection {
 - **CQRS requires eventual consistency**: the read model may lag behind the write model. Clients must handle stale reads (e.g., "your order has been placed but may not appear in search immediately").
 - **@TransactionalEventListener(phase = AFTER_COMMIT) is essential**: events must only be published after the transaction commits. `@EventListener` fires during the transaction — if the transaction later rolls back, the event is already published, creating inconsistency.
 
+## COLA Integration
+
+When `integration_with_cola` is true, this skill works within the COLA multi-module architecture defined by `ddd-cola`. The following adjustments apply:
+
+| Aspect | Standalone DDD | With COLA (integration_with_cola=true) |
+|--------|---------------|---------------------------------------|
+| Event DTO location | `app/` or `domain/` | `client/dto/event/` (shared with other services) |
+| DomainEvent base class | In `domain/` package | In `client/common/` package (so all modules can access) |
+| AggregateRoot base class | In `domain/` package | In `domain/` package (domain module only) |
+| Event publisher | Application Service | CmdExe (write path) |
+| Outbox table | `infrastructure/` | `infrastructure/` (same) |
+| Projection handler | `app/` or separate module | `app/` or `infrastructure/` |
+
+**simple_events with COLA**: No `AggregateRoot` base class needed. CmdExe publishes event after domain operation:
+```java
+// app/executor/CustomerAddCmdExe.java
+@Component
+@RequiredArgsConstructor
+public class CustomerAddCmdExe {
+    private final CustomerGateway customerGateway;
+    private final ApplicationEventPublisher eventPublisher;
+
+    @Transactional
+    public Result<Void> execute(CustomerAddCmd cmd) {
+        Customer customer = Customer.create(cmd.getCompanyName(), cmd.getCustomerType());
+        customerGateway.save(customer);
+        eventPublisher.publishEvent(new CustomerCreatedEvent(customer.getCustomerId(), Instant.now()));
+        return Result.success();
+    }
+}
+```
+
+**aggregate_events / event_sourcing with COLA**: Domain entity extends `AggregateRoot` instead of plain `@Data`. All other COLA conventions (Gateway, CmdExe/QryExe, module structure) remain unchanged. See `ddd-cola` skill's **Event Integration** section for the full comparison table.
+
+## Spring Cloud Integration
+
+For inter-service event delivery in Spring Cloud environments:
+
+| Transport | When to use | Config |
+|-----------|-------------|--------|
+| **Spring Cloud Stream + RocketMQ** | Alibaba Cloud ecosystem | `spring-cloud-starter-stream-rocketmq` → see `spring-cloud-alibaba` |
+| **Spring Cloud Stream + Kafka** | Generic microservices | `spring-cloud-starter-stream-kafka` → see `spring-kafka` |
+| **Outbox + Polling** | No message broker available | `@Scheduled` poller reads outbox table → see `spring-boot-scheduled-tasks` |
+
+> Always combine with outbox pattern for reliable delivery — never publish directly to a message broker within a business transaction.
+
 ## References
 
 - Domain-Driven Design by Eric Evans
@@ -418,14 +503,15 @@ public class OrderSummaryProjection {
 
 ## Related Skills
 
+- `ddd-cola` — COLA architecture: module structure, Gateway pattern, CmdExe/QryExe. **Load together when `integration_with_cola=true`**
 - `spring-boot-event-driven-patterns` — Spring Boot implementation (ApplicationEventPublisher, @TransactionalEventListener, Kafka)
 - `spring-boot-transaction-management` — transactional boundaries for event publishing, Outbox pattern, distributed transaction patterns
-- `ddd-cola` — COLA architecture with domain events in the domain layer
 - `spring-cloud-openfeign` — inter-service calls in saga choreography
 - `spring-kafka` — Kafka event publishing for distributed event delivery
 - `spring-boot-async-processing` — async event processing patterns
 - `spring-boot-scheduled-tasks` — Outbox Poller uses @Scheduled for event relay
+- `spring-cloud-alibaba` — RocketMQ integration for Spring Cloud Alibaba
 
 ## Keywords
 
-event-driven architecture, domain events, event sourcing, CQRS, outbox pattern, snapshooting, projection, aggregate root, domain event design, event versioning, eventual consistency, idempotent consumers, correlation ID, anemic events, event coupling, synchronous chains, message broker, Kafka
+event-driven architecture, domain events, event sourcing, CQRS, outbox pattern, snapshooting, projection, aggregate root, domain event design, event versioning, eventual consistency, idempotent consumers, correlation ID, anemic events, event coupling, synchronous chains, message broker, Kafka, COLA events, AggregateRoot, simple events, aggregate events

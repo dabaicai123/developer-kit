@@ -46,12 +46,14 @@ public class OrderController {
 }
 ```
 
-## Model Documentation (App Layer — Cmd/Qry/VO/DTO)
+## Model Documentation (Client Layer — Cmd/Qry/VO/DTO)
+
+> **Canonical location**: Cmd, Qry, and DTO live in the **client** module (`client/dto/`) per `ddd-cola` SKILL.md. The `app/` package references below are for brevity; replace with `client/dto/` in actual multi-module projects.
 
 ### Command Object (Write Path)
 
 ```java
-// app/ — CreateOrderCmd
+// client/dto/ — CreateOrderCmd
 @Schema(description = "创建订单命令")
 @Data
 public class CreateOrderCmd {
@@ -69,7 +71,7 @@ public class CreateOrderCmd {
 ### Query Object (Read Path)
 
 ```java
-// app/ — OrderQry
+// client/dto/ — OrderQry
 @Schema(description = "订单查询参数")
 @Data
 public class OrderQry {
@@ -84,7 +86,7 @@ public class OrderQry {
 ### View/DTO Object (Response)
 
 ```java
-// app/ — OrderDTO
+// client/dto/data/ — OrderDTO
 @Schema(description = "订单数据传输对象")
 @Data
 public class OrderDTO {
@@ -131,8 +133,8 @@ public enum OrderStatus {
 | Gateway Interface | `domain/gateway/` | **Never** | Internal port; not exposed to clients |
 | DO Object | `infrastructure/mapper/` | **Never** | Persistence-only; not in API contract |
 | Gateway Impl | `infrastructure/gatewayimpl/` | **Never** | Infrastructure internal |
-| Cmd/Qry | `app/` | **Yes** | Crosses adapter boundary (request body) |
-| VO/DTO | `app/` | **Yes** | Crosses adapter boundary (response body) |
+| Cmd/Qry | `client/dto/` | **Yes** | Crosses adapter boundary (request body) |
+| VO/DTO | `client/dto/data/` | **Yes** | Crosses adapter boundary (response body) |
 | Controller | `adapter/controller/` | **Yes** | Entry point for API documentation |
 
 ## Pagination with PageResult

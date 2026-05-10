@@ -54,12 +54,14 @@ public class OrderController {
 }
 ```
 
-## Cmd/Qry/VO/DTO (App Layer)
+## Cmd/Qry/VO/DTO (Client Layer)
+
+> **Canonical location**: Cmd, Qry, and DTO live in the **client** module (`client/dto/`) per `ddd-cola` SKILL.md. This ensures the API contract is self-contained — consumers can construct Cmd/Qry objects and deserialize DTO responses without depending on app/domain/infrastructure. The `app/` package references below are for brevity; replace with `client/dto/` in actual multi-module projects.
 
 ### Command (Write Path — Request Body)
 
 ```java
-// app/ — CreateOrderCmd
+// client/dto/ — CreateOrderCmd
 @Data
 public class CreateOrderCmd {
     @NotBlank(message = "客户 ID 不能为空")
@@ -74,7 +76,7 @@ public class CreateOrderCmd {
 ### Query (Read Path — Parameters)
 
 ```java
-// app/ — OrderQry
+// client/dto/ — OrderQry
 @Data
 public class OrderQry {
     private String status;     // 状态筛选
@@ -85,7 +87,7 @@ public class OrderQry {
 ### DTO (Response Body)
 
 ```java
-// app/ — OrderDTO
+// client/dto/data/ — OrderDTO
 @Data
 public class OrderDTO {
     private String orderId;
@@ -103,9 +105,9 @@ public class OrderDTO {
 | Domain Entity | `domain/model/entity/` | **Never** | Internal, no ORM annotations |
 | DO Object | `infrastructure/mapper/` | **Never** | Persistence-only, MyBatis-Plus annotations |
 | Gateway Interface | `domain/gateway/` | **Never** | Internal port |
-| Cmd | `app/` | **Yes** | Request body |
-| Qry | `app/` | **Yes** | Query parameters |
-| VO/DTO | `app/` | **Yes** | Response body |
+| Cmd | `client/dto/` | **Yes** | Request body |
+| Qry | `client/dto/` | **Yes** | Query parameters |
+| VO/DTO | `client/dto/data/` | **Yes** | Response body |
 
 ## Pagination Pattern
 

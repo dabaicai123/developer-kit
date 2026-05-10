@@ -1,16 +1,50 @@
 ---
 name: ddd-cola
-description: "COLA DDD Architecture (Web/Distributed): multi-module project structure (client/adapter/app/domain/infrastructure/start), Feign integration, Gateway pattern, CQRS. Uses project's own Result/BusinessException conventions. Use when creating a Spring Cloud microservice with COLA/DDD architecture."
-version: "2.0.0"
+description: "COLA DDD Architecture: multi-module project structure (client/adapter/app/domain/infrastructure/start), Feign integration, Gateway pattern, CQRS. Use when creating or structuring a Spring Boot or Spring Cloud microservice with COLA/DDD multi-module architecture. Do NOT use for simple MVC, monolithic layered, or non-Java projects."
+version: "2.1.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+parameters:
+  - name: service_name
+    description: "Service name (used as module prefix, e.g. 'demo' → demo-client, demo-adapter)"
+    type: string
+    required: true
+  - name: base_package
+    description: "Base Java package (e.g. 'com.example')"
+    type: string
+    required: true
+  - name: domain_name
+    description: "Domain name for the primary aggregate (e.g. 'customer', 'order')"
+    type: string
+    required: true
+  - name: use_feign
+    description: "Whether the service exposes Feign client for inter-service calls"
+    type: boolean
+    required: false
+    default: true
+  - name: use_event_driven
+    description: "Whether to include domain events (if true, also load ddd-event-driven skill)"
+    type: boolean
+    required: false
+    default: false
+  - name: architecture_type
+    description: "Deployment architecture type"
+    type: enum
+    values: ["spring_cloud", "standalone"]
+    required: false
+    default: "spring_cloud"
 ---
 
-# COLA DDD Architecture (Web/Distributed)
+# COLA DDD Architecture
 
 ## When to use this skill
 
-Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi-module architecture, implementing domain-driven design with a client module for Feign API sharing.
+Use when creating or structuring a Spring Boot or Spring Cloud microservice with COLA/DDD multi-module architecture, implementing domain-driven design with a client module for Feign API sharing.
+
+**Do NOT use when:**
+- Building a simple MVC/layered application without domain complexity → use `spring-boot-rest-api-standards`
+- The project is not Java/Spring Boot
+- Only adding a new endpoint to an existing non-COLA service → use the relevant module-specific skill
 
 ## Quick Guide
 
@@ -22,6 +56,8 @@ Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi
 | Confused about naming? | See **Naming Per Module** |
 | Confused about data flow? | Cmd/Qry (client) → Entity (domain, plain params) → DO (infrastructure) → DB → Result<T> |
 | Other service calling yours? | They depend on your `client` jar, inject FeignClient |
+| Need domain events? | Use `ddd-event-driven` skill — see **Event Integration** below |
+| Adding to existing COLA project? | See **Partial Module Addition** below |
 
 ## Official COLA vs Team Override
 
@@ -88,11 +124,21 @@ Other services consume your API via the client jar. Key practices:
 - **External HTTP Client**: RestClient (Spring 6.1+) for `infrastructure/external/` → see `spring-boot-rest-client`
 - **pom.xml templates**: Full pom for each module → see `references/pom-templates.md`
 
+### 5. Standalone Spring Boot (Non-Cloud)
+
+For standalone Spring Boot (no Nacos, no Feign, no Spring Cloud Alibaba):
+
+- Omit `demo-client` module's OpenFeign dependency entirely
+- Skip `CustomerFeignClient.java` — other services call via REST directly
+- Omit Spring Cloud starters from `start` module pom.xml
+- Remove `@EnableDiscoveryClient`, `@EnableFeignClients` from `Application.java`
+- All other modules (adapter, app, domain, infrastructure) remain the same
+
 ## Module Structure & Package Conventions
 
 ### client Module — API Contract + Common Types
 
-The client module is published as a Maven dependency for other services to consume via Feign.
+The client module is published as a Maven dependency for other services to consume via Feign. **Cmd, Qry, and DTO all live in client** so that the API contract is self-contained — consumers can construct Cmd/Qry objects and deserialize DTO responses without depending on app/domain/infrastructure.
 
 ```
 com.example.common.result/
@@ -114,11 +160,13 @@ com.example.dto/
 com.example.dto.data/
 ├── CustomerDTO.java                 # Data Transfer Object
 com.example.dto.event/
-├── CustomerCreatedEvent.java        # Domain event DTO
+├── CustomerCreatedEvent.java        # Domain event DTO (for inter-service events)
 └── DomainEventConstant.java         # Event topic constants
 ```
 
 > `Result`, `PageResult`, and `BusinessException` are project-wide conventions defined in `spring-boot-rest-api-standards` and `spring-boot-exception-handling`. They are placed in client `common/` packages so all modules (domain, app, adapter, infrastructure) can access them without pulling in Spring Boot starters. `Command` and `Query` are new marker base classes for CQRS identification.
+
+> **Cmd/Qry location**: Always in `client/dto/` — this is the canonical location. Other skills (cola-rest-patterns, ddd-architecture-example) may reference `app/` for brevity, but the canonical location for shared types is `client`. If a Cmd/Qry is purely internal (never sent by external callers), it may live in `app/`, but this should be the exception, not the default.
 
 **Feign Integration Pattern (recommended):**
 
@@ -182,10 +230,10 @@ com.example.domain.customer/
 ├── Customer.java                      # Entity (@Data, bare name)
 ├── CustomerType.java                  # Enum
 ├── gateway/
-    ├── CustomerGateway.java           # Persistence port
-    └── CreditGateway.java             # External service port
+│   ├── CustomerGateway.java           # Persistence port
+│   └── CreditGateway.java             # External service port
 ├── domainservice/
-    └── CreditChecker.java             # Cross-entity logic within domain
+│   └── CreditChecker.java             # Cross-entity logic within domain
 ```
 
 > **Domain Entity uses plain params in factory methods** — never receives client Cmd/DTO directly. This keeps Domain independent of the API contract.
@@ -284,22 +332,58 @@ public class ColaArchitectureTest {
             .because("domain must not depend on client Cmd/Qry/DTO — only Result/BusinessException allowed");
 
     @ArchTest
-    static final ArchRule adapter_no_mapper =
+    static final ArchRule adapter_no_infrastructure =
         noClasses()
             .that().resideInAPackage("..adapter..")
             .should().dependOnClassesThat()
             .resideInAPackage("..infrastructure..");
 
     @ArchTest
-    static final ArchRule write_path_uses_gateway =
-        classes()
-            .that().resideInAPackage("..executor..")
-            .and().areNotAssignableTo(Query.class)
+    static final ArchRule write_executors_use_gateway_not_mapper =
+        noClasses()
+            .that().resideInAPackage("..app..")
+            .and().haveSimpleNameNotContaining("QryExe")
             .should().notDependOnClassesThat()
-            .areAssignableTo(BaseMapper.class)
-            .because("Write executors must go through Domain Gateway, not Mapper directly");
+            .resideInAPackage("..infrastructure..")
+            .because("Write path (non-QryExe) must go through Domain Gateway, not infrastructure directly");
 }
 ```
+
+> **ArchUnit note**: The `write_executors_use_gateway_not_mapper` rule uses package-level checks rather than type-assignability checks, which are more reliable and easier to maintain. The previous version using `areAssignableTo(BaseMapper.class)` had API compatibility issues across ArchUnit versions.
+
+## Event Integration
+
+When `use_event_driven` is true, combine this skill with `ddd-event-driven`:
+
+| Aspect | This skill (ddd-cola) | ddd-event-driven |
+|--------|----------------------|------------------|
+| Event DTO | `client/dto/event/CustomerCreatedEvent.java` | `DomainEvent` base class + `OrderPlacedEvent` record |
+| Publisher | `ApplicationEventPublisher` (via CmdExe) | `ApplicationEventPublisher` (via Application Service) |
+| Aggregate | No base class — plain `@Data` entity | `AggregateRoot` base class with `registerEvent()` |
+| Listener | `@TransactionalEventListener` in app or infrastructure | `@TransactionalEventListener` in projection handler |
+| Storage | Outbox table in infrastructure | Outbox table in infrastructure |
+
+**When to use which event model:**
+
+| Scenario | Use | Reason |
+|----------|-----|--------|
+| Simple events after write (notify other services) | ddd-cola event DTO + CmdExe publish | Lightweight, no aggregate base class needed |
+| Rich domain with event-sourced aggregate | ddd-event-driven AggregateRoot + DomainEvent | Event sourcing requires AggregateRoot for event collection |
+| Event sourcing + CQRS with projections | ddd-event-driven full model | Projections require event stream replay |
+
+> **Compatibility note**: If you adopt `AggregateRoot` from `ddd-event-driven`, your domain entities extend `AggregateRoot` instead of being plain `@Data` classes. This is the ONLY change to domain entity style — all other COLA conventions (Gateway, CmdExe/QryExe, Module structure) remain the same.
+
+## Partial Module Addition
+
+When adding a new domain to an existing COLA project:
+
+1. **client**: Add new `XxxServiceI`, `XxxCmd`, `XxxQry`, `XxxDTO`, (optional) `XxxFeignClient`
+2. **adapter**: Add new `XxxController`
+3. **app**: Add new `XxxServiceImpl`, `XxxCmdExe`, `XxxQryExe`
+4. **domain**: Add new `Xxx` entity, `XxxGateway` interface, (optional) `XxxDomainService`
+5. **infrastructure**: Add new `XxxGatewayImpl`, `XxxDO`, `XxxMapper`, (optional) `XxxDOConverter`
+
+No need to modify existing domains' files. Module pom.xml dependencies are already correct.
 
 ## Naming Per Module
 
@@ -364,7 +448,7 @@ Conversion: MapStruct at each boundary → see `mapstruct-patterns`
 - `spring-cloud-alibaba` — Nacos, Sentinel, RocketMQ, OpenFeign — distributed infrastructure
 - `spring-boot-rest-api-standards` — `Result<T>`, `PageResult<T>`, unified response pattern
 - `spring-boot-exception-handling` — `BusinessException`, `ErrorCodes`, `GlobalExceptionHandler`
-- `ddd-event-driven` — domain event design, event stores, aggregate boundaries
+- `ddd-event-driven` — domain event design, event sourcing, CQRS with projections, AggregateRoot pattern
 - `spring-boot-transaction-management` — @Transactional patterns for executor and service layer
 - `spring-boot-rest-client` — RestClient for `infrastructure/external/`
 - `mybatis-plus-patterns` — DO conventions, Mapper, soft delete, ID generation, pagination
@@ -378,4 +462,4 @@ Conversion: MapStruct at each boundary → see `mapstruct-patterns`
 
 ## Keywords
 
-cola, COLA architecture, COLA V5, DDD, microservice, spring cloud, multi-module, client, adapter, app, domain, infrastructure, feign, gateway, GatewayImpl, mapper, executor, Result, PageResult, BusinessException, dependency inversion, ArchUnit
+cola, COLA architecture, COLA 4.x, COLA 5.x, cola-archetype-web, DDD, domain-driven design, microservice, spring cloud, multi-module, client, adapter, app, domain, infrastructure, feign, gateway, GatewayImpl, mapper, executor, Result, PageResult, BusinessException, dependency inversion, ArchUnit, CQRS, CmdExe, QryExe
