@@ -1,369 +1,381 @@
 ---
 name: ddd-cola
-description: "COLA DDD architecture for Spring Boot: project scaffolding, layer structure (adapter/app/domain/infrastructure), dependency direction, gateway pattern, and naming conventions. Use when creating a Spring Boot project with COLA/DDD architecture or structuring layered applications."
-version: "1.0.0"
+description: "COLA DDD Architecture (Web/Distributed): multi-module project structure (client/adapter/app/domain/infrastructure/start), Feign integration, Gateway pattern, CQRS. Uses project's own Result/BusinessException conventions. Use when creating a Spring Cloud microservice with COLA/DDD architecture."
+version: "2.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# COLA DDD Architecture
+# COLA DDD Architecture (Web/Distributed)
 
 ## When to use this skill
 
-Use when creating or structuring a Spring Boot project with COLA/DDD architecture, implementing domain-driven design with dependency-inverted layers.
+Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi-module architecture, implementing domain-driven design with a client module for Feign API sharing.
 
 ## Quick Guide
 
 | Your scenario | What to do |
 |---------------|-----------|
-| Starting a new project? | Follow **Project Setup** steps 1–7, then scaffold packages per **COLA Layer Structure** |
+| Starting a new service? | Follow **Project Setup** → scaffold 6 modules per **Module Structure** |
 | Adding a new use case? | Pick CQRS path: Write → CmdExe → Domain → Gateway; Read → QryExe → Mapper |
-| Unsure about a layer? | Adapter → `spring-boot-rest-api-standards` / `spring-boot-openapi-documentation`; Domain → this skill's Gateway + Entity examples; Infrastructure → `mybatis-plus-patterns` |
-| Confused about naming? | See **Naming Per Layer** (Entity=none, Gateway=Gateway, DO=DO, CmdExe=CmdExe) |
-| Confused about data flow? | Request → VO → DTO → Entity → DO → DB |
+| Unsure about a module? | Client → Feign + ServiceI; Adapter → `spring-boot-rest-api-standards`; Domain → this skill's Gateway + Entity; Infrastructure → `mybatis-plus-patterns` |
+| Confused about naming? | See **Naming Per Module** |
+| Confused about data flow? | Cmd/Qry (client) → Entity (domain, plain params) → DO (infrastructure) → DB → Result<T> |
+| Other service calling yours? | They depend on your `client` jar, inject FeignClient |
+
+## Official COLA vs Team Override
+
+| Aspect | Official COLA (archetype-web) | Team Override | Reason |
+|--------|-------------------------------|-------------|--------|
+| Response types | `Response<T>` / `MultiResponse<T>` (cola-component-dto) | `Result<T>` / `PageResult<T>` | Project already uses Result across all services; avoid dual type systems |
+| Exception types | `BizException` / `SysException` (cola-component-exception) | `BusinessException` + sub-classes | Project already uses BusinessException with int error codes |
+| COLA component deps | Required (BOM, dto, exception, domain-starter) | None | COLA components target Alibaba internal ecosystem (HSF/Mtop); unnecessary for Spring Cloud |
+| Domain entity annotation | `@Entity` (cola-component-domain-starter, prototype scope) | `@Data` (Lombok) | Lombok is lighter, already used in project; prototype scope rarely needed |
+| Infrastructure package | `gatewayimpl.database.dataobject` (some samples) | Flat per-domain (`customer/CustomerGatewayImpl.java`) | Simpler, fewer sub-packages; official archetype-web sample also uses flat layout |
+| ServiceI return type | `Response` / `MultiResponse` | `Result<T>` / `PageResult<T>` | Same as non-DDD services; no type split |
+| Cmd/Qry base | Extends COLA `Command` / `Query` | Extends self-defined `Command` / `Query` (in client `common.dto`) | No cola-component-dto dependency; marker classes serve the same CQRS identification purpose |
 
 ## Project Setup
 
-### 1. Generate from Spring Initializr
+### 1. Multi-Module Maven Project
 
-Generate project from Spring Initializr with Java 21, Spring Boot 3.5.1, and dependencies: web, postgresql, data-redis, validation, lombok, configuration-processor, cache, testcontainers.
-
-### 2. Add Dependencies
-
-Add MyBatis-Plus and pagination plugin dependencies. See `mybatis-plus-patterns` for versions and configuration.
-
-### 3. .gitignore
-
-Use standard Java .gitignore patterns (target/, .idea/, *.iml, .DS_Store, *.log, .env).
-
-### 4. Configuration
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/demo
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-  data:
-    redis:
-      host: localhost
-      port: 6379
-
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: assign_id
-      logic-delete-field: deletedAt
-      logic-delete-value: "now()"
-      logic-not-delete-value: ""
-```
-
-### 5. Docker Compose
-
-Use Docker Compose for PostgreSQL and Redis. See `docker-expert` for production Compose patterns.
-
-### 6. mvnd + JDK 21 + Lombok Compatibility
-
-When using **mvnd (Maven Daemon)** with **JDK 21** and **Lombok**, annotation processing silently fails.
-mvnd uses the JSR 199 `javax.tools.JavaCompiler` API, which blocks Lombok from accessing `com.sun.tools.javac.*`
-internal APIs needed for AST modification. Symptoms include:
-- `log` not found (from `@Slf4j`)
-- `getId()` not found (from `@Data`)
-- `builder()` not found (from `@Builder`)
-- Constructor type inference failures (from `@AllArgsConstructor`)
-
-**Fix**: Add `<forceLegacyJavacApi>true</forceLegacyJavacApi>` to `maven-compiler-plugin`:
-
-```xml
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <configuration>
-    <forceLegacyJavacApi>true</forceLegacyJavacApi>
-  </configuration>
-</plugin>
-```
-
-This forces mvnd to use the legacy javac API, restoring Lombok's annotation processing capability.
-
-### 7. External HTTP Client
-
-- Use **RestClient** (Spring 6.1+, included in `spring-boot-starter-web`, no extra dependency)
-- **OkHttp3**: only for WebSocket or custom interceptor scenarios; not managed by Spring Boot parent
-- For detailed configuration and usage → see `spring-boot-rest-client` skill
-
-> **Note**: Dependencies not managed by `spring-boot-starter-parent` (e.g., OkHttp3, Fastjson2) require explicit `<version>`.
-
-## COLA Layer Structure
+COLA archetype-web pattern — 6 Maven modules under a parent POM:
 
 ```
-com.example.app/
-├── adapter/
-│   ├── controller/        # HTTP inbound handlers
-│   └── scheduler/         # Scheduled tasks
-├── app/
-│   ├── executor/          # Command/Query executors — actual use case handlers
-│   └── service/           # Application service facade — delegates to executors
-├── domain/
-│   ├── metrics/           # Metrics domain (first by domain, then by function)
-│   │   ├── Metric.java          # Domain entity — plain Java class, bare name
-│   │   └── MetricGateway.java   # Gateway interface (persistence + external service ports)
-│   ├── customer/          # Customer domain
-│   │   ├── Customer.java
-│   │   └── CustomerGateway.java
-│   └── service/           # Domain services (cross-entity logic within a domain)
-└── infrastructure/
-    ├── gatewayimpl/        # Gateway implementations (implements domain gateway interfaces)
-    │   ├── metrics/       # Metrics gateway impls
-    │   └── customer/      # Customer gateway impls
-    ├── mapper/             # MyBatis Mapper interfaces + DO classes
-    ├── external/           # External API clients (RestClient)
-    └── config/             # Spring configuration
+demo-parent/
+├── demo-client/           # API interfaces, DTOs, Feign clients, common types
+├── demo-adapter/          # HTTP inbound (Controllers)
+├── demo-app/              # Application services, executors
+├── demo-domain/           # Domain entities, Gateways, domain services
+├── demo-infrastructure/   # Gateway implementations, Mappers, external clients
+└── demo-start/            # Bootstrap (Application.java + config)
 ```
 
-### Naming Per Layer
-
-| Layer | Class Type | Suffix | Example |
-|-------|-----------|--------|---------|
-| Domain | Entity | none | `Metric` (plain Java class, bare name, no suffix) |
-| Domain | Gateway | Gateway | `MetricGateway` (persistence + external service ports) |
-| Domain | Value Object | none | `Money` |
-| Domain | Domain Event | Event | `OrderCreatedEvent` |
-| Application | Service | none (interface ends with `I`) | `MetricsServiceI` |
-| Application | Executor (Command) | CmdExe | `ATAMetricAddCmdExe` |
-| Application | Executor (Query) | QryExe | `ATAMetricQryExe` |
-| Application | Command | Cmd | `CreateOrderCmd` |
-| Application | Query | Qry | `ATAMetricQry` |
-| Infrastructure | Data Object | DO | `OrderDO` |
-| Infrastructure | Gateway Impl | GatewayImpl | `OrderGatewayImpl` |
-| Adapter | Controller | Controller | `OrderController` |
-
-### App Layer: Service vs Executor
-
-**Service** is the facade (entry point), **Executor** is the processor. They work together, not as alternatives.
+### 2. Module Dependencies
 
 ```
-Controller → Service (thin facade) → Executor (actual handler)
+start → adapter → app → {client, infrastructure → domain → client}
 ```
+
+| Module | Depends On | Reason |
+|--------|-----------|--------|
+| **client** | jakarta.validation-api, lombok, openfeign(provided) | Pure API contract + common types. OpenFeign `provided` scope — consumers bring their own runtime |
+| **domain** | client | Uses Result/BusinessException base types from client common; **does NOT import Cmd/DTO into Entity constructors** |
+| **infrastructure** | domain | Implements domain Gateway interfaces; contains DO/Mapper |
+| **app** | client, infrastructure | ServiceI from client; infrastructure for **read path** (see CQRS exception below) |
+| **adapter** | app | Calls Application Service |
+| **start** | adapter | Brings all modules together for bootstrap |
+
+> **Read path pragmatic exception**: app depends on infrastructure so QryExe can access Mapper directly. This bypasses Domain for performance. The write path still follows strict dependency inversion (CmdExe → Domain Gateway → GatewayImpl). ArchUnit should enforce write-path compliance while allowing this read-path shortcut.
+
+### 3. Client Jar Publishing
+
+Other services consume your API via the client jar. Key practices:
+- **Artifact name**: `${service-name}-client` (e.g., `demo-client`)
+- **Version**: Follow the service version (e.g., `1.0.0-SNAPSHOT` during dev, `1.0.0` for release)
+- **Deploy**: `mvn deploy` to shared Maven repository (Nexus/Artifactory)
+- **Compatibility**: Minor version additions (new methods on ServiceI) are backward-compatible; breaking changes require major version bump or new interface
+- **Consumer**: Other services add `<dependency><groupId>...</groupId><artifactId>demo-client</artifactId></dependency>` and inject FeignClient
+
+> For multi-service version alignment, use a shared BOM or parent POM that declares all client jar versions.
+
+### 4. Other Setup
+
+- **Configuration**: PostgreSQL + Redis + MyBatis-Plus YAML in start module → see `mybatis-plus-patterns`
+- **Nacos/Sentinel/OpenFeign**: See `spring-cloud-alibaba`
+- **Docker Compose**: PostgreSQL + Redis → see `docker-expert`
+- **mvnd + JDK 21 + Lombok**: Add `<forceLegacyJavacApi>true</forceLegacyJavacApi>` to maven-compiler-plugin → see `references/pom-templates.md`
+- **External HTTP Client**: RestClient (Spring 6.1+) for `infrastructure/external/` → see `spring-boot-rest-client`
+- **pom.xml templates**: Full pom for each module → see `references/pom-templates.md`
+
+## Module Structure & Package Conventions
+
+### client Module — API Contract + Common Types
+
+The client module is published as a Maven dependency for other services to consume via Feign.
+
+```
+com.example.common.result/
+├── Result.java                      # (existing — see spring-boot-rest-api-standards)
+├── PageResult.java                  # (existing — see spring-boot-rest-api-standards)
+com.example.common.exception/
+├── BusinessException.java           # (existing — see spring-boot-exception-handling)
+├── NotFoundException.java
+├── ConflictException.java
+com.example.common.dto/
+├── Command.java                     # Write command marker (new — for CQRS identification)
+├── Query.java                       # Read query marker (new — for CQRS identification)
+com.example.api/
+├── CustomerServiceI.java            # Service interface (returns Result<T>)
+├── CustomerFeignClient.java         # @FeignClient — recommended pattern
+com.example.dto/
+├── CustomerAddCmd.java              # extends Command
+├── CustomerListByNameQry.java       # extends Query
+com.example.dto.data/
+├── CustomerDTO.java                 # Data Transfer Object
+com.example.dto.event/
+├── CustomerCreatedEvent.java        # Domain event DTO
+└── DomainEventConstant.java         # Event topic constants
+```
+
+> `Result`, `PageResult`, and `BusinessException` are project-wide conventions defined in `spring-boot-rest-api-standards` and `spring-boot-exception-handling`. They are placed in client `common/` packages so all modules (domain, app, adapter, infrastructure) can access them without pulling in Spring Boot starters. `Command` and `Query` are new marker base classes for CQRS identification.
+
+**Feign Integration Pattern (recommended):**
+
+```java
+// api/CustomerServiceI.java
+public interface CustomerServiceI {
+    Result<Void> addCustomer(CustomerAddCmd cmd);
+    Result<List<CustomerDTO>> listByName(CustomerListByNameQry qry);
+}
+
+// api/CustomerFeignClient.java
+@FeignClient(name = "customer-service", path = "/customer")
+public interface CustomerFeignClient extends CustomerServiceI {
+}
+```
+
+> **When FeignClient extends ServiceI**: Only suitable when ALL ServiceI methods are external-facing. If ServiceI includes internal-only methods (e.g., batch processing triggered by scheduler), split into separate interfaces — keep `CustomerServiceI` for internal use, create `CustomerExternalApi` for Feign.
+
+> **client stays lightweight**: No Spring Boot starter, no MyBatis-Plus, no COLA component deps. OpenFeign is `provided` scope. PageResult has an `of(Page<T>)` factory method that references MyBatis-Plus's `Page` class, but this is only used at runtime in infrastructure/app; client jar consumers who don't use MyBatis-Plus can still use PageResult's other constructors.
+
+### adapter Module — HTTP Inbound
+
+```
+com.example.web/
+├── CustomerController.java
+```
+
+Adapter is a routing layer — no business logic, no DTO conversion. Controller delegates to ServiceI directly. For detailed example → see `references/code-examples.md`.
+
+### app Module — Application Layer
+
+Organize by domain first, then by function.
+
+```
+com.example.customer/
+├── CustomerServiceImpl.java           # Implements ServiceI, delegates to executors
+└── executor/
+    ├── CustomerAddCmdExe.java         # Write handler
+    └── query/
+        └── CustomerListByNameQryExe.java  # Read handler
+```
+
+**Service vs Executor:**
 
 | Component | Package | Responsibility | Contains Logic? |
 |-----------|---------|---------------|----------------|
-| **Application Service** | `app/service/` | Implements client API interface; delegates each method to a specific Executor | No — pure delegation/routing |
-| **Command Executor** | `app/executor/` | Handles write operations: for simple cases, logic stays here; for complex domains, delegates to Domain entity | Yes (simple) / Delegates (complex) |
-| **Query Executor** | `app/executor/` | Handles read operations: queries Infrastructure directly, bypasses Domain for performance | Yes — assembles query results |
+| **Service** | `com.example.customer/` | Implements ServiceI; pure delegation to Executors | No |
+| **CmdExe** | `executor/` | Write operations: converts Cmd → plain params, calls Domain | Yes (simple) / Delegates (complex) |
+| **QryExe** | `executor/query/` | Read operations: queries Mapper directly, bypasses Domain | Yes |
 
-```java
-// app/service/ — thin facade, no business logic
-@Service
-@RequiredArgsConstructor
-public class MetricsServiceImpl implements MetricsServiceI {
-    private final ATAMetricAddCmdExe ataMetricAddCmdExe;
-    private final ATAMetricQryExe ataMetricQryExe;
+> **CmdExe converts Cmd to Domain params**: Domain Entity receives plain parameters (not Cmd object). This keeps Domain decoupled from client DTOs. E.g., `Customer.create(cmd.getCompanyName(), cmd.getCustomerType())`, NOT `Customer.create(cmd)`.
 
-    @Override
-    public Response addATAMetric(ATAMetricAddCmd cmd) {
-        return ataMetricAddCmdExe.execute(cmd);
-    }
+> **All Executors use `execute()` as method name**: `CmdExe.execute(cmd)` and `QryExe.execute(qry)`. Service delegates by calling executor's `execute` method.
 
-    @Override
-    public MultiResponse<ATAMetricDTO> listATAMetrics(ATAMetricQry qry) {
-        return ataMetricQryExe.execute(qry);
-    }
-}
+### domain Module — Domain Core
 
-// app/executor/ — write handler, goes through Domain
-@Component
-@RequiredArgsConstructor
-public class ATAMetricAddCmdExe {
-    private final MetricGateway metricGateway;
+Organize by domain first, then by function. Gateway interfaces and domain services are sub-packages within each domain.
 
-    @Transactional
-    public Response execute(ATAMetricAddCmd cmd) {
-        Metric metric = new Metric(cmd);
-        metricGateway.save(metric);
-        return Response.buildSuccess();
-    }
-}
-
-// app/executor/ — read handler, bypasses Domain
-@Component
-@RequiredArgsConstructor
-public class ATAMetricQryExe {
-    private final MetricMapper metricMapper;
-
-    public MultiResponse<ATAMetricDTO> execute(ATAMetricQry qry) {
-        List<MetricDO> records = metricMapper.selectByQry(qry);
-        return MultiResponse.of(records.stream().map(MetricDTO::fromDO).toList());
-    }
-}
+```
+com.example.domain.customer/
+├── Customer.java                      # Entity (@Data, bare name)
+├── CustomerType.java                  # Enum
+├── gateway/
+    ├── CustomerGateway.java           # Persistence port
+    └── CreditGateway.java             # External service port
+├── domainservice/
+    └── CreditChecker.java             # Cross-entity logic within domain
 ```
 
-> **Single-module (cola-archetype-light)**: Service can be omitted — Controller calls Executor directly.
-> **Multi-module with Client**: Service is required — it implements the client API interface and is the only entry point to the Application layer.
+> **Domain Entity uses plain params in factory methods** — never receives client Cmd/DTO directly. This keeps Domain independent of the API contract.
 
-### CQRS Paths
+> **Gateway is broader than Repository** — covers persistence AND external service access contracts. Define in Domain, implement in Infrastructure.
+
+> **Domain entities do NOT inject Spring beans** — pure Java. Cross-entity logic goes in DomainService (`domainservice/`).
+
+> Domain depends on client only for Result/BusinessException base types, NOT for Cmd/DTO input.
+
+### infrastructure Module — Implementation
+
+Flat per-domain package. No `gatewayimpl/` sub-package — everything related to a domain grouped together.
+
+```
+com.example.customer/
+├── CustomerGatewayImpl.java
+├── CreditGatewayImpl.java
+├── CustomerDO.java                    # @TableName, @Data
+├── CustomerMapper.java                # MyBatis-Plus Mapper
+com.example.config/
+└── AppConfig.java
+com.example.external/
+└── ExternalClientConfig.java          # RestClient/Feign config
+```
+
+> DO and Mapper conventions → see `mybatis-plus-patterns`. MapStruct converters → see `mapstruct-patterns`.
+
+### start Module — Bootstrap
+
+```
+com.example/
+├── Application.java                   # @SpringBootApplication @EnableDiscoveryClient @EnableFeignClients
+resources/
+├── application.yml                    # DB, Redis, MyBatis-Plus → see mybatis-plus-patterns
+├── bootstrap.yml                      # Nacos config → see spring-cloud-alibaba
+```
+
+## CQRS Paths
 
 | Type | Path | Notes |
 |------|------|-------|
-| **Command (Write)** | Controller → Service → CmdExe → Domain (for complex) → Gateway → DB | Simple cases: logic in CmdExe directly; Complex domains: CmdExe delegates to Domain entity |
-| **Query (Read)** | Controller → Service → QryExe → Mapper → DB | Bypasses Domain layer; queries Infrastructure directly for performance |
+| **Command (Write)** | Controller → Service → CmdExe → Domain Entity → Gateway → GatewayImpl → Mapper → DB | CmdExe converts Cmd → plain params for Domain |
+| **Query (Read)** | Controller → Service → QryExe → Mapper → DB | Pragmatic shortcut: bypasses Domain for performance |
+| **Feign (Write)** | Other Service → FeignClient(ServiceI) → Controller → Service → CmdExe → Domain → Gateway → DB | Same internal path as HTTP |
+| **Feign (Read)** | Other Service → FeignClient(ServiceI) → Controller → Service → QryExe → Mapper → DB | Read bypasses Domain |
 
-Key differences:
-- **Write**: Domain entity handles validation and business logic; Gateway (port) abstracts persistence; Infrastructure implements Gateway
-- **Read**: No domain entity needed; Query executor calls Mapper directly; returns DTO, never Domain entity or DO
+> **Write path must follow dependency inversion**: CmdExe → Domain Gateway → Infrastructure GatewayImpl. Never CmdExe → Mapper directly for writes.
+> **Read path pragmatic shortcut**: QryExe → Mapper directly. This is why app depends on infrastructure. For complex read logic that needs domain validation, QryExe can still go through Domain — it's a choice, not a rule.
 
-### Dependency Direction
-
-```
-Adapter → Application → Domain ← Infrastructure
-```
-
-- **Domain** depends on nothing
-- **Application** depends on Domain
-- **Adapter/Infrastructure** depend on Application and Domain
-- Never: Domain → Application (upward), Domain → Infrastructure (upward)
-
-### Data Object Flow Per Layer
+## Dependency Direction & Enforcement
 
 ```
-Request → VO → DTO → Entity → DO → DB
-Response → DO → Entity → DTO → VO
+client (no internal deps)
+    ↑
+domain (depends on client — for Result/BusinessException only, NOT Cmd/DTO)
+    ↑
+infrastructure (depends on domain — implements Gateway interfaces)
+    ↑
+app (depends on client + infrastructure — read path pragmatic shortcut)
+    ↑
+adapter (depends on app)
+    ↑
+start (depends on adapter)
 ```
 
-Conversion tools: MapStruct at each boundary → see `mapstruct-patterns`
+### ArchUnit Rules
 
-### Example: Use Case Executor
+Enforce dependency direction with ArchUnit tests in the start module:
 
 ```java
-// Domain entity — plain Java class, bare name, no suffix, no annotations
-public class Order {
-    private String orderId;
-    private List<OrderItem> items;
-    private OrderStatus status;
+@AnalyzeClasses(packages = "com.example")
+public class ColaArchitectureTest {
 
-    public static Order create(List<OrderItem> items, String customerId) {
-        Order order = new Order();
-        order.orderId = IdUtil.simpleUUID();
-        order.items = items;
-        order.status = OrderStatus.PENDING;
-        return order;
-    }
-}
+    @ArchTest
+    static final ArchRule domain_no_app =
+        noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..app..")
+            .because("domain must not depend on app — upward dependency breaks inversion");
 
-// Domain gateway (port) — broader than Repository: includes persistence AND external service access
-public interface OrderGateway {
-    void save(Order order);   // INSERT only
-    void update(Order order); // UPDATE only — no ambiguity, no risk of double INSERT
-    Optional<Order> findById(String id);
-}
+    @ArchTest
+    static final ArchRule domain_no_infrastructure =
+        noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..infrastructure..");
 
-// Domain gateway for external service access (not just DB)
-public interface InventoryGateway {
-    boolean deductStock(String orderId, int quantity);
-}
+    @ArchTest
+    static final ArchRule domain_no_client_dto =
+        noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..client.dto..")
+            .because("domain must not depend on client Cmd/Qry/DTO — only Result/BusinessException allowed");
 
-// Application executor (write — command handler)
-@Component
-public class CreateOrderCmdExe {
-    private final OrderGateway orderGateway;
+    @ArchTest
+    static final ArchRule adapter_no_mapper =
+        noClasses()
+            .that().resideInAPackage("..adapter..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..infrastructure..");
 
-    public CreateOrderCmdExe(OrderGateway orderGateway) {
-        this.orderGateway = orderGateway;
-    }
-
-    @Transactional
-    public OrderDTO execute(CreateOrderCmd cmd) {
-        Order order = Order.create(cmd.getItems(), cmd.getCustomerId());
-        orderGateway.save(order);
-        return OrderDTO.from(order);
-    }
-}
-
-// Infrastructure DO — persistence mapping with MyBatis-Plus annotations
-@TableName("order")
-public class OrderDO {
-    @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
-    private String orderId;
-    private String status;
-
-    @TableLogic(value = "", delval = "now()")
-    private LocalDateTime deletedAt;
-
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createdAt;
-
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updatedAt;
-
-    @Version
-    private Integer version;
-
-    // Manual conversion placeholder — use MapStruct converter → see mapstruct-patterns
-    // Replace with: private final OrderDOConverter orderDOConverter;
-    // orderDOConverter.toDO(order) / orderDOConverter.toDomain(orderDO)
-    public static OrderDO fromDomain(Order order) { /* manual mapping */ }
-    public Order toDomain() { /* manual mapping */ }
-}
-
-// Infrastructure gateway implementation (MyBatis-Plus)
-// Package: infrastructure/gatewayimpl/
-@Repository
-public class OrderGatewayImpl implements OrderGateway {
-    private final OrderMapper orderMapper;
-
-    @Override
-    public void save(Order order) {
-        orderMapper.insert(OrderDO.fromDomain(order));  // INSERT — for new records
-    }
-
-    @Override
-    public void update(Order order) {
-        orderMapper.updateById(OrderDO.fromDomain(order));  // UPDATE — for existing records
-    }
-
-    @Override
-    public Optional<Order> findById(String id) {
-        return Optional.ofNullable(orderMapper.selectOne(
-            new LambdaQueryWrapper<OrderDO>().eq(OrderDO::getOrderId, id)))
-            .map(OrderDO::toDomain);
-    }
+    @ArchTest
+    static final ArchRule write_path_uses_gateway =
+        classes()
+            .that().resideInAPackage("..executor..")
+            .and().areNotAssignableTo(Query.class)
+            .should().notDependOnClassesThat()
+            .areAssignableTo(BaseMapper.class)
+            .because("Write executors must go through Domain Gateway, not Mapper directly");
 }
 ```
+
+## Naming Per Module
+
+| Module | Class Type | Suffix | Example |
+|--------|-----------|--------|---------|
+| client | Response Wrapper | none | `Result<T>`, `PageResult<T>` → see spring-boot-rest-api-standards |
+| client | Business Exception | none | `BusinessException` + sub-classes → see spring-boot-exception-handling |
+| client | Command Base | none | `Command` (abstract, marker) |
+| client | Query Base | none | `Query` (abstract, marker) |
+| client | Service Interface | I | `CustomerServiceI` |
+| client | Feign Client | FeignClient | `CustomerFeignClient` |
+| client | Command DTO | Cmd | `CustomerAddCmd` |
+| client | Query DTO | Qry | `CustomerListByNameQry` |
+| client | Data Transfer Object | DTO | `CustomerDTO` |
+| client | Domain Event DTO | Event | `CustomerCreatedEvent` |
+| adapter | Controller | Controller | `CustomerController` |
+| app | Service Implementation | Impl | `CustomerServiceImpl` |
+| app | Command Executor | CmdExe | `CustomerAddCmdExe` |
+| app | Query Executor | QryExe | `CustomerListByNameQryExe` |
+| domain | Entity | none | `Customer` (bare name, @Data) |
+| domain | Value Object | none | `Credit` |
+| domain | Enum | none | `CustomerType` |
+| domain | Gateway | Gateway | `CustomerGateway` |
+| domain | Domain Service | none or DomainService | `CreditChecker` or `OrderDomainService` |
+| infrastructure | Gateway Implementation | GatewayImpl | `CustomerGatewayImpl` |
+| infrastructure | Data Object | DO | `CustomerDO` |
+| infrastructure | Mapper | Mapper | `CustomerMapper` |
+
+> All Executor methods use `execute()` as the standard name: `CmdExe.execute(cmd)`, `QryExe.execute(qry)`.
+
+## Data Flow
+
+```
+Write: Cmd (client) → CmdExe converts to plain params → Entity (domain) → Gateway → GatewayImpl → DO (infrastructure) → DB → Result<T>
+Read:  Qry (client) → QryExe → Mapper (infrastructure) → DO → DTO (client) → Result<List<DTO>> or PageResult<DTO>
+```
+
+Conversion: MapStruct at each boundary → see `mapstruct-patterns`
 
 ## Best Practices
 
-- Domain model is optional — COLA is application architecture, not strict DDD. For simple cases, business logic in Executor + Gateway is sufficient; for complex domains, invest in rich domain entities. "无有必要勿增实体，不要为了DDD而DDD"
-- Package structure: organize by domain first, then by function within each domain — `domain/metrics/`, `domain/customer/`, not `domain/model/entity/` + `domain/model/valueobject/`
-- Domain entities are plain Java classes with **bare names** (no suffix, no special annotations); Infrastructure DOs use **DO suffix**
-- Gateway is broader than Repository — it covers persistence AND external service access contracts. Define in Domain layer, implement in Infrastructure
-- Gateway `save()` = INSERT, `update()` = UPDATE — no ambiguity, no risk of calling INSERT on an already-persisted entity
-- Avoid business logic in Adapter layer; DTO/domain conversion at boundary
-- Follow COLA naming: `Cmd` for commands, `CmdExe` for command handlers, `QryExe` for query handlers, `Gateway` for ports, `ServiceI` for application service interfaces
-- Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` for soft delete
-- Use `@TableId(type = IdType.ASSIGN_ID)` for distributed ID generation
-- Use `@TableName("xxx")` with plain snake_case — no prefix
-- Do not add `@Transactional(readOnly = true)` on pure query methods — auto-commit is sufficient for MyBatis → see `spring-boot-transaction-management`
-- Use `LambdaQueryWrapper` in Infrastructure persistence, never raw `QueryWrapper`
-- Use MapStruct converters at layer boundaries instead of manual `fromDomain()/toDomain()` → see `mapstruct-patterns`
-- **Sealed interface pattern**: when using `sealed interface` for commands/events:
-  1. Import the sealed interface alongside its permit-listed subtypes — `import AuthorizeAccountCmd;` is required even when only casting to `OAuthAuthorizeCmd`
-  2. Call subtype-specific methods only after pattern-match or explicit cast — sealed interface itself has no methods (`if (cmd instanceof OAuthAuthorizeCmd oauth) { oauth.clientId(); }`)
-- **Verify import completeness** — after writing source or test files, check all symbols have explicit imports. Common misses: `java.util.Map`, sealed interface types, Hamcrest matchers
+- Domain model is optional — COLA is application architecture, not strict DDD. For simple cases, logic in Executor + Gateway is sufficient; for complex domains, invest in rich entities. "无有必要勿增实体，不要为了DDD而DDD"
+- Package structure: organize by domain first, then by function — `domain/customer/gateway/CustomerGateway.java`, not `domain/gateway/CustomerGateway.java`
+- Domain entities are plain Java classes with **bare names** (no suffix); use `@Data` for convenience; Infrastructure DOs use **DO suffix**
+- Domain Entity factory methods receive **plain parameters**, not Cmd objects — CmdExe converts Cmd → plain params for Domain
+- Gateway `save()` = INSERT, `update()` = UPDATE — no ambiguity
+- client module stays lightweight — no COLA component deps, no Spring Boot starter, no MyBatis runtime. OpenFeign `provided` scope
+- ServiceI returns `Result<T>` and `PageResult<T>` — same as non-DDD services, no type system split
+- FeignClient extends ServiceI only when all methods are external-facing. Split interfaces for internal-only methods
+- Adapter is a routing layer — no business logic, Controller delegates to ServiceI
+- Write path follows strict dependency inversion (CmdExe → Domain Gateway). Read path pragmatic shortcut (QryExe → Mapper directly)
+- All Executor methods use `execute()` as standard name
+- Use ArchUnit to enforce dependency direction — see `Dependency Direction & Enforcement`
+- Use `@TableLogic(value = "", delval = "now()")` with `deleted_at TIMESTAMPTZ` → see `mybatis-plus-patterns`
+- Use `@TableId(type = IdType.ASSIGN_ID)` for distributed ID → see `mybatis-plus-patterns`
+- Use `LambdaQueryWrapper`, never raw `QueryWrapper` → see `mybatis-plus-patterns`
+- Use MapStruct at layer boundaries → see `mapstruct-patterns`
+- Do not add `@Transactional(readOnly = true)` on pure query methods → see `spring-boot-transaction-management`
 
 ## Related Skills
 
+- `spring-cloud-alibaba` — Nacos, Sentinel, RocketMQ, OpenFeign — distributed infrastructure
+- `spring-boot-rest-api-standards` — `Result<T>`, `PageResult<T>`, unified response pattern
+- `spring-boot-exception-handling` — `BusinessException`, `ErrorCodes`, `GlobalExceptionHandler`
 - `ddd-event-driven` — domain event design, event stores, aggregate boundaries
 - `spring-boot-transaction-management` — @Transactional patterns for executor and service layer
-- `spring-boot-rest-client` — RestClient/WebClient/OkHttp selection, configuration, and testing for `infrastructure/external/`
-- `mybatis-plus-patterns` — MyBatis-Plus persistence patterns for Infrastructure layer (MVC IService pattern)
-- `mapstruct-patterns` — MapStruct converters for Domain ↔ DO and Domain ↔ DTO at layer boundaries
-- `spring-boot-dependency-injection` — constructor injection, Bean lifecycle for COLA layers
+- `spring-boot-rest-client` — RestClient for `infrastructure/external/`
+- `mybatis-plus-patterns` — DO conventions, Mapper, soft delete, ID generation, pagination
+- `mapstruct-patterns` — MapStruct converters for Domain ↔ DO and Domain ↔ DTO
+- `spring-boot-dependency-injection` — constructor injection, Bean lifecycle
+
+## References
+
+- `references/pom-templates.md` — Full pom.xml for each module
+- `references/code-examples.md` — Detailed code examples for each layer
 
 ## Keywords
 
-cola, COLA architecture, COLA V5, DDD, project setup, spring boot project creation, adapter, application, domain, infrastructure, gateway, gatewayimpl, mapper, executor, dependency inversion, RestClient
+cola, COLA architecture, COLA V5, DDD, microservice, spring cloud, multi-module, client, adapter, app, domain, infrastructure, feign, gateway, GatewayImpl, mapper, executor, Result, PageResult, BusinessException, dependency inversion, ArchUnit
