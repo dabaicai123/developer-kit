@@ -13,7 +13,7 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 
 2. **Use `LambdaQueryWrapper`** for type-safe queries. Never use `QueryWrapper` with string column names. For patterns, see the `mybatis-plus-patterns` skill.
 
-3. **Use `@Transactional(readOnly = true)`** for multi-step query methods only (MyBatis-Plus has no persistence context — no flush/dirty-check optimization like JPA). Single-statement queries (getById) run fine on auto-commit. `@Transactional(rollbackFor = Exception.class)` for writes. Keep transactions short — never hold locks during external calls. For details, see the `spring-boot-transaction-management` skill.
+3. **Do not add `@Transactional` on pure query methods** — MyBatis-Plus has no persistence context, so `readOnly = true` provides no optimization. Both single and multi-step queries run fine on auto-commit. Only add `@Transactional` when you need a consistent snapshot across multi-step queries; on PostgreSQL add `isolation = Isolation.REPEATABLE_READ` explicitly. `@Transactional(rollbackFor = Exception.class)` for writes. For details, see the `spring-boot-transaction-management` skill.
 
 4. **Set expiration on cached data** — always use `expire` with JetCache `@Cached`. Never cache without expiration. For patterns, see the `spring-boot-jetcache` skill.
 
@@ -38,7 +38,7 @@ Enforce Java best practices for Spring Boot + MyBatis-Plus projects. For detaile
 - `@Autowired` on fields for required deps — use constructor injection
 - `QueryWrapper` with string names — use `LambdaQueryWrapper`
 - Cache without `expire` — always set expiration
-- Missing `@Transactional(readOnly = true)` on multi-step queries
+- Adding `@Transactional(readOnly = true)` on any pure query method — unnecessary proxy overhead, no optimization benefit for MyBatis
 - Bare objects in API responses — use `Result<T>` wrapper
 - Integer soft delete (`deleted 0/1`) — use `deleted_at TIMESTAMPTZ` with `@TableLogic(value = "", delval = "now()")`
 - `Entity` suffix for persistence objects — use `DO` suffix

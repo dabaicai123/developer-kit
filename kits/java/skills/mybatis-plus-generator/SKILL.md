@@ -1,6 +1,6 @@
 ---
 name: mybatis-plus-generator
-description: "MyBatis-Plus code generation from database tables: Entity, Mapper, Service, Controller, DTO, VO, BO with MVC and DDD architectures in Java and Kotlin. Use when scaffolding MyBatis-Plus CRUD code from existing database tables."
+description: "MyBatis-Plus code generation from database tables: DO, Mapper, Service, Controller, DTO, VO with MVC and DDD/COLA architectures. Use when scaffolding MyBatis-Plus CRUD code from existing database tables."
 version: "1.0.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Use when scaffolding MyBatis-Plus CRUD code from existing database tables. For manually writing or editing individual modules, use `mybatis-plus-patterns` instead. Do NOT trigger for generic code generation, JPA/Hibernate, or other ORM frameworks.
 
-Supported: MVC / DDD / COLA / Layered / Clean architectures; Java and Kotlin.
+Supported: MVC / DDD/COLA / Layered / Clean architectures; Java and Kotlin.
 
 ## Spring Boot 3.x Dependency
 
@@ -33,7 +33,7 @@ Runtime dependencies: see `mybatis-plus-patterns` for `mybatis-plus-spring-boot3
 
 > **MySQL driver**: Use `com.mysql.cj.jdbc.Driver` (not `com.mysql.jdbc.Driver`, removed in Connector/J 8.x).
 
-### FastAutoGenerator Builder API (Recommended)
+## FastAutoGenerator Builder API (Recommended)
 
 The official API uses `FastAutoGenerator` with builder pattern (preferred over legacy `AutoGenerator` setter pattern):
 
@@ -85,15 +85,14 @@ FastAutoGenerator.create("jdbc:postgresql://localhost:5432/mydb", "user", "passw
     .execute();
 ```
 
-### Custom Artifact Generation (DTO/VO/BO)
+### Custom Artifact Generation (DTO/VO/BO/Cmd)
 
-Since 3.5.3, the `CustomFile.Builder` API generates additional artifact types (DTO, VO, BO, Cmd, etc.):
+Since 3.5.3, the `CustomFile.Builder` API generates additional artifact types:
 
 ```java
 FastAutoGenerator.create(url, username, password)
     .injectionConfig(injectConfig -> {
         // Inject custom template variables (accessible via ${cfg.xxx} in templates)
-        // FastAutoGenerator uses customMap(); legacy AutoGenerator uses InjectionConfig.initMap()
         Map<String, Object> customMap = new HashMap<>();
         customMap.put("enableSwagger", true);
         injectConfig.customMap(customMap);
@@ -116,11 +115,11 @@ FastAutoGenerator.create(url, username, password)
     .execute();
 ```
 
-> **OpenAPI 3 vs Swagger 2**: The generator's `enableSwagger()` produces **Swagger 2 annotations** (`@ApiModel`, `@ApiModelProperty`) by default. For Spring Boot 3.x with springdoc-openapi, create custom templates that generate **OpenAPI 3 annotations** (`@Schema`, `@Tag`, `@Operation`) instead. Use `springdoc-openapi-starter-webmvc-ui` dependency.
+> **OpenAPI 3 annotations**: The generator's `enableSwagger()` produces Swagger 2 annotations by default. For Spring Boot 3.x, use custom FreeMarker templates that generate OpenAPI 3 annotations (`@Schema`, `@Tag`, `@Operation`) instead. Use `springdoc-openapi-starter-webmvc-ui` dependency. See `spring-boot-openapi-documentation` for complete configuration.
 
 ### IFileCreate — Protecting Existing Custom Code
 
-When re-running the generator, use `IFileCreate` to prevent overwriting files that have been manually customized:
+When re-running the generator, use `IFileCreate` to prevent overwriting manually customized files:
 
 ```java
 InjectionConfig injectionConfig = new InjectionConfig() {
@@ -136,134 +135,108 @@ InjectionConfig injectionConfig = new InjectionConfig() {
 };
 ```
 
-**Best practice**: Run the generator once for initial scaffolding, then manually customize. Never re-run the generator on files that have been modified unless you use `IFileCreate` to protect existing content.
+Run the generator once for initial scaffolding, then manually customize. Never re-run on modified files without `IFileCreate`.
 
-### DDD/COLA Architecture Generation Limitation
+## Architecture-Specific Generation
 
-The generator **cannot natively produce** COLA's 4-layer structure. To generate DDD/COLA code:
+### MVC Architecture
 
-1. Use `CustomFile.Builder` to generate files into each COLA layer (Gateway, GatewayImpl, Cmd, Executor)
+Standard MVC mapping — generates Entity, Mapper, Service/ServiceImpl, Controller, DTO/VO/BO in flat packages.
+
+**Package mapping (MVC)**:
+
+| Artifact | Package | Suffix |
+|---|---|---|
+| Entity | `entity` | none |
+| Mapper | `mapper` | Mapper |
+| Service | `service` | Service |
+| ServiceImpl | `service.impl` | ServiceImpl |
+| Controller | `controller` | Controller |
+| DTO | `dto` | DTO |
+| VO | `vo` | VO |
+| BO | `bo` | BO |
+
+### DDD/COLA Architecture
+
+The generator **cannot natively produce** COLA's 4-layer structure. Generate COLA code by:
+
+1. Use `CustomFile.Builder` to generate files into each COLA layer
 2. Create custom FreeMarker templates for each COLA artifact type
 3. Use `pathInfo` to route files to the correct package directories
 
-**Key distinction**: Domain entities use **bare names** (no suffix, no ORM annotations), while infrastructure DOs use the **DO suffix** with full MyBatis-Plus annotations. The generator's default entity template produces the latter; you need a custom template for the domain entity.
+**COLA artifact mapping** (see `ddd-cola` skill for full layer structure):
+
+| COLA Artifact | Package | Suffix | Notes |
+|---|---|---|---|
+| Domain Entity | `domain.model.entity` | none (bare name) | No ORM annotations, no suffix |
+| DO | `infrastructure.mapper.dataobject` | DO | Full MyBatis-Plus annotations (@TableName, @TableId, @TableLogic, @Version) |
+| Gateway (port) | `domain.gateway` | Gateway | Interface — save(), update(), findById() |
+| GatewayImpl | `infrastructure.gatewayimpl` | GatewayImpl | Implements Gateway, uses Mapper + Converter |
+| Cmd | `app/command` | Cmd (create), Qry (query) | Request objects |
+| CmdExe | `app.executor` | CmdExe (write), QryExe (read) | Write: Domain → Gateway; Read: Mapper directly |
+| ServiceI | `app.service` | ServiceI | Application service interface (thin facade) |
+| Controller | `adapter.controller` | Controller | REST API |
+| DTO | `adapter.dto` (or `client/dto`) | DTO | Response objects |
+| Cmd/Request | `adapter.command` (or `client/command`) | Cmd | Request objects |
+| Converter (Domain ↔ DO) | `infrastructure.gatewayimpl.converter` | DOConverter | MapStruct interface — see `mapstruct-patterns` |
+| Converter (Domain ↔ DTO) | `adapter.converter` | DTOConverter | MapStruct interface |
+
+**Key distinction**: Domain entities use **bare names** (no suffix, no ORM annotations), while infrastructure DOs use the **DO suffix** with full MyBatis-Plus annotations. The generator's default entity template produces DO-style classes; you need a custom template for bare-name domain entities.
+
+**CQRS paths**: Write → Controller → ServiceI → CmdExe → Domain → Gateway → DB. Read → Controller → ServiceI → QryExe → Mapper → DB. See `ddd-cola` for detailed explanation.
 
 ### Kotlin Support Note
 
-MyBatis-Plus generator has **no official Kotlin template engine**. Kotlin generation requires:
-- Custom FreeMarker templates with Kotlin syntax (data classes, companion objects, val/var)
-- `.kt` file extension via `CustomFile.Builder`
-- Manual handling of Kotlin-specific features
-
-The `.kt.ftl` templates referenced in this skill are community-driven, not officially provided by baomidou.
+MyBatis-Plus generator has **no official Kotlin template engine**. Kotlin generation requires custom FreeMarker templates with Kotlin syntax (data classes, companion objects, val/var) and `.kt` file extension via `CustomFile.Builder`. The `.kt.ftl` templates in this skill are community-driven.
 
 ## How to use this skill
 
-### Step 1: Collect Input (Required)
+### Step 1: Collect Input
 
-Collect: (1) Database connection URL or table structure, (2) architecture type (MVC, DDD/COLA, Layered, Clean, Custom), (3) language (Java or Kotlin), (4) functional requirements per table. Enable OpenAPI 3 annotations (`@Schema`, `@Tag`, `@Operation`) when API documentation is requested.
+Collect: (1) Database connection URL or table structure, (2) architecture type (MVC, DDD/COLA, Layered, Clean, Custom), (3) language (Java or Kotlin), (4) functional requirements per table. Enable OpenAPI 3 annotations when API documentation is requested.
 
 ### Step 2: Map Directories
 
-After determining architecture, map output directories. See `references/architecture-directory-quick-reference.md` for lookup table. Confirm directory structure with user before generating code.
+After determining architecture, map output directories. For COLA, see `ddd-cola` skill for the complete layer structure. Confirm directory structure with user before generating code.
 
 ### Step 3: Configure FastAutoGenerator
 
-Configure builder with: global settings (author, output dir, Lombok), package paths (per architecture), strategy (table names, naming, ID type, soft delete, optimistic lock), and injection config for custom artifacts (DTO/VO/BO via `CustomFile.Builder`). See `references/code-generation-standards.md` for detailed requirements.
+Configure builder with: global settings (author, output dir, Lombok), package paths (per architecture), strategy (table names, naming, ID type, soft delete, optimistic lock), and injection config for custom artifacts via `CustomFile.Builder`.
 
-### Step 4: Protect Existing Code with IFileCreate
+### Step 4: Protect Existing Code
 
-When re-running the generator, use `IFileCreate` to prevent overwriting manually customized files. Run once for initial scaffolding, then manually customize. Never re-run on modified files without `IFileCreate`.
+When re-running, use `IFileCreate` to prevent overwriting manually customized files. Run once for initial scaffolding, then manually customize.
 
-### Code Generation Standards
+## Templates
 
-Analyze foreign keys and table relationships to generate accurate relationship comments. Include `@Schema`/OpenAPI annotations; add `@NotNull`/`@NotBlank` where columns have NOT NULL constraints. See `references/code-generation-standards.md` for detailed requirements.
+Templates use **FreeMarker** syntax (`.ftl` files). See `references/template-variables.md` for variable list.
 
-### Reference Documentation
+### Standard Templates (MVC)
 
-#### Architecture & Directory Mapping
-- `references/architecture-directory-mapping-guide.md` — Complete directory mapping guide for all architectures
-- `references/architecture-directory-quick-reference.md` — Quick lookup table for directory mappings
+Java: `entity.java.ftl`, `mapper.java.ftl`, `service.java.ftl`, `serviceImpl.java.ftl`, `controller.java.ftl`, `dto.java.ftl`, `vo.java.ftl`, `bo.java.ftl`
 
-#### Code Generation Standards
-- `references/code-generation-standards.md` — Detailed comment standards, template usage, and code quality requirements
-- `references/template-variables.md` — Complete list of template variables
-- `references/swagger-annotations-guide.md` — OpenAPI 3 annotation reference
+Kotlin: Corresponding `.kt.ftl` variants.
 
-#### MyBatis-Plus Reference
-- `references/mybatis-plus-generator-guide.md` — MyBatis-Plus Generator usage guide
+### DDD/COLA Templates
 
-### Examples
+These templates generate COLA-layer artifacts. All are in `templates/` root, supporting both Java and Kotlin:
 
-See the `examples/` directory for complete examples:
-- `examples/mvc-architecture-example.md` — MVC architecture generation example
-- `examples/ddd-architecture-example.md` — DDD architecture generation example
-- `examples/full-workflow-example.md` — Complete workflow example
-- `examples/architecture-directory-mapping.md` — Directory mapping examples for different architectures
-- `examples/swagger-annotations-example.md` — OpenAPI 3 annotation examples
+**Domain Layer**: `aggregate-root.*.ftl`, `repository.*.ftl` (→ Gateway), `domain-service.*.ftl`, `value-object.*.ftl`, `domain-event.*.ftl`
 
-### Templates
+**Application Layer**: `application-service.*.ftl` (→ CmdExe/QryExe)
 
-Templates are located in `templates/` directory, using **FreeMarker** syntax (`.ftl` files), strictly following [MyBatis-Plus official templates](https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates).
+**Adapter Layer**: `assembler.*.ftl` (→ Converter/DTOConverter)
 
-#### Standard Templates (MVC Architecture)
-
-**Java Templates:**
-- `entity.java.ftl` - Entity class template
-- `mapper.java.ftl` - Mapper interface template
-- `service.java.ftl` - Service interface template
-- `serviceImpl.java.ftl` - Service implementation template
-- `controller.java.ftl` - Controller template
-- `dto.java.ftl` - DTO template
-- `vo.java.ftl` - VO template
-- `bo.java.ftl` - BO template
-
-**Kotlin Templates:**
-- `entity.kt.ftl` - Entity data class template
-- `mapper.kt.ftl` - Mapper interface template
-- `service.kt.ftl` - Service interface template
-- `serviceImpl.kt.ftl` - Service implementation template
-- `controller.kt.ftl` - Controller template
-- `dto.kt.ftl` - DTO template
-- `vo.kt.ftl` - VO template
-- `bo.kt.ftl` - BO template
-
-#### DDD Architecture Templates
-
-All DDD templates are located in `templates/` root directory, supporting both Java and Kotlin:
-
-**Domain Layer:**
-- `aggregate-root.java.ftl` / `aggregate-root.kt.ftl` - Aggregate root template
-- `repository.java.ftl` / `repository.kt.ftl` - Repository interface template (domain layer)
-- `domain-service.java.ftl` / `domain-service.kt.ftl` - Domain service template
-- `value-object.java.ftl` / `value-object.kt.ftl` - Value object template
-- `domain-event.java.ftl` / `domain-event.kt.ftl` - Domain event template
-
-**Application Layer:**
-- `application-service.java.ftl` / `application-service.kt.ftl` - Application service template
-
-**Interface Layer:**
-- `assembler.java.ftl` / `assembler.kt.ftl` - DTO assembler template
-
-**Template Features:**
-- Support for OpenAPI 3 annotations
-- Intelligent comments based on table structure
-- Custom method generation support
-- Kotlin-specific features (data classes, null safety, etc.)
-- DDD-specific patterns (aggregate root, value objects, domain events)
-- FreeMarker syntax for template engine
-
-**Reference**: See MyBatis-Plus official templates at:
-- https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates
+> **Naming alignment**: The template file names use generic DDD terms (repository, assembler) but should map to COLA naming conventions (Gateway, Converter) when generating COLA architecture code. See the COLA artifact mapping table above.
 
 ## Related Skills
 
-- `ddd-cola` — COLA architecture layer structure for generated code
+- `ddd-cola` — COLA architecture layer structure, naming conventions, Gateway pattern for generated code
 - `mybatis-plus-patterns` — coding patterns for manually writing/editing MyBatis-Plus modules
+- `mapstruct-patterns` — MapStruct converters for Domain ↔ DO and Domain ↔ DTO at layer boundaries
 - `postgresql-table-design` — PostgreSQL schema design for code generation source tables
+- `spring-boot-openapi-documentation` — OpenAPI 3 annotations for generated controllers and DTOs
 
 ## Keywords
 
-mybatis-plus, mybatis-plus-generator, mybatis-plus code generator, mybatis-plus code generation, generate mybatis-plus code, mybatis-plus entity generator, mybatis-plus mapper generator, mybatis-plus service generator, mybatis-plus controller generator, mybatis-plus crud generation, mybatis-plus from table, mybatis-plus code from database
-
-**IMPORTANT**: All keywords must include "MyBatis-Plus" or "mybatis-plus" to avoid false triggers. Generic terms like "code generator" or "generate code from table" without "MyBatis-Plus" should NOT trigger this skill.
+mybatis-plus, mybatis-plus-generator, mybatis-plus code generation, generate mybatis-plus code, mybatis-plus crud generation, mybatis-plus from table, mybatis-plus code from database, COLA code generation, DDD code generation

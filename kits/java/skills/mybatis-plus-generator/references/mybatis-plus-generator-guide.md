@@ -1,160 +1,100 @@
 # MyBatis-Plus Generator Reference Guide
 
-## Overview
+## FastAutoGenerator Builder API (3.5.3+)
 
-This document provides a usage guide and best practices for MyBatis-Plus Generator, helping to understand the principles and configuration of code generation.
-
-## MyBatis-Plus Generator Principles
+The recommended API uses builder pattern with `FastAutoGenerator`. Legacy `AutoGenerator` with setter pattern is deprecated.
 
 ### Core Components
 
-1. **CodeGenerator**
-   - Responsible for reading database table structures
-   - Generates code based on configuration
-   - Uses template engines to render code
-
-2. **Template Engine**
-   - Supports Velocity, Freemarker, Beetl
-   - Uses placeholder replacement to generate code
-   - Official templates located at: `mybatis-plus-generator/src/main/resources/templates`
-
-3. **StrategyConfig**
-   - Controls which files to generate
-   - Controls naming rules
-   - Controls field mapping rules
+1. **FastAutoGenerator** — Builder-based entry point. Chains globalConfig, packageConfig, strategyConfig, injectionConfig, and templateEngine.
+2. **Template Engine** — FreeMarker (recommended), Velocity, or Beetl. This skill uses FreeMarker exclusively.
+3. **CustomFile.Builder** — Generates custom artifacts (DTO, VO, BO, Cmd, Converter) beyond the 6 standard types.
 
 ### Generation Flow
 
 ```
 Database table structure
-    ↓
-Read table metadata (columns, types, constraints)
-    ↓
-Apply configuration strategies (naming, package paths, etc.)
-    ↓
-Load template files
-    ↓
-Replace template variables
-    ↓
-Generate code files
+    → Read table metadata (columns, types, constraints)
+    → Apply configuration strategies (naming, package paths, etc.)
+    → Load FreeMarker template files (.ftl)
+    → Replace template variables
+    → Generate code files
 ```
 
-## Official Template Reference
-
-### Template Location
-
-MyBatis-Plus official templates are located at:
-- GitHub: https://github.com/baomidou/mybatis-plus/tree/3.0/mybatis-plus-generator/src/main/resources/templates
-- Local path: `mybatis-plus-generator/src/main/resources/templates`
-
-### Template Files
-
-1. **entity.java.vm** - Entity class template
-2. **mapper.java.vm** - Mapper interface template
-3. **mapper.xml.vm** - Mapper XML template
-4. **service.java.vm** - Service interface template
-5. **serviceImpl.java.vm** - ServiceImpl implementation class template
-6. **controller.java.vm** - Controller template
-
-### Template Variables
-
-Common template variables:
-
-- `${package.Entity}` - Entity package path
-- `${package.Mapper}` - Mapper package path
-- `${package.Service}` - Service package path
-- `${package.Controller}` - Controller package path
-- `${author}` - Author
-- `${date}` - Date
-- `${table.name}` - Table name
-- `${entity}` - Entity class name
-- `${table.comment}` - Table comment
-- `${field.name}` - Field name
-- `${field.propertyName}` - Property name
-- `${field.comment}` - Field comment
-- `${field.type}` - Field type
-
-## Configuration Details
+## Configuration Sections
 
 ### GlobalConfig
 
 ```java
-GlobalConfig globalConfig = new GlobalConfig();
-globalConfig.setAuthor("System");              // Author
-globalConfig.setOutputDir("src/main/java");    // Output directory
-globalConfig.setFileOverride(true);            // Whether to override files
-globalConfig.setOpen(false);                   // Whether to open output directory
-globalConfig.setSwagger2(true);                // Whether to enable Swagger
+FastAutoGenerator.create(url, username, password)
+    .globalConfig(builder -> builder
+        .author("AuthorName")
+        .outputDir(projectPath + "/src/main/java")
+        .disableOpenDir()
+    )
 ```
 
-### PackageConfig
+### PackageConfig (COLA mapping example)
 
 ```java
-PackageConfig packageConfig = new PackageConfig();
-packageConfig.setParent("com.example.app");    // Parent package name
-packageConfig.setEntity("entity");              // Entity package name
-packageConfig.setMapper("mapper");             // Mapper package name
-packageConfig.setService("service");           // Service package name
-packageConfig.setServiceImpl("service.impl");  // ServiceImpl package name
-packageConfig.setController("controller");     // Controller package name
+.packageConfig(builder -> builder
+    .parent("com.example")
+    .moduleName("app")
+    .entity("infrastructure.mapper.dataobject")  // DO classes
+    .mapper("infrastructure.mapper")
+    .service("app.service")
+    .serviceImpl("app.service.impl")
+    .controller("adapter.controller")
+)
 ```
 
 ### StrategyConfig
 
 ```java
-StrategyConfig strategyConfig = new StrategyConfig();
-strategyConfig.setNaming(NamingStrategy.underline_to_camel);  // Naming strategy
-strategyConfig.setColumnNaming(NamingStrategy.underline_to_camel);
-strategyConfig.setEntityLombokModel(true);      // Use Lombok
-strategyConfig.setRestControllerStyle(true);    // REST style
-strategyConfig.setControllerMappingHyphenStyle(true);
-strategyConfig.setTablePrefix("t_");            // Table prefix
+.strategyConfig(builder -> builder
+    .addInclude("user", "order")
+    .addTablePrefix("tbl_")
+    .entityBuilder()
+        .enableLombok()
+        .enableTableFieldAnnotation()
+        .idType(IdType.ASSIGN_ID)
+        .logicDeleteColumnName("deleted_at")
+        .versionColumnName("version")
+    .controllerBuilder()
+        .enableRestStyle()
+        .enableHyphenStyle()
+    .serviceBuilder()
+        .formatServiceFileName("%sService")
+        .formatServiceImplFileName("%sServiceImpl")
+)
 ```
 
-### TemplateConfig
+### InjectionConfig (Custom Artifacts)
 
 ```java
-TemplateConfig templateConfig = new TemplateConfig();
-templateConfig.setEntity("/templates/entity.java.vm");
-templateConfig.setMapper("/templates/mapper.java.vm");
-templateConfig.setService("/templates/service.java.vm");
-templateConfig.setServiceImpl("/templates/serviceImpl.java.vm");
-templateConfig.setController("/templates/controller.java.vm");
+.injectionConfig(builder -> {
+    Map<String, Object> customMap = new HashMap<>();
+    customMap.put("enableSwagger", true);
+    builder.customMap(customMap);
+
+    // Generate DTO via custom template
+    builder.customFile(new CustomFile.Builder()
+        .fileName("UserDTO.java")
+        .templatePath("templates/entityDTO.java.ftl")
+        .packageName("adapter.dto")
+        .build());
+})
 ```
 
 ## Best Practices
 
-### 1. Comment Generation
+- Run generator once for initial scaffolding, then manually customize — never re-run on modified files
+- Use `IFileCreate` to protect existing files if re-running is necessary
+- Use FreeMarker templates (`.ftl`) — not Velocity (`.vm`)
+- Use OpenAPI 3 annotations in custom templates
+- For COLA architecture: use `CustomFile.Builder` to generate Gateway, CmdExe, Converter, etc. into their respective layer packages
 
-- Use table comments as class comments
-- Use field comments as property comments
-- Generate method comments based on business logic
-- Follow Java programming conventions
+## References
 
-### 2. Code Quality
-
-- Generate production-ready code
-- Include appropriate annotations (Lombok, Swagger, Validation)
-- Include complete JavaDoc comments
-- Follow naming conventions
-
-### 3. Custom Methods
-
-- Generate custom methods based on business requirements
-- Provide method skeletons and TODO comments
-- Include parameter validation hints
-- Include exception handling hints
-
-### 4. Architecture Adaptation
-
-- Generate different objects based on architecture type
-- MVC: Entity, Mapper, Service, ServiceImpl, Controller
-- DDD: Entity, Mapper, Service, ServiceImpl, Controller, DTO, VO, BO
-- Clean Architecture: Entity, Repository, UseCase, Controller, DTO
-
-## Reference Materials
-
-- [MyBatis-Plus Official Documentation](https://baomidou.com/)
 - [MyBatis-Plus Generator Documentation](https://baomidou.com/pages/d357af/)
 - [MyBatis-Plus GitHub](https://github.com/baomidou/mybatis-plus)
-- [MyBatis-Plus Generator UI](https://github.com/Coffee-Tang/mybatis-plus-generator-ui)

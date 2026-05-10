@@ -95,7 +95,7 @@ Never use:
 ## Key Principles
 
 - Constructor injection over field injection (`@Autowired`)
-- `@Transactional(readOnly = true)` for multi-step query methods only (single-statement queries don't need it)
+- Do not add `@Transactional` on pure query methods — auto-commit is sufficient for MyBatis
 - JetCache `@Cached(expire = 3600)` for cacheable data — always set expire
 - Business exception hierarchy: `BusinessException`, `NotFoundException`, `ValidationException`
 - Proper logging: `@Slf4j` with structured log messages

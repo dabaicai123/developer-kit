@@ -56,8 +56,7 @@ public class ${table.controllerName} extends ${superControllerClass} {
 public class ${table.controllerName} {
 </#if>
 
-    @Autowired
-    private ${table.serviceName} ${table.serviceName?substring(0,1)?lower_case}${table.serviceName?substring(1);
+    private final ${table.serviceName} ${table.serviceName?substring(0,1)?lower_case}${table.serviceName?substring(1);
 
     /**
      * <p>Create ${table.comment}</p>

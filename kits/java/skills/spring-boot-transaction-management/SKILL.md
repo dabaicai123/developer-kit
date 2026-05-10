@@ -32,7 +32,7 @@ Transaction management patterns with MyBatis-Plus — declarative `@Transactiona
 
 2. **Always specify `rollbackFor = Exception.class`** — by default, only unchecked exceptions (`RuntimeException` and subclasses) trigger rollback. Checked exceptions (e.g., `IOException`) will commit the transaction unless explicitly configured.
 
-3. **Use `@Transactional(readOnly = true)` on multi-step query methods only** — MyBatis-Plus has no persistence context (unlike JPA/Hibernate), so `readOnly = true` provides no flush/dirty-check optimization. For single-statement queries (getById, findByEmail), auto-commit is sufficient and adding `@Transactional` only adds proxy overhead. Use `readOnly = true` when a method executes multiple SQL statements to ensure a consistent snapshot, or as a defensive measure to prevent accidental writes in complex query logic.
+3. **Do not add `@Transactional` on pure query methods** — MyBatis-Plus has no persistence context (unlike JPA/Hibernate), so `readOnly = true` provides no flush/dirty-check optimization. Both single and multi-step queries run fine on auto-commit. Only add `@Transactional` when you need a consistent snapshot across multi-step queries; on PostgreSQL (READ_COMMITTED default) add `isolation = Isolation.REPEATABLE_READ` explicitly, on MySQL (REPEATABLE_READ default) the default isolation already provides consistent snapshots.
 
 
 ### MyBatis-Plus IService Built-in Transaction Behavior
@@ -87,7 +87,7 @@ Choose propagation based on the relationship between caller and callee transacti
 | Propagation | Use when |
 |---|---|
 | `REQUIRED` (default) | Most write operations — join existing or start new |
-| `SUPPORTS` | Multi-step query methods with `readOnly=true` — can run inside or outside an existing transaction. Pattern: `@Transactional(propagation = SUPPORTS, readOnly = true)` |
+| `SUPPORTS` | Query methods — can run inside or outside an existing transaction. Pattern: `@Transactional(propagation = SUPPORTS)` |
 | `MANDATORY` | Methods that must only be called within an existing transaction (enforced constraint) |
 | `REQUIRES_NEW` | Independent sub-transactions that must commit/rollback independently (audit logging) |
 | `NOT_SUPPORTED` | Non-transactional operations that should suspend any existing transaction |
@@ -134,7 +134,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 }
 ```
 
-### Example 2: @Transactional(readOnly = true) for multi-step query methods
+### Example 2: @Transactional for consistent snapshot (rare — only when business requires)
 
 ```java
 /**
@@ -157,8 +157,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
 
     /**
-     * Paginated user list query — multi-step (query + count + transform), readOnly = true needed
-     * <p>Multiple SQL statements need consistent snapshot; readOnly prevents accidental writes</p>
+     * Paginated user list query — auto-commit is sufficient for most queries
+     * <p>Only add @Transactional when you need a consistent snapshot across multi-step reads</p>
      *
      * @param pageNum  page number
      * @param pageSize items per page
@@ -166,7 +166,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
      * @return paginated result
      */
     @Override
-    @Transactional(readOnly = true)
     public PageResult<UserVO> page(int pageNum, int pageSize, UserQry query) {
         LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
             .like(StringUtils.isNotBlank(query.getUsername()), UserDO::getUsername, query.getUsername())
@@ -175,15 +174,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
         return PageResult.of(mpPage).map(UserConverter::toVO);
     }
+
+    /**
+     * Report: revenue comparison across months — needs consistent snapshot
+     * <p>Multiple queries must see the same data state; on PostgreSQL add REPEATABLE_READ</p>
+     *
+     * @param year report year
+     * @return monthly revenue comparison
+     */
+    @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)  // PostgreSQL: ensure snapshot consistency
+    public RevenueReportVO getYearlyRevenueReport(int year) {
+        BigDecimal q1Revenue = calculateQuarterRevenue(year, 1);
+        BigDecimal q2Revenue = calculateQuarterRevenue(year, 2);
+        // All queries see the same snapshot — no phantom reads between steps
+        return new RevenueReportVO(q1Revenue, q2Revenue);
+    }
 }
 ```
 
-> **MyBatis-Plus readOnly nuance**: Unlike JPA/Hibernate, MyBatis has no persistence context — no auto-flush, no dirty-checking.
-> `readOnly = true` does NOT skip flush cycles (they don't exist in MyBatis). Its value is:
-> 1. **Consistent snapshot** — multiple SQL statements in one method see the same data state
-> 2. **Defensive** — PostgreSQL rejects writes on a readOnly connection, preventing accidental INSERT/UPDATE
-> 3. **Not needed** for single-statement queries — auto-commit handles these efficiently without proxy overhead
-```
+> **MyBatis-Plus transaction nuance**: Unlike JPA/Hibernate, MyBatis has no persistence context — no auto-flush, no dirty-checking.
+> 1. **Pure queries don't need `@Transactional`** — auto-commit handles single and multi-step queries efficiently
+> 2. **`readOnly = true` provides no optimization for MyBatis** — no flush cycles to skip (they don't exist). Its only effect is preventing writes on PostgreSQL connections, which is a weak reason to add proxy overhead
+> 3. **Consistent snapshot requires proper isolation** — on PostgreSQL (READ_COMMITTED default), use `isolation = Isolation.REPEATABLE_READ`; on MySQL (REPEATABLE_READ default), plain `@Transactional` already provides snapshot consistency
 
 ### Example 3: Propagation.REQUIRES_NEW for independent sub-transactions (audit logging)
 
@@ -539,7 +552,7 @@ public class RefundServiceImpl extends ServiceImpl<RefundMapper, RefundDO> imple
 - **Connection pool pressure from REQUIRES_NEW**: `Propagation.REQUIRES_NEW` acquires a second connection while suspending the first. Use only for independent audit/logging. With HikariCP `maximum-pool-size=20`, 10 concurrent REQUIRES_NEW calls can exhaust all connections.
 - **MQ publish inside @Transactional**: Never send MQ messages directly inside a `@Transactional` method. RabbitMQ/Kafka are not Spring transaction resources — the message may be sent before DB commit (consumer can't find data) or before DB rollback (ghost message). Use `TransactionSynchronizationManager.registerSynchronization` with `afterCommit` callback. For stronger guarantees, use Outbox pattern or RabbitMQ `channelTransacted=true` (see `spring-boot-event-driven-patterns` and `spring-boot-amqp`).
 - **IService internal transactions**: `saveBatch/saveOrUpdateBatch` have internal `@Transactional`; single methods (`save/updateById/removeById`) do NOT — add `@Transactional(rollbackFor=Exception.class)` on your method for multi-step writes
-- **Use `Propagation.SUPPORTS + readOnly=true` for multi-step read methods** — works both inside and outside an existing transaction
+- **Do not add `@Transactional(readOnly = true)` on pure query methods** — unnecessary proxy overhead, no optimization benefit for MyBatis
 - Keep transaction scope minimal — wrap only DB operations. Exclude external API calls, file I/O, and long computations from transactional boundaries.
 - **Use `TransactionTemplate` for fine-grained programmatic control** — when conditional transaction boundaries or partial success is needed
 - **Place `@Transactional` on ServiceImpl methods (MVC) or CmdExe methods (DDD/COLA)**, not on interfaces or GatewayImpl

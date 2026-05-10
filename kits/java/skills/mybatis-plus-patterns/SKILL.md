@@ -218,7 +218,6 @@ public void updateOrder(OrderDO order) {
 
 ```java
 @Override
-@Transactional(readOnly = true)
 public PageResult<UserVO> page(int pageNum, int pageSize, UserQueryBO query) {
     LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
         .like(StringUtils.isNotBlank(query.getUsername()), UserDO::getUsername, query.getUsername())
@@ -380,7 +379,7 @@ public void deleteAll(List<Long> ids) {
 - **MVC**: Use `IService/ServiceImpl` pattern with `IService<DO>` / `ServiceImpl<Mapper, DO>`
 - **DDD/COLA**: Use Gateway pattern — see `ddd-cola` skill
 - **IService transaction behavior**: `saveBatch/saveOrUpdateBatch` have internal `@Transactional`; single methods (`save`, `updateById`, `removeById`) do NOT — add `@Transactional(rollbackFor=Exception.class)` on your method for multi-step writes
-- Use `@Transactional(readOnly = true)` on multi-step query methods only (not single-statement queries) → see `spring-boot-transaction-management`
+- Do not add `@Transactional(readOnly = true)` on pure query methods — auto-commit is sufficient for MyBatis
 - Use `mybatis-plus-join` (`MPJLambdaWrapper`) for type-safe multi-table joins
 - Document each DO class with table mapping, each field with business meaning, each custom Mapper method with parameter descriptions
 

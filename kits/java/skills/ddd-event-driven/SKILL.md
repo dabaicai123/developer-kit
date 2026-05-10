@@ -275,12 +275,10 @@ public class OrderCommandService {
 public class OrderQueryService {
     private final OrderReadRepository readRepository;  // Separate read model
 
-    @Transactional(readOnly = true)
     public OrderSummary getOrderSummary(UUID orderId) {
         return readRepository.findSummaryById(orderId);  // Denormalized, query-optimized
     }
 
-    @Transactional(readOnly = true)
     public PageResult<OrderListEntry> searchOrders(OrderSearchCriteria criteria) {
         return readRepository.search(criteria);  // Optimized for list queries
     }

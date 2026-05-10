@@ -51,8 +51,7 @@ class ${table.controllerName} : ${superControllerClass}() {
 class ${table.controllerName} {
 </#if>
 
-    @Autowired
-    lateinit var ${table.serviceName?substring(0,1)?lower_case}${table.serviceName?substring(1)}: ${table.serviceName}
+    private val ${table.serviceName?substring(0,1)?lower_case}${table.serviceName?substring(1)}: ${table.serviceName}
 
     /**
      * <p>Create ${table.comment}</p>

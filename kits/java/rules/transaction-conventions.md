@@ -14,7 +14,7 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 
 2. **Always specify `rollbackFor = Exception.class`** — default rollback only covers `RuntimeException` and `Error`. Checked exceptions (e.g., `IOException`) silently commit the transaction.
 
-3. **Use `@Transactional(readOnly = true)` on multi-step query methods only** — MyBatis-Plus has no persistence context (unlike JPA), so `readOnly` provides no flush/dirty-check optimization. Single-statement queries (getById, findByEmail) run fine on auto-commit. Use `readOnly = true` only when a method executes multiple SQL statements (consistent snapshot, defensive write prevention). For multi-step read methods that can run inside or outside a transaction, use `@Transactional(propagation = SUPPORTS, readOnly = true)`.
+3. **Do not add `@Transactional` on pure query methods** — MyBatis-Plus has no persistence context (unlike JPA), so `readOnly = true` provides no flush/dirty-check optimization. Both single and multi-step queries run fine on auto-commit. Only add `@Transactional` when you need a consistent snapshot across multi-step queries; on PostgreSQL (READ_COMMITTED default) add `isolation = Isolation.REPEATABLE_READ` explicitly, on MySQL (REPEATABLE_READ default) the default isolation already provides this.
 
 4. **Avoid self-invocation** — `this.internalMethod()` bypasses the proxy; `@Transactional` on same-class method calls is silently ignored. Extract internal transactional logic to a separate bean.
 
@@ -36,7 +36,7 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 
 - `@Transactional` on Service interface
 - Missing `rollbackFor = Exception.class`
-- Missing `readOnly = true` on multi-step query methods
+- Adding `@Transactional(readOnly = true)` on any pure query method — unnecessary proxy overhead, no optimization benefit for MyBatis
 - Self-invocation with `@Transactional`
 - Wrapping external API calls or file I/O inside `@Transactional`
 - Catching and swallowing exceptions inside `@Transactional`
@@ -44,7 +44,6 @@ Enforce consistent transaction management in the Spring Boot + MyBatis-Plus serv
 - No timeout on batch operations
 - Modifying a saved entity without updating — changes silently lost (use `updateById()`, not `save()` again)
 - Assuming `save()` has built-in transaction (it doesn't — only `saveBatch` does)
-- Adding `@Transactional(readOnly=true)` on single-statement queries (unnecessary proxy overhead)
 - For-loop individual DB calls (insert/select/update/delete) instead of batch methods — use `saveBatch`, `listByIds`, `removeByIds`, `updateBatchById`, or `lambdaQuery().in()`
 
 For detailed examples and explanations, use the `spring-boot-transaction-management` skill.

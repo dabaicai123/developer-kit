@@ -228,7 +228,6 @@ public class DataService {
         this.dataMapper = dataMapper;
     }
 
-    @Transactional(readOnly = true)
     public int processShard(int shardIndex, int shardTotal) {
         // Query data assigned to this shard
         List<DataDO> items = dataMapper.selectList(

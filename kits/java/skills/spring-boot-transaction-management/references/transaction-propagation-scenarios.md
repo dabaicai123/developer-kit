@@ -25,15 +25,15 @@ public void create(UserCreateDTO dto) {
 
 **Join an existing transaction if one exists; execute non-transactionally if none exists.** The method adapts to the caller's transactional context without enforcing one.
 
-**Use when**: query methods that can run with or without a transaction. Often paired with `readOnly = true`.
+**Use when**: query methods that can run with or without a transaction.
 
 ```java
 /**
  * Count users by status — SUPPORTS propagation behavior
- * <p>Join existing transaction (readOnly optimization applies), or execute non-transactionally if no transaction</p>
+ * <p>Join existing transaction if present, or execute non-transactionally if no transaction</p>
  */
 @Override
-@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+@Transactional(propagation = Propagation.SUPPORTS)
 public long countByStatus(UserStatus status) {
     return lambdaQuery().eq(UserDO::getStatus, status).count();
 }

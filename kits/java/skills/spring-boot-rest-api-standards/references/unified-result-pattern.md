@@ -264,7 +264,6 @@ public class UserController {
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserServiceI {
 
     @Override
-    @Transactional(readOnly = true)
     public UserVO getById(Long id) {
         UserDO entity = baseMapper.selectById(id);
         if (entity == null) {
@@ -275,7 +274,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     // PageResult.of(mpPage).map() unified conversion
     @Override
-    @Transactional(readOnly = true)
     public PageResult<UserVO> page(long page, long pageSize) {
         Page<UserDO> mpPage = baseMapper.selectPage(
             new Page<>(page, pageSize),

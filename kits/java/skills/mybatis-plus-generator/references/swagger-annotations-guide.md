@@ -1,140 +1,89 @@
-# OpenAPI 3 Annotations Reference Guide
+# OpenAPI 3 Annotations Reference
 
-## Overview
-
-This skill uses only OpenAPI 3 annotations (`io.swagger.v3.oas.annotations.*`), Swagger 2 is no longer supported.
-
-## OpenAPI 3 Annotations
-
-### Dependency Configuration
-
-```xml
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-ui</artifactId>
-    <version>1.7.0</version>
-</dependency>
-```
-
-For Spring Boot 3.x projects:
+## Spring Boot 3.x Dependency
 
 ```xml
 <dependency>
     <groupId>org.springdoc</groupId>
     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>2.3.0</version>
+    <version>2.8.0</version>
 </dependency>
 ```
 
-### Applicable Scenarios
+> For Spring Boot 2.x projects (not recommended in this kit): use `springdoc-openapi-ui` 1.x. See `spring-boot-openapi-documentation` for complete configuration.
 
-- Spring Boot 2.2+ and Spring Boot 3.x projects
-- Conforms to OpenAPI 3.0 specification
-- Officially recommended API documentation standard
+## Annotations
 
-## Annotations Overview
+### Class-Level
 
-### Class-Level Annotations
-
-| Purpose | Annotation |
-|:---|:---|
-| Entity class/model | `@Schema(description = "...")` |
+| Target | Annotation |
+|---|---|
+| Entity / DTO | `@Schema(description = "...")` |
 | Controller | `@Tag(name = "...", description = "...")` |
-| Service interface | `@Tag(name = "...", description = "...")` |
 
-### Method-Level Annotations
+### Method-Level
 
-| Purpose | Annotation |
-|:---|:---|
+| Target | Annotation |
+|---|---|
 | API operation | `@Operation(summary = "...", description = "...")` |
-| Parameter description | `@Parameter(name = "...", description = "...", required = true)` |
+| Parameter | `@Parameter(name = "...", description = "...", required = true)` |
 
-### Field-Level Annotations
+### Field-Level
 
-| Purpose | Annotation |
-|:---|:---|
+| Target | Annotation |
+|---|---|
 | Field description | `@Schema(description = "...", required = true)` |
 
 ## Code Examples
 
-### Entity Class
-
-```java
-import io.swagger.v3.oas.annotations.media.Schema;
-
-@Schema(description = "User entity class")
-public class User {
-
-    @Schema(description = "User ID")
-    private Long id;
-
-    @Schema(description = "Username", required = true)
-    private String username;
-}
-```
-
 ### Controller
 
 ```java
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 @Tag(name = "User Management", description = "User management API")
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@Validated
 public class UserController {
 
-    @Operation(summary = "Create user", description = "Create a new user record")
+    @Operation(summary = "Create user")
     @PostMapping
-    public User create(@RequestBody User user) {
-        return userService.save(user);
+    public Result<UserDTO> create(@Valid @RequestBody UserAddCmd cmd) {
+        return Result.success(userAddCmdExe.execute(cmd));
     }
 
-    @Operation(summary = "Find user by ID", description = "Query user details by ID")
-    @Parameter(name = "id", description = "User ID", required = true)
-    @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return userService.getById(id);
+    @Operation(summary = "Get user by ID")
+    @GetMapping("/{userId}")
+    public Result<UserDTO> get(@PathVariable @NotBlank String userId) {
+        return Result.success(userQryExe.findById(userId));
     }
 }
 ```
 
-### DTO (Data Transfer Object)
+### DTO
 
 ```java
-import io.swagger.v3.oas.annotations.media.Schema;
+@Schema(description = "User creation request")
+public record UserAddCmd(
+    @Schema(description = "Username", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank String username,
 
-@Schema(description = "User creation data transfer object")
-public class UserCreateDTO {
-
-    @Schema(description = "Username", required = true)
-    @NotBlank(message = "Username cannot be empty")
-    @Size(max = 50, message = "Username length cannot exceed 50 characters")
-    private String username;
-
-    @Schema(description = "Email address", required = true)
-    @NotBlank(message = "Email address cannot be empty")
-    @Email(message = "Invalid email format")
-    private String email;
-}
+    @Schema(description = "Email address", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank @Email String email
+) {}
 ```
 
-## Template Variables
+## Template Conditional
 
-In code generation templates, use the following variable to control API documentation:
-
-- `${swagger}` - Whether to enable API documentation (boolean)
-
-### Template Conditional Check
+In FreeMarker templates, use `${cfg.enableSwagger}` from `customMap`:
 
 ```ftl
-<#if swagger>
-@Schema(description = "${table.comment}")
+<#if cfg.enableSwagger>
+@Schema(description = "${field.comment}")
 </#if>
 ```
 
 ## References
 
-- [OpenAPI 3 Official Documentation](https://swagger.io/specification/)
+- `spring-boot-openapi-documentation` — Complete OpenAPI configuration, security, pagination
 - [SpringDoc OpenAPI](https://springdoc.org/)

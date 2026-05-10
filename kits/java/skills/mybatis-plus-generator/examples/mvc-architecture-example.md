@@ -255,10 +255,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User Management", description = "User management API")
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
-    
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
     
     @Operation(summary = "Create user", description = "Create a new user record")
     @PostMapping

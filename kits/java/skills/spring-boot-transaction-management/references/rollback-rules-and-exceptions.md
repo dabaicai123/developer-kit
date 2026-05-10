@@ -198,10 +198,10 @@ Key Rules:
 @Transactional(rollbackFor = Exception.class, noRollbackFor = DuplicateDataException.class)
 ```
 
-### Read-only with full rollback coverage
+### Consistent snapshot + rollback coverage
 
 ```java
-@Transactional(readOnly = true, rollbackFor = Exception.class)
+@Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
 ```
 
 ### Timeout + rollback (prevent stuck transactions)
