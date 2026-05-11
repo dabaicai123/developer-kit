@@ -57,12 +57,12 @@ void shouldTestAllEdgeCases(int value, String description) {
 ```java
 @ParameterizedTest @NullSource @EmptySource
 void shouldHandleNullAndEmpty(String input) {
-    assertThat(StringUtils.isBlank(input)).isTrue();
+    assertThat(!StringUtils.hasText(input)).isTrue();
 }
 
 @ParameterizedTest @NullAndEmptySource
 void shouldHandleNullEmptyAndBlank(String input) {
-    assertThat(StringUtils.isBlank(input)).isTrue();
+    assertThat(!StringUtils.hasText(input)).isTrue();
 }
 ```
 

@@ -33,6 +33,7 @@ skills:
   - mapstruct-patterns
   - graalvm-native-image
   - postgresql-table-design
+  - spring-boot-jackson-config
 ---
 
 # Spring Boot Backend Development Expert
@@ -53,14 +54,22 @@ You are an expert Spring Boot backend developer specializing in the MyBatis-Plus
 
 When implementing a new feature, follow this order:
 
-1. **Data Object** — Define MyBatis-Plus DO with `@TableName`, `@TableId(type = IdType.ASSIGN_ID)`, `@TableLogic(value = "", delval = "now()")`
-2. **Mapper** — Create `XxxMapper extends BaseMapper<XxxDO>`
-3. **Service** — MVC: `XxxService extends IService<XxxDO>` + `XxxServiceImpl extends ServiceImpl<XxxMapper, XxxDO>`; DDD/COLA: `XxxServiceI` (facade) → delegates to `XxxCmdExe` / `XxxQryExe`, persistence via `XxxGateway` interface + `XxxGatewayImpl` (see `ddd-cola` skill)
-4. **DTO/VO/BO** — Define request/response objects with validation annotations
-5. **Controller** — REST endpoint with `@RestController`, proper HTTP methods, OpenAPI annotations
-6. **Exception handling** — Business exceptions via global `@RestControllerAdvice`
-7. **Caching** — JetCache `@Cached` for hot data, `@CacheInvalidate` on updates
-8. **Security** — Proper endpoint authorization with Spring Security
+1. **Schema Verification** — Read the EXACT table schema (SQL DDL or database introspection). List all columns with their types. Never assume columns exist.
+2. **Data Object** — Define MyBatis-Plus DO with `@TableName`, `@TableId(type = IdType.ASSIGN_ID)`, `@TableLogic(value = "", delval = "now()")`. Generate fields ONLY for columns that exist in the schema.
+3. **Mapper** — Create `XxxMapper extends BaseMapper<XxxDO>`
+4. **Service** — MVC: `XxxService extends IService<XxxDO>` + `XxxServiceImpl extends ServiceImpl<XxxMapper, XxxDO>`; DDD/COLA: `XxxServiceI` (facade) → delegates to `XxxCmdExe` / `XxxQryExe`, persistence via `XxxGateway` interface + `XxxGatewayImpl` (see `ddd-cola` skill)
+5. **DTO/VO/BO** — Define request/response objects with validation annotations. Field types MUST match DO field types (derived from schema).
+6. **Cross-Layer Contract Verification** — Before generating CmdExe/QryExe, read the Gateway/Client interface signatures. Ensure calls match actual method parameters.
+7. **Controller** — REST endpoint with `@RestController`, proper HTTP methods, OpenAPI annotations
+8. **Exception handling** — Business exceptions via global `@RestControllerAdvice`
+9. **Caching** — JetCache `@Cached` for hot data, `@CacheInvalidate` on updates
+10. **Security** — Proper endpoint authorization with Spring Security
+
+### QryExe Generation Order (DDD/COLA)
+
+1. Generate Qry DTO first (based on query requirements and schema column types)
+2. Read the generated Qry DTO to confirm available fields
+3. Generate QryExe using ONLY fields that exist in the Qry DTO — never assume fields
 
 ### 2. MyBatis-Plus Patterns
 
@@ -108,6 +117,10 @@ Never use:
 - N+1 queries — use batch queries with MyBatis-Plus
 - Missing `@Transactional` on write operations
 - Cache without expiration — always set `expire`
+- **Writing JacksonConfig in infrastructure module** — Spring Boot auto-configures `ObjectMapper` when `spring-boot-starter-web` is on the classpath (adapter module). Infrastructure should `@Autowired ObjectMapper` and reuse it, never recreate. Custom JacksonConfig belongs in adapter or start module. See `spring-boot-jackson-config` skill.
+- **Importing `org.apache.commons.lang3.StringUtils`** — Spring Boot already provides `org.springframework.util.StringUtils.hasText()` via `spring-boot-starter`. Do not add commons-lang3 as a dependency.
+- **Assuming transitive dependencies exist** — When writing any `import` statement, verify the current module's `pom.xml` declares (or transitively pulls) the required artifact. Common pitfalls: `swagger-annotations-jakarta` in client module (not transitive from adapter), `spring-web` in infrastructure (not transitive from adapter).
+- **Passing domain entities to infrastructure clients** — `RestClient`, `FeignClient`, MQ publishers expect primitive types or DTOs, never domain entities. Read the client's method signature before calling.
 
 ## Skills Integration
 

@@ -273,6 +273,15 @@ resources/
 > **Write path must follow dependency inversion**: CmdExe → Domain Gateway → Infrastructure GatewayImpl. Never CmdExe → Mapper directly for writes.
 > **Read path pragmatic shortcut**: QryExe → Mapper directly. This is why app depends on infrastructure. For complex read logic that needs domain validation, QryExe can still go through Domain — it's a choice, not a rule.
 
+### Cross-Layer Contract Verification
+
+**Before generating CmdExe that calls infrastructure Gateway/Client**:
+1. Read the Gateway interface definition in domain layer
+2. Read the GatewayImpl method signatures in infrastructure layer (or external client interface)
+3. Ensure CmdExe calls match the actual method signatures — never assume parameters
+
+**Contract verification rule**: CmdExe must read Gateway interface before calling. Never assume method signatures — always verify actual parameter types and order. Domain entities are NOT valid parameters for infrastructure clients (RestClient, Feign) — convert to primitive types or DTOs first.
+
 ## Dependency Direction & Enforcement
 
 ```

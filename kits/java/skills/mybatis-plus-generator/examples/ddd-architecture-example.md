@@ -291,8 +291,8 @@ public class UserQryExe {
 
     public Result<PageResult<UserDTO>> page(long page, long pageSize, UserQry qry) {
         LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<UserDO>()
-            .like(StringUtils.isNotBlank(qry.getUsername()), UserDO::getUsername, qry.getUsername())
-            .eq(StringUtils.isNotBlank(qry.getStatus()), UserDO::getStatus, qry.getStatus())
+            .like(StringUtils.hasText(qry.getUsername()), UserDO::getUsername, qry.getUsername())
+            .eq(StringUtils.hasText(qry.getStatus()), UserDO::getStatus, qry.getStatus())
             .orderByDesc(UserDO::getCreatedAt);
         Page<UserDO> mpPage = userMapper.selectPage(new Page<>(page, pageSize), wrapper);
         return Result.success(PageResult.of(mpPage).map(userDOConverter::toDTO));

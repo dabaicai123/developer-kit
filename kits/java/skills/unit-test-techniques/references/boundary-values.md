@@ -38,7 +38,7 @@ void shouldHandleOnlyWhitespace() {
 @Test
 void shouldHandleVeryLongString() {
     String longString = "x".repeat(1000000);
-    assertThat(StringUtils.isNotBlank(longString)).isTrue();
+    assertThat(StringUtils.hasText(longString)).isTrue();
 }
 ```
 

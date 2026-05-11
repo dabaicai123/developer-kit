@@ -180,6 +180,16 @@ The generator **cannot natively produce** COLA's 4-layer structure. Generate COL
 | Controller | `web` (adapter module, flat) | Controller | REST API |
 | Cmd / Qry | `dto` (client module) | Cmd (extends Command) / Qry (extends Query) | Marker base classes are self-defined in `common.dto` |
 | DTO | `dto.data` (client module) | DTO | Response objects |
+
+**Type Mapping Rule**: When generating Cmd/Qry DTOs, field types MUST match the corresponding DO field types derived from schema:
+- Schema `BIGINT` → DO `Long` → Cmd/Qry `Long` (NOT `String`)
+- Schema `INTEGER` → DO `Integer` → Cmd/Qry `Integer`
+- Schema `TEXT` → DO `String` → Cmd/Qry `String`
+- Schema `NUMERIC(p,s)` → DO `BigDecimal` → Cmd/Qry `BigDecimal`
+- Schema `BOOLEAN` → DO `Boolean` → Cmd/Qry `Boolean`
+- Schema `TIMESTAMPTZ` → DO `LocalDateTime` → Cmd/Qry `LocalDateTime`
+
+Never guess field types — always reference the schema column type or the generated DO field type.
 | Converter (DO ↔ Domain) | `{domain}` (infrastructure module) | DomainConverter | MapStruct interface — see `mapstruct-patterns` |
 | Converter (DO → DTO) | `{domain}` (app module) | DOConverter | MapStruct interface |
 
@@ -196,6 +206,8 @@ MyBatis-Plus generator has **no official Kotlin template engine**. Kotlin genera
 ### Step 1: Collect Input
 
 Collect: (1) Database connection URL or table structure, (2) architecture type (MVC, DDD/COLA, Layered, Clean, Custom), (3) language (Java or Kotlin), (4) functional requirements per table. Enable OpenAPI 3 annotations when API documentation is requested.
+
+**CRITICAL — Schema Verification**: For each table, read the EXACT column list from the provided schema (SQL DDL or database introspection). Do NOT assume common columns exist across all tables. Generate DO fields ONLY for columns that actually exist in the schema. Never use a "common template" that assumes all tables have the same columns (e.g., assuming all config tables have `status` when the schema doesn't define it).
 
 ### Step 2: Map Directories
 

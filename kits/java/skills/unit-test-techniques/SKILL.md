@@ -145,11 +145,11 @@ void shouldDetectOverflow() {
 @ParameterizedTest
 @ValueSource(strings = {"", " ", "  ", "\t", "\n"})
 void shouldRejectEmptyAndWhitespace(String input) {
-  assertThat(StringUtils.isNotBlank(input)).isFalse();
+  assertThat(StringUtils.hasText(input)).isFalse();
 }
 
 @Test
-void shouldHandleNullString() { assertThat(StringUtils.trim(null)).isNull(); }
+void shouldHandleNullString() { assertThat(StringUtils.trimWhitespace(null)).isNull(); }
 ```
 
 ### Collection Boundaries (0-1-Many)

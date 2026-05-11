@@ -220,7 +220,7 @@ public void updateOrder(OrderDO order) {
 @Override
 public PageResult<UserVO> page(int pageNum, int pageSize, UserQueryBO query) {
     LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
-        .like(StringUtils.isNotBlank(query.getUsername()), UserDO::getUsername, query.getUsername())
+        .like(StringUtils.hasText(query.getUsername()), UserDO::getUsername, query.getUsername())
         .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
         .orderByDesc(UserDO::getCreatedAt);
     Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
@@ -234,6 +234,9 @@ public PageResult<UserVO> page(int pageNum, int pageSize, UserQueryBO query) {
 LambdaQueryWrapper<UserDO> wrapper = Wrappers.lambdaQuery()
     .eq(UserDO::getStatus, UserStatus.ACTIVE);
 ```
+
+**String validation**: Use `org.springframework.util.StringUtils.hasText()` (Spring Boot built-in), 
+NOT `org.apache.commons.lang3.StringUtils.isNotBlank()` (requires extra dependency).
 
 **Anti-patterns**:
 - Never use raw `QueryWrapper` with string column names — use `LambdaQueryWrapper` for type safety

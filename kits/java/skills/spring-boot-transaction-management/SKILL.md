@@ -138,7 +138,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public PageResult<UserVO> page(int pageNum, int pageSize, UserQry query) {
         LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
-            .like(StringUtils.isNotBlank(query.getUsername()), UserDO::getUsername, query.getUsername())
+            .like(StringUtils.hasText(query.getUsername()), UserDO::getUsername, query.getUsername())
             .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
             .orderByDesc(UserDO::getCreatedAt);
         Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);

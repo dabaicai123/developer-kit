@@ -216,10 +216,10 @@ public class UserImportReadListener extends AnalysisEventListener<UserImportDTO>
     }
 
     private void validateRow(UserImportDTO data, int rowIndex) {
-        if (StringUtils.isBlank(data.getUsername())) {
+        if (!StringUtils.hasText(data.getUsername())) {
             throw new ValidationException("Username is required");
         }
-        if (StringUtils.isBlank(data.getEmail()) || !data.getEmail().contains("@")) {
+        if (!StringUtils.hasText(data.getEmail()) || !data.getEmail().contains("@")) {
             throw new ValidationException("Valid email is required");
         }
     }

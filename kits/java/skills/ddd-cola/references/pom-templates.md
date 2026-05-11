@@ -12,6 +12,7 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
     <!-- Spring Cloud Alibaba version must match Spring Boot version - see compatibility matrix at https://github.com/alibaba/spring-cloud-alibaba/wiki/版本说明 -->
     <spring-cloud-alibaba.version>2025.0.0.0-RC1</spring-cloud-alibaba.version>
     <mapstruct.version>1.6.3</mapstruct.version>
+    <springdoc.version>2.8.16</springdoc.version>
 </properties>
 
 <dependencyManagement>
@@ -27,6 +28,15 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-alibaba-dependencies</artifactId>
             <version>${spring-cloud-alibaba.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <!-- SpringDoc BOM transitively manages swagger-annotations-jakarta and swagger-core versions.
+             Do NOT pin swagger-annotations-jakarta version directly — let SpringDoc BOM drive it. -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-bom</artifactId>
+            <version>${springdoc.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -62,10 +72,17 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
         <artifactId>spring-cloud-starter-openfeign</artifactId>
         <scope>provided</scope>
     </dependency>
+    <!-- OpenAPI 3 annotations for Cmd/Qry/DTO — provided scope, adapter brings runtime -->
+    <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-annotations-jakarta</artifactId>
+        <scope>provided</scope>
+    </dependency>
 </dependencies>
 ```
 
 > OpenFeign is `provided` scope — client module only needs the annotation for compilation. Other services bring the Feign runtime themselves.
+> swagger-annotations-jakarta is `provided` scope — adapter module (with springdoc-openapi-starter-webmvc-ui) brings the runtime.
 > No COLA component dependency — Result/PageResult/BusinessException/Command/Query are defined in client `common/` package.
 
 ## domain/pom.xml
@@ -108,6 +125,24 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
+    <!-- OPTIONAL: RestClient for external HTTP calls (Spring 6.1+).
+         Add ONLY when infrastructure has gatewayimpl/rpc/ for calling external services.
+         Pure-CRUD services without external HTTP calls do not need this. -->
+    <!--
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+    </dependency>
+    -->
+    <!-- OPTIONAL: Jackson Java 8 date/time support (LocalDateTime, etc.).
+         Add ONLY when infrastructure has custom JacksonConfig (see spring-boot-jackson-config skill).
+         Adapter module's spring-boot-starter-web already provides this transitively for HTTP layer. -->
+    <!--
+    <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+    -->
     <dependency>
         <groupId>org.mapstruct</groupId>
         <artifactId>mapstruct</artifactId>
