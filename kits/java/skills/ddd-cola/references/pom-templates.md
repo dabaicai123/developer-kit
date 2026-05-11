@@ -10,7 +10,7 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
     <!-- Use Spring Boot 3.5.13 for your project -->
     <spring-boot.version>3.5.13</spring-boot.version>
     <!-- Spring Cloud Alibaba version must match Spring Boot version - see compatibility matrix at https://github.com/alibaba/spring-cloud-alibaba/wiki/版本说明 -->
-    <spring-cloud-alibaba.version>2025.0.0.0-RC1</spring-cloud-alibaba.version>
+    <spring-cloud-alibaba.version>2025.0.0.0</spring-cloud-alibaba.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <springdoc.version>2.8.16</springdoc.version>
 </properties>

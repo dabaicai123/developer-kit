@@ -277,7 +277,7 @@ CREATE INDEX profiles_attrs_gin ON profiles USING GIN (attrs);
 
 ## Related Skills
 
-- `spring-boot-database-migration` — Flyway migrations for schema evolution and baseline
+- `spring-boot-database-migration` — manual SQL changesets for schema evolution and baseline
 - `mybatis-plus-patterns` — MyBatis-Plus ORM patterns for querying designed tables
 
 ## Related Agents

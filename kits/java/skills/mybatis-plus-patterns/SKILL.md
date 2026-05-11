@@ -29,7 +29,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ## Related Skills
 
 - `spring-boot-transaction-management` — transaction boundaries with MyBatis-Plus IService/ServiceImpl
-- `spring-boot-database-migration` — Flyway migrations for schema evolution
+- `spring-boot-database-migration` — manual SQL changesets for schema evolution
 - `postgresql-table-design` — PostgreSQL data types, indexing, and constraints
 - `mybatis-plus-generator` — batch code generation from database tables
 - `ddd-cola` — COLA/DDD Gateway pattern for complex domains

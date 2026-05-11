@@ -59,6 +59,17 @@ Set default component model globally:
 </compilerArgs>
 ```
 
+## Converter Naming (anchored to ddd-cola)
+
+Two converter types, two distinct names — do NOT use the same suffix for both:
+
+| Converter | Direction | Location | Class Name |
+|-----------|-----------|----------|------------|
+| `XxxDomainConverter` | Domain ↔ DO | `infrastructure/{domain}/gatewayimpl/database/` | e.g. `OrderDomainConverter` |
+| `XxxDOConverter` | DO → DTO (read path) | `app/{domain}/converter/` | e.g. `OrderDOConverter` |
+
+> Naming alignment: matches `ddd-cola` and `mybatis-plus-generator`. Never name a Domain↔DO converter `XxxDOConverter` — that suffix is reserved for the DO→DTO converter used by `QryExe`.
+
 ## Converter Location in COLA Layers
 
 ```
@@ -68,8 +79,8 @@ demo-adapter/
 demo-app/
 └── order/                              # domain-first
     ├── OrderServiceImpl.java
-    ├── converter/                      # Domain ↔ DTO/Cmd mappers (App layer, read path)
-    │   ├── OrderDTOConverter.java
+    ├── converter/                      # Read-path mappers (App layer)
+    │   ├── OrderDTOConverter.java      # Domain ↔ DTO/Cmd (when CmdExe returns Domain)
     │   └── OrderDOConverter.java       # DO → DTO (for QryExe direct Mapper reads)
     └── executor/
 demo-domain/
@@ -100,7 +111,7 @@ Replaces manual `OrderDO.fromDomain(order)` / `OrderDO.toDomain()`:
 
 ```java
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface OrderDOConverter {
+public interface OrderDomainConverter {
 
     OrderDO toDO(Order order);
 
@@ -119,25 +130,58 @@ Use in GatewayImpl (see `ddd-cola` for the full Gateway pattern context):
 @RequiredArgsConstructor
 public class OrderGatewayImpl implements OrderGateway {
     private final OrderMapper orderMapper;
-    private final OrderDOConverter orderDOConverter;
+    private final OrderDomainConverter orderDomainConverter;
 
     @Override
     public void save(Order order) {
-        orderMapper.insert(orderDOConverter.toDO(order));
+        orderMapper.insert(orderDomainConverter.toDO(order));
     }
 
     @Override
     public Optional<Order> findById(String id) {
         return Optional.ofNullable(orderMapper.selectOne(
             new LambdaQueryWrapper<OrderDO>().eq(OrderDO::getOrderId, id)))
-            .map(orderDOConverter::toDomain);
+            .map(orderDomainConverter::toDomain);
     }
 }
 ```
 
 Audit fields (`id`, `createdAt`, `updatedAt`, `version`, `deletedAt`) are managed by MyBatis-Plus or the database — never map them from Domain.
 
-## Domain ↔ DTO/Cmd Mapper (Adapter Layer)
+## DO → DTO Mapper (App Layer, Read Path)
+
+For `QryExe` that reads `Mapper` directly and returns `DTO` — bypassing Domain for performance:
+
+```java
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface OrderDOConverter {
+
+    OrderDTO toDTO(OrderDO orderDO);
+
+    List<OrderDTO> toDTOList(List<OrderDO> orderDOs);
+}
+```
+
+Use in QryExe:
+
+```java
+@Component
+@RequiredArgsConstructor
+public class OrderListQryExe {
+    private final OrderMapper orderMapper;
+    private final OrderDOConverter orderDOConverter;
+
+    public Result<List<OrderDTO>> execute(OrderListQry qry) {
+        List<OrderDO> records = orderMapper.selectList(
+            new LambdaQueryWrapper<OrderDO>().eq(OrderDO::getStatus, qry.getStatus()));
+        return Result.success(orderDOConverter.toDTOList(records));
+    }
+}
+```
+
+## Domain ↔ DTO/Cmd Mapper (App Layer, Write Path)
+
+For complex Cmd → Domain construction. Many CmdExe build Domain entities by direct factory method (`Customer.create(...)`) and do not need a converter — only use this pattern when Cmd has 5+ fields that map 1:1 to Domain.
 
 ```java
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -149,19 +193,20 @@ public interface OrderDTOConverter {
 }
 ```
 
-Use in Controller:
+Use in CmdExe (not Controller — adapter stays thin):
 
 ```java
-@RestController
+@Component
 @RequiredArgsConstructor
-public class OrderController {
-    private final CreateOrderCmdExe createOrderCmdExe;
+public class CreateOrderCmdExe {
+    private final OrderGateway orderGateway;
     private final OrderDTOConverter orderDTOConverter;
 
-    @PostMapping("/orders")
-    public OrderDTO create(@RequestBody CreateOrderCmd cmd) {
-        Order order = createOrderCmdExe.execute(cmd);
-        return orderDTOConverter.toDTO(order);
+    @Transactional
+    public Result<OrderDTO> execute(CreateOrderCmd cmd) {
+        Order order = orderDTOConverter.fromCreateCmd(cmd);
+        orderGateway.save(order);
+        return Result.success(orderDTOConverter.toDTO(order));
     }
 }
 ```
@@ -172,7 +217,7 @@ Use `@MappingTarget` for partial updates — only non-null fields are applied:
 
 ```java
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface OrderDOConverter {
+public interface OrderDomainConverter {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateDOFromDomain(Order order, @MappingTarget OrderDO orderDO);
@@ -186,13 +231,13 @@ public interface OrderDOConverter {
 @RequiredArgsConstructor
 public class OrderGatewayImpl implements OrderGateway {
     private final OrderMapper orderMapper;
-    private final OrderDOConverter orderDOConverter;
+    private final OrderDomainConverter orderDomainConverter;
 
     @Override
     public void update(Order order) {
         OrderDO existing = orderMapper.selectOne(
             new LambdaQueryWrapper<OrderDO>().eq(OrderDO::getOrderId, order.getOrderId()));
-        orderDOConverter.updateDOFromDomain(order, existing);
+        orderDomainConverter.updateDOFromDomain(order, existing);
         orderMapper.updateById(existing);
     }
 }
@@ -203,14 +248,14 @@ public class OrderGatewayImpl implements OrderGateway {
 Use `uses` to compose mappers for nested objects:
 
 ```java
-@Mapper(componentModel = "spring", uses = {OrderItemDOConverter.class})
-public interface OrderDOConverter {
+@Mapper(componentModel = "spring", uses = {OrderItemDomainConverter.class})
+public interface OrderDomainConverter {
     OrderDO toDO(Order order);
     Order toDomain(OrderDO orderDO);
 }
 
 @Mapper(componentModel = "spring")
-public interface OrderItemDOConverter {
+public interface OrderItemDomainConverter {
     OrderItemDO toDO(OrderItem item);
     OrderItem toDomain(OrderItemDO itemDO);
     List<OrderItemDO> toDOList(List<OrderItem> items);
@@ -220,16 +265,19 @@ public interface OrderItemDOConverter {
 
 ## Custom Methods for Complex Conversion
 
+> **Enum ↔ String mapping is built-in**: MapStruct automatically maps `Enum` ↔ `String` via `Enum.name()` and `Enum.valueOf(String)`. Do NOT write `default mapStatus(...)` methods for routine `OrderStatus` ↔ `String` cases — that's framework duplication. Only add custom methods when the enum needs **non-name** serialization (e.g., a `getCode()` int, a lowercase string, or a legacy database value).
+
 Use default methods in interfaces for simple custom logic — MapStruct auto-selects them by type matching:
 
 ```java
 @Mapper(componentModel = "spring")
-public interface OrderDOConverter {
+public interface OrderDomainConverter {
     OrderDO toDO(Order order);
     Order toDomain(OrderDO orderDO);
 
-    default String mapStatus(OrderStatus status) {
-        return status == null ? null : status.name();
+    // Example of a JUSTIFIED custom method: enum uses a non-name code
+    default String mapStatusCode(OrderStatus status) {
+        return status == null ? null : status.getCode();
     }
 }
 ```
@@ -238,7 +286,7 @@ If you need `@Named` qualifiers to distinguish multiple methods with the same so
 
 ```java
 @Mapper(componentModel = "spring")
-public interface UserDOConverter {
+public interface UserDomainConverter {
     @Mapping(target = "displayName", qualifiedByName = "fullName")
     UserDO toDO(User user);
 
@@ -252,8 +300,8 @@ public interface UserDOConverter {
 Use abstract class when you need injected dependencies:
 
 ```java
-@Mapper(componentModel = "spring", uses = {RoleDOConverter.class})
-public abstract class UserDOConverter {
+@Mapper(componentModel = "spring", uses = {RoleDomainConverter.class})
+public abstract class UserDomainConverter {
 
     @Autowired
     protected RoleGateway roleGateway;
@@ -273,7 +321,7 @@ public abstract class UserDOConverter {
 
 ## Best Practices
 
-- **Converters belong at layer boundaries**: Domain ↔ DO in `infrastructure/{domain}/gatewayimpl/database/` (e.g., `OrderDomainConverter`); DO → DTO in `app/{domain}/converter/` (e.g., `OrderDOConverter`); Domain ↔ DTO/Cmd in `adapter/converter/`
+- **Converters belong at layer boundaries**: Domain ↔ DO in `infrastructure/{domain}/gatewayimpl/database/` as `XxxDomainConverter`; DO → DTO in `app/{domain}/converter/` as `XxxDOConverter`; Domain ↔ DTO/Cmd (when justified) in `app/{domain}/converter/` as `XxxDTOConverter`
 - **Domain never depends on converters**: converters import domain types; domain never imports converters
 - **Audit fields auto-excluded via `unmappedTargetPolicy = IGNORE`** (see Domain <-> DO Mapper section). Only add explicit `@Mapping(target = "xxx", ignore = true)` for same-name-but-different-meaning fields
 - **Use `@BeanMapping(nullValuePropertyMappingStrategy = IGNORE)`** for partial updates — don't overwrite existing values with null

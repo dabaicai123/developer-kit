@@ -545,5 +545,5 @@ Avoid these common mistakes in Java/Spring Boot Docker setups:
 
 - **spring-boot-actuator**: Health check endpoints, liveness/readiness probes, Prometheus metrics — essential for Docker HEALTHCHECK and monitoring
 - **graalvm-native-image**: Compile Spring Boot to native executable for sub-second startup and minimal Docker images (~50-80 MB)
-- **spring-boot-database-migration**: Flyway/Liquibase integration with PostgreSQL in Docker Compose, database schema versioning
+- **spring-boot-database-migration**: Manual SQL changesets reviewed and applied by DBA against PostgreSQL in Docker Compose (no Flyway/Liquibase auto-migration)
 - **postgresql-table-design**: Schema design, indexing, and optimization for PostgreSQL containers in Spring Boot applications
