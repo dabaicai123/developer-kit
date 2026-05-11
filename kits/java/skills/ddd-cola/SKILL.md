@@ -167,7 +167,7 @@ com.example.dto.event/
 
 > **FeignClient extends ServiceI**: Only when ALL ServiceI methods are external-facing. If some are internal-only, split into separate interfaces. Code examples → see `references/code-examples.md`.
 
-> **client stays lightweight**: No Spring Boot starter, no MyBatis-Plus, no COLA component deps. OpenFeign is `provided` scope. If strict client isolation is required, replace `PageResult.of(Page<T>)` with `PageResult.of(List<T>, long total)` that doesn't reference MyBatis types.
+> **client stays lightweight**: No Spring Boot starter, no MyBatis-Plus, no COLA component deps. OpenFeign is `provided` scope. `PageResult` only exposes `PageResult.of(List<T> records, long total, long page, long pageSize)` — it does not depend on MyBatis-Plus `Page<T>`. App/infrastructure callers destructure MP's `Page` at the call site (`records / total / current / size`) and pass them into `PageResult.of(...)`.
 
 ### adapter Module — HTTP Inbound
 

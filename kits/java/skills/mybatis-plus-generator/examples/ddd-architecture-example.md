@@ -295,7 +295,10 @@ public class UserQryExe {
             .eq(StringUtils.hasText(qry.getStatus()), UserDO::getStatus, qry.getStatus())
             .orderByDesc(UserDO::getCreatedAt);
         Page<UserDO> mpPage = userMapper.selectPage(new Page<>(page, pageSize), wrapper);
-        return Result.success(PageResult.of(mpPage).map(userDOConverter::toDTO));
+        return Result.success(
+            PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+                .map(userDOConverter::toDTO)
+        );
     }
 }
 ```

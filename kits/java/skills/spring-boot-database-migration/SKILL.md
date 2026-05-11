@@ -84,7 +84,7 @@ Every changeset SQL file MUST:
    ```sql
    -- 0002__add_user_status_column.sql
    -- Ticket: PROJ-123 — Track active vs suspended users
-   -- Author: lishunxian, 2026-05-12
+   -- Author: agent, 2026-05-12
    ```
 5. **Never reference application identifiers** that may not exist yet (Java enum class names, bean names)
 

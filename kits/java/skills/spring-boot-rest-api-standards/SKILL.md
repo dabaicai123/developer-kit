@@ -53,7 +53,7 @@ Use `@Valid` on `@RequestBody`, Jakarta annotations (`@NotBlank`, `@Size`). Vali
 
 ### 7. Pagination → [cola-rest-patterns.md](references/cola-rest-patterns.md)
 
-Return `Result<PageResult<T>>` for paginated endpoints. Use `PageResult.of(mpPage).map()` to convert MyBatis-Plus `Page<DO>` → `PageResult<VO>`.
+Return `Result<PageResult<T>>` for paginated endpoints. `PageResult` does not depend on MyBatis-Plus — at the call site use `PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize()).map()` to convert `Page<DO>` → `PageResult<VO>`.
 
 ### 8. Security Headers and CORS → `spring-boot-security`
 

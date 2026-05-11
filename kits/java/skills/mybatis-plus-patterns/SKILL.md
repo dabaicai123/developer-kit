@@ -224,7 +224,8 @@ public PageResult<UserVO> page(int pageNum, int pageSize, UserQueryBO query) {
         .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
         .orderByDesc(UserDO::getCreatedAt);
     Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
-    return PageResult.of(mpPage).map(UserConverter::toVO);
+    return PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+        .map(UserConverter::toVO);
 }
 ```
 

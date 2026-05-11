@@ -142,7 +142,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
             .orderByDesc(UserDO::getCreatedAt);
         Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
-        return PageResult.of(mpPage).map(UserConverter::toVO);
+        return PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+            .map(UserConverter::toVO);
     }
 
     /** Multi-step revenue report — needs consistent snapshot across queries */

@@ -116,7 +116,10 @@ public class CustomerListByNameQryExe {
         }
         wrapper.orderByDesc(CustomerDO::getCreatedAt);
         customerMapper.selectPage(mpPage, wrapper);
-        return Result.success(PageResult.of(mpPage).map(customerDOConverter::toDTO));
+        return Result.success(
+            PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+                .map(customerDOConverter::toDTO)
+        );
     }
 }
 ```
@@ -131,7 +134,10 @@ public Result<PageResult<CustomerDTO>> execute(CustomerListByNameQry qry, long p
     wrapper.eq(qry.getName() != null, CustomerDO::getCompanyName, qry.getName());
     wrapper.orderByDesc(CustomerDO::getCreatedAt);
     Page<CustomerDO> mpPage = customerMapper.selectPage(new Page<>(page, pageSize), wrapper);
-    return Result.success(PageResult.of(mpPage).map(customerDOConverter::toDTO));
+    return Result.success(
+        PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+            .map(customerDOConverter::toDTO)
+    );
 }
 ```
 

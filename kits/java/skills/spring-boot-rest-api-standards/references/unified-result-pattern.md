@@ -52,23 +52,45 @@ public class Result<T> {
 NOT String codes like "SUCCESS" or "NOT_FOUND" → always integer HTTP status codes.
 NOT extra fields in outer structure → exactly `code/msg/data`.
 
-## PageResult.java (MyBatis-Plus conversion)
+## PageResult.java (no MyBatis-Plus dependency)
 
 ```java
 package com.example.common.result;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Data;
-import java.util.List;
+
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 分页结果封装，提供统一的分页响应格式。
+ *
+ * <p>包含 {@code records / total / page / pageSize} 四个字段，
+ * 通过 {@link #of(List, long, long, long)} 工厂方法从查询结果构造，
+ * 通过 {@link #map(Function)} 方法可将 DO 列表转换为 VO/DTO 列表。
+ *
+ * <p>不依赖 MyBatis-Plus 类型，保持 api 模块轻量。app/infrastructure 层
+ * 可在调用点直接解构 MP 的 {@code Page<T>}（records/total/current/size）传入 {@link #of(List, long, long, long)}，
+ * 避免 api 模块反向依赖 MyBatis-Plus。
+ *
+ * @author agent
+ * @since 1.0.0
+ */
 @Data
 public class PageResult<T> {
+
+    /** 当前页数据列表 */
     private List<T> records;
+
+    /** 总记录数 */
     private long total;
+
+    /** 当前页码（从 1 开始） */
     private long page;
+
+    /** 每页大小 */
     private long pageSize;
 
     public PageResult(List<T> records, long total, long page, long pageSize) {
@@ -78,13 +100,28 @@ public class PageResult<T> {
         this.pageSize = pageSize;
     }
 
-    public static <T> PageResult<T> of(Page<T> mpPage) {
-        return new PageResult<>(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize());
+    /**
+     * 从查询结果列表直接构造分页结果。
+     *
+     * @param records  当前页数据列表
+     * @param total    总记录数
+     * @param page     当前页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    public static <T> PageResult<T> of(List<T> records, long total, long page, long pageSize) {
+        return new PageResult<>(records, total, page, pageSize);
     }
 
+    /**
+     * 将当前分页结果中的 records 映射为另一种类型（通常用于 DO → VO/DTO 转换）。
+     *
+     * @param converter 类型转换函数
+     * @return 转换后的新分页结果，total/page/pageSize 保持不变
+     */
     public <U> PageResult<U> map(Function<T, U> converter) {
-        List<U> voList = records.stream().map(converter).collect(Collectors.toList());
-        return new PageResult<>(voList, total, page, pageSize);
+        List<U> mapped = records.stream().map(converter).collect(Collectors.toList());
+        return new PageResult<>(mapped, total, page, pageSize);
     }
 }
 ```
@@ -286,7 +323,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             new Page<>(page, pageSize),
             lambdaQuery().orderByDesc(UserDO::getCreatedAt)
         );
-        return PageResult.of(mpPage).map(UserConverter::toVO);
+        return PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+            .map(UserConverter::toVO);
     }
 }
 ```

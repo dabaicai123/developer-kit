@@ -40,7 +40,7 @@ Enforce MyBatis-Plus best practices for mapper, service, and data object definit
 
 ## Pagination
 
-- Use `PageResult.of(mpPage).map()` for type-safe pagination conversion
+- Use `PageResult.of(records, total, current, size).map()` for type-safe pagination conversion — `PageResult` no longer depends on MP `Page`; destructure `mpPage` at the call site
 - Never paginate in memory (select all then subList)
 
 ## Soft Delete Pattern
