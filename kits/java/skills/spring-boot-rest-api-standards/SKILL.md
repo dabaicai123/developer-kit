@@ -30,6 +30,8 @@ Use plural nouns, REST conventions (`GET /v1/orders`, `POST /v1/orders`). NOT ac
 
 All responses follow `{code, msg, data}` format. NOT `ResponseEntity`, `ProblemDetail`, or raw entity returns → use `Result<T>`.
 
+Always declare a concrete payload type: `Result<UserVO>`, `Result<PageResult<UserVO>>`, `Result<List<UserVO>>`, or `Result<Void>` for no-payload responses. NOT `Result<Object>`, `Result<?>`, or raw `Result` → these break OpenAPI schemas and IDE inference. See [unified-result-pattern.md](references/unified-result-pattern.md) for the full type-parameter decision table.
+
 Spring Boot 3.5 defaults ProblemDetail (`spring.mvc.problemdetails.enabled=true`). COLA projects must disable it: set `spring.mvc.problemdetails.enabled=false`.
 
 ### 3. COLA Controller (Adapter Layer) → [cola-rest-patterns.md](references/cola-rest-patterns.md)

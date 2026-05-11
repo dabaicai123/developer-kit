@@ -51,6 +51,20 @@ public class Result<T> {
 
 NOT String codes like "SUCCESS" or "NOT_FOUND" → always integer HTTP status codes.
 NOT extra fields in outer structure → exactly `code/msg/data`.
+NOT `Result<Object>`, `Result<?>`, or raw `Result` → always declare the concrete payload type, e.g. `Result<UserVO>`, `Result<PageResult<UserVO>>`, `Result<List<UserVO>>`, `Result<Void>` for no-payload responses. `Result<Object>` defeats OpenAPI/Swagger schema generation, breaks IDE auto-completion at call sites, and silently hides DTO contract drift — never use it as a shortcut.
+
+### Choosing the right type parameter
+
+| Endpoint shape | Correct return type | Anti-pattern |
+|----------------|--------------------|--------------|
+| Returns single resource | `Result<UserVO>` | `Result<Object>` / `Result<Map<String,Object>>` |
+| Returns paginated list | `Result<PageResult<UserVO>>` | `Result<Object>` / `Result<PageResult>` (raw) |
+| Returns flat list | `Result<List<UserVO>>` | `Result<List>` (raw) / `Result<Object>` |
+| Returns nothing (CUD) | `Result<Void>` | `Result<Object>` with `null` data / `Result<Boolean>` for plain success flags |
+| Returns ID after create | `Result<Long>` or `Result<UserVO>` | `Result<Object>` |
+| Returns one of several shapes | Split into separate endpoints, or use a sealed DTO | `Result<Object>` / `Result<Map<String,Object>>` |
+
+Rule of thumb: if you can name what `data` is, that name belongs in the generic. If you genuinely cannot name it, redesign the endpoint — `Object` is a smell, not a type.
 
 ## PageResult.java (no MyBatis-Plus dependency)
 
