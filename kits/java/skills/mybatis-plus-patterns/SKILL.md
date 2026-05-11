@@ -133,7 +133,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 }
 ```
 
-**DDD/COLA projects** use the Gateway pattern instead — see `ddd-cola` skill for `OrderGateway` (with `save()` + `update()`) / `OrderGatewayImpl` (in `infrastructure/customer/` — flat per-domain package) pattern.
+**DDD/COLA projects** use the Gateway pattern instead — see `ddd-cola` skill for `OrderGateway` (with `save()` + `update()`) / `OrderGatewayImpl` (in `infrastructure/order/` at domain root, with `gatewayimpl/database/dataobject/` nested sub-packages) pattern.
 
 ## Pagination Configuration
 

@@ -62,27 +62,34 @@ Set default component model globally:
 ## Converter Location in COLA Layers
 
 ```
-com.example.app/
-├── adapter/
-│   ├── controller/
-│   └── converter/          # Domain ↔ DTO/Cmd mappers (Adapter layer)
-│       ├── OrderDTOConverter.java
-│       └── OrderCmdConverter.java
-├── app/
-├── domain/
-│   ├── model/              # Domain entities — NO mapper annotations, NO ORM annotations
-│   └── gateway/            # Repository interfaces
-└── infrastructure/
-    ├── gatewayimpl/
-    │   ├── converter/      # Domain ↔ DO mappers (Infrastructure layer)
-    │   │   └── OrderDOConverter.java
-    │   └── OrderGatewayImpl.java
-    ├── mapper/
-    │   └── dataobject/     # DO classes with MyBatis-Plus annotations
-    │   │   └── OrderDO.java
-    │   └── OrderMapper.java
-    ├── external/
-    └── config/
+demo-adapter/
+└── web/
+    └── OrderController.java
+demo-app/
+└── order/                              # domain-first
+    ├── OrderServiceImpl.java
+    ├── converter/                      # Domain ↔ DTO/Cmd mappers (App layer, read path)
+    │   ├── OrderDTOConverter.java
+    │   └── OrderDOConverter.java       # DO → DTO (for QryExe direct Mapper reads)
+    └── executor/
+demo-domain/
+└── domain/order/
+    ├── Order.java                      # bare name, @Data, NO ORM annotations
+    └── gateway/
+        └── OrderGateway.java
+demo-infrastructure/
+└── order/                              # domain-first + craftsman-style nesting
+    ├── OrderGatewayImpl.java           # domain-level facade
+    └── gatewayimpl/
+        ├── database/
+        │   ├── OrderMapper.java
+        │   ├── OrderDomainConverter.java   # Domain ↔ DO mapper (Infrastructure layer)
+        │   └── dataobject/
+        │       └── OrderDO.java        # MyBatis-Plus annotations
+        └── rpc/                        # optional — external services
+            ├── XxxRpcClient.java
+            └── dataobject/
+                └── XxxRpcDO.java
 ```
 
 **Dependency direction**: converters depend on Domain (read domain types), but Domain never depends on converters.
@@ -266,7 +273,7 @@ public abstract class UserDOConverter {
 
 ## Best Practices
 
-- **Converters belong at layer boundaries**: Domain ↔ DO in `infrastructure/converter/`, Domain ↔ DTO/Cmd in `adapter/converter/`
+- **Converters belong at layer boundaries**: Domain ↔ DO in `infrastructure/{domain}/gatewayimpl/database/` (e.g., `OrderDomainConverter`); DO → DTO in `app/{domain}/converter/` (e.g., `OrderDOConverter`); Domain ↔ DTO/Cmd in `adapter/converter/`
 - **Domain never depends on converters**: converters import domain types; domain never imports converters
 - **Audit fields auto-excluded via `unmappedTargetPolicy = IGNORE`** (see Domain <-> DO Mapper section). Only add explicit `@Mapping(target = "xxx", ignore = true)` for same-name-but-different-meaning fields
 - **Use `@BeanMapping(nullValuePropertyMappingStrategy = IGNORE)`** for partial updates — don't overwrite existing values with null

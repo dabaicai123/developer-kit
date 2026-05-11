@@ -63,7 +63,7 @@ Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi
 | Exception types | `BizException` / `SysException` (cola-component-exception) | `BusinessException` + sub-classes | Project already uses BusinessException with int error codes |
 | COLA component deps | Required (BOM, dto, exception, domain-starter) | None | Project uses self-defined types across all services; importing COLA components creates a dual type system and adds dependency on the COLA release cycle. COLA components are OSS but designed around HSF/Mtop patterns that don't apply to Spring Cloud |
 | Domain entity annotation | `@Entity` (cola-component-domain-starter, prototype scope) | `@Data` (Lombok) | Lombok is lighter, already used in project; prototype scope rarely needed |
-| Infrastructure package | `gatewayimpl.database.dataobject` (some samples) | Flat per-domain (`customer/CustomerGatewayImpl.java`) | Simpler, fewer sub-packages; official archetype-web sample also uses flat layout |
+| Infrastructure package | `gatewayimpl/database/dataobject` at project root (`cola-samples/craftsman` style) | Domain-first + `craftsman`-style nesting: `customer/CustomerGatewayImpl.java` at domain root, with `customer/gatewayimpl/database/` and `customer/gatewayimpl/rpc/` sub-packages | Keeps all Customer infra co-located (domain-first); nested `database/dataobject` + `rpc/dataobject` cleanly separates heterogeneous data sources from day one; same internal nesting as `craftsman` sample but scoped per-domain instead of per-project |
 | ServiceI return type | `Response` / `MultiResponse` | `Result<T>` / `PageResult<T>` | Same as non-DDD services; no type split |
 | Cmd/Qry base | Extends COLA `Command` / `Query` | Extends self-defined `Command` / `Query` (in client `common.dto`) | No cola-component-dto dependency; marker classes serve the same CQRS identification purpose |
 | Cmd field structure | `CustomerAddCmd` wraps nested `CustomerDTO` | `CustomerAddCmd` uses flat fields (`companyName`, `customerType`) | Flat fields are simpler for API consumers; nested DTO adds unnecessary wrapping for single-entity operations. For multi-entity or complex Cmd, nested DTO is still recommended |
@@ -220,19 +220,34 @@ com.example.domain.customer/
 
 ### infrastructure Module — Implementation
 
-Flat per-domain package. No `gatewayimpl/` sub-package — everything related to a domain grouped together.
+**Domain-first with `craftsman`-style nested sub-packages**. Each domain is a top-level package; within each domain, use `gatewayimpl/database/dataobject` and `gatewayimpl/rpc/dataobject` to separate data sources by technology. `GatewayImpl` stays at the domain root as the facade.
 
 ```
-com.example.customer/
-├── CustomerGatewayImpl.java
-├── CreditGatewayImpl.java
-├── CustomerDO.java                    # @TableName, @Data
-├── CustomerMapper.java                # MyBatis-Plus Mapper
-com.example.config/
+com.example.customer/                    # domain-first: all Customer infra here
+├── CustomerGatewayImpl.java             # domain-level facade — implements CustomerGateway
+├── CreditGatewayImpl.java               # another Gateway impl for the same domain
+└── gatewayimpl/
+    ├── database/                        # persistence source
+    │   ├── CustomerMapper.java          # MyBatis-Plus Mapper
+    │   └── dataobject/
+    │       └── CustomerDO.java          # @TableName, @Data
+    └── rpc/                             # external RPC/HTTP source (optional)
+        ├── CreditRpcClient.java         # RestClient / Feign wrapper
+        └── dataobject/
+            └── CreditRpcDO.java         # RPC response object
+com.example.config/                      # cross-domain infra config (root-level)
 └── AppConfig.java
-com.example.external/
-└── ExternalClientConfig.java          # RestClient/Feign config
+com.example.external/                    # cross-domain external client config (root-level)
+└── ExternalClientConfig.java            # shared RestClient/Feign bean config
 ```
+
+**Rules**
+
+- **GatewayImpl always at domain root** — it's the port-facing facade; technology details belong in `gatewayimpl/` sub-packages.
+- **`gatewayimpl/database/dataobject`** holds all persistence artifacts (DO + Mapper) for the domain.
+- **`gatewayimpl/rpc/dataobject`** holds all RPC artifacts (client + response DO) when the domain calls external services.
+- **Add more sub-packages as needed** — e.g., `gatewayimpl/mq/` for message queue publishers/consumers.
+- **Cross-domain config** stays at root (`com.example.config/`, `com.example.external/`) for shared beans used by multiple domains.
 
 > DO and Mapper conventions → see `mybatis-plus-patterns`. MapStruct converters → see `mapstruct-patterns`.
 
@@ -345,7 +360,12 @@ When adding a new domain to an existing COLA project:
 2. **adapter**: Add new `XxxController`
 3. **app**: Add new `XxxServiceImpl`, `XxxCmdExe`, `XxxQryExe`
 4. **domain**: Add new `Xxx` entity, `XxxGateway` interface, (optional) `XxxDomainService`
-5. **infrastructure**: Add new `XxxGatewayImpl`, `XxxDO`, `XxxMapper`, (optional) `XxxDOConverter`
+5. **infrastructure**: Create new domain package `xxx/` with:
+   - `XxxGatewayImpl.java` at domain root (facade)
+   - `gatewayimpl/database/`: `XxxMapper.java`
+   - `gatewayimpl/database/dataobject/`: `XxxDO.java`
+   - (optional) `gatewayimpl/rpc/` + `gatewayimpl/rpc/dataobject/` when calling external services
+   - (optional) `XxxDOConverter` for read path (in app module)
 
 No need to modify existing domains' files. Module pom.xml dependencies are already correct.
 

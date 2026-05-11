@@ -169,12 +169,12 @@ The generator **cannot natively produce** COLA's 4-layer structure. Generate COL
 | COLA Artifact | Package | Suffix | Notes |
 |---|---|---|---|
 | Domain Entity | `domain.{domain}` (domain module) | none (bare name) | `@Data`, no ORM annotations |
-| DO | `{domain}` (infrastructure module, flat per-domain) | DO | Full MyBatis-Plus annotations (@TableName, @TableId, @TableLogic, @Version) |
-| Mapper | `{domain}` (infrastructure module, flat per-domain) | Mapper | extends `BaseMapper<XxxDO>` |
+| DO | `{domain}.gatewayimpl.database.dataobject` (infrastructure module) | DO | Full MyBatis-Plus annotations (@TableName, @TableId, @TableLogic, @Version) |
+| Mapper | `{domain}.gatewayimpl.database` (infrastructure module) | Mapper | extends `BaseMapper<XxxDO>` |
 | Gateway (port) | `domain.{domain}.gateway` | Gateway | Interface — `save()`, `update()`, `findById()` |
-| GatewayImpl | `{domain}` (infrastructure module, flat per-domain) | GatewayImpl | Implements Gateway, uses Mapper + DomainConverter |
+| GatewayImpl | `{domain}` (infrastructure module, domain root) | GatewayImpl | Implements Gateway, uses Mapper + DomainConverter |
 | ServiceI | `api` (client module) | ServiceI | Application service interface, returns `Result<T>` |
-| ServiceImpl | `{domain}` (app module, flat per-domain) | ServiceImpl | implements ServiceI, delegates to executors |
+| ServiceImpl | `{domain}` (app module) | ServiceImpl | implements ServiceI, delegates to executors |
 | CmdExe | `{domain}.executor` (app module) | CmdExe | Write handler — Domain → Gateway |
 | QryExe | `{domain}.executor.query` (app module) | QryExe | Read handler — Mapper directly |
 | Controller | `web` (adapter module, flat) | Controller | REST API |

@@ -14,7 +14,7 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/domain/model/aggregate/{entity}/` or `{package}/domain/model/entity/` |
 | Hexagonal | `{package}/domain/model/entity/` |
 | Clean | `{package}/domain/entity/` |
-| COLA | `{package}/domain/{domain}/` (domain module, flat per-domain; bare name, no ORM annotations) |
+| COLA | `{package}/domain/{domain}/` (domain module; bare name, no ORM annotations) |
 
 ### Mapper (Data Access Interfaces)
 
@@ -24,7 +24,7 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/domain/repository/` (repository interfaces)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper) |
 | Hexagonal | `{package}/application/ports/outbound/` (port interfaces)<br>`{package}/infrastructure/adapter/outbound/persistence/mapper/` (MyBatis Mapper) |
 | Clean | `{package}/application/ports/output/` or `{package}/domain/repository/` (interfaces)<br>`{package}/infrastructure/persistence/mapper/` (MyBatis Mapper) |
-| COLA | `{package}/domain/{domain}/gateway/` (Gateway interface in domain module)<br>`{package}/{domain}/` (MyBatis Mapper in infrastructure module, flat per-domain) |
+| COLA | `{package}/domain/{domain}/gateway/` (Gateway interface in domain module)<br>`{package}/{domain}/gatewayimpl/database/` (MyBatis Mapper in infrastructure module) |
 
 ### Service (Service Interfaces)
 
@@ -44,7 +44,7 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/application/service/impl/` |
 | Hexagonal | `{package}/application/services/` |
 | Clean | `{package}/application/service/` |
-| COLA | `{package}/{domain}/` (app module, flat per-domain) |
+| COLA | `{package}/{domain}/` (app module; ServiceImpl at domain root) |
 
 ### Controller (Controllers)
 
@@ -101,7 +101,7 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/infrastructure/persistence/entity/` |
 | Hexagonal | `{package}/infrastructure/adapter/outbound/persistence/entity/` |
 | Clean | `{package}/infrastructure/persistence/entity/` |
-| COLA | `{package}/{domain}/` (infrastructure module, flat per-domain; `DO` suffix) |
+| COLA | `{package}/{domain}/gatewayimpl/database/dataobject/` (infrastructure module; `DO` suffix) |
 
 ### Repository/Gateway Implementation
 
@@ -110,14 +110,14 @@ This document provides a quick directory mapping reference for various object ty
 | DDD | `{package}/infrastructure/persistence/repository/` |
 | Hexagonal | `{package}/infrastructure/adapter/outbound/persistence/repositoryimpl/` |
 | Clean | `{package}/infrastructure/persistence/repository/` |
-| COLA | `{package}/{domain}/` (infrastructure module, flat per-domain; `GatewayImpl` suffix) |
+| COLA | `{package}/{domain}/` (infrastructure module, at domain root; `GatewayImpl` suffix) |
 
 ### Converter (COLA only, MapStruct)
 
 | Architecture Type | Directory Path |
 |:--------|:---------|
-| COLA (DO ↔ Domain) | `{package}/{domain}/` (infrastructure module; `DomainConverter` suffix) |
-| COLA (DO → DTO) | `{package}/{domain}/` (app module; `DOConverter` suffix) |
+| COLA (DO ↔ Domain) | `{package}/{domain}/gatewayimpl/database/` (infrastructure module; `DomainConverter` suffix) |
+| COLA (DO → DTO) | `{package}/{domain}/converter/` (app module; `DOConverter` suffix) |
 
 ## Complete Path Examples
 
@@ -196,7 +196,7 @@ src/main/java/com/example/order/
 
 ### COLA V5 Architecture (aligned with `ddd-cola` skill — 6 Maven modules)
 
-> `ddd-cola` is the authoritative reference. The tree below reflects its **flat per-domain** convention in the `app` and `infrastructure` modules and the `client/dto` + `client/dto/data` split for Cmd/Qry and DTO.
+> `ddd-cola` is the authoritative reference. The tree below reflects its **domain-first + `craftsman`-style nested `gatewayimpl/database/dataobject`** convention in the infrastructure module, and the `client/dto` + `client/dto/data` split for Cmd/Qry and DTO.
 
 ```
 demo-parent/
@@ -218,9 +218,10 @@ demo-parent/
 │   └── src/main/java/com/example/web/
 │       └── UserController.java          # @RestController
 ├── demo-app/
-│   └── src/main/java/com/example/user/  # flat per-domain
+│   └── src/main/java/com/example/user/  # domain-first
 │       ├── UserServiceImpl.java         # implements UserServiceI
-│       ├── UserDOConverter.java         # MapStruct DO → DTO
+│       ├── converter/
+│       │   └── UserDOConverter.java     # MapStruct DO → DTO
 │       └── executor/
 │           ├── UserAddCmdExe.java       # write handler
 │           └── query/
@@ -234,11 +235,18 @@ demo-parent/
 │       └── domainservice/
 │           └── CreditChecker.java       # cross-entity logic (optional)
 ├── demo-infrastructure/
-│   └── src/main/java/com/example/user/  # flat per-domain
-│       ├── UserGatewayImpl.java
-│       ├── UserDO.java                  # @TableName, @Data
-│       ├── UserMapper.java
-│       └── UserDomainConverter.java     # MapStruct DO ↔ Domain
+│   └── src/main/java/com/example/user/  # domain-first + craftsman-style nesting
+│       ├── UserGatewayImpl.java         # domain-level facade
+│       └── gatewayimpl/
+│           ├── database/
+│           │   ├── UserMapper.java
+│           │   ├── UserDomainConverter.java   # MapStruct DO ↔ Domain
+│           │   └── dataobject/
+│           │       └── UserDO.java      # @TableName, @Data
+│           └── rpc/                     # optional — only when calling external services
+│               ├── XxxRpcClient.java
+│               └── dataobject/
+│                   └── XxxRpcDO.java
 └── demo-start/
     └── src/main/java/com/example/
         └── Application.java             # @SpringBootApplication
@@ -252,12 +260,12 @@ demo-parent/
 |:-----|:------------|:---------------|:-----|
 | Application layer | `app` module | `application` | COLA V5 uses short naming |
 | Repository interface | `gateway` | `repository` | COLA uses Gateway terminology |
-| Controller directory | `adapter/web/` (flat) | nested `interfaces/web/controller/` | COLA uses flat organization |
+| Controller directory | `adapter/web/` (flat) | nested `interfaces/web/controller/` | COLA flat Controller packaging |
 | Command objects | `Cmd` suffix | `Command` / `Request` | e.g., `CreateUserCmd` |
 | Query objects | `Qry` suffix | `Query` / `Request` | e.g., `GetUserQry` |
 | Executors | `Exe` suffix | `Handler` / `UseCase` | e.g., `UserCreateCmdExe` |
 | Persistence objects | `DO` suffix | `Entity` / `PO` | e.g., `UserDO` |
-| Infra/app package | flat per-domain (`{package}/{domain}/`) | `persistence` / `service/impl` | GatewayImpl, Mapper, DO, and converters stay together under one domain package |
+| Infra/app package | domain-first (`{package}/{domain}/`); infrastructure uses `craftsman`-style nested `gatewayimpl/database/dataobject` | `persistence` / `service/impl` | GatewayImpl at domain root; DO/Mapper inside `gatewayimpl/database` nested sub-packages |
 | Gateway impl | `GatewayImpl` suffix | `RepositoryImpl` | e.g., `UserGatewayImpl` |
 | Cmd/Qry/DTO location | `client` module | `application` / `web` | Kept in client so consumers can use them via Feign |
 

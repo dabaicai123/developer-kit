@@ -29,7 +29,7 @@ com.example.user/
 │   ├── service/     → ServiceI (facade — delegates to executors)
 │   └── executor/    → CmdExe (write), QryExe (read)
 ├── domain/          → entity (bare name, no suffix), gateway, event
-├── infrastructure/  → gatewayimpl (GatewayImpl), mapper (DO, Mapper), config, external
+├── infrastructure/  → {domain}/GatewayImpl at root, gatewayimpl/database/dataobject (DO, Mapper), config, external
 ```
 
 For full COLA/DDD architecture details, use the `ddd-cola` skill.
@@ -39,7 +39,7 @@ For full COLA/DDD architecture details, use the `ddd-cola` skill.
 | Architecture | Persistence Object | Domain Entity | Data Access |
 |---|---|---|---|
 | MVC | `UserDO` (DO suffix) | N/A | `UserService extends IService<UserDO>` |
-| COLA/DDD | `OrderDO` (DO suffix, in infrastructure) | `Order` (bare name, in domain) | `OrderGateway` interface + `OrderGatewayImpl` |
+| COLA/DDD | `OrderDO` (DO suffix, in infrastructure `{domain}/gatewayimpl/database/dataobject/`) | `Order` (bare name, in domain) | `OrderGateway` interface + `OrderGatewayImpl` |
 
 ## Dependency Direction
 

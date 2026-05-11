@@ -177,8 +177,26 @@ public interface CreditGateway {
 
 ## infrastructure Module
 
+**Package layout** (domain-first + `craftsman`-style nested sub-packages):
+
+```
+com.example.customer/
+├── CustomerGatewayImpl.java             # domain-level facade
+├── CreditGatewayImpl.java               # external-service facade
+└── gatewayimpl/
+    ├── database/
+    │   ├── CustomerMapper.java
+    │   ├── CustomerDomainConverter.java
+    │   └── dataobject/
+    │       └── CustomerDO.java
+    └── rpc/                             # optional — only when calling external services
+        ├── CreditRpcClient.java
+        └── dataobject/
+            └── CreditRpcDO.java
+```
+
 ```java
-// customer/CustomerGatewayImpl.java
+// customer/CustomerGatewayImpl.java — domain facade, composes database adapter
 @Repository
 @RequiredArgsConstructor
 public class CustomerGatewayImpl implements CustomerGateway {
@@ -203,7 +221,7 @@ public class CustomerGatewayImpl implements CustomerGateway {
     }
 }
 
-// customer/CustomerDO.java — see mybatis-plus-patterns for full DO conventions
+// customer/gatewayimpl/database/dataobject/CustomerDO.java — see mybatis-plus-patterns for full DO conventions
 @TableName("customer")
 @Data
 public class CustomerDO {
@@ -226,20 +244,20 @@ public class CustomerDO {
     private Integer version;
 }
 
-// customer/CustomerDomainConverter.java — MapStruct converter for DO↔Domain (in infrastructure module)
+// customer/gatewayimpl/database/CustomerDomainConverter.java — MapStruct converter for DO↔Domain (in infrastructure module)
 @Mapper(componentModel = "spring")
 public interface CustomerDomainConverter {
     CustomerDO fromDomain(Customer customer);
     Customer toDomain(CustomerDO customerDO);
 }
 
-// customer/CustomerDOConverter.java — MapStruct converter for DO→DTO (in app module)
+// app module — customer/converter/CustomerDOConverter.java — MapStruct converter for DO→DTO (read path)
 @Mapper(componentModel = "spring")
 public interface CustomerDOConverter {
     CustomerDTO toDTO(CustomerDO customerDO);
 }
 
-// customer/CreditGatewayImpl.java — external service via RestClient
+// customer/CreditGatewayImpl.java — external-service facade; delegates to gatewayimpl/rpc/ adapter
 @Repository
 @RequiredArgsConstructor
 public class CreditGatewayImpl implements CreditGateway {

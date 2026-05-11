@@ -53,11 +53,14 @@ com.example/                              # Across 6 Maven modules
 │           └── UserGateway.java          # Persistence port interface
 └── infrastructure/                       # demo-infrastructure module
     └── user/
-        ├── UserGatewayImpl.java          # Implements UserGateway
-        ├── UserDO.java                   # @TableName, @Data
-        ├── UserMapper.java               # MyBatis-Plus Mapper
-        ├── UserDomainConverter.java      # MapStruct Domain ↔ DO
-        └── UserDOConverter.java          # MapStruct DO → DTO
+        ├── UserGatewayImpl.java          # domain-level facade — implements UserGateway
+        └── gatewayimpl/
+            └── database/
+                ├── UserMapper.java       # MyBatis-Plus Mapper
+                ├── UserDomainConverter.java  # MapStruct Domain ↔ DO
+                └── dataobject/
+                    └── UserDO.java       # @TableName, @Data
+    # UserDOConverter (DO → DTO) lives in app module: app/user/converter/UserDOConverter.java
 ```
 
 ## Functional Requirements
@@ -104,10 +107,10 @@ public class User {
 }
 ```
 
-### 2. DO — UserDO (infrastructure, full MyBatis-Plus annotations)
+### 2. DO — UserDO (infrastructure, `gatewayimpl/database/dataobject/`, full MyBatis-Plus annotations)
 
 ```java
-package com.example.user;
+package com.example.user.gatewayimpl.database.dataobject;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -150,10 +153,10 @@ public interface UserGateway {
 }
 ```
 
-### 4. Converter — UserDomainConverter (MapStruct, infrastructure — DO ↔ Domain)
+### 4. Converter — UserDomainConverter (MapStruct, infrastructure — DO ↔ Domain, in `gatewayimpl/database/`)
 
 ```java
-package com.example.user;
+package com.example.user.gatewayimpl.database;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserDomainConverter {
@@ -165,10 +168,10 @@ public interface UserDomainConverter {
 }
 ```
 
-### 5. Converter — UserDOConverter (MapStruct, app — DO → DTO)
+### 5. Converter — UserDOConverter (MapStruct, app — DO → DTO, in `converter/` sub-package)
 
 ```java
-package com.example.user.executor;
+package com.example.user.converter;
 
 @Mapper(componentModel = "spring")
 public interface UserDOConverter {
@@ -176,12 +179,15 @@ public interface UserDOConverter {
 }
 ```
 
-### 6. GatewayImpl (infrastructure, implements Gateway)
+### 6. GatewayImpl (infrastructure, at domain root — implements Gateway, composes `gatewayimpl/database`)
 
 ```java
 package com.example.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.user.gatewayimpl.database.UserDomainConverter;
+import com.example.user.gatewayimpl.database.UserMapper;
+import com.example.user.gatewayimpl.database.dataobject.UserDO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
