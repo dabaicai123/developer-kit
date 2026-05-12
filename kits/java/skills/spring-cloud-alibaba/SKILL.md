@@ -54,7 +54,43 @@ spring:
         group: DEFAULT_GROUP
 ```
 
-**Configuration Management**: Use `spring.config.import=nacos:` in application.yml (NOT `bootstrap.yml`, which is removed in Spring Boot 3.x). For detailed Nacos Config patterns (shared/extension configs, @RefreshScope, ConfigListener), see `spring-boot-configuration-management`.
+**Configuration Management** (Spring Boot 3.x):
+
+Use `spring.config.import` in `application.yml` — NOT `bootstrap.yml` (removed in Boot 3.x).
+
+```yaml
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      config:
+        server-addr: localhost:8848
+        namespace: dev
+        group: DEFAULT_GROUP
+        file-extension: yaml
+  config:
+    import:
+      - optional:nacos:user-service.yaml
+      - optional:nacos:user-service-dev.yaml
+      - optional:nacos:shared-datasource.yaml?group=SHARED_GROUP
+```
+
+**Naming convention for Nacos config files**:
+
+| Config file in Nacos | Purpose |
+|---------------------|---------|
+| `${app-name}.yaml` | Application base config (all profiles) |
+| `${app-name}-${profile}.yaml` | Profile-specific config (dev/test/prod) |
+| `shared-*.yaml` | Shared configs across services (datasource, redis, etc.) |
+
+- `optional:` prefix — app starts normally even if the config is missing in Nacos
+- `?group=XXX` suffix — specify non-default group for shared configs
+- Load order: later entries override earlier ones (profile-specific overrides base)
+
+For detailed Nacos Config patterns (shared/extension configs, @RefreshScope, ConfigListener), see `spring-boot-configuration-management`.
 
 ### 2. Sentinel (Flow Control)
 
