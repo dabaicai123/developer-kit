@@ -3,7 +3,6 @@ name: spring-boot-slice-testing
 description: "Spring Boot slice testing: Events, Scheduled/Async, ConfigProps, @JsonTest, Caching — require Spring Context, NOT unit tests."
 version: "1.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Grep
 ---
 
 # Spring Boot Slice Testing
@@ -30,11 +29,9 @@ Five slice testing patterns that depend on Spring Context (AOP proxy, Bean bindi
 - NOT confuse slice tests with unit tests — slice tests need Spring Context
 - NOT use `@SpringBootTest` for `@ConfigurationProperties` binding → `ApplicationContextRunner` (no full context)
 
-## COLA Conventions (applies to all Sections)
+## COLA Conventions
 
-- **ServiceI interface**: `UserServiceI` -> `UserServiceImpl`
-- **Result<T> response**: Service methods return `Result<T>`
-- **/v1/ URL**: Controllers use `/v1/` prefix
+Follow COLA naming conventions (`UserServiceI` / `Result<T>` / `/v1/` prefix) — see `spring-boot-cola-architecture` skill.
 
 ---
 
@@ -323,14 +320,6 @@ public Result<Data> getData(Long id) { ... }
 
 ## References
 
-- [ApplicationEventPublisher](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationEventPublisher.html)
-- [@EventListener](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/event/EventListener.html)
-- [@Async](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Async.html) | [@Scheduled](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html)
-- [Awaitility](https://github.com/awaitility/awaitility) | [CompletableFuture](https://docs.oracle.com/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html)
-- [@JsonTest](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/test/autoconfigure/json/JsonTest.html) | [Jackson Annotations](https://fasterxml.github.io/jackson-annotations/javadoc/2.18/)
-- [@MockitoBean](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/context/bean/override/mockito/MockitoBean.html) (replaces deprecated `@MockBean`)
-- [ApplicationContextRunner](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/test/context/runner/ApplicationContextRunner.html) | [ConfigurationProperties](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html)
-- [Spring Caching](https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#cache) | [@Cacheable](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/cache/annotation/Cacheable.html) | [SpEL](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#expressions)
 - Advanced examples: `references/advanced-examples.md`
 
 ## Related Skills

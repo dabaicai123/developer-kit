@@ -3,7 +3,6 @@ name: ddd-event-driven
 description: "Domain-driven event architecture for Spring Boot: domain events, aggregate event collection, event sourcing, CQRS projections, outbox, snapshotting, and COLA integration. Use when designing domain events inside DDD/COLA or event-sourced models."
 version: "1.2.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 parameters:
   - name: event_complexity
     description: "simple_events, aggregate_events, or event_sourcing"

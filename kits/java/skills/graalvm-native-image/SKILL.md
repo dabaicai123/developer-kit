@@ -3,7 +3,6 @@ name: graalvm-native-image
 description: "GraalVM Native Image for Java applications: native binary compilation, cold start optimization, memory reduction, reflection/resource configuration, and framework-specific support (Spring Boot, Quarkus, Micronaut). Use when converting JVM applications to native binaries or optimizing startup time."
 version: "1.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # GraalVM Native Image for Java Applications
@@ -113,35 +112,22 @@ Native Image uses a closed-world assumption — all code paths must be known at 
 
 ### 5. The Iterative Fix Engine
 
-Native image builds often fail due to missing metadata. Follow this iterative approach:
+Native image builds often fail due to missing metadata. Iterate:
 
-**Step 1 — Execute the native build:**
+1. Build: `./mvnw -Pnative package` or `./gradlew nativeCompile`
+2. Parse errors — common patterns:
 
-```bash
-# Maven
-./mvnw -Pnative package 2>&1 | tee native-build.log
+| Error Pattern | Fix |
+|---------------|-----|
+| `ClassNotFoundException` | Add to `reflect-config.json` or `@RegisterReflectionForBinding` |
+| `NoSuchMethodException` | Add method to reflection config |
+| `MissingResourceException` | Add to `resource-config.json` |
+| `Proxy class not found` | Add interface list to `proxy-config.json` |
+| `UnsupportedFeatureException: Serialization` | Add to `serialization-config.json` |
 
-# Gradle
-./gradlew nativeCompile 2>&1 | tee native-build.log
-```
-
-**Step 2 — Parse build errors and identify the root cause:**
-
-Common error patterns and their fixes:
-
-| Error Pattern | Cause | Fix |
-|---------------|-------|-----|
-| `ClassNotFoundException: com.example.MyClass` | Missing reflection metadata | Add to `reflect-config.json` or use `@RegisterReflectionForBinding` |
-| `NoSuchMethodException` | Method not registered for reflection | Add method to reflection config |
-| `MissingResourceException` | Resource not included in native image | Add to `resource-config.json` |
-| `Proxy class not found` | Dynamic proxy not registered | Add interface list to `proxy-config.json` |
-| `UnsupportedFeatureException: Serialization` | Missing serialization metadata | Add to `serialization-config.json` |
-
-**Step 3 — Apply fixes** by updating the appropriate metadata file or using framework annotations.
-
-**Step 4 — Rebuild and verify.** Repeat until the build succeeds.
-
-**Step 5 — If manual fixes are insufficient**, use the GraalVM tracing agent to collect reachability metadata automatically. See [advanced-config.md](references/advanced-config.md) for agent modes and pitfalls.
+3. Apply fixes (metadata file or framework annotation)
+4. Rebuild and verify — repeat until success
+5. If manual fixes are insufficient, use the GraalVM tracing agent. See [advanced-config.md](references/advanced-config.md) for agent modes.
 
 ### 6. Validation and Benchmarking
 
@@ -284,13 +270,6 @@ public class UserController {
 
 **Scenario:** Native build fails with `ClassNotFoundException` for a Jackson-serialized DTO.
 
-**Error output:**
-
-```
-com.oracle.svm.core.jdk.UnsupportedFeatureError:
-  Reflection registration missing for class com.example.dto.PaymentResponse
-```
-
 **Fix — Add to `src/main/resources/META-INF/native-image/reachability-metadata.json`:**
 
 ```json
@@ -306,35 +285,18 @@ com.oracle.svm.core.jdk.UnsupportedFeatureError:
 }
 ```
 
-**Or use the Spring Boot annotation approach:**
+Or use `@RegisterReflectionForBinding(PaymentResponse.class)` on the consuming class.
 
-```java
-@RegisterReflectionForBinding(PaymentResponse.class)
-@Service
-public class PaymentService { /* ... */ }
-```
+### Example 3: Using the Tracing Agent
 
-### Example 3: Using the Tracing Agent for a Complex Project
-
-**Scenario:** A project with many third-party libraries needs comprehensive reachability metadata.
+**Scenario:** Complex project needs comprehensive reachability metadata.
 
 ```bash
-# 1. Build the JAR
 ./mvnw package -DskipTests
-
-# 2. Run with the tracing agent
 java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image \
     -jar target/myapp.jar
-
-# 3. Exercise all endpoints
-curl http://localhost:8080/api/users
-curl -X POST http://localhost:8080/api/orders -H 'Content-Type: application/json' -d '{"item":"test"}'
-curl http://localhost:8080/actuator/health
-
-# 4. Stop the application (Ctrl+C), then build native
+# Exercise all endpoints, then stop the app
 ./mvnw -Pnative native:compile
-
-# 5. Verify
 ./target/myapp
 ```
 
@@ -361,5 +323,5 @@ curl http://localhost:8080/actuator/health
 
 ## Related Skills
 
-- `spring-boot-actuator` — native image health checks and monitoring endpoints
-- `docker-expert` — minimal Docker images for native executables
+- `spring-boot-actuator`
+- `docker-expert`

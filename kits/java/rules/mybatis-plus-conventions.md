@@ -1,63 +1,24 @@
 ---
 paths:
   - "**/*Mapper.java"
-  - "**/*Service.java"
-  - "**/*ServiceImpl.java"
   - "**/*DO.java"
 ---
 
 # Rule: MyBatis-Plus Conventions
 
-Enforce MyBatis-Plus best practices for mapper, service, and data object definitions. For detailed examples and patterns, use the `mybatis-plus-patterns` skill.
+For full patterns, see `mybatis-plus-patterns` skill. This rule enforces the minimum on every DO/Mapper file.
 
-## Data Object (DO) Conventions
+## Standard Columns (every DO must include)
 
-- Use `@TableName("xxx")` — explicit table name mapping, no prefix (plain snake_case)
-- Use `@TableId(type = IdType.ASSIGN_ID)` — application-layer snowflake ID for distributed systems
-- Use `@TableLogic(value = "", delval = "now()")` — timestamp-based soft delete with `deleted_at TIMESTAMPTZ` (NULL = active, `now()` = deleted)
-- Use `@TableField(fill = FieldFill.INSERT/UPDATE)` — auto-fill `createdAt`, `updatedAt`, `createdBy`, `updatedBy`
-- Use `@Version` — optimistic lock counter, increment on every update
+`id`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `deletedAt`, `version`
 
-**Standard columns** every DO must include: `id`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `deletedAt`, `version`
+## Quick Checks
 
-## Mapper Conventions
-
-- Always extend `BaseMapper<XxxDO>`
-- Only add custom methods when `LambdaQueryWrapper` cannot express the query
-- Use `@Select` annotation for simple custom queries (prefer over XML mapper files)
-- Use `#{param}` (parameterized) — never `${param}` (raw interpolation, SQL injection risk)
-
-## Service Conventions (MVC)
-
-- Interface must extend `IService<XxxDO>`
-- Implementation must extend `ServiceImpl<XxxMapper, XxxDO>`
-- Use `lambdaQuery()` / `lambdaUpdate()` inside ServiceImpl (not `new LambdaQueryWrapper`)
-- Use conditional expressions: `.eq(condition, column, value)` for optional filters
-- Do not add `@Transactional` on pure query methods — auto-commit is sufficient for MyBatis (no persistence context optimization)
-- Use `@Transactional(rollbackFor = Exception.class)` for write methods
-
-**DDD/COLA projects** use the Gateway pattern instead — see `ddd-cola` skill.
-
-## Pagination
-
-- Use `PageResult.of(records, total, current, size).map()` for type-safe pagination conversion — `PageResult` no longer depends on MP `Page`; destructure `mpPage` at the call site
-- Never paginate in memory (select all then subList)
-
-## Soft Delete Pattern
-
-- SQL column: `deleted_at TIMESTAMPTZ` (NULL = active, non-NULL = deleted timestamp)
-- Java field: `@TableLogic(value = "", delval = "now()") private LocalDateTime deletedAt;`
-- All SELECT queries automatically filter `WHERE deleted_at IS NULL` via MyBatis-Plus `@TableLogic`
-- Partial index for active rows: `CREATE INDEX ON xxx (key) WHERE deleted_at IS NULL`
-
-## Anti-Patterns
-
-- `QueryWrapper` with string column names — use `LambdaQueryWrapper`
-- `${param}` in mapper SQL — use `#{param}` (parameterized)
-- Direct `BaseMapper` calls in Controller — go through Service
-- In-memory pagination — use `Page<>` object
-- Physical delete — use `@TableLogic(value = "", delval = "now()")` soft delete
-- Integer-based soft delete (`deleted 0/1`) — use `deleted_at TIMESTAMPTZ`
-- `new LambdaQueryWrapper<>` outside ServiceImpl — use `lambdaQuery()`
-- `@TableName("t_xxx")` prefix — use plain snake_case (`@TableName("xxx")`)
-- `Entity` suffix — use `DO` suffix for persistence objects
+- `@TableName("xxx")` — plain snake_case, no `t_` prefix
+- `@TableId(type = IdType.ASSIGN_ID)` — snowflake ID
+- `@TableLogic(value = "", delval = "now()")` — timestamp soft delete
+- `@TableField(fill = FieldFill.INSERT/UPDATE)` — auto-fill audit fields
+- `@Version` — optimistic lock
+- `DO` suffix — never `Entity` suffix
+- `#{param}` in XML — never `${param}` (SQL injection)
+- `lambdaQuery()` inside ServiceImpl — never `new LambdaQueryWrapper<>()`

@@ -3,7 +3,6 @@ name: spring-boot-jackson-config
 description: "Jackson ObjectMapper configuration for Spring Boot 3.x: JavaTimeModule, JsonInclude, date serialization, custom serializers. Use when configuring JSON serialization/deserialization in infrastructure layer."
 version: "1.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Jackson Configuration
@@ -217,10 +216,6 @@ public ObjectMapper objectMapper() {
 
 ## Related Skills
 
-- `spring-boot-rest-client` — RestClient uses ObjectMapper for JSON serialization
-- `ddd-cola` — JacksonConfig belongs in infrastructure/config/ for COLA projects
-- `spring-boot-rest-api-standards` — Result<T> serialization uses Jackson
-
-## Keywords
-
-Jackson, ObjectMapper, JavaTimeModule, JsonInclude, serialization, deserialization, LocalDateTime, ISO-8601, custom serializer
+- `spring-boot-rest-client`
+- `ddd-cola`
+- `spring-boot-rest-api-standards`

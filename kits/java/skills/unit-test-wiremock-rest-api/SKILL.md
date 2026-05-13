@@ -3,7 +3,6 @@ name: unit-test-wiremock-rest-api
 description: "Unit testing external REST APIs with WireMock: response stubs, request verification, failure simulation, HTTP client behavior validation."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing REST APIs with WireMock
@@ -135,10 +134,8 @@ See `references/advanced-examples.md` for error scenarios, body verification, ti
 
 ## References
 
-- [WireMock Spring Boot Integration](https://wiremock.org/docs/spring-boot/)
-- [WireMock Jetty 12](https://wiremock.org/docs/jetty-12/)
 - `references/advanced-examples.md` — Error scenarios, body verification, timeouts
 
 ## Related Skills
 
-- `spring-boot-rest-client` — RestClient and RestTemplate patterns (Spring Boot 3.5 HTTP clients)
+- `spring-boot-rest-client`

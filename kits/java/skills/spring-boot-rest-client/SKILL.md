@@ -3,7 +3,6 @@ name: spring-boot-rest-client
 description: "Spring Boot HTTP client: RestClient configuration, YAML timeout/factory properties, error handling, OAuth2, @RestClientTest, MockServerRestClientCustomizer, OkHttp3/RestTemplate migration. Use when making external HTTP calls."
 version: "2.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot REST Client Patterns
@@ -329,11 +328,7 @@ public class ClientConfig {
 
 ## Related Skills
 
-- `ddd-cola` — COLA architecture places HTTP clients in `infrastructure/external/`
-- `spring-boot-exception-handling` — `onStatus()` error handling maps to `BusinessException`
-- `spring-boot-resilience4j` — retry, circuit breaker, rate limiter for HTTP calls
-- `spring-boot-transaction-management` — NOT place HTTP calls inside `@Transactional`
-
-## Keywords
-
-RestClient, RestTemplate, HTTP client, @RestClientTest, MockServerRestClientCustomizer, MockRestServiceServer, timeout, onStatus, UriBuilder, connection pooling, Apache HttpClient, OkHttp, declarative client, HttpServiceProxyFactory, spring.http.client.factory
+- `ddd-cola`
+- `spring-boot-exception-handling`
+- `spring-boot-resilience4j`
+- `spring-boot-transaction-management`

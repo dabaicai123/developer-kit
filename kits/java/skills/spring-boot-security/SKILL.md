@@ -3,7 +3,6 @@ name: spring-boot-security
 description: "Spring Security: SecurityFilterChain, @EnableMethodSecurity, CSRF, CORS, security headers, password encoding, secrets management. Use when configuring authentication, authorization, or security filters in Java Spring Boot services."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Security (Spring Boot 3.5.x)
@@ -207,17 +206,8 @@ OWASP Dependency-Check Maven plugin or Snyk CLI in CI pipelines. Fail builds on 
 
 ## Related Skills
 
-- `spring-boot-security-jwt` — JWT token implementation
-- `spring-boot-validation` — Input validation with Jakarta annotations
-- `spring-boot-exception-handling` — Global exception handler, Result.fail()
-- `spring-boot-resilience4j` — Rate limiter pattern
-- `unit-test-security-authorization` — Security testing patterns
-
-## External Resources
-
-- [Spring Security Reference 6.5](https://docs.spring.io/spring-security/reference/6.5/)
-- [Spring Boot Security How-To](https://docs.spring.io/spring-boot/how-to/security.html)
-
-## Keywords
-
-Spring Security, SecurityFilterChain, @EnableMethodSecurity, @PreAuthorize, CSRF, CORS, BCrypt, Argon2, security headers, password encoding, secrets management, CVE scanning, Spring Boot 3.5
+- `spring-boot-security-jwt`
+- `spring-boot-validation`
+- `spring-boot-exception-handling`
+- `spring-boot-resilience4j`
+- `unit-test-security-authorization`

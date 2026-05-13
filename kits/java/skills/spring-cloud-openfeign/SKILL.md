@@ -1,9 +1,8 @@
 ---
 name: spring-cloud-openfeign
 description: "Spring Cloud OpenFeign: Feign client definition, timeout/retry, error decoder, Resilience4j fallback, interceptors, and connection pool tuning. Use when making service-to-service HTTP calls in microservices."
-version: "1.0.0"
+version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Cloud OpenFeign
@@ -35,29 +34,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-loadbalancer</artifactId>
 </dependency>
-
-<!-- Resilience4j for circuit breaker fallback (optional but recommended) -->
-<dependency>
-    <groupId>io.github.resilience4j</groupId>
-    <artifactId>resilience4j-spring-boot3</artifactId>
-</dependency>
 ```
 
-BOM for Spring Cloud + OpenFeign version alignment:
+BOM: see `spring-cloud-alibaba` skill for Spring Cloud Alibaba BOM declaration.
 
-```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-            <version>2025.0.1.0</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
-```
+Resilience4j for circuit breaker fallback: see `spring-boot-resilience4j` skill.
 
 Enable Feign clients on the main application class:
 
@@ -169,12 +150,9 @@ public class FeignErrorDecoder implements ErrorDecoder {
         try {
             String body = Util.toString(response.body().asReader(StandardCharsets.UTF_8));
             Result<Void> result = objectMapper.readValue(body, new TypeReference<>() {});
-
             if (result != null && result.getCode() != 200) {
                 return switch (status) {
                     case 400 -> new ValidationException(result.getMsg());
-                    case 401 -> new UnauthorizedException(result.getMsg());
-                    case 403 -> new ForbiddenException(result.getMsg());
                     case 404 -> new NotFoundException("Remote resource", methodKey);
                     case 503 -> new ServiceUnavailableException("Remote: " + methodKey);
                     default  -> new BusinessException(status * 1000, result.getMsg());
@@ -208,10 +186,7 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
             public Result<UserDTO> createUser(CreateUserCmd request) {
                 throw new ServiceUnavailableException("user-service unavailable");
             }
-            @Override
-            public Result<PageResult<UserDTO>> searchUsers(String keyword, int page, int pageSize) {
-                return Result.fail(503, "search temporarily disabled");
-            }
+            // ... implement all interface methods
         };
     }
 }
@@ -314,10 +289,4 @@ public interface StorageClient {
 
 ## Related Skills
 
-- `spring-boot-resilience4j` — circuit breaker, retry, and fallback patterns for Feign clients
-- `spring-cloud-alibaba` — Nacos service discovery for Feign load balancing, Seata distributed transactions
-- `spring-cloud-gateway` — API gateway routing before Feign calls reach downstream services
-- `spring-boot-exception-handling` — global handler catches BusinessException from ErrorDecoder
-- `spring-boot-transaction-management` — Outbox pattern and Saga choreography with inter-service Feign calls
-- `spring-boot-async-processing` — async alternatives to synchronous Feign calls
-- `ddd-event-driven` — event-driven communication as alternative to synchronous Feign for cross-service data
+`spring-boot-resilience4j`, `spring-cloud-alibaba`, `spring-cloud-gateway`, `spring-boot-exception-handling`, `spring-boot-transaction-management`, `spring-boot-async-processing`

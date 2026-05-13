@@ -51,5 +51,4 @@ For full COLA/DDD architecture details, use the `ddd-cola` skill.
 - Controller → Mapper (bypasses Service layer)
 - Service → Controller (upward dependency)
 - Domain Entity → Service (upward dependency in DDD)
-- Field injection (`@Autowired` on fields) — use constructor injection
 - `Entity` suffix for persistence objects — use `DO` suffix

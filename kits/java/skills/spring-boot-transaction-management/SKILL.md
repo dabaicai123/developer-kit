@@ -3,7 +3,6 @@ name: spring-boot-transaction-management
 description: "Spring Boot transaction management with MyBatis-Plus: @Transactional placement, rollbackFor, propagation, self-invocation, afterCommit messaging, and distributed consistency. Use when implementing write operations or reviewing transaction boundaries."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Transaction Management

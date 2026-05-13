@@ -1,9 +1,8 @@
 ---
 name: spring-cloud-alibaba
 description: "Spring Cloud Alibaba with Nacos, Sentinel, RocketMQ, and Seata. Use for service discovery, flow control, or Alibaba Cloud integration in microservices."
-version: "1.1.0"
+version: "1.2.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Cloud Alibaba Development Guide
@@ -212,63 +211,34 @@ public class UserEventListener implements RocketMQListener<User> {
 
 ### 4. Seata (Distributed Transactions)
 
-NOT include Seata unless strong-consistency distributed transactions are confirmed necessary. Prefer local transactions + event-driven eventual consistency.
+NOT include Seata unless strong-consistency distributed transactions are confirmed necessary. Heavy business intrusion (proxied data sources, undo_log tables, global locks). Prefer local transactions + event-driven eventual consistency.
 
-**Dependency** (only when strong consistency is required):
-
-```xml
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
-</dependency>
-```
-
-## Common Dependencies
+## BOM and Dependencies
 
 ```xml
-<!-- BOM (Spring Boot 3.5.x / Spring Cloud 2025.0.x) -->
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-            <version>2025.0.0.0</version>
+            <version>2025.0.1.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
     </dependencies>
 </dependencyManagement>
-
-<!-- Nacos Discovery -->
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-</dependency>
-
-<!-- Nacos Config -->
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-</dependency>
-
-<!-- Sentinel -->
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
-</dependency>
-
-<!-- RocketMQ -->
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-rocketmq</artifactId>
-</dependency>
-
-<!-- OpenFeign (deprecated in Spring Cloud 2025.x; prefer RestClient) -->
-<dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-openfeign</artifactId>
-</dependency>
 ```
+
+Component starters (add only what you need):
+
+| Component | artifactId |
+|-----------|-----------|
+| Nacos Discovery | `spring-cloud-starter-alibaba-nacos-discovery` |
+| Nacos Config | `spring-cloud-starter-alibaba-nacos-config` |
+| Sentinel | `spring-cloud-starter-alibaba-sentinel` |
+| RocketMQ | `spring-cloud-starter-alibaba-rocketmq` |
+| Seata | `spring-cloud-starter-alibaba-seata` |
+| OpenFeign | `spring-cloud-starter-openfeign` (deprecated; prefer RestClient) |
 
 ## Constraints
 
@@ -278,18 +248,8 @@ NOT include Seata unless strong-consistency distributed transactions are confirm
 - NOT use Dubbo for inter-service calls — requires separate RPC ports and binary protocol, incompatible with REST ecosystem; use OpenFeign or RestClient
 - NOT store Sentinel rules locally — lost on restart; persist in Nacos datasource
 - NOT share Nacos namespace across environments — always configure separate namespaces (dev, test, prod) to prevent config conflicts
-- NOT mismatch BOM versions — Spring Cloud Alibaba version must align with Spring Boot and Spring Cloud versions (2025.0.0.0 = Boot 3.5.x + Cloud 2025.0.x)
-
-## Keywords
-
-`spring-cloud-alibaba`, `nacos`, `sentinel`, `rocketmq`, `seata`, `openfeign`, `restclient`, `dubbo`, `service-discovery`, `configuration-management`, `flow-control`, `circuit-breaker`, `rate-limiting`, `distributed-transaction`, `eventual-consistency`, `microservices`
+- NOT mismatch BOM versions — Spring Cloud Alibaba version must align with Spring Boot and Spring Cloud versions (2025.0.1.0 = Boot 3.5.x + Cloud 2025.0.x)
 
 ## Related Skills
 
-- `spring-boot-event-driven-patterns` — Event-driven patterns for eventual consistency
-- `spring-cloud-gateway` — API gateway routing and filtering
-- `spring-cloud-openfeign` — Declarative HTTP client (deprecated; prefer RestClient)
-- `spring-boot-rest-client` — RestClient for HTTP calls (recommended over OpenFeign)
-- `spring-boot-resilience4j` — Circuit breaker patterns (alternative to Sentinel)
-- `spring-boot-actuator` — Monitoring, health checks, observability
-- `ddd-cola` — DDD architecture and COLA framework for microservice design
+`spring-boot-event-driven-patterns`, `spring-cloud-gateway`, `spring-cloud-openfeign`, `spring-boot-rest-client`, `spring-boot-resilience4j`, `spring-boot-actuator`, `ddd-cola`

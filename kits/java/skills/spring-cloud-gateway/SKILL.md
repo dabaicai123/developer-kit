@@ -1,9 +1,8 @@
 ---
 name: spring-cloud-gateway
 description: "Spring Cloud Gateway: routing, filters, rate limiting, and load balancing. Use when building API gateways for microservices."
-version: "1.0.0"
+version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Cloud Gateway
@@ -158,5 +157,4 @@ public class RateLimiterConfig {
 
 ## Related Skills
 
-- `spring-boot-resilience4j` — circuit breaker integration for gateway routes
-- `spring-cloud-alibaba` — Nacos discovery integration for gateway routing
+`spring-boot-resilience4j`, `spring-cloud-alibaba`

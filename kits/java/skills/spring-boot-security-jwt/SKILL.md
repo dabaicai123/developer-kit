@@ -3,7 +3,6 @@ name: spring-boot-security-jwt
 description: "JWT auth with JJWT 0.13.0 and Spring Security 6.x. Bearer/cookie authentication, refresh token rotation, RBAC/permission-based access control."
 version: "1.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot JWT Security
@@ -147,28 +146,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 ### SecurityFilterChain
 
-```java
-@Configuration
-@EnableMethodSecurity
-@RequiredArgsConstructor
-public class SecurityConfig {
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
+For base SecurityFilterChain config (CSRF, session, CORS), see `spring-boot-security` skill. JWT-specific registration:
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
-    }
-}
+```java
+.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 ```
 
 ### Auth Endpoints
@@ -209,6 +190,6 @@ public class AuthController {
 
 ## Related Skills
 
-- `spring-boot-security` — Spring Security base config, CORS, CSRF
-- `unit-test-security-authorization` — testing @PreAuthorize, RBAC
-- `spring-boot-actuator` — securing management endpoints
+- `spring-boot-security`
+- `unit-test-security-authorization`
+- `spring-boot-actuator`

@@ -3,7 +3,6 @@ name: spring-boot-load-testing
 description: "Spring Boot API load testing with k6: REST endpoint benchmarks, MyBatis-Plus pagination queries, JWT auth scenarios, HikariCP pool validation, and JetCache hit/miss verification. Use when running load tests, stress tests, or performance benchmarks against Spring Boot services."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Load Testing with k6
@@ -121,10 +120,6 @@ export default function (data) {
 }
 ```
 
-> For token refresh scenarios, add a separate test stage that re-authenticates and measures token endpoint throughput.
->
-> ❌ **Anti-pattern: no token refresh for long soak tests** — JWT tokens expire (typically 15-30 min). In soak tests lasting 1-4 hours, all VUs will fail after token expiry. Fix: implement periodic re-authentication in the test script or use a longer-lived test token.
-
 ### 4. Test paginated queries under load
 
 MyBatis-Plus pagination is the most common high-traffic pattern. Test with varied page parameters:
@@ -155,8 +150,6 @@ export default function () {
   sleep(Math.random() * 2);  // ✅ Random think time 0-2s — realistic user behavior
 }
 ```
-
-> ❌ **Anti-pattern: always using pageNum=1 with same pageSize** — only tests cache hits, not DB query performance under varied conditions. Randomize `pageNum` and `pageSize` to simulate real traffic patterns.
 
 ### 5. Verify HikariCP connection pool under load
 
@@ -189,8 +182,6 @@ Key pool metrics to monitor during load tests:
 
 > For HikariCP sizing formula: `connections = (core_count * 2) + effective_spindle_count`. See `mybatis-plus-patterns` for query optimization that reduces pool pressure.
 >
-> ❌ **Anti-pattern: load testing without monitoring HikariCP pool metrics** — connection exhaustion is the most common failure mode under load. Without monitoring active/pending connections, you cannot diagnose pool sizing issues or detect connection leaks.
->
 > **Spring Boot 3.5.x with virtual threads**: When `spring.threads.virtual.enabled=true`, virtual threads can scale to thousands of concurrent requests. HikariCP pool sizing may need significant increase — the traditional formula may underestimate. Monitor `hikaricp.connections.pending` closely and adjust `maximum-pool-size` accordingly.
 
 ### 6. Verify cache behavior under load
@@ -216,8 +207,6 @@ export default function () {
   });
 }
 ```
-
-> ❌ **Anti-pattern: only testing cache-friendly endpoints** — always hitting `/v1/users/1` only proves cache works for that one record. Mix cache misses (random or new IDs) with cache hits to validate realistic cache hit ratio and eviction behavior.
 
 ### 7. Generate performance report
 
@@ -260,26 +249,7 @@ In CI/CD, run k6 with `--summary-export=summary.json` and check thresholds via j
 | Consistent slow responses regardless of VUs | Single slow query or external API call | Profile with Actuator; check `@Transactional` scope wrapping non-DB work |
 | Inconsistent results across runs | Cache warming, GC pauses, cold starts | Add warm-up stage; run 3 times and average; use dedicated test env |
 
-## Best Practices
-
-- ✅ **Always randomize parameters** — varied `pageNum`, `pageSize`, `userId` to avoid cache-only testing
-- ✅ **Start with smoke test** — verify script works with 1-5 VUs before scaling
-- ✅ **Use `setup()` for JWT auth** — obtain token once, share across VUs
-- ✅ **Check `Result<T>` wrapper** — validate `code === 200` not just HTTP status
-- ✅ **Monitor HikariCP active/pending connections, cache hit rates, and GC pause counts** via `/actuator/metrics/` during tests
-- ✅ **Never load test production** — use staging/perf environment with production-like data volume
-- ✅ **Add warm-up stage** — first 1-2 min at low VUs to warm caches and JIT compilation
-
-## Constraints and Warnings
-
-- **k6 is the primary tool** — this skill focuses on k6 patterns. For JMeter/Gatling, see their official documentation
-- **Result<T> parsing** — Spring Boot's unified response wrapper requires checking `code` field, not just HTTP status
-- **JWT token scope** — `setup()` token is shared across all VUs; for per-VU auth, use `__ENV` variables or a token pool
-- **MyBatis-Plus pagination** — `Page<>` object generates `LIMIT/OFFSET` SQL; large offsets degrade performance — test with realistic page ranges
-- **Actuator must be enabled** — pool and cache metrics require `spring-boot-starter-actuator` and `management.endpoints.web.exposure.include` configuration (see Prerequisites)
-- **Think time matters** — without `sleep()`, tests generate unrealistic burst traffic; use 0.5-2s think time
-
-### Anti-patterns
+## Anti-patterns
 
 - ❌ **Only checking HTTP status, not `Result<T>.code`** — Spring Boot APIs wrap business errors in HTTP 200. A `code=500` inside a 200 response is a failure your test must catch.
 - ❌ **Hardcoded credentials in test scripts** — use `__ENV` variables (`k6 run -e TEST_USERNAME=... -e TEST_PASSWORD=...`). Hardcoded admin/admin123 credentials leak into CI logs and can't rotate.
@@ -291,16 +261,12 @@ In CI/CD, run k6 with `--summary-export=summary.json` and check thresholds via j
 
 ## References
 
-- k6 documentation: https://grafana.com/docs/k6/latest/
-- k6 thresholds: https://grafana.com/docs/k6/latest/use-cases/thresholds/
-- Spring Boot Actuator metrics: https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.metrics
-- HikariCP metrics: https://github.com/brettwooldridge/HikariCP/wiki/Micrometer-Metrics
-- [references/k6-test-templates.md](references/k6-test-templates.md) - Ready-to-use k6 test script templates for Spring Boot endpoints
+- [references/k6-test-templates.md](references/k6-test-templates.md) — Ready-to-use k6 test script templates for Spring Boot endpoints
 
 ## Related Skills
 
-- `spring-boot-actuator` — Actuator endpoints for monitoring during load tests
-- `mybatis-plus-patterns` — Query optimization to reduce DB pressure under load
-- `spring-boot-jetcache` — Cache patterns that reduce load on database
-- `spring-boot-security-jwt` — JWT authentication setup for authenticated test scenarios
-- `spring-boot-transaction-management` — Transaction scope optimization to reduce connection hold time
+- `spring-boot-actuator`
+- `mybatis-plus-patterns`
+- `spring-boot-jetcache`
+- `spring-boot-security-jwt`
+- `spring-boot-transaction-management`

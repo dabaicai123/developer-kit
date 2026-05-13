@@ -1,9 +1,8 @@
 ---
 name: spring-boot-rest-api-standards
 description: "REST API design standards for COLA/DDD projects: adapter layer controllers, Result<T> unified response, PageResult pagination, Cmd/Qry/VO data contracts, exception handling. Use when designing or reviewing REST interfaces, DTO models, pagination, and error responses in DDD/COLA projects."
-version: "1.0.0"
+version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot REST API Standards (COLA/DDD Mode)
@@ -95,7 +94,3 @@ Return `Result<PageResult<T>>` for paginated endpoints. `PageResult` does not de
 - `spring-boot-exception-handling` — BusinessException hierarchy, error codes, GlobalExceptionHandler
 - `spring-boot-validation` — @Valid, @NotBlank, MethodArgumentNotValidException
 - `spring-boot-openapi-documentation` — Swagger/OpenAPI docs for REST endpoints
-
-## Keywords
-
-REST API, Result, PageResult, Cmd, Qry, VO, DTO, adapter layer, COLA, DDD, pagination, error handling, BusinessException, validation

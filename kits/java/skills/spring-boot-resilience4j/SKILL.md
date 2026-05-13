@@ -1,9 +1,8 @@
 ---
 name: spring-boot-resilience4j
 description: "Resilience4j fault tolerance: circuit breaker, retry, rate limiter, bulkhead, time limiter, and fallback. Use when adding circuit breakers, retry logic, rate limiting, or protecting services from cascading failures."
-version: "1.1.0"
+version: "1.2.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Resilience4j Patterns
@@ -38,14 +37,6 @@ Add to `pom.xml`:
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
-```
-
-For Gradle:
-
-```gradle
-implementation "io.github.resilience4j:resilience4j-spring-boot3:2.4.0"
-implementation "org.springframework.boot:spring-boot-starter-aop"
-implementation "org.springframework.boot:spring-boot-starter-actuator"
 ```
 
 ### 2. Aspect Order Configuration (Spring Boot 3)
@@ -154,24 +145,9 @@ resilience4j:
 ### 5. Rate Limiter Pattern
 
 ```java
-@Service
-public class NotificationService {
-    private final EmailClient emailClient;
-
-    public NotificationService(EmailClient emailClient) {
-        this.emailClient = emailClient;
-    }
-
-    @RateLimiter(name = "notificationService",
-        fallbackMethod = "rateLimitFallback")
-    public void sendEmail(EmailRequest request) {
-        emailClient.send(request);
-    }
-
-    private void rateLimitFallback(EmailRequest request, Exception ex) {
-        throw new RateLimitExceededException(
-            "Too many requests. Please try again later.");
-    }
+@RateLimiter(name = "notificationService", fallbackMethod = "rateLimitFallback")
+public void sendEmail(EmailRequest request) {
+    emailClient.send(request);
 }
 ```
 
@@ -180,7 +156,6 @@ resilience4j:
   ratelimiter:
     configs:
       default:
-        registerHealthIndicator: true
         limitForPeriod: 10
         limitRefreshPeriod: 1s
         timeoutDuration: 500ms
@@ -192,35 +167,20 @@ resilience4j:
 
 ### 6. Bulkhead Pattern
 
-Use `type = SEMAPHORE` for synchronous methods:
+| Type | Use case | Return type |
+|------|----------|-------------|
+| `SEMAPHORE` | Synchronous methods | Direct return |
+| `THREADPOOL` | Async methods | `CompletableFuture<T>` |
 
 ```java
-@Service
-public class ReportService {
-    private final ReportGenerator reportGenerator;
-
-    public ReportService(ReportGenerator reportGenerator) {
-        this.reportGenerator = reportGenerator;
-    }
-
-    @Bulkhead(name = "reportService", type = Bulkhead.Type.SEMAPHORE)
-    public Report generateReport(ReportRequest request) {
-        return reportGenerator.generate(request);
-    }
+@Bulkhead(name = "reportService", type = Bulkhead.Type.SEMAPHORE)
+public Report generateReport(ReportRequest request) {
+    return reportGenerator.generate(request);
 }
-```
 
-Use `type = THREADPOOL` for async/CompletableFuture methods:
-
-```java
-@Service
-public class AnalyticsService {
-    @Bulkhead(name = "analyticsService", type = Bulkhead.Type.THREADPOOL)
-    public CompletableFuture<AnalyticsResult> runAnalytics(
-            AnalyticsRequest request) {
-        return CompletableFuture.supplyAsync(() ->
-            analyticsEngine.analyze(request));
-    }
+@Bulkhead(name = "analyticsService", type = Bulkhead.Type.THREADPOOL)
+public CompletableFuture<AnalyticsResult> runAnalytics(AnalyticsRequest request) {
+    return CompletableFuture.supplyAsync(() -> analyticsEngine.analyze(request));
 }
 ```
 
@@ -231,11 +191,6 @@ resilience4j:
       default:
         maxConcurrentCalls: 10
         maxWaitDuration: 100ms
-    instances:
-      reportService:
-        baseConfig: default
-        maxConcurrentCalls: 5
-
   thread-pool-bulkhead:
     instances:
       analyticsService:
@@ -244,22 +199,12 @@ resilience4j:
 
 ### 7. Time Limiter Pattern
 
-Apply `@TimeLimiter` to async methods to enforce timeout boundaries:
+Apply `@TimeLimiter` to async methods returning `CompletableFuture`:
 
 ```java
-@Service
-public class SearchService {
-    @TimeLimiter(name = "searchService", fallbackMethod = "searchFallback")
-    public CompletableFuture<SearchResults> search(SearchQuery query) {
-        return CompletableFuture.supplyAsync(() ->
-            searchEngine.executeSearch(query));
-    }
-
-    private CompletableFuture<SearchResults> searchFallback(
-            SearchQuery query, Exception ex) {
-        return CompletableFuture.completedFuture(
-            SearchResults.empty("Search timed out"));
-    }
+@TimeLimiter(name = "searchService", fallbackMethod = "searchFallback")
+public CompletableFuture<SearchResults> search(SearchQuery query) {
+    return CompletableFuture.supplyAsync(() -> searchEngine.executeSearch(query));
 }
 ```
 
@@ -270,10 +215,6 @@ resilience4j:
       default:
         timeoutDuration: 2s
         cancelRunningFuture: true
-    instances:
-      searchService:
-        baseConfig: default
-        timeoutDuration: 3s
 ```
 
 ### 8. Combining Multiple Patterns
@@ -295,54 +236,9 @@ public class OrderService {
 
 Execution order depends on `aspectOrder` config (see Section 2). All patterns should reference the same named instance for consistency.
 
-### 9. Exception Handling and Monitoring
+### 9. Monitoring
 
-```java
-@RestControllerAdvice
-public class ResilienceExceptionHandler {
-
-    @ExceptionHandler(CallNotPermittedException.class)
-    public Result<Void> handleCircuitOpen(CallNotPermittedException ex) {
-        return Result.fail(503, "Service currently unavailable");
-    }
-
-    @ExceptionHandler(RequestNotPermitted.class)
-    public Result<Void> handleRateLimited(RequestNotPermitted ex) {
-        return Result.fail(429, "Rate limit exceeded");
-    }
-
-    @ExceptionHandler(BulkheadFullException.class)
-    public Result<Void> handleBulkheadFull(BulkheadFullException ex) {
-        return Result.fail(503, "Service at capacity");
-    }
-}
-```
-
-Enable Actuator endpoints:
-
-```yaml
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,metrics,circuitbreakers,retries,ratelimiters
-  endpoint:
-    health:
-      show-details: always
-  health:
-    circuitbreakers:
-      enabled: true
-    ratelimiters:
-      enabled: true
-```
-
-- `GET /actuator/health` — overall health including resilience patterns
-- `GET /actuator/circuitbreakers` — circuit breaker states
-- `GET /actuator/metrics` — custom resilience metrics
-
-### Testing & Verification
-
-Verify via Actuator: `/actuator/circuitbreakers` (state transitions), `/actuator/ratelimiters` (limited counts), `/actuator/metrics` (retry counts). See `references/references.md` for testing patterns.
+Verify via Actuator: `/actuator/circuitbreakers` (state transitions), `/actuator/ratelimiters` (limited counts), `/actuator/metrics` (retry counts). See `spring-boot-actuator` skill for endpoint configuration.
 
 ## Constraints and Warnings
 
@@ -361,6 +257,4 @@ Verify via Actuator: `/actuator/circuitbreakers` (state transitions), `/actuator
 
 ## Related Skills
 
-- `spring-boot-exception-handling` — CallNotPermittedException, RequestNotPermitted exception handling
-- `spring-boot-actuator` — Resilience4j health indicators and metrics endpoints
-- `spring-cloud-openfeign` — Feign client resilience integration
+`spring-boot-exception-handling`, `spring-boot-actuator`, `spring-cloud-openfeign`

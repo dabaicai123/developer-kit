@@ -1,9 +1,8 @@
 ---
 name: spring-boot-jetcache
 description: "JetCache two-level caching (Caffeine LOCAL + Redisson REMOTE) and Redisson distributed lock with @Cached/@CacheInvalidate, QuickConfig, RLock, and syncLocal. Use when adding declarative caching, configuring distributed locks, or setting up two-level cache in Spring Boot."
-version: "1.0.0"
+version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # JetCache + Redisson Two-Level Cache and Distributed Services
@@ -32,11 +31,7 @@ redisson-spring-boot-starter
 
 ## Related Skills
 
-- Transaction management → `spring-boot-transaction-management`
-- Async processing → `spring-boot-async-processing`
-- Resilience patterns → `spring-boot-resilience4j`
-- Monitoring & metrics → `spring-boot-actuator`
-- MyBatis-Plus data access → `mybatis-plus-patterns`
+`spring-boot-transaction-management`, `spring-boot-async-processing`, `spring-boot-resilience4j`, `spring-boot-actuator`, `mybatis-plus-patterns`
 
 ## Dependencies
 
@@ -172,7 +167,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implements OrderService {
 
     private Cache<Long, OrderDO> orderCache;
-
     private final CacheManager cacheManager;
 
     public OrderServiceImpl(CacheManager cacheManager) {
@@ -191,21 +185,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         orderCache = cacheManager.getOrCreateCache(qc);
     }
 
-    @Override
     public OrderDO getOrder(Long orderId) {
         return orderCache.computeIfAbsent(orderId, id -> getById(id));
     }
 
-    @Override
     public void updateOrder(OrderDO order) {
         updateById(order);
         orderCache.put(order.getId(), order);
-    }
-
-    @Override
-    public void removeOrder(Long orderId) {
-        removeById(orderId);
-        orderCache.remove(orderId);
     }
 }
 ```
@@ -237,8 +223,6 @@ QuickConfig qc = QuickConfig.newBuilder("user:")
 - @CacheInvalidate/@CacheUpdate area/name not matching @Cached — must exactly match
 - Using @CreateCache — deprecated in 2.7+, use QuickConfig instead
 - BOTH without broadcastChannel — syncLocal won't work
-- Self-invocation bypassing proxy — inject service or call through interface
-- Using @Autowired field injection — use constructor injection instead (private final + @RequiredArgsConstructor)
 
 ## References
 
@@ -248,7 +232,3 @@ QuickConfig qc = QuickConfig.newBuilder("user:")
 - [`references/jetcache-api-reference.md`](references/jetcache-api-reference.md): Cache API, QuickConfig builder, distributed lock API
 - [`references/redis-utils.md`](references/redis-utils.md): RedisUtils utility class (String/Hash/List/Set/ZSet/expiry)
 - [`references/distributed-lock-utils.md`](references/distributed-lock-utils.md): DistributedLockUtils utility class (reentrant lock, read-write lock, tryLock)
-
-## Keywords
-
-jetcache, caffeine, redisson, @Cached, @CacheInvalidate, @CacheUpdate, CacheType.BOTH, QuickConfig, syncLocal, @CacheRefresh, @CachePenetrationProtect, RLock, RReadWriteLock, RRateLimiter, RTopic, RedissonClient, RedisTemplate, RedisUtils, DistributedLockUtils

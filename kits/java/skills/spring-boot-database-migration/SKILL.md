@@ -3,7 +3,6 @@ name: spring-boot-database-migration
 description: "Production-safe PostgreSQL schema changesets for Spring Boot: numbered SQL files reviewed and executed by DBA. No application-side auto-migration (no Flyway/Liquibase). Use when defining schema changes that must be applied manually under DBA control."
 version: "2.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Database Migration
@@ -200,10 +199,6 @@ When the change touches a table > 1M rows or is on a write-heavy table:
 
 ## Related Skills
 
-- `postgresql-table-design` — PostgreSQL data types, constraints, indexing for table definitions
-- `mybatis-plus-patterns` — MyBatis-Plus ORM patterns once tables exist
-- `ddd-cola` — where the start module sits in the COLA module layout
-
-## Keywords
-
-database migration, schema changeset, sql file, ddl, manual migration, dba review, no flyway, no liquibase, postgresql, versioning, baseline
+- `postgresql-table-design`
+- `mybatis-plus-patterns`
+- `ddd-cola`

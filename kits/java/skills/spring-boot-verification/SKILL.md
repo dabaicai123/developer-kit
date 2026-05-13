@@ -3,7 +3,6 @@ name: spring-boot-verification
 description: "Verification loop for Spring Boot projects: build, static analysis, tests with coverage, security scans, and diff review before release or PR."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Verification Loop
@@ -134,6 +133,6 @@ Issues to Fix:
 
 ## Related Skills
 
-- `spring-boot-tdd` — TDD workflow with JUnit 5, Mockito 5, Testcontainers
-- `spring-boot-actuator` — production health probes and metrics
-- `spring-boot-logging` — SLF4J structured logging patterns
+- `spring-boot-tdd`
+- `spring-boot-actuator`
+- `spring-boot-logging`

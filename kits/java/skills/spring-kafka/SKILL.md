@@ -1,9 +1,8 @@
 ---
 name: spring-kafka
 description: "Spring Kafka: producer/consumer config, serialization, ErrorHandlingDeserializer, non-blocking retry (@RetryableTopic), DLQ, and manual ack. Use when configuring Kafka clients or handling Kafka errors."
-version: "1.1.0"
+version: "1.2.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Kafka
@@ -165,6 +164,4 @@ NOT ack before business logic completes — the message is permanently committed
 
 ## Related Skills
 
-- `spring-boot-event-driven-patterns` — @TransactionalEventListener, application event patterns
-- `ddd-event-driven` — domain event design, event stores, aggregate boundaries
-- `spring-boot-actuator` — Kafka consumer health indicators and metrics
+`spring-boot-event-driven-patterns`, `ddd-event-driven`, `spring-boot-actuator`

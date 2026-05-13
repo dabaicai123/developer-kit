@@ -3,7 +3,6 @@ name: spring-boot-tdd
 description: "TDD workflow for Spring Boot using JUnit 5, Mockito 5, MockMvc, Testcontainers, and JaCoCo. Use when adding features, fixing bugs, or refactoring."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot TDD Workflow

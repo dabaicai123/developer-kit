@@ -3,7 +3,6 @@ name: unit-test-security-authorization
 description: "Unit testing Spring Security authorization: @PreAuthorize, @Secured, role-based access control. Use when testing security configurations and access control logic."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Unit Testing Security and Authorization
@@ -107,5 +106,5 @@ See [references/basic-testing.md](references/basic-testing.md) for more patterns
 
 ## Related Skills
 
-- `spring-boot-security` — Spring Security configuration, CORS, CSRF, method security
-- `spring-boot-security-jwt` — JWT authentication, SecurityFilterChain, token management
+- `spring-boot-security`
+- `spring-boot-security-jwt`

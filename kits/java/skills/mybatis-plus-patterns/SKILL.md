@@ -3,7 +3,6 @@ name: mybatis-plus-patterns
 description: "MyBatis-Plus mapper, data object, service, LambdaQueryWrapper, pagination, soft delete, field fill, optimistic lock, and batch patterns. Use when implementing Java Spring Boot persistence with MyBatis-Plus."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # MyBatis-Plus Patterns

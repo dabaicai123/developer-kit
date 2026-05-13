@@ -3,7 +3,6 @@ name: ddd-cola
 description: "COLA DDD Architecture: multi-module project structure, common/client/adapter/app/domain/infrastructure/start modules, Gateway pattern, CQRS, Feign API contracts. Use when a Java Spring Cloud service already uses COLA/DDD or when the task explicitly mentions COLA, DDD, domain/app/infrastructure/client layers, CmdExe, QryExe, Gateway, or ServiceI."
 version: "2.3.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 parameters:
   - name: service_name
     description: "Service name used as module prefix, for example demo-client and demo-adapter"

@@ -3,7 +3,6 @@ name: unit-test-techniques
 description: "General Java/JUnit 5 testing techniques: parameterized testing, boundary value analysis, utility method testing. Use when writing parameterized tests, boundary condition tests, and utility/static method tests."
 version: "1.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Grep
 ---
 
 # Unit Test Techniques
@@ -273,13 +272,10 @@ class DateUtilsTest {
 
 ## References
 
-- [JUnit 5 Parameterized Tests](https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests)
-- [Boundary Value Analysis](https://en.wikipedia.org/wiki/Boundary-value_analysis)
-- [AssertJ Floating Point](https://assertj.github.io/assertj-core-features-highlight.html#assertions-on-numbers)
 - [references/parameterized-testing.md](references/parameterized-testing.md) — full parameterized testing examples
 - [references/boundary-values.md](references/boundary-values.md) — boundary values and edge cases reference
 - [references/concurrent-testing.md](references/concurrent-testing.md) — concurrent safety testing patterns
 
 ## Related Skills
 
-- `spring-boot-tdd` — Spring Boot-specific TDD workflow
+- `spring-boot-tdd`

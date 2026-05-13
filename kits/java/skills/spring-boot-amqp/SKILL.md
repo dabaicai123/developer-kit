@@ -1,9 +1,8 @@
 ---
 name: spring-boot-amqp
 description: "Spring AMQP / RabbitMQ for Spring Boot 3.x: Jackson message converter, RabbitTemplate producer, @RabbitListener consumer, listener container types (simple/direct/stream), manual acknowledgment, dead-letter handling, idempotency, and virtual thread support. Use when configuring RabbitMQ clients, setting up queue subscriptions, or handling AMQP-specific errors."
-version: "1.0.0"
+version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot AMQP
@@ -176,8 +175,6 @@ Spring Boot 3.x supports three container types via `spring.rabbitmq.listener.typ
 | `simple` | `listener.simple.*` | Default. Invoker thread pool, supports retry config and prefetch |
 | `direct` | `listener.direct.*` | Lower latency. Invoked on RabbitMQ consumer thread; no retry, uses `consumers-per-queue` |
 | `stream` | `listener.stream.*` | RabbitMQ Stream protocol for high-throughput, persistent log |
-
-> Retry properties only apply to `simple` container. `direct` container has no built-in retry.
 
 On Java 21+ with `spring.threads.virtual.enabled=true`, Spring Boot 3.5 auto-configures virtual threads for listener containers.
 

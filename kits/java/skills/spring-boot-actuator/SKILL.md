@@ -3,7 +3,6 @@ name: spring-boot-actuator
 description: "Spring Boot Actuator for production monitoring: health probes, secured management endpoints, and Micrometer metrics. Use when setting up monitoring, health checks, or metrics for Spring Boot applications."
 version: "1.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Actuator
@@ -123,6 +122,6 @@ public class ExternalServiceHealth implements HealthIndicator {
 
 ## Related Skills
 
-- `spring-boot-logging` — structured JSON logging, ThreadContext correlation for observability
-- `spring-boot-resilience4j` — circuit breaker, retry, rate limiter health indicators
-- `spring-boot-security-jwt` — securing management endpoints with JWT
+- `spring-boot-logging`
+- `spring-boot-resilience4j`
+- `spring-boot-security-jwt`

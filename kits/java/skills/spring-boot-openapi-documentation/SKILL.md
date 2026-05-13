@@ -3,7 +3,6 @@ name: spring-boot-openapi-documentation
 description: "SpringDoc 2.8.x + OpenAPI 3.0 spec for COLA/DDD projects: adapter controller annotations, Cmd/Qry/VO Schema labeling, Result<T> response patterns, JWT security scheme. Generates Swagger UI for REST APIs in DDD/COLA projects."
 version: "1.1.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot OpenAPI Documentation (COLA/DDD Mode)
@@ -118,16 +117,7 @@ Pagination: `@RequestParam` for page/pageSize with `Result<PageResult<T>>`. Erro
 
 ## Related Skills
 
-- `ddd-cola` — COLA architecture, naming, CQRS paths (prerequisite)
-- `spring-boot-rest-api-standards` — Result<T>, PageResult<T>, URL conventions
-- `spring-boot-exception-handling` — Global handler, Result.fail(), error codes
-- `spring-boot-validation` — @Valid, @NotBlank (auto-documented by SpringDoc)
-
-## Keywords
-
-openapi, swagger, springdoc, API docs, DDD, COLA, adapter layer, Result, PageResult, Cmd, Qry, VO, DTO, schema annotations, JWT, SpringDoc 2.8.x
-
-## External Resources
-
-- [SpringDoc Official Documentation](https://springdoc.org/)
-- [OpenAPI 3.0 Specification](https://swagger.io/specification/)
+- `ddd-cola`
+- `spring-boot-rest-api-standards`
+- `spring-boot-exception-handling`
+- `spring-boot-validation`

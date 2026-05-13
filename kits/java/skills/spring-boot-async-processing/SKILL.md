@@ -3,7 +3,6 @@ name: spring-boot-async-processing
 description: "Spring Boot async processing with @Async, CompletableFuture, ThreadPoolTaskExecutor, async exception handling, and async+transaction boundary patterns. Use when implementing asynchronous execution in Spring Boot services."
 version: "1.0.0"
 type: skill
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Spring Boot Async Processing
@@ -174,58 +173,6 @@ public class ProductAggregateService {
 }
 ```
 
-### Example 3: Custom ThreadPoolTaskExecutor bean configuration
-
-```java
-@Configuration
-@EnableAsync
-public class AsyncExecutorConfig {
-
-    @Bean("ioExecutor")
-    public Executor ioExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(8);       // IO-bound: more threads than CPU cores
-        executor.setMaxPoolSize(16);
-        executor.setQueueCapacity(200);
-        executor.setThreadNamePrefix("io-async-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean("computeExecutor")
-    public Executor computeExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);       // CPU-bound: ~CPU cores
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("compute-async-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
-        executor.initialize();
-        return executor;
-    }
-}
-
-@Service
-public class ReportService {
-    @Async("computeExecutor")
-    public CompletableFuture<ReportDTO> generateReport(String reportId) {
-        // Uses computeExecutor — CPU-intensive work
-        return CompletableFuture.completedFuture(reportEngine.generate(reportId));
-    }
-
-    @Async("ioExecutor")
-    public void exportToPdf(String reportId) {
-        // Uses ioExecutor — IO-intensive work
-        pdfExporter.export(reportEngine.generate(reportId));
-    }
-}
-```
-
 ### Example 5: Async + transaction boundary — proper separation
 
 ```java
@@ -264,27 +211,19 @@ public class OrderTransactionService {
 
 ## Constraints and Warnings
 
-- **Self-invocation:** `@Async` on same-class method calls is silently ignored (same as `@Transactional` — Spring AOP proxy limitation)
-- **Transaction boundary:** `@Async` methods run in a separate thread — they don't inherit the caller's transaction context. Each `@Async` method needs its own `@Transactional`
+- **Self-invocation:** `@Async` on same-class method calls is silently ignored (Spring AOP proxy limitation — see `spring-boot-transaction-management` for details)
+- **Transaction boundary:** `@Async` methods run in a separate thread — they don't inherit the caller's transaction. Never `@Async` + `@Transactional` on the same method (see `spring-boot-transaction-management`)
 - **Thread pool exhaustion:** without proper `TaskExecutor` configuration, async tasks may silently fail or queue indefinitely
 - **Context propagation:** Spring Security context, `RequestContextHolder`, and ThreadContext are NOT automatically propagated to async threads — use `TaskDecorator` to propagate
-- **Never `@Async` + `@Transactional` on the same method** — it creates confusing proxy ordering and unpredictable behavior
 
 ## References
 
 - **[async-method-patterns.md](references/async-method-patterns.md)** — @Async patterns: void, CompletableFuture, executor selection, class-level, exception handling, ThreadContextTaskDecorator
 - **[completable-future-chaining.md](references/completable-future-chaining.md)** — CompletableFuture operations, chaining, combining, error handling, parallel data fetch
 - **[threadpool-taskexecutor-config.md](references/threadpool-taskexecutor-config.md)** — ThreadPoolTaskExecutor bean configuration, sizing guidelines, multiple executors, monitoring, yml approach
-- [Spring @Async Documentation](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Async.html)
-- [Spring Task Execution Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.task-execution-and-scheduling)
-- [CompletableFuture API (Java 21)](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html)
 
 ## Related Skills
 
-- `spring-boot-transaction-management` — @Transactional patterns, propagation, isolation
-- `spring-boot-event-driven-patterns` — @TransactionalEventListener for async event handling after commit
-- `spring-boot-scheduled-tasks` — @Scheduled patterns, XXL-Job, distributed scheduling
-
-## Keywords
-
-@Async, CompletableFuture, TaskExecutor, thread pool, async exception, ContextPropagation, TaskDecorator
+- `spring-boot-transaction-management`
+- `spring-boot-event-driven-patterns`
+- `spring-boot-scheduled-tasks`
