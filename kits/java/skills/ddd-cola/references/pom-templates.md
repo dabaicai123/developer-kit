@@ -44,6 +44,7 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
 </dependencyManagement>
 
 <modules>
+    <module>demo-common</module>
     <module>demo-client</module>
     <module>demo-adapter</module>
     <module>demo-app</module>
@@ -53,10 +54,31 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
 </modules>
 ```
 
+## common/pom.xml
+
+The `common` module is the shared kernel — `Result`, `PageResult`, `BusinessException`, `ErrorCode`, `Command`, `Query`. Both `client` and `domain` depend on it, which is what keeps them as leaf modules with no edge between them (matches official COLA `cola-samples/craftsman` layout).
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+```
+
+> No Spring, no MyBatis, no Jackson. Pure Java + Lombok so any module can depend on it without dragging in framework jars.
+
 ## client/pom.xml
 
 ```xml
 <dependencies>
+    <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>demo-common</artifactId>
+        <version>${project.version}</version>
+    </dependency>
     <dependency>
         <groupId>jakarta.validation</groupId>
         <artifactId>jakarta.validation-api</artifactId>
@@ -81,9 +103,9 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
 </dependencies>
 ```
 
+> client does NOT depend on domain. DTO fields are flat primitives plus client-side enums.
 > OpenFeign is `provided` scope — client module only needs the annotation for compilation. Other services bring the Feign runtime themselves.
 > swagger-annotations-jakarta is `provided` scope — adapter module (with springdoc-openapi-starter-webmvc-ui) brings the runtime.
-> No COLA component dependency — Result/PageResult/BusinessException/Command/Query are defined in client `common/` package.
 
 ## domain/pom.xml
 
@@ -91,7 +113,7 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
 <dependencies>
     <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>demo-client</artifactId>
+        <artifactId>demo-common</artifactId>
         <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -102,7 +124,8 @@ Full pom.xml templates for each module. Only dependency declarations — no plug
 </dependencies>
 ```
 
-> Domain depends on nothing except client (for Result/BusinessException base types). No Spring, no MyBatis, no infrastructure tech. Pure Java + Lombok.
+> Domain depends only on common. No client, no Spring, no MyBatis. Pure Java + Lombok.
+> Domain value objects (ConditionGroup, RewardSpec, StepDefinition, etc.) live here with behavior. Their flat DTO counterparts live in client.
 
 ## infrastructure/pom.xml
 

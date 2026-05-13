@@ -1,7 +1,7 @@
 ---
 name: ddd-cola
-description: "COLA DDD Architecture: multi-module project structure (client/adapter/app/domain/infrastructure/start), Feign integration, Gateway pattern, CQRS. Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi-module architecture. Do NOT use for simple MVC, non-microservice, or non-Java projects."
-version: "2.1.0"
+description: "COLA DDD Architecture: multi-module project structure (common/client/adapter/app/domain/infrastructure/start), Feign integration, Gateway pattern, CQRS. Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi-module architecture. Do NOT use for simple MVC, non-microservice, or non-Java projects."
+version: "2.2.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 parameters:
@@ -46,12 +46,13 @@ Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi
 
 | Your scenario | What to do |
 |---------------|-----------|
-| Starting a new service? | Follow **Project Setup** → scaffold 6 modules per **Module Structure** |
-| Adding a new use case? | Pick CQRS path: Write → CmdExe → Domain → Gateway; Read → QryExe → Mapper |
-| Unsure about a module? | Client → Feign + ServiceI; Adapter → `spring-boot-rest-api-standards`; Domain → this skill's Gateway + Entity; Infrastructure → `mybatis-plus-patterns` |
+| Starting a new service? | Follow **Project Setup** → scaffold 7 modules per **Module Structure** (common/client/adapter/app/domain/infrastructure/start) |
+| Adding a new use case? | Pick CQRS path: Write → CmdExe → DtoVoConvertor → Domain → Gateway; Read → QryExe → Mapper |
+| Unsure about a module? | Common → shared kernel types; Client → Feign + ServiceI + flat DTOs; Adapter → `spring-boot-rest-api-standards`; Domain → this skill's Gateway + Entity + VO; Infrastructure → `mybatis-plus-patterns` |
 | Confused about naming? | See **Naming Per Module** |
-| Confused about data flow? | Cmd/Qry (client) → Entity (domain, plain params) → DO (infrastructure) → DB → Result<T> |
-| Other service calling yours? | They depend on your `client` jar, inject FeignClient |
+| Confused about data flow? | Cmd/Qry (client) → VO (domain via DtoVoConvertor) → DO (infrastructure via DomainConverter) → DB → Result<T> |
+| DTO vs VO for the same concept? | Flat `XxxDTO` in client (serializable, no behavior) + rich `Xxx` VO in domain (behavior); app `DtoVoConvertor` bridges them |
+| Other service calling yours? | They depend on your `client` jar (which transitively pulls `common`), inject FeignClient |
 | Need domain events? | Use `ddd-event-driven` skill — see **Event Integration** below |
 | Adding to existing COLA project? | See **Partial Module Addition** below |
 
@@ -59,14 +60,16 @@ Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi
 
 | Aspect | Official COLA (archetype-web) | Team Override | Reason |
 |--------|-------------------------------|-------------|--------|
-| Response types | `Response<T>` / `MultiResponse<T>` (cola-component-dto) | `Result<T>` / `PageResult<T>` | Project already uses Result across all services; avoid dual type systems |
-| Exception types | `BizException` / `SysException` (cola-component-exception) | `BusinessException` + sub-classes | Project already uses BusinessException with int error codes |
-| COLA component deps | Required (BOM, dto, exception, domain-starter) | None | Project uses self-defined types across all services; importing COLA components creates a dual type system and adds dependency on the COLA release cycle. COLA components are OSS but designed around HSF/Mtop patterns that don't apply to Spring Cloud |
+| Module count | 6 modules (client/adapter/app/domain/infrastructure/start) | 7 modules — add `common` as shared kernel | Official COLA uses `cola-component-dto` + `cola-component-exception` as shared kernel. We don't import those, so we carve out a local `common` module. Keeps `client` and `domain` as leaf modules with zero edge between them (matches `cola-samples/craftsman` where `craftsman-client` and `craftsman-domain` are both leaves) |
+| Response types | `Response<T>` / `MultiResponse<T>` (cola-component-dto) | `Result<T>` / `PageResult<T>` (in `common`) | Project already uses Result across all services; avoid dual type systems |
+| Exception types | `BizException` / `SysException` (cola-component-exception) | `BusinessException` + sub-classes (in `common`) | Project already uses BusinessException with int error codes |
+| COLA component deps | Required (BOM, dto, exception, domain-starter) | None — replaced by local `common` module | Project uses self-defined types across all services; importing COLA components creates a dual type system and adds dependency on the COLA release cycle. COLA components are OSS but designed around HSF/Mtop patterns that don't apply to Spring Cloud |
 | Domain entity annotation | `@Entity` (cola-component-domain-starter, prototype scope) | `@Data` (Lombok) | Lombok is lighter, already used in project; prototype scope rarely needed |
 | Infrastructure package | `gatewayimpl/database/dataobject` at project root (`cola-samples/craftsman` style) | Domain-first + `craftsman`-style nesting: `customer/CustomerGatewayImpl.java` at domain root, with `customer/gatewayimpl/database/` and `customer/gatewayimpl/rpc/` sub-packages | Keeps all Customer infra co-located (domain-first); nested `database/dataobject` + `rpc/dataobject` cleanly separates heterogeneous data sources from day one; same internal nesting as `craftsman` sample but scoped per-domain instead of per-project |
 | ServiceI return type | `Response` / `MultiResponse` | `Result<T>` / `PageResult<T>` | Same as non-DDD services; no type split |
-| Cmd/Qry base | Extends COLA `Command` / `Query` | Extends self-defined `Command` / `Query` (in client `common.dto`) | No cola-component-dto dependency; marker classes serve the same CQRS identification purpose |
+| Cmd/Qry base | Extends COLA `Command` / `Query` | Extends self-defined `Command` / `Query` (in `common`) | No cola-component-dto dependency; marker classes serve the same CQRS identification purpose |
 | Cmd field structure | `CustomerAddCmd` wraps nested `CustomerDTO` | `CustomerAddCmd` uses flat fields (`companyName`, `customerType`) | Flat fields are simpler for API consumers; nested DTO adds unnecessary wrapping for single-entity operations. For multi-entity or complex Cmd, nested DTO is still recommended |
+| Value objects | Live in domain; client has no VO knowledge | DTO in `client` (flat, serializable), VO in `domain` (behavior-carrying); app `DtoVoConvertor` bridges them | When a complex structure (ConditionGroup, RewardSpec, StepDefinition) must cross the API boundary, defining two types keeps `client` and `domain` independent — which is the only way to keep them as leaf modules |
 | Query hierarchy | `Query extends Command` (cola-component-dto) | `Query` and `Command` are independent abstract classes | Decoupling Query from Command avoids semantic confusion — a read operation is not a write operation. Both remain Serializable marker classes |
 | Validation API | `javax.validation-api` (Spring Boot 2.x) | `jakarta.validation-api` (Spring Boot 3.x) | Project uses Spring Boot 3.x / Jakarta EE 9+; javax is legacy |
 | DI style | `@Autowired` / `@Resource` (official archetype) | Constructor injection via `@RequiredArgsConstructor` | Constructor injection is the Spring-recommended best practice; explicit, testable, immutable |
@@ -82,14 +85,15 @@ This skill targets **cola-archetype-web** (6-module distributed web archetype). 
 
 ### 1. Multi-Module Maven Project
 
-COLA archetype-web pattern — 6 Maven modules under a parent POM:
+COLA archetype-web pattern adapted with a local `common` shared-kernel module — 7 Maven modules under a parent POM:
 
 ```
 demo-parent/
-├── demo-client/           # API interfaces, DTOs, Feign clients, common types
+├── demo-common/           # Shared kernel: Result, PageResult, BusinessException, Command, Query, ErrorCode
+├── demo-client/           # API interfaces, Cmd/Qry/DTO (flat), Feign clients
 ├── demo-adapter/          # HTTP inbound (Controllers)
-├── demo-app/              # Application services, executors
-├── demo-domain/           # Domain entities, Gateways, domain services
+├── demo-app/              # Application services, executors, DTO↔VO Convertor
+├── demo-domain/           # Domain entities, value objects (with behavior), Gateways, domain services
 ├── demo-infrastructure/   # Gateway implementations, Mappers, external clients
 └── demo-start/            # Bootstrap (Application.java + config)
 ```
@@ -97,19 +101,22 @@ demo-parent/
 ### 2. Module Dependencies
 
 ```
-start → adapter → app → {client, infrastructure → domain → client}
+start → adapter → app → {client → common, infrastructure → domain → common}
 ```
 
 | Module | Depends On | Reason |
 |--------|-----------|--------|
-| **client** | jakarta.validation-api, lombok, openfeign(provided) | Pure API contract + common types. OpenFeign `provided` scope — consumers bring their own runtime |
-| **domain** | client | Uses Result/BusinessException base types from client common; **does NOT import Cmd/DTO into Entity constructors** |
-| **infrastructure** | domain | Implements domain Gateway interfaces; contains DO/Mapper |
-| **app** | client, infrastructure | ServiceI from client; infrastructure for **read path** (see CQRS exception below) |
+| **common** | lombok(provided) | Pure Java shared kernel. No framework deps. Both client and domain depend on it |
+| **client** | common, jakarta.validation-api, lombok, openfeign(provided) | Pure API contract — Cmd/Qry/DTO with flat fields. Never references domain types. OpenFeign `provided` scope — consumers bring their own runtime |
+| **domain** | common, lombok(provided) | Pure domain core. Value objects carry behavior. Leaf module; does NOT depend on client |
+| **infrastructure** | domain | Implements domain Gateway interfaces; contains DO/Mapper. Transitively gets common |
+| **app** | client, infrastructure | ServiceI from client; infrastructure for **read path** (see CQRS exception below). Transitively gets common and domain. Hosts `DtoVoConvertor` (DTO ↔ domain VO) |
 | **adapter** | app | Calls Application Service |
 | **start** | adapter | Brings all modules together for bootstrap |
 
 > **Read path pragmatic exception**: app depends on infrastructure so QryExe can access Mapper directly. This bypasses Domain for performance. The write path still follows strict dependency inversion (CmdExe → Domain Gateway → GatewayImpl). ArchUnit should enforce write-path compliance while allowing this read-path shortcut.
+
+> **Why `common` exists**: The official COLA samples use `cola-component-dto` and `cola-component-exception` as a shared kernel so that `craftsman-client` and `craftsman-domain` can both be leaf modules. We don't import those COLA components, so we carve out an equivalent local module. Without it, either `domain` has to depend on `client` (breaks DDD) or `client` has to depend on `domain` (breaks API contract independence).
 
 ### 3. Client Jar Publishing
 
@@ -133,41 +140,53 @@ Other services consume your API via the client jar. Key practices:
 
 ## Module Structure & Package Conventions
 
-### client Module — API Contract + Common Types
+### common Module — Shared Kernel
 
-The client module is published as a Maven dependency for other services to consume via Feign. **Cmd, Qry, and DTO all live in client** so that the API contract is self-contained — consumers can construct Cmd/Qry objects and deserialize DTO responses without depending on app/domain/infrastructure.
+The `common` module holds framework-neutral types that both `client` and `domain` need. It has no Spring, no MyBatis, no Jackson — pure Java + Lombok. This is the only way to keep `client` and `domain` as independent leaf modules.
 
 ```
 com.example.common.result/
 ├── Result.java                      # (existing — see spring-boot-rest-api-standards)
-├── PageResult.java                  # (existing — see spring-boot-rest-api-standards)
+└── PageResult.java                  # (existing — see spring-boot-rest-api-standards)
 com.example.common.exception/
 ├── BusinessException.java           # (existing — see spring-boot-exception-handling)
 ├── NotFoundException.java
 ├── ConflictException.java
+└── ErrorCode.java                   # int-based error code enum
 com.example.common.dto/
 ├── Command.java                     # Write command marker (self-defined, not from cola-component-dto)
-├── Query.java                       # Read query marker (self-defined; unlike COLA official, Query does NOT extend Command)
+└── Query.java                       # Read query marker (self-defined; unlike COLA official, Query does NOT extend Command)
+```
+
+> These types are placed in `common` so all modules (client, domain, app, adapter, infrastructure) can access them without pulling in Spring Boot starters. `Command` and `Query` are self-defined marker base classes for CQRS identification — NOT from `cola-component-dto`.
+
+### client Module — API Contract
+
+The client module is published as a Maven dependency for other services to consume via Feign. **Cmd, Qry, and DTO all live in client with flat fields** so that the API contract is self-contained — consumers can construct Cmd/Qry objects and deserialize DTO responses without depending on app/domain/infrastructure.
+
+```
 com.example.api/
 ├── CustomerServiceI.java            # Service interface (returns Result<T>)
 ├── CustomerFeignClient.java         # @FeignClient — recommended pattern
 com.example.dto/
-├── CustomerAddCmd.java              # extends Command
-├── CustomerListByNameQry.java       # extends Query
+├── CustomerAddCmd.java              # extends Command (from common)
+├── CustomerListByNameQry.java       # extends Query (from common)
 com.example.dto.data/
-├── CustomerDTO.java                 # Data Transfer Object
+├── CustomerDTO.java                 # Data Transfer Object (flat fields, client-side enums only)
+├── ConditionGroupDTO.java           # Complex structure DTO — flat, serializable, NO behavior
+├── RewardSpecDTO.java
 com.example.dto.event/
 ├── CustomerCreatedEvent.java        # Domain event DTO (for inter-service events)
 └── DomainEventConstant.java         # Event topic constants
 ```
 
-> `Result`, `PageResult`, and `BusinessException` are project-wide conventions defined in `spring-boot-rest-api-standards` and `spring-boot-exception-handling`. They are placed in client `common/` packages so all modules (domain, app, adapter, infrastructure) can access them without pulling in Spring Boot starters. `Command` and `Query` are self-defined marker base classes for CQRS identification. They are NOT from `cola-component-dto` — see Team Override table for details.
+> **Client DTO discipline**: DTO fields use primitives, Strings, collections, and client-side enums only. They NEVER reference domain value objects. When a complex structure like `ConditionGroup` must cross the API boundary, define `ConditionGroupDTO` here (flat, @Data, no methods) and a behavior-carrying `ConditionGroup` VO in `domain`. App `DtoVoConvertor` bridges the two.
 
 > **Cmd/Qry location**: Always in `client/dto/` — this is the canonical location. If a Cmd/Qry is purely internal (never sent by external callers), it may live in `app/`, but this should be the exception, not the default.
 
 > **FeignClient extends ServiceI**: Only when ALL ServiceI methods are external-facing. If some are internal-only, split into separate interfaces. Code examples → see `references/code-examples.md`.
 
-> **client stays lightweight**: No Spring Boot starter, no MyBatis-Plus, no COLA component deps. OpenFeign is `provided` scope. `PageResult` only exposes `PageResult.of(List<T> records, long total, long page, long pageSize)` — it does not depend on MyBatis-Plus `Page<T>`. App/infrastructure callers destructure MP's `Page` at the call site (`records / total / current / size`) and pass them into `PageResult.of(...)`.
+> **client stays lightweight**: Depends on `common` + jakarta.validation + lombok(provided) + openfeign(provided) + swagger(provided). No Spring Boot starter, no MyBatis-Plus, no COLA component deps. `PageResult` only exposes `PageResult.of(List<T> records, long total, long page, long pageSize)` — it does not depend on MyBatis-Plus `Page<T>`. App/infrastructure callers destructure MP's `Page` at the call site (`records / total / current / size`) and pass them into `PageResult.of(...)`.
 
 ### adapter Module — HTTP Inbound
 
@@ -185,8 +204,10 @@ Organize by domain first, then by function.
 ```
 com.example.customer/
 ├── CustomerServiceImpl.java           # Implements ServiceI, delegates to executors
+├── convertor/
+│   └── CustomerDtoVoConvertor.java    # MapStruct — DTO ↔ Domain VO (e.g., ConditionGroupDTO ↔ ConditionGroup)
 └── executor/
-    ├── CustomerAddCmdExe.java         # Write handler
+    ├── CustomerAddCmdExe.java         # Write handler — uses Convertor before calling Domain
     └── query/
         └── CustomerListByNameQryExe.java  # Read handler
 ```
@@ -196,19 +217,24 @@ com.example.customer/
 | Component | Package | Responsibility | Contains Logic? |
 |-----------|---------|---------------|----------------|
 | **Service** | `com.example.customer/` | Implements ServiceI; pure delegation to Executors | No |
-| **CmdExe** | `executor/` | Write operations: converts Cmd → plain params, calls Domain | Yes (simple) / Delegates (complex) |
+| **CmdExe** | `executor/` | Write operations: converts Cmd → Domain VO via Convertor, calls Domain | Yes (simple) / Delegates (complex) |
 | **QryExe** | `executor/query/` | Read operations: queries Mapper directly, bypasses Domain | Yes |
+| **Convertor** | `convertor/` | MapStruct bridge between client DTO and domain VO; decouples API contract from domain model | No (pure mapping) |
 
-> CmdExe converts Cmd to **plain params** for Domain — Domain never receives client Cmd/DTO. All Executors use `execute()` as method name.
+> CmdExe converts Cmd to **plain params or Domain VOs** for Domain — Domain never receives client Cmd/DTO directly. All Executors use `execute()` as method name.
 
 ### domain Module — Domain Core
 
-Organize by domain first, then by function. Gateway interfaces and domain services are sub-packages within each domain.
+Organize by domain first, then by function. Gateway interfaces, value objects, and domain services are sub-packages within each domain.
 
 ```
 com.example.domain.customer/
 ├── Customer.java                      # Entity (@Data, bare name)
 ├── CustomerType.java                  # Enum
+├── vo/
+│   ├── ConditionGroup.java            # Value object with behavior (matches, evaluate, etc.)
+│   ├── RewardSpec.java
+│   └── StepDefinition.java
 ├── gateway/
 │   ├── CustomerGateway.java           # Persistence port
 │   └── CreditGateway.java             # External service port
@@ -216,7 +242,9 @@ com.example.domain.customer/
 │   └── CreditChecker.java             # Cross-entity logic within domain
 ```
 
-> Domain depends on client only for Result/BusinessException base types, NOT for Cmd/DTO. Domain entities do NOT inject Spring beans — cross-entity logic goes in DomainService. Gateway covers persistence AND external service access — define in Domain, implement in Infrastructure.
+> **Domain is a leaf module**. It depends only on `common` (for Result/BusinessException/ErrorCode) and Lombok. It does NOT depend on `client`. Domain entities do NOT inject Spring beans — cross-entity logic goes in DomainService. Gateway covers persistence AND external service access — define in Domain, implement in Infrastructure.
+
+> **Domain VOs vs client DTOs**: When the same conceptual structure (e.g., `ConditionGroup`) must appear on both API contract and inside the domain model, define both — `ConditionGroupDTO` in client (flat, no behavior) and `ConditionGroup` in domain (rich, with behavior like `matches()`, `evaluate()`). App `DtoVoConvertor` maps between them. This is how we keep client and domain as independent leaves.
 
 ### infrastructure Module — Implementation
 
@@ -265,9 +293,9 @@ resources/
 
 | Type | Path | Notes |
 |------|------|-------|
-| **Command (Write)** | Controller → Service → CmdExe → Domain Entity → Gateway → GatewayImpl → Mapper → DB | CmdExe converts Cmd → plain params for Domain |
-| **Query (Read)** | Controller → Service → QryExe → Mapper → DB | Pragmatic shortcut: bypasses Domain for performance |
-| **Feign (Write)** | Other Service → FeignClient(ServiceI) → Controller → Service → CmdExe → Domain → Gateway → DB | Same internal path as HTTP |
+| **Command (Write)** | Controller → Service → CmdExe → DtoVoConvertor (DTO→VO) → Domain Entity → Gateway → GatewayImpl → DomainConverter (Domain→DO) → Mapper → DB | CmdExe converts Cmd fields/nested DTOs into Domain VOs via the app-module Convertor |
+| **Query (Read)** | Controller → Service → QryExe → Mapper → DOConverter (DO→DTO) → DB | Pragmatic shortcut: bypasses Domain for performance |
+| **Feign (Write)** | Other Service → FeignClient(ServiceI) → Controller → Service → CmdExe → DtoVoConvertor → Domain → Gateway → DB | Same internal path as HTTP |
 | **Feign (Read)** | Other Service → FeignClient(ServiceI) → Controller → Service → QryExe → Mapper → DB | Read bypasses Domain |
 
 > **Write path must follow dependency inversion**: CmdExe → Domain Gateway → Infrastructure GatewayImpl. Never CmdExe → Mapper directly for writes.
@@ -285,17 +313,17 @@ resources/
 ## Dependency Direction & Enforcement
 
 ```
-client (no internal deps)
-    ↑
-domain (depends on client — for Result/BusinessException only, NOT Cmd/DTO)
-    ↑
-infrastructure (depends on domain — implements Gateway interfaces)
-    ↑
-app (depends on client + infrastructure — read path pragmatic shortcut)
-    ↑
-adapter (depends on app)
-    ↑
-start (depends on adapter)
+common (no internal deps; pure Java + Lombok)
+   ↑                  ↑
+client (depends on common only — leaf)        domain (depends on common only — leaf)
+                      ↑
+              infrastructure (depends on domain — implements Gateway interfaces)
+                      ↑
+                     app (depends on client + infrastructure — read path pragmatic shortcut; hosts DtoVoConvertor)
+                      ↑
+                  adapter (depends on app)
+                      ↑
+                    start (depends on adapter)
 ```
 
 ### ArchUnit Rules
@@ -322,12 +350,22 @@ public class ColaArchitectureTest {
             .resideInAPackage("..infrastructure..");
 
     @ArchTest
-    static final ArchRule domain_no_client_dto =
+    static final ArchRule domain_no_client =
         noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
-            .resideInAPackage("..client.dto..")
-            .because("domain must not depend on client Cmd/Qry/DTO — only Result/BusinessException allowed");
+            .resideInAPackage("..client..")
+            .orShould().dependOnClassesThat().resideInAPackage("..dto..")
+            .because("domain is a leaf module; it must never reference client API contracts. Use common module for shared types.");
+
+    @ArchTest
+    static final ArchRule client_no_domain =
+        noClasses()
+            .that().resideInAPackage("..client..")
+            .or().resideInAPackage("..api..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..domain..")
+            .because("client is a leaf module; API contract must not leak domain types. Define flat DTOs in client and use DtoVoConvertor in app.");
 
     @ArchTest
     static final ArchRule adapter_no_infrastructure =
@@ -365,16 +403,16 @@ See `ddd-event-driven` skill for complete event design patterns.
 
 When adding a new domain to an existing COLA project:
 
-1. **client**: Add new `XxxServiceI`, `XxxCmd`, `XxxQry`, `XxxDTO`, (optional) `XxxFeignClient`
-2. **adapter**: Add new `XxxController`
-3. **app**: Add new `XxxServiceImpl`, `XxxCmdExe`, `XxxQryExe`
-4. **domain**: Add new `Xxx` entity, `XxxGateway` interface, (optional) `XxxDomainService`
-5. **infrastructure**: Create new domain package `xxx/` with:
+1. **common**: Add new `ErrorCode` entries if needed. Usually no changes — shared kernel is stable
+2. **client**: Add new `XxxServiceI`, `XxxCmd`, `XxxQry`, `XxxDTO` (flat), (optional) `XxxFeignClient`. If the new domain needs a complex structure in its API, also add `XxxConfigDTO` (flat, serializable)
+3. **adapter**: Add new `XxxController`
+4. **app**: Add new `XxxServiceImpl`, `XxxCmdExe`, `XxxQryExe`, (optional) `XxxDtoVoConvertor` if the domain has VO-bearing DTOs
+5. **domain**: Add new `Xxx` entity, `XxxGateway` interface, (optional) `vo/XxxConfig` value object with behavior, (optional) `XxxDomainService`
+6. **infrastructure**: Create new domain package `xxx/` with:
    - `XxxGatewayImpl.java` at domain root (facade)
-   - `gatewayimpl/database/`: `XxxMapper.java`
+   - `gatewayimpl/database/`: `XxxMapper.java`, `XxxDomainConverter.java`
    - `gatewayimpl/database/dataobject/`: `XxxDO.java`
    - (optional) `gatewayimpl/rpc/` + `gatewayimpl/rpc/dataobject/` when calling external services
-   - (optional) `XxxDOConverter` for read path (in app module)
 
 No need to modify existing domains' files. Module pom.xml dependencies are already correct.
 
@@ -382,26 +420,29 @@ No need to modify existing domains' files. Module pom.xml dependencies are alrea
 
 | Module | Class Type | Suffix | Example |
 |--------|-----------|--------|---------|
-| client | Response Wrapper | none | `Result<T>`, `PageResult<T>` → see spring-boot-rest-api-standards |
-| client | Business Exception | none | `BusinessException` + sub-classes → see spring-boot-exception-handling |
-| client | Command Base | none | `Command` (abstract, marker) |
-| client | Query Base | none | `Query` (abstract, marker) |
+| common | Response Wrapper | none | `Result<T>`, `PageResult<T>` → see spring-boot-rest-api-standards |
+| common | Business Exception | none | `BusinessException` + sub-classes → see spring-boot-exception-handling |
+| common | Error Code | none | `ErrorCode` (enum or int constants) |
+| common | Command Base | none | `Command` (abstract, marker) |
+| common | Query Base | none | `Query` (abstract, marker) |
 | client | Service Interface | I | `CustomerServiceI` |
 | client | Feign Client | FeignClient | `CustomerFeignClient` |
 | client | Command DTO | Cmd | `CustomerAddCmd` |
 | client | Query DTO | Qry | `CustomerListByNameQry` |
-| client | Data Transfer Object | DTO | `CustomerDTO` |
+| client | Data Transfer Object | DTO | `CustomerDTO`, `ConditionGroupDTO` (flat, no domain refs) |
 | client | Domain Event DTO | Event | `CustomerCreatedEvent` |
 | adapter | Controller | Controller | `CustomerController` |
 | app | Service Implementation | Impl | `CustomerServiceImpl` |
 | app | Command Executor | CmdExe | `CustomerAddCmdExe` |
 | app | Query Executor | QryExe | `CustomerListByNameQryExe` |
+| app | DTO↔VO Converter | DtoVoConvertor | `CustomerDtoVoConvertor` (MapStruct) |
 | domain | Entity | none | `Customer` (bare name, @Data) |
-| domain | Value Object | none | `Credit` |
+| domain | Value Object | none | `ConditionGroup`, `RewardSpec`, `Credit` |
 | domain | Enum | none | `CustomerType` |
 | domain | Gateway | Gateway | `CustomerGateway` |
 | domain | Domain Service | none or DomainService | `CreditChecker` or `OrderDomainService` |
 | infrastructure | Gateway Implementation | GatewayImpl | `CustomerGatewayImpl` |
+| infrastructure | Domain↔DO Converter | DomainConverter | `CustomerDomainConverter` (MapStruct) |
 | infrastructure | Data Object | DO | `CustomerDO` |
 | infrastructure | Mapper | Mapper | `CustomerMapper` |
 
@@ -410,11 +451,15 @@ No need to modify existing domains' files. Module pom.xml dependencies are alrea
 ## Data Flow
 
 ```
-Write: Cmd (client) → CmdExe converts to plain params → Entity (domain) → Gateway → GatewayImpl → DO (infrastructure) → DB → Result<T>
+Write: Cmd (client) → CmdExe → DtoVoConvertor (app, DTO→VO) → Entity/VO (domain) → Gateway → GatewayImpl → DomainConverter (infra, Domain→DO) → DO (infrastructure) → DB → Result<T>
 Read:  Qry (client) → QryExe → Mapper (infrastructure) → DO → DOConverter.toDTO() → DTO (client) → Result<List<DTO>> or PageResult<DTO>
 ```
 
-Conversion: MapStruct at each boundary → see `mapstruct-patterns`
+Conversion has two boundaries:
+- App `DtoVoConvertor` (MapStruct) — flat client DTO ↔ behavior-carrying domain VO. Lives in app because app is the only module that knows both client and domain.
+- Infrastructure `DomainConverter` (MapStruct) — domain Entity/VO ↔ DO. Lives in infrastructure.
+
+→ see `mapstruct-patterns`
 
 ## Best Practices
 

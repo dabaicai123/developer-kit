@@ -1,7 +1,7 @@
 ---
 name: ddd-cola
-description: "COLA DDD Architecture: multi-module project structure, client/adapter/app/domain/infrastructure/start modules, Gateway pattern, CQRS, Feign API contracts. Use when a Java Spring Cloud service already uses COLA/DDD or when the task explicitly mentions COLA, DDD, domain/app/infrastructure/client layers, CmdExe, QryExe, Gateway, or ServiceI."
-version: "2.2.0"
+description: "COLA DDD Architecture: multi-module project structure, common/client/adapter/app/domain/infrastructure/start modules, Gateway pattern, CQRS, Feign API contracts. Use when a Java Spring Cloud service already uses COLA/DDD or when the task explicitly mentions COLA, DDD, domain/app/infrastructure/client layers, CmdExe, QryExe, Gateway, or ServiceI."
+version: "2.3.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 parameters:
@@ -49,58 +49,73 @@ Do not force COLA onto simple MVC CRUD modules. For plain controller-service-map
 - Do not add COLA component dependencies unless the project already depends on them.
 - Use Spring Boot 3.x `jakarta.validation` APIs.
 - Use constructor injection, normally Lombok `@RequiredArgsConstructor`.
-- Put Cmd, Qry, DTO, ServiceI, and optional FeignClient in the `client` module.
+- Put shared kernel types (`Result`, `PageResult`, `BusinessException`, `Command`, `Query`, `ErrorCode`) in the `common` module — NOT in `client`.
+- Put Cmd, Qry, DTO, ServiceI, and optional FeignClient in the `client` module. DTO fields are flat primitive types and client-side enums. They never reference domain value objects.
+- Domain value objects (ConditionGroup, RewardSpec, StepDefinition, etc.) live in `domain`. They carry behavior. App layer Convertor maps DTO ↔ VO.
 - Domain entities are plain domain objects. They do not receive Cmd/DTO directly.
 - Infrastructure DO classes use `DO` suffix and MyBatis-Plus annotations.
 
 ## Module Model
 
-Standard modules:
+Standard modules (7 modules — `common` is the shared kernel that keeps `client` and `domain` as leaves):
 
 ```text
-service-client          API contracts, Cmd/Qry/DTO, ServiceI, FeignClient
+service-common          shared kernel: Result, PageResult, BusinessException, Command, Query, ErrorCode
+service-client          API contracts: Cmd/Qry/DTO (flat), ServiceI, FeignClient
 service-adapter         HTTP controllers and inbound adapters
-service-app             application services, CmdExe, QryExe
+service-app             application services, CmdExe, QryExe, Convertor (DTO ↔ Domain VO)
 service-domain          domain entities, value objects, gateways, domain services
 service-infrastructure  GatewayImpl, Mapper, DO, external clients
 service-start           Spring Boot bootstrap and runtime config
 ```
 
-Dependency direction:
+Dependency direction (client and domain are BOTH leaves — neither depends on the other):
 
 ```text
-client <- domain <- infrastructure <- app <- adapter <- start
-client -----------------------------^
+common  ← client                             (Cmd/Qry/DTO + ServiceI)
+common  ← domain                             (Entity + VO + Gateway)
+domain  ← infrastructure                     (GatewayImpl + Mapper + DO; DIP)
+client, infrastructure  ← app                (ServiceI impl + Cmd/QryExe + Convertor)
+app  ← adapter  ← start
 ```
 
-Pragmatic read-path exception: QryExe may query infrastructure Mapper directly for read performance. Write paths must go through the domain Gateway.
+Key invariants:
+
+- `client` and `domain` have ZERO dependency between them. This matches the official COLA `cola-samples/craftsman` layout where `craftsman-client` and `craftsman-domain` are both leaf modules.
+- Client DTO fields are flat (primitives + client enums). If a complex structure (ConditionGroup, StepDefinition, RewardSpec) is needed on both sides, define a flat DTO in `client` and a behavior-carrying VO in `domain`. App Convertor bridges them.
+- Pragmatic read-path exception: QryExe may query infrastructure Mapper directly for read performance. Write paths must go through the domain Gateway.
 
 ## Implementation Rules
 
 - ServiceI is the public facade interface in `client`; app `XxxServiceImpl` implements it and delegates only.
-- Write use cases go `Controller -> ServiceI -> XxxCmdExe -> Domain -> Gateway -> GatewayImpl -> Mapper`.
-- Read use cases go `Controller -> ServiceI -> XxxQryExe -> Mapper -> DTO`.
+- Write use cases go `Controller -> ServiceI -> XxxCmdExe -> (Convertor DTO→VO) -> Domain -> Gateway -> GatewayImpl -> Mapper`.
+- Read use cases go `Controller -> ServiceI -> XxxQryExe -> Mapper -> (Convertor DO→DTO) -> DTO`.
 - CmdExe owns transaction boundaries for writes with `@Transactional(rollbackFor = Exception.class)`.
+- CmdExe is responsible for DTO → Domain VO conversion via a Convertor (MapStruct) in the app module. Never let domain import from `client.dto`.
 - Gateway interfaces live in domain; GatewayImpl lives in infrastructure and stays thin.
 - Gateway methods must separate `save()` for INSERT and `update()` for UPDATE.
 - Never pass domain entities to infrastructure HTTP/Feign/MQ clients. Convert to primitive values or DTOs first.
 - Before generating a CmdExe or QryExe, read the actual Gateway, Mapper, client, and DTO signatures. Do not invent parameters.
 - All executor methods use `execute(...)`.
-- Use MapStruct for boundary conversion when mapping grows beyond trivial field copies.
+- Use MapStruct for boundary conversion. Two conversion points: app `DtoVoConvertor` (DTO ↔ domain VO) and infrastructure `DomainConverter` (Domain ↔ DO).
 
 ## Naming
 
 | Layer | Pattern |
 | --- | --- |
+| common shared kernel | `Result<T>`, `PageResult<T>`, `BusinessException`, `Command`, `Query`, `ErrorCode` |
 | client API | `XxxServiceI`, `XxxFeignClient` |
 | client command/query | `XxxCreateCmd`, `XxxPageQry` |
-| client data | `XxxDTO` |
+| client data | `XxxDTO` (flat; no domain VO references) |
 | app service | `XxxServiceImpl` |
 | app write executor | `XxxCreateCmdExe` |
 | app read executor | `XxxPageQryExe` |
+| app DTO↔VO converter | `XxxDtoVoConvertor` (MapStruct, in app) |
 | domain entity | `Xxx` |
+| domain value object | `XxxVO` or bare name (e.g., `ConditionGroup`, `RewardSpec`) |
 | domain port | `XxxGateway` |
 | infrastructure adapter | `XxxGatewayImpl` |
+| infrastructure Domain↔DO converter | `XxxDomainConverter` (MapStruct, in infrastructure) |
 | persistence object | `XxxDO` |
 | mapper | `XxxMapper` |
 

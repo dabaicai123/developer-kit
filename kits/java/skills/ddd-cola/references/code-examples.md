@@ -4,6 +4,23 @@ Detailed code examples for each COLA layer. These are reference implementations 
 
 **Import note**: All validation annotations use `jakarta.validation.constraints.*` (Spring Boot 3.x), not `javax.validation.constraints.*` (Spring Boot 2.x legacy).
 
+## common Module
+
+Shared kernel types — depended on by both `client` and `domain`, keeping them as leaf modules.
+
+```java
+// common/dto/Command.java — marker base class for CQRS write identification
+public abstract class Command implements Serializable {
+}
+
+// common/dto/Query.java — marker base class for CQRS read identification
+// Note: Unlike official COLA, Query does NOT extend Command — read and write are semantically distinct
+public abstract class Query implements Serializable {
+}
+```
+
+> `Result<T>`, `PageResult<T>`, `BusinessException`, `ErrorCode` are detailed in `spring-boot-rest-api-standards` and `spring-boot-exception-handling`. They live here in `common` so every other module can reference them without pulling in Spring or MyBatis.
+
 ## client Module
 
 ### Service Interface + Feign Client
@@ -21,19 +38,7 @@ public interface CustomerFeignClient extends CustomerServiceI {
 }
 ```
 
-### Command / Query Base Classes
-
-```java
-// common/dto/Command.java — marker base class for CQRS write identification
-public abstract class Command implements Serializable {
-}
-
-// common/dto/Query.java — marker base class for CQRS read identification
-public abstract class Query implements Serializable {
-}
-```
-
-> `Result<T>`, `PageResult<T>`, `BusinessException` → see `spring-boot-rest-api-standards` and `spring-boot-exception-handling`.
+> `Result<T>`, `PageResult<T>`, `BusinessException`, `Command`, `Query` live in the `common` module. See `spring-boot-rest-api-standards` and `spring-boot-exception-handling`. The `common` module is depended on by both `client` and `domain` so neither has to know about the other.
 
 ### DTO Examples
 
@@ -60,6 +65,57 @@ public class CustomerDTO {
     private String customerId;
     private String companyName;
     private String customerType;
+}
+```
+
+### Complex Structure: DTO (client) vs VO (domain)
+
+When a structure like `ConditionGroup` must cross the API boundary, define two types — flat DTO in client, behavior-carrying VO in domain. The app `DtoVoConvertor` bridges them. This is how `client` and `domain` stay as independent leaf modules.
+
+```java
+// client — dto/data/ConditionGroupDTO.java
+// Flat, serializable, NO behavior. Consumers can JSON-deserialize without any domain dependency.
+@Data
+public class ConditionGroupDTO {
+    private String operator;              // "AND" or "OR" as string
+    private List<ConditionDTO> conditions;
+    private List<ConditionGroupDTO> nestedGroups;
+}
+
+// client — dto/data/ConditionDTO.java
+@Data
+public class ConditionDTO {
+    private String field;
+    private String op;
+    private Object value;
+}
+```
+
+```java
+// domain — taskrule/vo/ConditionGroup.java
+// Behavior-carrying domain value object. Lives in domain, uses domain types.
+@Value
+@Builder
+public class ConditionGroup {
+    LogicalOperator operator;         // domain enum, not String
+    List<Condition> conditions;
+    List<ConditionGroup> nestedGroups;
+
+    public boolean matches(EvaluationContext ctx) {
+        return operator == LogicalOperator.AND
+            ? allMatch(ctx)
+            : anyMatch(ctx);
+    }
+
+    private boolean allMatch(EvaluationContext ctx) {
+        return conditions.stream().allMatch(c -> c.matches(ctx))
+            && nestedGroups.stream().allMatch(g -> g.matches(ctx));
+    }
+
+    private boolean anyMatch(EvaluationContext ctx) {
+        return conditions.stream().anyMatch(c -> c.matches(ctx))
+            || nestedGroups.stream().anyMatch(g -> g.matches(ctx));
+    }
 }
 ```
 
@@ -106,13 +162,27 @@ public class CustomerServiceImpl implements CustomerServiceI {
     }
 }
 
+// customer/convertor/CustomerDtoVoConvertor.java — MapStruct bridge between client DTO and domain VO
+// This lives in app because app is the only module that knows both client and domain.
+@Mapper(componentModel = "spring")
+public interface CustomerDtoVoConvertor {
+    // Example: ConditionGroupDTO (client, flat, operator as String) → ConditionGroup (domain, rich, LogicalOperator enum)
+    @Mapping(target = "operator", source = "operator", qualifiedByName = "operatorToEnum")
+    ConditionGroup toVo(ConditionGroupDTO dto);
+
+    @Named("operatorToEnum")
+    default LogicalOperator operatorToEnum(String operator) {
+        return operator == null ? null : LogicalOperator.valueOf(operator.toUpperCase());
+    }
+}
+
 // customer/executor/CustomerAddCmdExe.java — write handler
 @Component
 @RequiredArgsConstructor
 public class CustomerAddCmdExe {
     private final CustomerGateway customerGateway;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> execute(CustomerAddCmd cmd) {
         CustomerType type;
         try {
@@ -140,6 +210,8 @@ public class CustomerListByNameQryExe {
     }
 }
 ```
+
+> When Cmd fields are primitives (as in this `CustomerAddCmd` example), a Convertor is overkill — CmdExe maps directly. Use `DtoVoConvertor` when Cmd carries nested DTOs that correspond to domain VOs (e.g., a `TaskRuleAddCmd` with `List<ConditionGroupDTO>` that needs to become `List<ConditionGroup>`).
 
 ## domain Module
 
