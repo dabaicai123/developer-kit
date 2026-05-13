@@ -344,29 +344,16 @@ management:
 
 Verify via Actuator: `/actuator/circuitbreakers` (state transitions), `/actuator/ratelimiters` (limited counts), `/actuator/metrics` (retry counts). See `references/references.md` for testing patterns.
 
-## Best Practices
-
-- **Retry only transient errors** — 5xx, timeouts; NOT 4xx or business exceptions
-- **Size bulkheads based on expected concurrency**
-- **Configure aspect order explicitly** — always set `circuitBreakerAspectOrder` lower than `retryAspectOrder` in Spring Boot 3
-
 ## Constraints and Warnings
 
-**Anti-patterns**:
-
-- **NOT leave aspect order at default in Spring Boot 3** — default places Retry outside CircuitBreaker; each retry attempt counts as a separate failure, inflating failure rates and causing premature circuit opening. Always configure `circuitBreakerAspectOrder` < `retryAspectOrder`.
-- **NOT retry on non-idempotent operations** — POST/PUT requests may execute multiple times; use circuit breaker or timeout instead.
-- **NOT use circuit breaker for operations that must always complete** — circuit breaker intentionally blocks calls when open; use timeout for mandatory-completion scenarios.
-- **NOT mismatch fallback return type** — fallback must return the same type as the original method plus an optional `Exception` parameter.
-- **NOT use String error codes in resilience exceptions** — use integer codes consistent with HTTP status and `Result.fail(code, msg)`.
-
-**Technical constraints**:
-
+- **Configure aspect order explicitly** — always set `circuitBreakerAspectOrder` < `retryAspectOrder` in Spring Boot 3. Default places Retry outside CircuitBreaker, inflating failure rates.
+- **Retry only transient errors** — 5xx, timeouts; NOT 4xx or business exceptions
+- **NOT retry on non-idempotent operations** — POST/PUT may execute multiple times
+- **NOT use circuit breaker for must-complete operations** — circuit breaker blocks calls when open
+- **Fallback must match return type** — same type as original method plus optional `Exception` parameter
 - Circuit breaker state is per-instance; ensure proper bean scoping in multi-tenant scenarios
-- Retry operations must be idempotent (may execute multiple times)
 - Rate limiters can cause thread blocking; configure appropriate `timeoutDuration`
-- Monitor memory when using thread pool bulkheads with high concurrency
-- `resilience4j-spring-boot3` artifact is for Spring Boot 3.x; use `resilience4j-spring-boot4` for Spring Boot 4.x
+- `resilience4j-spring-boot3` for Spring Boot 3.x; `resilience4j-spring-boot4` for Spring Boot 4.x
 
 ## References
 

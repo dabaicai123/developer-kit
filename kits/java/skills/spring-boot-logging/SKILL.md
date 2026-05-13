@@ -263,7 +263,7 @@ public class TraceIdFilter extends OncePerRequestFilter {
 
 ### 5. Log4j2 Async Logging
 
-**Production deployments using Log4j2 must use async logging** to prevent I/O from blocking business threads.
+Production deployments using Log4j2 must use async logging to prevent I/O from blocking business threads.
 
 Add Disruptor dependency:
 
@@ -276,9 +276,7 @@ Add Disruptor dependency:
 </dependency>
 ```
 
-#### All-Async (Recommended)
-
-Set system property before Spring context starts:
+**All-Async (Recommended):** Set system property before Spring context starts:
 
 ```java
 @SpringBootApplication
@@ -293,70 +291,27 @@ public class Application {
 
 Or JVM argument: `-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector`
 
-When all-async is enabled, use regular `<Logger>` and `<Root>` — no `<AsyncLogger>` needed.
-
-#### Mixed Async (Selective)
-
-Use `<AsyncLogger>` for high-frequency loggers, `<Logger>` for sync ones that need immediate flush:
-
-```xml
-<Loggers>
-    <!-- Async: high-frequency business logs -->
-    <AsyncLogger name="com.example" level="DEBUG" includeLocation="false">
-        <AppenderRef ref="File"/>
-        <AppenderRef ref="Console"/>
-    </AsyncLogger>
-
-    <!-- Sync: low-frequency audit logs need immediate flush -->
-    <Logger name="com.example.audit" level="INFO">
-        <AppenderRef ref="File"/>
-    </Logger>
-
-    <AsyncRoot level="INFO" includeLocation="false">
-        <AppenderRef ref="Console"/>
-        <AppenderRef ref="File"/>
-    </AsyncRoot>
-</Loggers>
-```
-
-#### Async Tuning
+**Async Tuning:**
 
 ```properties
-# Ring buffer size — must be power of 2 (default: 262144 = 256K)
-log4j2.asyncLoggerRingBufferSize=262144
-
-# Wait strategy: Block (highest throughput), Timeout, Sleep, Yield
+log4j2.asyncLoggerRingBufferSize=262144  # Must be power of 2
 log4j2.asyncLoggerWaitStrategy=Timeout
-
-# Queue full policy: Discard drops DEBUG/TRACE when busy
 log4j2.asyncQueueFullPolicy=Discard
-
-# Discard threshold — events at this level or below are dropped when queue is full
-log4j2.discardThreshold=INFO
 ```
 
-#### includeLocation="false"
-
-`includeLocation="false"` disables class/method/line-number in log output. Location lookup is **10x slower** in async mode because it happens on the business thread before enqueue. Production should disable it unless debugging. When disabled, use parameterized logging: `log.info("userId={}", id)`.
+**includeLocation="false":** Disables class/method/line-number in log output. Location lookup is 10x slower in async mode. Production should disable it unless debugging.
 
 ## Constraints and Warnings
 
-**Anti-patterns**:
-
-- **Replacing Logback with Log4j2 just for JSON logging** — Spring Boot 3.5 provides built-in structured logging with Logback via `logging.structured.format.*`. Switching frameworks is unnecessary for most applications. Use Log4j2 only if you need specific features like Disruptor-based async logging or custom appenders.
-- **String concatenation in log statements** — `log.info("userId=" + id)` creates strings even when the level is disabled. Use parameterized logging: `log.info("userId={}", id)`.
-- **Logging passwords, tokens, JWT secrets, or PII** — never log credentials or personally identifiable information in exception messages or log output.
-- **Setting `includeLocation="true"` on all loggers in production** — location lookup is 10x slower in async mode. Set `includeLocation="true"` only on specific debug loggers.
-- **Using MDC or ThreadContext without clearing in `finally`** — context leaks to subsequent requests on the same thread. Always clear in `finally`.
-- **Blocking business threads on I/O for logging** — production must use async logging (Disruptor for Log4j2, or Logback's `AsyncAppender`) to prevent log I/O from slowing request processing.
-- **Logging 4xx errors at ERROR level** — client errors are expected behavior, not system failures. Use WARN for 4xx, ERROR for 5xx.
-
-**Technical constraints**:
-
-- **Spring Boot 3.5's built-in structured logging uses Logback only** — it does not work with Log4j2. If you switch to Log4j2, you lose `logging.structured.format.*` support and must configure JSON output manually via `JsonTemplateLayout`.
-- **Log4j2 async mode requires `log4j2.contextSelector` set before Spring context starts** — setting it after `SpringApplication.run()` has no effect. Set it in `main()` before the run call, or via JVM `-D` argument.
-- **`log4j2-spring.xml` uses `<SpringProfile>` while `logback-spring.xml` uses `<springProfile>`** — the element name differs between frameworks.
-- **Disruptor 4.0 requires Java 11+** — compatible with Spring Boot 3.5's Java 17 minimum.
+- **Replacing Logback with Log4j2 just for JSON logging** — Spring Boot 3.5 provides built-in structured logging with Logback via `logging.structured.format.*`. Use Log4j2 only if you need Disruptor-based async logging or custom appenders.
+- **String concatenation in log statements** — `log.info("userId=" + id)` creates strings even when level is disabled. Use parameterized logging: `log.info("userId={}", id)`.
+- **Logging passwords, tokens, JWT secrets, or PII** — never log credentials or personally identifiable information.
+- **Setting `includeLocation="true"` in production** — location lookup is 10x slower in async mode. Set only on specific debug loggers.
+- **Using MDC or ThreadContext without clearing in `finally`** — context leaks to subsequent requests on the same thread.
+- **Blocking business threads on I/O for logging** — production must use async logging to prevent log I/O from slowing request processing.
+- **Logging 4xx errors at ERROR level** — client errors are expected behavior. Use WARN for 4xx, ERROR for 5xx.
+- **Spring Boot 3.5's built-in structured logging uses Logback only** — does not work with Log4j2. If you switch to Log4j2, you lose `logging.structured.format.*` support.
+- **Log4j2 async mode requires `log4j2.contextSelector` set before Spring context starts** — set it in `main()` before the run call, or via JVM `-D` argument.
 
 ## References
 

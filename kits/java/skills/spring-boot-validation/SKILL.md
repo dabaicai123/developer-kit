@@ -119,12 +119,9 @@ public class UserController {
 
 ### 4. Create custom validators
 
-Define domain-specific validation annotations for rules not covered by built-in constraints:
+Define domain-specific validation annotations (must include `message()`, `groups()`, `payload()` per JSR-380). Null is valid per JSR-380 — use `@NotNull` separately:
 
 ```java
-/**
- * Custom phone number validation — message(), groups(), payload() required by JSR-380.
- */
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = PhoneNumberValidator.class)
@@ -134,7 +131,6 @@ public @interface ValidPhone {
     Class<? extends Payload>[] payload() default {};
 }
 
-// null is valid per JSR-380 — use @NotNull separately for null checks
 public class PhoneNumberValidator implements ConstraintValidator<ValidPhone, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext ctx) {
@@ -143,11 +139,9 @@ public class PhoneNumberValidator implements ConstraintValidator<ValidPhone, Str
 }
 ```
 
-Custom validator with dependency injection (e.g., checking database uniqueness):
+Custom validator with dependency injection:
 
 ```java
-@Target({ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = UniqueEmailValidator.class)
 public @interface UniqueEmail {
     String message() default "Email already exists";
@@ -155,18 +149,12 @@ public @interface UniqueEmail {
     Class<? extends Payload>[] payload() default {};
 }
 
-// Spring injects dependencies into ConstraintValidator implementations
 public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, String> {
     private final UserRepository userRepository;
 
-    public UniqueEmailValidator(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
     @Override
     public boolean isValid(String email, ConstraintValidatorContext ctx) {
-        if (email == null) return true;
-        return !userRepository.existsByEmail(email);
+        return email == null || !userRepository.existsByEmail(email);
     }
 }
 ```
@@ -345,33 +333,18 @@ public class CreateUserCmd extends Command {
 
 Spring Boot auto-detects `messages.properties` in the classpath root.
 
-## Rules
-
-### Must
+## Constraints and Warnings
 
 - `@Valid` on `@RequestBody`; `@Validated` for groups and path/query params
-- `@Validated` on controller class when using path/query param constraints
-- `@Valid` on nested fields to cascade validation
+- `@Validated` on controller class required for path/query param constraints
+- `@Valid` on nested fields to cascade validation — omitting silently skips inner constraints
 - Custom validators: null is valid per JSR-380; include `message()`, `groups()`, `payload()`
-- Constraints on DTOs, not entities
-- Handle both `MethodArgumentNotValidException` and `ConstraintViolationException` in global exception handler
-
-### Must NOT
-
-- NOT manual if-checks — use `@NotBlank`, `@NotNull` etc. instead
-- NOT re-validate in service layer after controller `@Valid` — format checks are redundant at boundary
-- NOT validate entities — entities are constructed in mappers/tests/DB reads where constraints may not apply
-- NOT return false for null in custom validators — violates JSR-380; use `@NotNull` separately
-- NOT omit `@Valid` on nested fields — inner constraints are silently skipped
-- NOT omit `@Validated` on controller for path/query params — constraints like `@Positive` on `@PathVariable` are silently ignored
-- NOT use validation groups for everything — prefer separate DTOs when create/update differ significantly
-- NOT put business rules in annotations — format/constraint checks only; business rules belong in service layer
-
-### Notes
-
+- Constraints on DTOs, not entities — entities are constructed in mappers/tests/DB reads where constraints may not apply
+- No manual if-checks — use `@NotBlank`, `@NotNull` etc. instead
+- No re-validation in service layer after controller `@Valid` — format checks are redundant at boundary
+- No business rules in annotations — format/constraint checks only; business rules belong in service layer
 - `@Valid` (JSR-380) validates all constraints, no group support; `@Validated` (Spring) supports groups and method-level validation
 - `MethodArgumentNotValidException` from `@Valid` on `@RequestBody`; `ConstraintViolationException` from `@Validated` on method params
-- `@ConfigurationProperties` validation errors cause startup failure (intentional)
 - Validation happens before `@Transactional` — `MethodArgumentNotValidException` never enters transactional context
 
 ## Related Skills

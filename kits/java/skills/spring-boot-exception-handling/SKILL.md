@@ -300,37 +300,27 @@ public class PaymentController {
 ## Best Practices
 
 - **All API responses use `Result<T>` wrapper** — `{"code":200,"msg":"success","data":...}`
-- **Errors return `Result.fail(code, msg)`** — this project uses `Result<T>` as its unified response contract. Do not mix `ProblemDetail` (RFC 7807) or `ResponseEntity` within the same API. `ProblemDetail` is a valid Spring Boot 3.5 standard for other projects; this project has chosen `Result<T>` instead.
+- **Errors return `Result.fail(code, msg)`** — this project uses `Result<T>` as unified response contract. Do not mix `ProblemDetail` (RFC 7807) or `ResponseEntity`.
 - **Never expose stack traces or internal details in responses** — the `Exception.class` catch-all must return a generic message
 - **Log 4xx at WARN, 5xx at ERROR with full stack trace** — client errors are expected, server errors indicate bugs
-- **Never log passwords, tokens, JWT secrets, or PII in exception messages**
 - **Define a structured error code system** — per-module prefixes give clients programmatic error handling
-- **Avoid duplicate error code names** — even if two scenarios seem similar (both "not found"), use distinct names reflecting the specific semantics. `STRATEGY_CONFIG_NOT_FOUND` vs `CHANNEL_STRATEGY_MISSING` is better than `STRATEGY_NOT_FOUND` appearing twice with different codes.
-- **Use `@Order(Ordered.HIGHEST_PRECEDENCE)` on global handler** — ensures it runs before any framework handlers
+- **Use `@Order(Ordered.HIGHEST_PRECEDENCE)` on global handler** — ensures it runs before framework handlers
 - **Throw `BusinessException` subclasses from service layer** — let the global handler catch and format them
-- **Prefer throwing exceptions over returning error Result from service methods** — keeps service signatures clean and lets the handler normalize the response
 
 ## Constraints and Warnings
 
-**Anti-patterns**:
-
-- **Catching `Exception` and swallowing it** — prevents rollback in `@Transactional` methods; the proxy only sees a normal return. Either re-throw or use `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()`.
+- **Catching `Exception` and swallowing it** — prevents rollback in `@Transactional` methods. Either re-throw or use `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()`.
 - **Exposing stack traces in API responses** — leaks internal architecture, library versions, and file paths to attackers.
-- **Using String error codes** (`"NOT_FOUND"`, `"ERROR"`) — not sortable, not numeric, inconsistent with HTTP status conventions. Use integer codes.
-- **Mixing `Result<T>` with `ProblemDetail` or `ResponseEntity`** — breaks the unified response contract. This project uses `Result<T>` exclusively. `ProblemDetail` (RFC 7807) is a valid Spring Boot 3.5 standard, but the two formats must not coexist in the same API.
+- **Using String error codes** — not sortable, not numeric, inconsistent with HTTP status conventions. Use integer codes.
+- **Mixing `Result<T>` with `ProblemDetail` or `ResponseEntity`** — breaks unified response contract.
 - **Throwing raw `RuntimeException` or `NullPointerException`** — unstructured, no error code, no business context. Always throw `BusinessException` subclasses.
 - **Logging 4xx errors at ERROR level** — floods error logs with expected client mistakes. Use WARN for 4xx, ERROR for 5xx.
-- **Re-validating in service layer after controller `@Valid`** — redundant and wasteful. Validate at the controller boundary only.
 - **Catch-all handler that returns the exception message verbatim** — `return Result.fail(500, e.getMessage())` leaks internal details. Return a fixed generic message for 5xx.
 - **Multiple `@RestControllerAdvice` classes handling the same exception type** — causes ambiguous handler resolution. Use a single global handler with `@Order`.
-- **Duplicate enum constant names in ErrorCodes** — never define the same constant name twice with different codes (e.g., `STRATEGY_NOT_FOUND = 404` and `STRATEGY_NOT_FOUND = 5002`). Java enum/constants must be unique by name. When two errors have similar names but different semantics, use distinct names: `STRATEGY_CONFIG_NOT_FOUND = 404` vs `CHANNEL_STRATEGY_MISSING = 5002`.
-
-**Technical constraints**:
-
-- **`@RestControllerAdvice` catches exceptions from all controller types** — it is composed of `@ControllerAdvice` + `@ResponseBody`. It handles exceptions from both `@RestController` and `@Controller` methods. The `@ResponseBody` part means responses are written directly to the response body (JSON). For non-controller exceptions (filters, interceptors), use `@ControllerAdvice` without `@ResponseBody` or register error pages.
-- **Validation exception handler must handle both `MethodArgumentNotValidException` (from `@Valid` on `@RequestBody`) and `ConstraintViolationException` (from `@Validated` on path/query params)** — these are separate exception types with different message formats. In Spring Boot 3.5.x with Jakarta EE 10, `ConstraintViolationException` comes from `jakarta.validation` (not `javax.validation`).
-- **The catch-all `@ExceptionHandler(Exception.class)` must be defined last** — Spring resolves handlers by exception type specificity; more specific types are matched first.
-- **Never expose stack traces, SQL statements, or internal class names in error responses** — these are security risks that leak implementation details.
+- **Duplicate enum constant names in ErrorCodes** — never define the same constant name twice with different codes. Use distinct names: `STRATEGY_CONFIG_NOT_FOUND = 404` vs `CHANNEL_STRATEGY_MISSING = 5002`.
+- **`@RestControllerAdvice` catches exceptions from all controller types** — composed of `@ControllerAdvice` + `@ResponseBody`. Handles exceptions from both `@RestController` and `@Controller`.
+- **Validation exception handler must handle both `MethodArgumentNotValidException` (from `@Valid` on `@RequestBody`) and `ConstraintViolationException` (from `@Validated` on path/query params)** — separate exception types with different message formats.
+- **The catch-all `@ExceptionHandler(Exception.class)` must be defined last** — Spring resolves handlers by exception type specificity.
 
 ## References
 
