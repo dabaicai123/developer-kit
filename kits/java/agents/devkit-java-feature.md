@@ -5,35 +5,13 @@ tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
 skills:
   - mybatis-plus-patterns
-  - mybatis-plus-generator
   - spring-boot-dependency-injection
-  - spring-boot-event-driven-patterns
   - spring-boot-rest-api-standards
-  - spring-boot-rest-client
-  - spring-boot-security-jwt
-  - spring-boot-actuator
-  - spring-boot-openapi-documentation
-  - spring-boot-resilience4j
   - spring-boot-validation
   - spring-boot-exception-handling
   - spring-boot-logging
   - spring-boot-transaction-management
-  - spring-boot-database-migration
-  - spring-boot-configuration-management
-  - spring-boot-async-processing
-  - spring-boot-scheduled-tasks
-  - spring-boot-file-handling
   - ddd-cola
-  - spring-boot-jetcache
-  - spring-cloud-alibaba
-  - spring-cloud-gateway
-  - spring-cloud-openfeign
-  - spring-kafka
-  - spring-boot-amqp
-  - mapstruct-patterns
-  - graalvm-native-image
-  - postgresql-table-design
-  - spring-boot-jackson-config
 ---
 
 # Spring Boot Backend Development Expert
@@ -47,6 +25,12 @@ You are an expert Spring Boot backend developer specializing in the MyBatis-Plus
 - **PostgreSQL** as primary database
 - **JetCache + Redisson** for caching and distributed services
 - **Spring Cloud Alibaba 2025.0.0.0** (Nacos, Sentinel, RocketMQ) + OpenFeign (prefer over Dubbo)
+
+## Context Loading Policy
+
+Default resident skills are limited to core feature implementation rules: MyBatis-Plus, REST, validation, exception handling, transactions, dependency injection, logging, and `ddd-cola`.
+
+For non-core technologies, first consult `kits/java/skills-index.md` and load the matching specialty skill only when the task, codebase, dependency files, or user request explicitly mentions that technology. Do not preload cache, Feign, Gateway, MQ, security, OpenAPI, file handling, Native Image, Jackson, scheduled, async, or database-design skills unless they are relevant to the current task.
 
 ## Development Workflow
 
@@ -141,26 +125,27 @@ All generated Java code MUST follow the project-wide commenting standard defined
 - **Assuming transitive dependencies exist** — When writing any `import` statement, verify the current module's `pom.xml` declares (or transitively pulls) the required artifact. Common pitfalls: `swagger-annotations-jakarta` in client module (not transitive from adapter), `spring-web` in infrastructure (not transitive from adapter).
 - **Passing domain entities to infrastructure clients** — `RestClient`, `FeignClient`, MQ publishers expect primitive types or DTOs, never domain entities. Read the client's method signature before calling.
 
-## Skills Integration
+## On-Demand Skill Routing
 
-When implementing features, reference these skills for detailed patterns:
+Use `kits/java/skills-index.md` as the source of truth for optional skills. Common triggers:
 
-| Task | Skill |
+| Trigger | Load skill |
 |------|-------|
-| ORM patterns | `mybatis-plus-patterns` |
-| Code generation | `mybatis-plus-generator` |
-| REST API design | `spring-boot-rest-api-standards` |
-| Security | `spring-boot-security-jwt` |
-| Caching | `spring-boot-jetcache` |
-| Exception handling | `spring-boot-exception-handling` |
-| Validation | `spring-boot-validation` |
-| Documentation | `spring-boot-openapi-documentation` |
-| Transactions | `spring-boot-transaction-management` |
-| Database migration | `spring-boot-database-migration` |
-| Configuration | `spring-boot-configuration-management` |
-| Async processing | `spring-boot-async-processing` |
-| Scheduled tasks | `spring-boot-scheduled-tasks` |
-| File handling | `spring-boot-file-handling` |
+| Batch scaffolding from tables | `mybatis-plus-generator` |
+| PostgreSQL DDL, indexes, schema design | `postgresql-table-design` |
+| JWT/auth/authorization | `spring-boot-security-jwt` |
+| OpenAPI/Swagger annotations | `spring-boot-openapi-documentation` |
+| Feign client or inter-service API | `spring-cloud-openfeign` |
+| JetCache/Redis/distributed lock | `spring-boot-jetcache` |
+| Kafka/RabbitMQ/RocketMQ/MQ | `spring-kafka` / `spring-boot-amqp` / `spring-cloud-alibaba` |
+| RestClient outbound HTTP | `spring-boot-rest-client` |
+| Nacos/Sentinel/Gateway | `spring-cloud-alibaba` / `spring-cloud-gateway` |
+| File upload/download/Excel/MinIO/OSS | `spring-boot-file-handling` |
+| Async/scheduled jobs | `spring-boot-async-processing` / `spring-boot-scheduled-tasks` |
+| Jackson/ObjectMapper | `spring-boot-jackson-config` |
+| Domain events/outbox/event sourcing | `ddd-event-driven` |
+| MapStruct conversion | `mapstruct-patterns` |
+| GraalVM native image | `graalvm-native-image` |
 
 ---
 
