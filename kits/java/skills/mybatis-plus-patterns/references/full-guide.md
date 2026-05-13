@@ -16,11 +16,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 - Setting up MyBatis-Plus interceptors
 - Writing LambdaQueryWrapper queries
 
-## When NOT to Use
-
-- For batch code generation from database tables → use `mybatis-plus-generator`
-- `mybatis-plus-generator` creates full CRUD scaffolding; this skill is for coding patterns when writing/editing individual modules
-
 ## Architecture Note
 
 - **MVC projects**: Use `IService/ServiceImpl` pattern (see Service section below)
@@ -31,7 +26,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 - `spring-boot-transaction-management` — transaction boundaries with MyBatis-Plus IService/ServiceImpl
 - `spring-boot-database-migration` — manual SQL changesets for schema evolution
 - `postgresql-table-design` — PostgreSQL data types, indexing, and constraints
-- `mybatis-plus-generator` — batch code generation from database tables
 - `ddd-cola` — COLA/DDD Gateway pattern for complex domains
 
 ## Mapper Pattern
@@ -139,7 +133,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
 Since **3.5.9**, the pagination plugin requires a separate `mybatis-plus-jsqlparser` dependency. For **Spring Boot 3.x**, use `mybatis-plus-spring-boot3-starter` (not the old `mybatis-plus-boot-starter`):
 
-Add `mybatis-plus-spring-boot3-starter` 3.5.9 and `mybatis-plus-jsqlparser` 3.5.9. See `ddd-cola` or `mybatis-plus-generator` for full dependency blocks.
+Add `mybatis-plus-spring-boot3-starter` 3.5.9 and `mybatis-plus-jsqlparser` 3.5.9. See `ddd-cola` for full dependency blocks.
 
 ```java
 @Configuration

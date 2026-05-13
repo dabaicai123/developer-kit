@@ -131,7 +131,6 @@ Use `kits/java/skills-index.md` as the source of truth for optional skills. Comm
 
 | Trigger | Load skill |
 |------|-------|
-| Batch scaffolding from tables | `mybatis-plus-generator` |
 | PostgreSQL DDL, indexes, schema design | `postgresql-table-design` |
 | JWT/auth/authorization | `spring-boot-security-jwt` |
 | OpenAPI/Swagger annotations | `spring-boot-openapi-documentation` |

@@ -68,7 +68,7 @@ Two converter types, two distinct names — do NOT use the same suffix for both:
 | `XxxDomainConverter` | Domain ↔ DO | `infrastructure/{domain}/gatewayimpl/database/` | e.g. `OrderDomainConverter` |
 | `XxxDOConverter` | DO → DTO (read path) | `app/{domain}/converter/` | e.g. `OrderDOConverter` |
 
-> Naming alignment: matches `ddd-cola` and `mybatis-plus-generator`. Never name a Domain↔DO converter `XxxDOConverter` — that suffix is reserved for the DO→DTO converter used by `QryExe`.
+> Naming alignment: matches `ddd-cola`. Never name a Domain↔DO converter `XxxDOConverter` — that suffix is reserved for the DO→DTO converter used by `QryExe`.
 
 ## Converter Location in COLA Layers
 

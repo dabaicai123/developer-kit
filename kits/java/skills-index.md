@@ -17,7 +17,6 @@ This file is the lightweight routing table for Java agents. Agent frontmatter sh
 
 | Trigger | Load skill |
 | --- | --- |
-| code generation from existing tables, batch scaffolding | `mybatis-plus-generator` |
 | table DDL, index, PostgreSQL data type, schema review | `postgresql-table-design` |
 | OpenAPI, Swagger, `@Operation`, API docs | `spring-boot-openapi-documentation` |
 | JWT, token, auth, authorization, `@PreAuthorize` | `spring-boot-security-jwt`, `spring-boot-security` |
