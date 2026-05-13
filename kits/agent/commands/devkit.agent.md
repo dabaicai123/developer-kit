@@ -73,3 +73,9 @@ Before implementation, define:
 | CrewAI patterns | `crewai-patterns` |
 | LlamaIndex RAG | `llamaindex-rag-patterns` |
 | LangGraph patterns | `langgraph-patterns` |
+| OpenAI Agents / PydanticAI | `openai-agents-pydantic-ai` |
+| Streaming & realtime | `agent-streaming-realtime` |
+| Human interaction | `agent-human-interaction` |
+| Error recovery | `agent-error-recovery` |
+| Planning & reasoning | `agent-planning-reasoning` |
+| Cost optimization | `agent-cost-optimization` |

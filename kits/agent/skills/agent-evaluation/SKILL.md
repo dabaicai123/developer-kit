@@ -44,6 +44,7 @@ Testing and benchmarking LLM agents including behavioral testing, capability ass
 
 - Does not cover: Model training evaluation (loss, perplexity), Fairness and bias testing, User experience testing
 - Boundaries: Focus is agent capability and reliability, Covers functional and behavioral testing
+- **Scope boundary vs `agent-testing-debugging`**: This skill covers *evaluating* agent behavior (benchmark design, LLM-as-judge, regression testing, statistical analysis). Use `agent-testing-debugging` for *debugging* failed agent runs (trace analysis, error diagnosis, fixing broken loops). If you're designing an eval suite, use this skill. If you're diagnosing why a specific run failed, use `agent-testing-debugging`.
 
 ## Ecosystem
 

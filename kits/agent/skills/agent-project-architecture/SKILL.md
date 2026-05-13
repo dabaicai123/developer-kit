@@ -291,17 +291,10 @@ src/
 
 ### CrewAI Project
 
-```
-src/
-  config/
-    agents.yaml       → Agent role/goal/backstory definitions
-    tasks.yaml        → Task description/expected_output definitions
-  orchestration/
-    flow.py           → Flow class with @start, @listen, @router
-    crews/            → Crew compositions
-      research_crew.py
-      analysis_crew.py
-```
+For detailed CrewAI project layout, agents.yaml, tasks.yaml conventions, and Flow/Crew directory structure, see the `crewai-project-architecture` skill. The key difference from the general layout:
+
+- `config/` holds YAML definitions for agents, tasks, and crews (CrewAI convention)
+- `orchestration/crews/` contains Crew compositions; `orchestration/flow.py` defines the Flow class
 
 ### OpenAI Agents SDK Project
 
@@ -334,6 +327,33 @@ src/
     providers.py      → Dependency provider factories
     types.py          → @dataclass dependency definitions
 ```
+
+## Naming Conventions
+
+Consistent naming across all agent system components. Use descriptive, domain-oriented names following these patterns:
+
+| Component | Pattern | Example |
+|---|---|---|
+| Agent names | `{role}_agent` | `researcher_agent`, `analyst_agent` |
+| Crew names | `{purpose}_crew` | `research_crew`, `content_generation_crew` |
+| Flow names | `{workflow}_flow` | `report_generation_flow`, `data_pipeline_flow` |
+| Tool names | `{action}_{target}_tool` | `search_web_tool`, `query_database_tool` |
+| Pydantic models | PascalCase domain entities | `ResearchReport`, `AnalysisResult` |
+| Schema fields | snake_case | `query_text`, `result_count`, `confidence_score` |
+| Enum values | UPPER_SNAKE_CASE | `TOOL_CALL_SUCCESS`, `TOOL_CALL_FAILURE` |
+| YAML keys | snake_case | `llm_provider`, `max_iterations`, `memory_backend` |
+| Environment variables | UPPER_SNAKE_CASE | `OPENAI_API_KEY`, `CREWAI_LOG_LEVEL` |
+| System prompts | `{role}_system_prompt.md` | `researcher_system_prompt.md` |
+| Task templates | `{task_name}_task_template.md` | `analyze_data_task_template.md` |
+| MCP server identifiers | `{domain}_mcp_server` | `database_mcp_server` |
+| MCP tool names | `{action}_{resource}` | `query_orders`, `read_file` |
+| Skill files | `SKILL.md` in skill directory | Always `SKILL.md` |
+
+Naming anti-patterns:
+- Generic numbered names (`agent_1`, `tool_a`) — always use descriptive role/action names
+- Mixing naming conventions (PascalCase tools, camelCase models) — stay consistent per category
+- Abbreviations without documentation (`svc_t`, `proc_a`) — use full words
+- Name collisions between tools and agents — namespace by role/action
 
 ## Production Readiness Checklist
 

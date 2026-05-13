@@ -349,7 +349,7 @@ def get_weather(location: str, unit: str = "fahrenheit") -> str:
     return json.dumps({"temperature": "72°F", "conditions": "Sunny"})
 
 runner = client.beta.messages.tool_runner(
-    model="claude-sonnet-4-5", max_tokens=1024,
+    model="claude-sonnet-4-6", max_tokens=1024,
     tools=[get_weather],
     messages=[{"role": "user", "content": "What's the weather in Paris?"}]
 )

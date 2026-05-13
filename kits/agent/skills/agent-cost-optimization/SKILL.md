@@ -41,14 +41,14 @@ LLM calls dominate. Optimize them first. Every strategy in this skill targets LL
 
 | Model | Input (per 1M tokens) | Output (per 1M tokens) | Best For |
 |---|---|---|---|
-| claude-haiku-4-5 | $0.80 | $4.00 | Routing, classification, simple extraction |
+| claude-haiku-4-5 | $1.00 | $5.00 | Routing, classification, simple extraction |
 | claude-sonnet-4-6 | $3.00 | $15.00 | Main agent reasoning, tool selection |
-| claude-opus-4-7 | $15.00 | $75.00 | Complex planning, high-stakes decisions |
+| claude-opus-4-7 | $5.00 | $25.00 | Complex planning, high-stakes decisions |
 | gpt-4o-mini | $0.15 | $0.60 | Classification, formatting, simple tasks |
 | gpt-4.1 | $2.00 | $8.00 | General agent reasoning |
 | gpt-4.1-mini | $0.40 | $1.60 | Routing, simple tool calls |
 
-Cost ratio: Opus vs Haiku input is ~19x. One Opus call costs the same as ~19 Haiku calls. Route aggressively.
+Cost ratio: Opus vs Haiku input is 5x. One Opus call costs the same as ~5 Haiku calls. Route aggressively.
 
 ## Strategy 1: Model Routing
 
@@ -379,7 +379,7 @@ Start with model routing and spend limits — they have the highest impact with 
 
 | Anti-Pattern | Why It Fails | Correct Approach |
 |---|---|---|
-| Using the most expensive model for every step | Opus/GPT-4.1 for classification costs 19x more than necessary | Route based on task complexity |
+| Using the most expensive model for every step | Opus/GPT-4.1 for classification costs 5x more than necessary | Route based on task complexity |
 | No token budget per run | Runaway agents can cost $50+ per task | Set and enforce token budgets |
 | Caching temperature>0 responses | Non-deterministic outputs cached incorrectly | Only cache temperature=0 |
 | Modifying system prompt between steps | Breaks prompt caching, re-pays full input cost | Keep system prompts stable within a session |

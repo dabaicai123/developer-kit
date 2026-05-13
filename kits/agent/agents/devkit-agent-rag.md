@@ -123,4 +123,4 @@ llama_index.core.global_handler = "arize_phoenix"  # or "langfuse", "mlflow", et
 
 ---
 
-**Remember**: LlamaIndex felt like it was six months to a year ahead of alternatives. Start with simple RAG, add agentic capabilities progressively. Evaluate at every stage.
+**Remember**: Start with simple RAG, add agentic capabilities progressively. Evaluate at every stage. For deep LlamaIndex patterns, refer to the `llamaindex-rag-patterns` skill.
