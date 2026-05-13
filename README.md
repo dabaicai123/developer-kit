@@ -8,12 +8,12 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 
 | Kit | Description / 描述 | Skills | Agents | Commands | Rules |
 |-----|---------------------|--------|--------|----------|-------|
-| **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 50 | 6 | 6 | 8 |
+| **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 40 | 6 | 6 | 6 |
 | **frontend** | Next.js + Tailwind v4 + React + TypeScript / 前端全栈 | 13 | 3 | 3 | 5 |
-| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 13 | 3 | 1 | 3 |
+| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 22 | 2 | 1 | 3 |
 | **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
 
-> **79 skills total / 共 79 个技能**
+> **78 skills total / 共 78 个技能**
 
 ## Tech Stack / 技术栈
 
@@ -119,6 +119,8 @@ Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .c
 | `spring-boot-scheduled-tasks` | @Scheduled, XXL-Job distributed scheduling / 定时任务与分布式调度 |
 | `spring-boot-file-handling` | File upload/download, MinIO/OSS, EasyExcel / 文件上传下载与 MinIO/OSS |
 | `spring-boot-amqp` | RabbitMQ: Jackson converter, producer/consumer, DLX / RabbitMQ 生产者消费者与死信 |
+| `spring-boot-openapi-documentation` | SpringDoc 2.8.x + OpenAPI 3.0 for DDD/COLA / SpringDoc + OpenAPI DDD 项目文档 |
+| `spring-boot-jackson-config` | Jackson ObjectMapper config: JavaTimeModule, serialization / Jackson 序列化配置 |
 
 ### Security / 安全
 
@@ -144,24 +146,13 @@ Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .c
 | `spring-boot-load-testing` | k6 load testing / k6 负载测试 |
 | `spring-boot-resilience4j` | Resilience4j patterns / Resilience4j 容错模式 |
 
-### Testing (17) / 测试（17 项）
+### Testing (6) / 测试（6 项）
 
 | Skill | Description / 描述 |
 |-------|---------------------|
-| `unit-test-service-layer` | Service layer unit testing / Service 层单元测试 |
-| `unit-test-controller-layer` | Controller layer unit testing / Controller 层单元测试 |
-| `unit-test-bean-validation` | Bean validation testing / Bean 校验测试 |
-| `unit-test-exception-handler` | Exception handler testing / 异常处理器测试 |
-| `unit-test-boundary-conditions` | Boundary condition testing / 边界条件测试 |
-| `unit-test-parameterized` | Parameterized testing / 参数化测试 |
-| `unit-test-mapper-converter` | Mapper/converter testing / Mapper/Converter 测试 |
-| `unit-test-json-serialization` | JSON serialization testing / JSON 序列化测试 |
-| `unit-test-caching` | Caching testing / 缓存测试 |
-| `unit-test-config-properties` | Configuration testing / 配置属性测试 |
+| `spring-boot-slice-testing` | Spring Context slice tests (Events, Scheduled, ConfigProps, @JsonTest, Caching) / Spring 分层测试 |
+| `unit-test-techniques` | General JUnit 5 techniques: parameterized, boundary, utility / 通用 JUnit 5 测试技巧 |
 | `unit-test-security-authorization` | Security authorization testing / 安全授权测试 |
-| `unit-test-application-events` | Application events testing / 应用事件测试 |
-| `unit-test-scheduled-async` | Scheduled/async testing / 定时与异步测试 |
-| `unit-test-utility-methods` | Utility methods testing / 工具方法测试 |
 | `unit-test-wiremock-rest-api` | WireMock REST API testing / WireMock REST API 测试 |
 | `spring-boot-tdd` | TDD workflow / TDD 工作流 |
 | `spring-boot-verification` | Verification patterns (build + test + security) / 验证模式（构建+测试+安全） |
@@ -204,10 +195,8 @@ Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .c
 |------|----------------------|
 | `naming-conventions` | `**/*.java` / 命名规范 |
 | `project-structure` | `**/*.java` / 项目结构 |
-| `language-best-practices` | `**/*.java` / 语言最佳实践 |
 | `error-handling` | `**/*.java` / 错误处理 |
-| `coding-style` | `**/*.java` / 编码风格 |
-| `common-coding-style` | `**/*.java` / 通用编码风格 |
+| `java-coding-style` | `**/*.java` / Java 编码风格 |
 | `mybatis-plus-conventions` | `**/*Mapper.java`, `**/*Service.java` / MyBatis-Plus 约定 |
 | `transaction-conventions` | `**/*Service.java` / 事务约定 |
 
@@ -263,7 +252,7 @@ Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .c
 
 ## Agent Kit / 智能体工具包
 
-### Agent Skills / 智能体技能
+### Core Agent Patterns / 智能体核心模式
 
 | Skill | Description / 描述 |
 |-------|---------------------|
@@ -272,20 +261,43 @@ Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .c
 | `agent-prompt-engineering` | Prompt templates, system prompts / 提示词工程 |
 | `agent-context-management` | Context window, summarization, token budgets / 上下文管理与压缩 |
 | `agent-memory-systems` | Short-term/long-term memory, episodic / 智能体记忆系统 |
+| `agent-planning-reasoning` | Tree of Thought, MCTS, HTN, constraint satisfaction / 智能体规划与推理模式 |
+| `agent-human-interaction` | Human-in-the-loop, escalation, clarification dialogs / 智能体人机交互模式 |
+| `agent-error-recovery` | Circuit breakers, retry, self-healing, fallback / 智能体容错与恢复模式 |
+
+### Observability & Operations / 可观测性与运营
+
+| Skill | Description / 描述 |
+|-------|---------------------|
 | `agent-observability` | Logging, tracing, cost tracking / 智能体可观测性 |
 | `agent-evaluation` | Benchmarks, scoring, regression testing / 智能体评估 |
+| `agent-cost-optimization` | Token budgeting, model routing, LLM caching / 智能体成本优化 |
+
+### Safety & Quality / 安全与质量
+
+| Skill | Description / 描述 |
+|-------|---------------------|
 | `agent-guardrails` | Safety, validation, output filtering / 智能体安全护栏 |
+| `agent-streaming-realtime` | SSE/WebSocket streaming, progressive delivery / 智能体流式与实时模式 |
+| `agent-testing-debugging` | Unit/integration testing, trajectory replay, mock LLMs / 智能体测试与调试 |
+
+### Multi-Agent & Frameworks / 多智能体与框架
+
+| Skill | Description / 描述 |
+|-------|---------------------|
 | `multi-agent-orchestration` | Multi-agent coordination, routing / 多智能体编排 |
 | `langgraph-patterns` | LangGraph state graphs, branching, persistence / LangGraph 状态图模式 |
 | `crewai-patterns` | CrewAI crew/process/task patterns / CrewAI 多角色协作模式 |
+| `crewai-project-architecture` | CrewAI project scaffolding, YAML-first definitions / CrewAI 项目架构 |
 | `llamaindex-rag-patterns` | LlamaIndex RAG pipelines, chunking, retrieval / LlamaIndex RAG 管线模式 |
 | `mcp-integration` | MCP server design, tool registration / MCP 集成与工具注册 |
+| `openai-agents-pydantic-ai` | OpenAI Agents SDK & PydanticAI patterns / OpenAI Agents 与 PydanticAI 模式 |
+| `agent-project-architecture` | General agent project scaffolding / 智能体项目架构 |
 
 ### Agent Agents / 智能体专用智能体
 
 | Agent | Description / 描述 |
 |-------|---------------------|
-| `devkit:agent:dev` | AI agent developer / 智能体开发专家 |
 | `devkit:agent:crewai` | CrewAI system builder / CrewAI 系统构建专家 |
 | `devkit:agent:rag` | RAG pipeline builder / RAG 管线构建专家 |
 
