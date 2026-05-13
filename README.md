@@ -96,7 +96,6 @@ Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .c
 | Skill | Description / 描述 |
 |-------|---------------------|
 | `mybatis-plus-patterns` | MyBatis-Plus mapper/entity/service patterns / MyBatis-Plus 映射器/实体/服务模式 |
-| `mybatis-plus-generator` | Code generation from database tables / 数据库表代码生成 |
 | `postgresql-table-design` | PostgreSQL schema design / PostgreSQL 表结构设计 |
 | `spring-boot-database-migration` | Manual SQL changeset workflow (DBA-executed) / 手动 SQL 变更集（DBA 执行） |
 | `spring-boot-jetcache` | JetCache + Redisson caching & distributed services / JetCache + Redisson 缓存与分布式服务 |

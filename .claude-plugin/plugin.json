@@ -48,7 +48,6 @@
     "./skills/docker-expert",
     "./skills/graalvm-native-image",
     "./skills/spring-boot-jetcache",
-    "./skills/mybatis-plus-generator",
     "./skills/mybatis-plus-patterns",
     "./skills/postgresql-table-design",
     "./skills/spring-boot-actuator",
