@@ -2,7 +2,6 @@
 name: spring-boot-security
 description: "Spring Security: SecurityFilterChain, @EnableMethodSecurity, CSRF, CORS, security headers, password encoding, secrets management. Use when configuring authentication, authorization, or security filters in Java Spring Boot services."
 version: "1.1.0"
-type: skill
 ---
 
 # Spring Boot Security (Spring Boot 3.5.x)

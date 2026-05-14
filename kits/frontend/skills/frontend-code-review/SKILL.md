@@ -2,7 +2,6 @@
 name: frontend-code-review
 description: "Code review heuristics for React/Next.js/TypeScript/Tailwind with risk-vs-preference classification, architecture smell detection, and 12 common anti-patterns with root causes. Use when reviewing frontend PRs, conducting architecture reviews, or establishing team review standards."
 version: "1.0.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

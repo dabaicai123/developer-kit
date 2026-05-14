@@ -2,7 +2,6 @@
 name: unit-test-techniques
 description: "General Java/JUnit 5 testing techniques: parameterized testing, boundary value analysis, utility method testing. Use when writing parameterized tests, boundary condition tests, and utility/static method tests."
 version: "1.0.0"
-type: skill
 ---
 
 # Unit Test Techniques

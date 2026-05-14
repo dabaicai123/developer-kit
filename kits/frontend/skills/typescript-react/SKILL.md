@@ -2,7 +2,6 @@
 name: typescript-react
 description: "TypeScript patterns for React and Next.js: interface vs type, discriminated unions for state, explicit event handler types, useRef generics, useOptimistic typing, satisfies validation, and SSR/CSR type safety. Use when writing typed React/Next.js components, debugging type errors, or resolving hydration mismatches."
 version: "1.0.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

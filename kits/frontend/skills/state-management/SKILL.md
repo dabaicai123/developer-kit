@@ -1,8 +1,7 @@
 ---
 name: state-management
-description: Decision framework for React state (useState/useReducer/context/Zustand/TanStack Query/URL state). Zustand patterns and hard rules: never store server data in Zustand, never derive computable state.
+description: "Chooses React state management across useState, useReducer, context, Zustand, TanStack Query, and URL state. Use when deciding where state belongs, designing stores, or avoiding server-state duplication."
 version: "1.0.0"
-type: skill
 allowed-tools:
   - Read
   - Write

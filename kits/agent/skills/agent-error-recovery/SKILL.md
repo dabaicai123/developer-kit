@@ -2,7 +2,6 @@
 name: agent-error-recovery
 description: "Designs resilience for agent systems with typed failures, retries, circuit breakers, fallbacks, compensation, and degraded modes. Use when tools, models, networks, or workflow steps can fail."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

@@ -2,7 +2,6 @@
 name: create-readme
 description: Creates comprehensive README files with proper structure, badges, and installation instructions. Use when creating project README, writing documentation, or setting up project documentation.
 version: "1.0.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

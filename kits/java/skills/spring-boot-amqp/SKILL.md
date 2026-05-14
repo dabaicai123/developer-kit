@@ -2,7 +2,6 @@
 name: spring-boot-amqp
 description: "Spring AMQP / RabbitMQ for Spring Boot 3.x: Jackson message converter, RabbitTemplate producer, @RabbitListener consumer, listener container types (simple/direct/stream), manual acknowledgment, dead-letter handling, idempotency, and virtual thread support. Use when configuring RabbitMQ clients, setting up queue subscriptions, or handling AMQP-specific errors."
 version: "1.1.0"
-type: skill
 ---
 
 # Spring Boot AMQP

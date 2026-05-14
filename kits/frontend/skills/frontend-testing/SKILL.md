@@ -1,8 +1,7 @@
 ---
 name: frontend-testing
-description: Testing pyramid with Vitest + Testing Library for unit, Integration testing for flows, Server Action testing, and Playwright E2E. Anti-patterns: testing implementation details.
+description: "Defines frontend testing with Vitest, Testing Library, integration flow tests, Server Action tests, and Playwright E2E. Use when adding test coverage, testing React components, or validating user flows."
 version: "1.0.0"
-type: skill
 allowed-tools:
   - Read
   - Write

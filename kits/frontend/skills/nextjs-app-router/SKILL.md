@@ -2,7 +2,6 @@
 name: nextjs-app-router
 description: "Next.js App Router patterns for React Server Components, file conventions, data fetching, streaming, directives, error handling, route handlers, metadata, image/font optimization, hydration, Suspense, parallel routes, bundling, and self-hosting. Use when building or reviewing Next.js pages, layouts, server actions, or API routes."
 version: "1.0.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

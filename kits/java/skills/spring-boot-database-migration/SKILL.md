@@ -2,7 +2,6 @@
 name: spring-boot-database-migration
 description: "Production-safe PostgreSQL schema changesets for Spring Boot: numbered SQL files reviewed and executed by DBA. No application-side auto-migration (no Flyway/Liquibase). Use when defining schema changes that must be applied manually under DBA control."
 version: "2.0.0"
-type: skill
 ---
 
 # Spring Boot Database Migration

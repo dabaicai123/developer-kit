@@ -2,7 +2,6 @@
 name: spring-boot-rest-client
 description: "Spring Boot HTTP client: RestClient configuration, YAML timeout/factory properties, error handling, OAuth2, @RestClientTest, MockServerRestClientCustomizer, OkHttp3/RestTemplate migration. Use when making external HTTP calls."
 version: "2.0.0"
-type: skill
 ---
 
 # Spring Boot REST Client Patterns

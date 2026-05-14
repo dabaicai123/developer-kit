@@ -2,7 +2,6 @@
 name: spring-boot-event-driven-patterns
 description: "Event-Driven Architecture for Spring Boot: domain events, ApplicationEvent with @TransactionalEventListener, Kafka producer/consumer, and transactional outbox pattern. Use when implementing event-driven systems in Spring Boot, setting up async messaging with Kafka, or publishing domain events from DDD aggregates."
 version: "1.0.0"
-type: skill
 ---
 
 # Spring Boot Event-Driven Patterns

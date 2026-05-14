@@ -1,6 +1,6 @@
 # Controller Layer and Exception Handler Unit Testing Reference
 
-Unit testing for `@RestController` (adapter/web) and `@ControllerAdvice` using MockMvc without full Spring context.
+Unit testing for `@RestController` (adapter module `web/` package) and `@ControllerAdvice` using MockMvc without full Spring context.
 
 ## COLA Naming Conventions
 

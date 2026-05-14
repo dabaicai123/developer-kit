@@ -2,7 +2,6 @@
 name: agent-prompt-engineering
 description: "Designs agent prompts: instruction hierarchy, system/developer separation, prompt assembly, tool guidance, versioning, and context budgets. Use when writing or refactoring agent instructions."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

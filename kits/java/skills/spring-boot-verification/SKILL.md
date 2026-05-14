@@ -1,8 +1,7 @@
 ---
 name: spring-boot-verification
-description: "Verification loop for Spring Boot projects: build, static analysis, tests with coverage, security scans, and diff review before release or PR."
+description: "Runs Spring Boot verification loops with build checks, static analysis, tests, coverage, security scans, and diff review. Use when preparing a PR, release, or post-change quality gate."
 version: "1.1.0"
-type: skill
 ---
 
 # Spring Boot Verification Loop

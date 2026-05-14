@@ -2,7 +2,6 @@
 name: postgresql-table-design
 description: "PostgreSQL table design: standard business columns, data types, soft delete, constraints, indexes, partitioning, JSONB, and schema evolution. Use when designing or reviewing PostgreSQL schemas."
 version: "1.1.0"
-type: skill
 ---
 
 # PostgreSQL Table Design

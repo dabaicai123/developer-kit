@@ -2,7 +2,6 @@
 name: agent-cost-optimization
 description: "Controls agent cost through token budgets, model routing, caching, batching, evaluation-based routing, and spend alerts. Use when reducing LLM spend, setting model tiers, or adding budget gates."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

@@ -2,7 +2,6 @@
 name: agent-evaluation
 description: "Builds agent evaluation systems: golden datasets, trajectory checks, rubric judges, regression gates, reliability metrics, and production monitoring. Use when measuring agent quality or release readiness."
 version: "1.2.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

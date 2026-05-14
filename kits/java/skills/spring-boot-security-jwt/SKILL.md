@@ -1,8 +1,7 @@
 ---
 name: spring-boot-security-jwt
-description: "JWT auth with JJWT 0.13.0 and Spring Security 6.x. Bearer/cookie authentication, refresh token rotation, RBAC/permission-based access control."
+description: "Implements JWT authentication with JJWT 0.13.0 and Spring Security 6.x, including bearer/cookie auth, refresh token rotation, RBAC, and permission checks. Use when adding JWT login, token refresh, or authorization rules."
 version: "1.0.0"
-type: skill
 ---
 
 # Spring Boot JWT Security

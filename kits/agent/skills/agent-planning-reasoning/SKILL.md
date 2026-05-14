@@ -1,8 +1,7 @@
 ---
 name: agent-planning-reasoning
-description: "Selects planning and reasoning strategies for complex agents: task decomposition, plan validation, search, constraints, temporal reasoning, and replanning. Use for multi-step decisions."
+description: "Selects planning and reasoning strategies for complex agents: task decomposition, plan validation, search, constraints, temporal reasoning, and replanning. Use when designing multi-step decisions, planning loops, or replanning behavior."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

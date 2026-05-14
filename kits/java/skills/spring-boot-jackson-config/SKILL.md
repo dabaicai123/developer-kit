@@ -2,7 +2,6 @@
 name: spring-boot-jackson-config
 description: "Jackson ObjectMapper configuration for Spring Boot 3.x: JavaTimeModule, JsonInclude, date serialization, custom serializers. Use when configuring JSON serialization/deserialization in infrastructure layer."
 version: "1.0.0"
-type: skill
 ---
 
 # Spring Boot Jackson Configuration

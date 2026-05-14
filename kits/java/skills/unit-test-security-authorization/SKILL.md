@@ -2,7 +2,6 @@
 name: unit-test-security-authorization
 description: "Unit testing Spring Security authorization: @PreAuthorize, @Secured, role-based access control. Use when testing security configurations and access control logic."
 version: "1.1.0"
-type: skill
 ---
 
 # Unit Testing Security and Authorization

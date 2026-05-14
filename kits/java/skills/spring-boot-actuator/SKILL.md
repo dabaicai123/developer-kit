@@ -2,7 +2,6 @@
 name: spring-boot-actuator
 description: "Spring Boot Actuator for production monitoring: health probes, secured management endpoints, and Micrometer metrics. Use when setting up monitoring, health checks, or metrics for Spring Boot applications."
 version: "1.0.0"
-type: skill
 ---
 
 # Spring Boot Actuator

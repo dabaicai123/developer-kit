@@ -2,7 +2,6 @@
 name: agent-human-interaction
 description: "Designs human-in-the-loop agent flows: clarification, approval, review, handoff, feedback, and confidence-based escalation. Use when agents collaborate with users or operators."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

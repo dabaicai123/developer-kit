@@ -1,8 +1,7 @@
 ---
 name: data-fetching
-description: Server-side RSC fetch, client-side TanStack Query, Zod validation, Result<T,E> type, pagination patterns. Hard rules: always validate with Zod, always handle loading/error.
+description: "Implements data fetching with server-side RSC fetch, client-side TanStack Query, Zod validation, Result<T,E>, and pagination patterns. Use when fetching API data, validating responses, handling loading/error states, or adding pagination."
 version: "1.0.0"
-type: skill
 allowed-tools:
   - Read
   - Write

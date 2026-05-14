@@ -1,8 +1,7 @@
 ---
 name: spring-boot-logging
-description: "Structured JSON logging with Logback (Spring Boot 3.5 built-in), MDC request correlation, per-environment log levels, and anti-patterns."
+description: "Configures structured JSON logging with Logback, MDC request correlation, per-environment log levels, and logging anti-patterns. Use when setting up Spring Boot logging, request tracing, or production log formats."
 version: "2.0.0"
-type: skill
 ---
 
 # Spring Boot Logging

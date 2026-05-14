@@ -2,7 +2,6 @@
 name: react-best-practices
 description: "React performance optimization with priority-ranked rules across 8 categories: eliminating waterfalls, bundle size, server-side perf, client data fetching, re-render optimization, rendering perf, JS perf, and advanced patterns. Use when writing or reviewing React components, implementing data fetching, or optimizing bundle size."
 version: "1.0.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

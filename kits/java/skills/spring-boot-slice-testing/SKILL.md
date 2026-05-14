@@ -1,8 +1,7 @@
 ---
 name: spring-boot-slice-testing
-description: "Spring Boot slice testing: Events, Scheduled/Async, ConfigProps, @JsonTest, Caching — require Spring Context, NOT unit tests."
+description: "Creates Spring Boot slice tests for events, scheduled/async code, ConfigProps, @JsonTest, and caching that require Spring Context. Use when testing framework-integrated behavior rather than pure unit logic."
 version: "1.0.0"
-type: skill
 ---
 
 # Spring Boot Slice Testing

@@ -2,7 +2,6 @@
 name: agent-tool-design
 description: "Designs agent tools with strict schemas, descriptions, validation, idempotency, permission checks, error contracts, and MCP compatibility. Use when exposing actions to agents."
 version: "1.2.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

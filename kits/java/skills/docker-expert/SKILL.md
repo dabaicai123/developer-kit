@@ -1,8 +1,7 @@
 ---
 name: docker-expert
-description: "Docker containerization for Java/Spring Boot applications: multi-stage builds, JVM optimization, Compose orchestration, and production hardening."
+description: "Designs Docker containerization for Java/Spring Boot applications: multi-stage builds, JVM optimization, Compose orchestration, and production hardening. Use when creating Dockerfiles, Compose setups, or container deployment configs."
 version: "1.1.0"
-type: skill
 ---
 
 # Docker Expert (Java/Spring Boot)

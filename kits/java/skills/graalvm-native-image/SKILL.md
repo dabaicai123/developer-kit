@@ -2,7 +2,6 @@
 name: graalvm-native-image
 description: "GraalVM Native Image for Java applications: native binary compilation, cold start optimization, memory reduction, reflection/resource configuration, and framework-specific support (Spring Boot, Quarkus, Micronaut). Use when converting JVM applications to native binaries or optimizing startup time."
 version: "1.0.0"
-type: skill
 ---
 
 # GraalVM Native Image for Java Applications

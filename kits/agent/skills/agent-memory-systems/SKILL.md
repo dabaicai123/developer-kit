@@ -1,8 +1,7 @@
 ---
 name: agent-memory-systems
-description: "Designs durable agent memory: working records, episodic logs, semantic vector memory, user profiles, retention, retrieval, and privacy controls. Use for cross-session remembering."
+description: "Designs durable agent memory: working records, episodic logs, semantic vector memory, user profiles, retention, retrieval, and privacy controls. Use when adding cross-session memory, user profiles, vector recall, or retention policies."
 version: "1.2.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

@@ -1,8 +1,7 @@
 ---
 name: web-design-audit
-description: Audit categories for visual hierarchy, layout, typography, color, interaction, accessibility, and responsive design. Checklist-based approach for reviewing web UIs.
+description: "Audits web UI quality across visual hierarchy, layout, typography, color, interaction, accessibility, and responsive design. Use when reviewing screenshots, pages, landing pages, or product interfaces."
 version: "1.0.0"
-type: skill
 allowed-tools:
   - Read
   - Write

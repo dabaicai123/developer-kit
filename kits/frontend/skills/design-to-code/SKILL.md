@@ -2,7 +2,6 @@
 name: design-to-code
 description: "Convert design specifications (Figma, ClaudeDesign, OpenDesign) to Next.js React components via Tailwind v4. Covers design token extraction, HTML/CSS prototyping, Tailwind conversion, component decomposition, and responsive implementation. Use when translating visual designs to code, setting up design tokens, or breaking mockups into component hierarchy."
 version: "1.0.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

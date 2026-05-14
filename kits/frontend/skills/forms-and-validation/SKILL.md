@@ -1,8 +1,7 @@
 ---
 name: forms-and-validation
-description: React Hook Form + Zod for form handling, Server Actions for mutations, error display patterns, controlled/uncontrolled inputs. Hard rules: always Zod schema, z.infer for types, field errors near input, validate on server.
+description: "Builds forms with React Hook Form, Zod schemas, Server Actions, error display patterns, and controlled/uncontrolled inputs. Use when creating forms, validation schemas, mutations, or server-side form handling."
 version: "1.0.0"
-type: skill
 allowed-tools:
   - Read
   - Write

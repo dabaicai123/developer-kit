@@ -2,7 +2,6 @@
 name: mcp-integration
 description: "Integrates Model Context Protocol servers and clients with tools, resources, prompts, Streamable HTTP, stdio, OAuth, and framework adapters. Use when connecting agents to external capabilities."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

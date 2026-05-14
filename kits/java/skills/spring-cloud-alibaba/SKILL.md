@@ -1,8 +1,7 @@
 ---
 name: spring-cloud-alibaba
-description: "Spring Cloud Alibaba with Nacos, Sentinel, RocketMQ, and Seata. Use for service discovery, flow control, or Alibaba Cloud integration in microservices."
+description: "Integrates Spring Cloud Alibaba with Nacos, Sentinel, RocketMQ, and Seata. Use when adding service discovery, configuration management, flow control, messaging, distributed transactions, or Alibaba Cloud microservice patterns."
 version: "1.2.0"
-type: skill
 ---
 
 # Spring Cloud Alibaba Development Guide

@@ -2,7 +2,6 @@
 name: spring-boot-async-processing
 description: "Spring Boot async processing with @Async, CompletableFuture, ThreadPoolTaskExecutor, async exception handling, and async+transaction boundary patterns. Use when implementing asynchronous execution in Spring Boot services."
 version: "1.0.0"
-type: skill
 ---
 
 # Spring Boot Async Processing

@@ -2,7 +2,6 @@
 name: spring-kafka
 description: "Spring Kafka: producer/consumer config, serialization, ErrorHandlingDeserializer, non-blocking retry (@RetryableTopic), DLQ, and manual ack. Use when configuring Kafka clients or handling Kafka errors."
 version: "1.2.0"
-type: skill
 ---
 
 # Spring Kafka

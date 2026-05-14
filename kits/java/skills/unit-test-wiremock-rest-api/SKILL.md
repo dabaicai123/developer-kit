@@ -1,8 +1,7 @@
 ---
 name: unit-test-wiremock-rest-api
-description: "Unit testing external REST APIs with WireMock: response stubs, request verification, failure simulation, HTTP client behavior validation."
+description: "Tests external REST API integrations with WireMock response stubs, request verification, failure simulation, and HTTP client behavior validation. Use when unit testing outbound REST clients or third-party API calls."
 version: "1.1.0"
-type: skill
 ---
 
 # Unit Testing REST APIs with WireMock

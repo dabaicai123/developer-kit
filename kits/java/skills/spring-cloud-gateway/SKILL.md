@@ -2,7 +2,6 @@
 name: spring-cloud-gateway
 description: "Spring Cloud Gateway: routing, filters, rate limiting, and load balancing. Use when building API gateways for microservices."
 version: "1.1.0"
-type: skill
 ---
 
 # Spring Cloud Gateway

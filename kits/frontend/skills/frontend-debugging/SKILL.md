@@ -1,8 +1,7 @@
 ---
 name: frontend-debugging
-description: 4 debugging playbooks for common frontend issues: type errors, hydration mismatches, effect dependency bugs, and Next.js-specific problems. Quick diagnosis table included.
+description: "Provides frontend debugging playbooks for type errors, hydration mismatches, effect dependency bugs, and Next.js-specific problems. Use when diagnosing React, TypeScript, hydration, or effect issues."
 version: "1.0.0"
-type: skill
 allowed-tools:
   - Read
   - Write

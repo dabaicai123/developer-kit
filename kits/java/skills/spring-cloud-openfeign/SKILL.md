@@ -2,7 +2,6 @@
 name: spring-cloud-openfeign
 description: "Spring Cloud OpenFeign: Feign client definition, timeout/retry, error decoder, Resilience4j fallback, interceptors, and connection pool tuning. Use when making service-to-service HTTP calls in microservices."
 version: "1.1.0"
-type: skill
 ---
 
 # Spring Cloud OpenFeign

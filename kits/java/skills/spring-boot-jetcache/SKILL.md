@@ -2,7 +2,6 @@
 name: spring-boot-jetcache
 description: "JetCache two-level caching (Caffeine LOCAL + Redisson REMOTE) and Redisson distributed lock with @Cached/@CacheInvalidate, QuickConfig, RLock, and syncLocal. Use when adding declarative caching, configuring distributed locks, or setting up two-level cache in Spring Boot."
 version: "1.1.0"
-type: skill
 ---
 
 # JetCache + Redisson Two-Level Cache and Distributed Services

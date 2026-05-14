@@ -1,8 +1,7 @@
 ---
 name: langgraph-patterns
-description: "Applies LangGraph patterns: StateGraph, nodes, conditional routing, ToolNode, interrupts, checkpointers, memory, subgraphs, and multi-agent graphs. Use for stateful graph agents."
+description: "Applies LangGraph patterns: StateGraph, nodes, conditional routing, ToolNode, interrupts, checkpointers, memory, subgraphs, and multi-agent graphs. Use when building stateful graph agents, LangGraph workflows, or checkpointed agent flows."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

@@ -1,8 +1,7 @@
 ---
 name: react-composition
-description: Compound components, state lifting, render delegation, and composition-vs-configuration decision guide. Build flexible, maintainable React components through composition patterns.
+description: "Designs React component composition with compound components, state lifting, render delegation, and composition-vs-configuration decisions. Use when creating reusable components or refactoring component APIs."
 version: "1.0.0"
-type: skill
 allowed-tools:
   - Read
   - Write

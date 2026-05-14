@@ -1,8 +1,7 @@
 ---
 name: tailwind-v4
-description: "Tailwind CSS v4 patterns for Next.js + TypeScript projects: CSS-first @theme configuration, OKLCH color palettes, semantic token naming, dynamic utility values, @starting-style transitions, new variants (not-*, in-*, nth-*), tailwind-variants (tv()) for component composition, and v3-to-v4 migration. No shadcn/ui."
+description: "Applies Tailwind CSS v4 patterns for Next.js and TypeScript: CSS-first @theme configuration, OKLCH palettes, semantic tokens, dynamic utilities, new variants, tailwind-variants, and v3-to-v4 migration. Use when styling Tailwind v4 components or migrating from v3."
 version: "1.0.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

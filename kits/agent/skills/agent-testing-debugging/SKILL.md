@@ -2,7 +2,6 @@
 name: agent-testing-debugging
 description: "Tests and debugs agent systems with unit tests, mock models, trajectory replay, state inspection, snapshots, and CI diagnostics. Use when fixing failed runs or adding test coverage."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

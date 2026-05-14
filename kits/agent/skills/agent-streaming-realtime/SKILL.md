@@ -1,8 +1,7 @@
 ---
 name: agent-streaming-realtime
-description: "Designs streaming and realtime agent experiences with SSE, WebSockets, incremental events, cancellation, backpressure, and partial results. Use for live agent UX or APIs."
+description: "Designs streaming and realtime agent experiences with SSE, WebSockets, incremental events, cancellation, backpressure, and partial results. Use when building live agent UX, streaming APIs, or realtime cancellation flows."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

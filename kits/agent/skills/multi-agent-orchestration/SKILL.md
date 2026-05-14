@@ -2,7 +2,6 @@
 name: multi-agent-orchestration
 description: "Designs multi-agent coordination with supervisor, swarm, hierarchy, pipeline, parallel fan-out/fan-in, handoffs, and shared state. Use when one agent is insufficient."
 version: "1.1.0"
-type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
