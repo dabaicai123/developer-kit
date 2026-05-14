@@ -1,7 +1,7 @@
 ---
 name: ddd-cola
 description: "COLA DDD Architecture: multi-module project structure (common/client/adapter/app/domain/infrastructure/start), Feign integration, Gateway pattern, CQRS. Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi-module architecture. Do NOT use for simple MVC, non-microservice, or non-Java projects."
-version: "2.2.0"
+version: "2.3.0"
 type: skill
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 parameters:
@@ -73,7 +73,7 @@ Use when creating or structuring a Spring Cloud microservice with COLA/DDD multi
 | Query hierarchy | `Query extends Command` (cola-component-dto) | `Query` and `Command` are independent abstract classes | Decoupling Query from Command avoids semantic confusion — a read operation is not a write operation. Both remain Serializable marker classes |
 | Validation API | `javax.validation-api` (Spring Boot 2.x) | `jakarta.validation-api` (Spring Boot 3.x) | Project uses Spring Boot 3.x / Jakarta EE 9+; javax is legacy |
 | DI style | `@Autowired` / `@Resource` (official archetype) | Constructor injection via `@RequiredArgsConstructor` | Constructor injection is the Spring-recommended best practice; explicit, testable, immutable |
-| Exception handling | `@CatchAndLog` (cola-component-catchlog-starter) on ServiceImpl | `GlobalExceptionHandler` (spring-boot-exception-handling skill) | Dropping COLA components means dropping catchlog; GlobalExceptionHandler provides equivalent centralized error handling |
+| Exception handling | `@CatchAndLog` (cola-component-catchlog-starter) on ServiceImpl | Adapter-layer `GlobalExceptionHandler` in `web.advice` (spring-boot-exception-handling skill) | Dropping COLA components means dropping catchlog; GlobalExceptionHandler provides equivalent centralized error handling without adding Spring Web to `common` |
 | Gateway methods | `getByById(String customerId)` only (archetype sample) | `save()`, `update()`, `findById()` | Official sample is minimal; real services need CRUD operations. `save()` = INSERT, `update()` = UPDATE — no ambiguity |
 | `scanBasePackages` | `{"${package}", "com.alibaba.cola"}` | Standard `@SpringBootApplication` (no cola scan) | No COLA component beans to scan; Spring Boot auto-detection suffices |
 
@@ -92,7 +92,7 @@ demo-parent/
 ├── demo-common/           # Shared kernel: Result, PageResult, BusinessException, Command, Query, ErrorCode
 ├── demo-client/           # API interfaces, Cmd/Qry/DTO (flat), Feign clients
 ├── demo-adapter/          # HTTP inbound (Controllers)
-├── demo-app/              # Application services, executors, DTO↔VO Convertor
+├── demo-app/              # Application services, executors, DtoVoConvertor, DOConverter
 ├── demo-domain/           # Domain entities, value objects (with behavior), Gateways, domain services
 ├── demo-infrastructure/   # Gateway implementations, Mappers, external clients
 └── demo-start/            # Bootstrap (Application.java + config)
@@ -294,7 +294,7 @@ resources/
 | Type | Path | Notes |
 |------|------|-------|
 | **Command (Write)** | Controller → Service → CmdExe → DtoVoConvertor (DTO→VO) → Domain Entity → Gateway → GatewayImpl → DomainConverter (Domain→DO) → Mapper → DB | CmdExe converts Cmd fields/nested DTOs into Domain VOs via the app-module Convertor |
-| **Query (Read)** | Controller → Service → QryExe → Mapper → DOConverter (DO→DTO) → DB | Pragmatic shortcut: bypasses Domain for performance |
+| **Query (Read)** | Controller → Service → QryExe → Mapper → DB → DO → DOConverter (DO→DTO) → DTO | Pragmatic shortcut: bypasses Domain for performance |
 | **Feign (Write)** | Other Service → FeignClient(ServiceI) → Controller → Service → CmdExe → DtoVoConvertor → Domain → Gateway → DB | Same internal path as HTTP |
 | **Feign (Read)** | Other Service → FeignClient(ServiceI) → Controller → Service → QryExe → Mapper → DB | Read bypasses Domain |
 
@@ -436,6 +436,7 @@ No need to modify existing domains' files. Module pom.xml dependencies are alrea
 | app | Command Executor | CmdExe | `CustomerAddCmdExe` |
 | app | Query Executor | QryExe | `CustomerListByNameQryExe` |
 | app | DTO↔VO Converter | DtoVoConvertor | `CustomerDtoVoConvertor` (MapStruct) |
+| app | DO→DTO Converter | DOConverter | `CustomerDOConverter` (MapStruct, read path) |
 | domain | Entity | none | `Customer` (bare name, @Data) |
 | domain | Value Object | none | `ConditionGroup`, `RewardSpec`, `Credit` |
 | domain | Enum | none | `CustomerType` |
@@ -484,7 +485,7 @@ Conversion has two boundaries:
 - `spring-boot-transaction-management` — @Transactional patterns for executor and service layer
 - `spring-boot-rest-client` — RestClient for `infrastructure/external/`
 - `mybatis-plus-patterns` — DO conventions, Mapper, soft delete, ID generation, pagination
-- `mapstruct-patterns` — MapStruct converters for Domain ↔ DO and Domain ↔ DTO
+- `mapstruct-patterns` — MapStruct converters for `DtoVoConvertor`, `DOConverter`, and `DomainConverter`
 - `spring-boot-dependency-injection` — constructor injection, Bean lifecycle
 
 ## References

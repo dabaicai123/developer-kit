@@ -212,14 +212,14 @@ public void updateOrder(OrderDO order) {
 
 ```java
 @Override
-public PageResult<UserVO> page(int pageNum, int pageSize, UserQueryBO query) {
+public PageResult<UserDTO> page(int pageNum, int pageSize, UserQueryBO query) {
     LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
         .like(StringUtils.hasText(query.getUsername()), UserDO::getUsername, query.getUsername())
         .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
         .orderByDesc(UserDO::getCreatedAt);
     Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
     return PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
-        .map(UserConverter::toVO);
+        .map(UserConverter::toDTO);
 }
 ```
 
@@ -254,11 +254,11 @@ For multi-table queries, write raw SQL in **Mapper XML** files. XML gives full c
     WHERE o.status = #{status} AND o.deleted_at IS NULL
 </select>
 
-<resultMap id="orderWithItemsResultMap" type="OrderVO">
+<resultMap id="orderWithItemsResultMap" type="OrderDTO">
     <id column="id" property="id"/>
     <result column="status" property="status"/>
     <result column="total_amount" property="totalAmount"/>
-    <collection property="items" ofType="OrderItemVO">
+    <collection property="items" ofType="OrderItemDTO">
         <result column="product_name" property="productName"/>
         <result column="quantity" property="quantity"/>
         <result column="unit_price" property="unitPrice"/>
@@ -269,7 +269,7 @@ For multi-table queries, write raw SQL in **Mapper XML** files. XML gives full c
 ```java
 @Mapper
 public interface OrderMapper extends BaseMapper<OrderDO> {
-    List<OrderVO> findOrderWithItems(@Param("status") OrderStatus status);
+    List<OrderDTO> findOrderWithItems(@Param("status") OrderStatus status);
 }
 ```
 

@@ -10,7 +10,7 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
     tagsSorter: alpha
-  packages-to-scan: com.example.app.adapter.web
+  packages-to-scan: com.example.web
   paths-to-match: /v1/**
 ```
 
@@ -54,7 +54,7 @@ Group APIs by domain aggregate for Swagger UI navigation:
 public GroupedOpenApi orderApi() {
     return GroupedOpenApi.builder()
         .group("订单")
-        .packagesToScan("com.example.app.adapter.web")
+        .packagesToScan("com.example.web")
         .pathsToMatch("/v1/orders/**")
         .build();
 }

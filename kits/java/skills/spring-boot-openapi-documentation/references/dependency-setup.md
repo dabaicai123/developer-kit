@@ -45,11 +45,11 @@ Check [Maven Central](https://mvnrepository.com/artifact/org.springdoc) for the 
 
 ## COLA Package Scanning
 
-COLA controllers live in `adapter/web/`. Configure SpringDoc to scan only the adapter layer:
+COLA controllers live in the adapter module `web/` package. Configure SpringDoc to scan only the adapter layer:
 
 ```yaml
 springdoc:
-  packages-to-scan: com.example.app.adapter.web
+  packages-to-scan: com.example.web
   paths-to-match: /v1/**
 ```
 

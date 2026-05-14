@@ -5,9 +5,9 @@
 ```
 demo-app/
 └── order/
-    ├── converter/
-    │   ├── OrderDTOConverter.java      # Domain ↔ DTO/Cmd
-    │   └── OrderDOConverter.java       # DO → DTO (for QryExe)
+    ├── convertor/
+    │   ├── OrderDtoVoConvertor.java    # client DTO/Cmd ↔ domain VO
+    │   └── OrderDOConverter.java       # DO → client DTO (for QryExe)
     └── executor/
 demo-infrastructure/
 └── order/
@@ -66,20 +66,21 @@ public class OrderListQryExe {
 }
 ```
 
-## CmdExe Usage (Domain ↔ DTO/Cmd)
+## CmdExe Usage (DTO/Cmd ↔ Domain VO)
 
 ```java
 @Component
 @RequiredArgsConstructor
 public class CreateOrderCmdExe {
     private final OrderGateway orderGateway;
-    private final OrderDTOConverter orderDTOConverter;
+    private final OrderDtoVoConvertor orderDtoVoConvertor;
 
     @Transactional
     public Result<OrderDTO> execute(CreateOrderCmd cmd) {
-        Order order = orderDTOConverter.fromCreateCmd(cmd);
+        OrderRule rule = orderDtoVoConvertor.toOrderRule(cmd.getRule());
+        Order order = Order.create(cmd.getBuyerId(), rule);
         orderGateway.save(order);
-        return Result.success(orderDTOConverter.toDTO(order));
+        return Result.success();
     }
 }
 ```

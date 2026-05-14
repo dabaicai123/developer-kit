@@ -1,15 +1,15 @@
 # COLA/DDD REST Patterns
 
-Patterns for REST APIs in COLA architecture. Swagger/OpenAPI descriptions in Chinese; all other content in English.
+Patterns for REST APIs in COLA architecture. Swagger/OpenAPI descriptions may use Chinese in code examples; architectural guidance stays in English.
 
-Supplement to `ddd-cola` SKILL.md — REST-specific patterns. For module structure, CQRS, and Gateway patterns, refer to `ddd-cola`.
+This is a REST-specific supplement to `ddd-cola`. For module structure, CQRS paths, and Gateway patterns, refer to `ddd-cola`.
 
 ## Controller (Adapter Layer)
 
-Controllers in `web/` are thin inbound handlers. They delegate to `CustomerServiceI` (app layer). No business logic in controllers.
+Controllers in the adapter module `web/` package are thin inbound handlers. They delegate to `CustomerServiceI` from the client module; the app module provides `CustomerServiceImpl`. No business logic belongs in controllers.
 
 ```java
-// adapter/web/CustomerController.java
+// service-adapter: web/CustomerController.java
 @RestController
 @RequestMapping("/v1/customers")
 @RequiredArgsConstructor
@@ -27,13 +27,9 @@ public class CustomerController {
         return customerService.getCustomer(customerId);
     }
 
-    // @ParameterObject (Spring Boot 3.5+) for query param binding to Qry object
     @GetMapping
-    public Result<PageResult<CustomerDTO>> listCustomers(
-            @RequestParam(defaultValue = "1") long page,
-            @RequestParam(defaultValue = "10") long pageSize,
-            @RequestParam(required = false) String customerType) {
-        return customerService.listCustomers(page, pageSize, customerType);
+    public Result<PageResult<CustomerDTO>> listCustomers(@ParameterObject @Valid CustomerPageQry qry) {
+        return customerService.listCustomers(qry);
     }
 
     @PutMapping("/{customerId}")
@@ -49,17 +45,14 @@ public class CustomerController {
 }
 ```
 
-NOT Controller wrapping `Result.success()` again → Service already returns `Result<T>`.
-NOT business logic in Controller → delegate to Service.
+Do not wrap `Result.success()` again in the controller; `ServiceI` already returns `Result<T>`.
 
 ## Cmd/Qry/DTO (Client Layer)
 
-Canonical location: Cmd, Qry, and DTO live in **client** module (`client/dto/`).
-
-### Command (Write Path — Request Body)
+Canonical location: Cmd, Qry, and DTO live in the client module.
 
 ```java
-// client/dto/CustomerAddCmd.java
+// service-client: dto/CustomerAddCmd.java
 @Data
 public class CustomerAddCmd extends Command {
     @NotBlank(message = "Company name must not be blank")
@@ -69,22 +62,22 @@ public class CustomerAddCmd extends Command {
 }
 ```
 
-### Query (Read Path — Parameters)
-
 ```java
-// client/dto/CustomerListByNameQry.java
+// service-client: dto/CustomerPageQry.java
 @Data
-@AllArgsConstructor
-public class CustomerListByNameQry extends Query {
-    @NotBlank(message = "Name must not be blank")
-    private String name;
+public class CustomerPageQry extends Query {
+    @Min(value = 1, message = "Page must be greater than zero")
+    private long page = 1;
+
+    @Min(value = 1, message = "Page size must be greater than zero")
+    private long pageSize = 10;
+
+    private String customerType;
 }
 ```
 
-### DTO (Response Body)
-
 ```java
-// client/dto/data/CustomerDTO.java
+// service-client: dto/data/CustomerDTO.java
 @Data
 public class CustomerDTO {
     private String customerId;
@@ -93,68 +86,48 @@ public class CustomerDTO {
 }
 ```
 
-NOT domain entity `Customer` at boundary → use `CustomerDTO`.
-NOT `CustomerDO` at boundary → convert via MapStruct.
+Do not expose domain entity `Customer` or persistence object `CustomerDO` at the adapter boundary. Use `CustomerDTO`.
 
 ## Pagination Pattern
 
-Return `Result<PageResult<T>>` for paginated endpoints. Convert MyBatis-Plus `Page<DO>` → `PageResult<DTO>` in QryExe:
+Return `Result<PageResult<T>>` for paginated endpoints. Convert MyBatis-Plus `Page<DO>` to `PageResult<DTO>` in QryExe:
 
 ```java
-// app/customer/executor/query/CustomerListByNameQryExe.java
+// service-app: customer/executor/query/CustomerPageQryExe.java
 @Component
 @RequiredArgsConstructor
-public class CustomerListByNameQryExe {
+public class CustomerPageQryExe {
     private final CustomerMapper customerMapper;
     private final CustomerDOConverter customerDOConverter;
 
-    public Result<PageResult<CustomerDTO>> execute(long page, long pageSize, String customerType) {
-        Page<CustomerDO> mpPage = new Page<>(page, pageSize);
-        LambdaQueryWrapper<CustomerDO> wrapper = new LambdaQueryWrapper<>();
-        if (customerType != null) {
-            wrapper.eq(CustomerDO::getCustomerType, customerType);
-        }
+    public Result<PageResult<CustomerDTO>> execute(CustomerPageQry qry) {
+        LambdaQueryWrapper<CustomerDO> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(StringUtils.hasText(qry.getCustomerType()), CustomerDO::getCustomerType, qry.getCustomerType());
         wrapper.orderByDesc(CustomerDO::getCreatedAt);
-        customerMapper.selectPage(mpPage, wrapper);
-        return Result.success(
-            PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
-                .map(customerDOConverter::toDTO)
-        );
+
+        Page<CustomerDO> mpPage = customerMapper.selectPage(new Page<>(qry.getPage(), qry.getPageSize()), wrapper);
+        PageResult<CustomerDTO> pageResult = PageResult
+            .of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+            .map(customerDOConverter::toDTO);
+        return Result.success(pageResult);
     }
 }
 ```
 
-## Filtering Pattern
+Use `LambdaQueryWrapper` or `Wrappers.lambdaQuery()`. Do not use raw `QueryWrapper`.
 
-Use `LambdaQueryWrapper` for dynamic filtering in read executors:
+## @ParameterObject
 
-```java
-public Result<PageResult<CustomerDTO>> execute(CustomerListByNameQry qry, long page, long pageSize) {
-    LambdaQueryWrapper<CustomerDO> wrapper = new LambdaQueryWrapper<>();
-    wrapper.eq(qry.getName() != null, CustomerDO::getCompanyName, qry.getName());
-    wrapper.orderByDesc(CustomerDO::getCreatedAt);
-    Page<CustomerDO> mpPage = customerMapper.selectPage(new Page<>(page, pageSize), wrapper);
-    return Result.success(
-        PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
-            .map(customerDOConverter::toDTO)
-    );
-}
-```
-
-NOT raw `QueryWrapper` → always use `LambdaQueryWrapper`. → see `mybatis-plus-patterns`
-
-## @ParameterObject (Spring Boot 3.5+)
-
-Spring Framework 6.2 introduces `@ParameterObject` for binding query params to a Qry object without manual `@RequestParam` extraction:
+Use `@ParameterObject` for binding query params to a Qry object:
 
 ```java
 @GetMapping
-public Result<PageResult<CustomerDTO>> listCustomers(@ParameterObject CustomerListQry qry) {
+public Result<PageResult<CustomerDTO>> listCustomers(@ParameterObject @Valid CustomerPageQry qry) {
     return customerService.listCustomers(qry);
 }
 ```
 
-NOT manual `@RequestParam` for each query field → use `@ParameterObject` + Qry object.
+Do not manually duplicate every query field as `@RequestParam` when a Qry object already exists.
 
 ## URL Design
 
@@ -167,15 +140,15 @@ NOT manual `@RequestParam` for each query field → use `@ParameterObject` + Qry
 | Delete | `DELETE /v1/customers/{id}` | `Result<Void>` |
 | Sub-resource | `GET /v1/customers/{id}/credits` | Nested under aggregate root |
 
-### Anti-patterns
+## Anti-Patterns
 
 | NOT | Why | Correct |
 |-----|-----|---------|
 | `/getCustomerList` | Action-based URL | `GET /v1/customers` |
 | `/customer/create` | Noun + verb | `POST /v1/customers` |
-| `/api/v1/...` | Mixed prefix | `/v1/customers` (version in path, no `/api`) |
+| `/api/v1/...` | Mixed prefix | `/v1/customers` |
 | `Customer` entity at boundary | Leaks domain internals | `CustomerDTO` |
-| `CustomerDO` at boundary | Leaks persistence internals | Convert via MapStruct |
+| `CustomerDO` at boundary | Leaks persistence internals | Convert through `CustomerDOConverter` |
 | `ResponseEntity<T>` | Breaks unified format | `Result<T>` |
 
 ## HTTP Status Codes in Result<T>
@@ -190,4 +163,4 @@ NOT manual `@RequestParam` for each query field → use `@ParameterObject` + Qry
 | 409 | Duplicate, state conflict |
 | 500 | Unexpected server errors |
 
-NOT String codes → always integer HTTP status codes.
+Use integer codes, not string codes.

@@ -136,23 +136,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     /** Paginated query — auto-commit sufficient for most queries */
     @Override
-    public PageResult<UserVO> page(int pageNum, int pageSize, UserQry query) {
+    public PageResult<UserDTO> page(int pageNum, int pageSize, UserQry query) {
         LambdaQueryWrapper<UserDO> wrapper = lambdaQuery()
             .like(StringUtils.hasText(query.getUsername()), UserDO::getUsername, query.getUsername())
             .eq(query.getStatus() != null, UserDO::getStatus, query.getStatus())
             .orderByDesc(UserDO::getCreatedAt);
         Page<UserDO> mpPage = baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
         return PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
-            .map(UserConverter::toVO);
+            .map(UserConverter::toDTO);
     }
 
     /** Multi-step revenue report — needs consistent snapshot across queries */
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
-    public RevenueReportVO getYearlyRevenueReport(int year) {
+    public RevenueReportDTO getYearlyRevenueReport(int year) {
         BigDecimal q1Revenue = calculateQuarterRevenue(year, 1);
         BigDecimal q2Revenue = calculateQuarterRevenue(year, 2);
-        return new RevenueReportVO(q1Revenue, q2Revenue);
+        return new RevenueReportDTO(q1Revenue, q2Revenue);
     }
 }
 ```

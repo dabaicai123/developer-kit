@@ -8,7 +8,7 @@ Core annotations for COLA/DDD REST controllers. Spring Boot 3.5 baseline: Jakart
 
 | Annotation | Purpose | Example |
 |------------|---------|---------|
-| `@RestController` | REST endpoint class | `@RestController` on adapter/web classes |
+| `@RestController` | REST endpoint class | `@RestController` on adapter module `web/` classes |
 | `@RequestMapping` | Base URL prefix | `@RequestMapping("/v1/orders")` |
 | `@GetMapping` | Read endpoint | `@GetMapping("/{id}")` |
 | `@PostMapping` | Create endpoint | `@PostMapping` |

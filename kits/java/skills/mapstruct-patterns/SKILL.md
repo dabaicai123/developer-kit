@@ -1,8 +1,7 @@
 ---
 name: mapstruct-patterns
-description: "MapStruct object mapping for DDD/COLA architecture: Domain ↔ DO, Domain ↔ DTO/Cmd conversions, update mapping, nested objects, and Maven config with Lombok. Use when creating mappers for COLA layer boundaries or configuring MapStruct with Spring Boot."
+description: "MapStruct object mapping for DDD/COLA architecture: DTO ↔ domain VO, DO → DTO read models, Domain ↔ DO persistence mapping, update mapping, nested objects, and Maven config with Lombok. Use when creating mappers for COLA layer boundaries or configuring MapStruct with Spring Boot."
 version: "1.0.0"
-type: skill
 ---
 
 # MapStruct Patterns (DDD Context)
@@ -10,7 +9,8 @@ type: skill
 ## When to use this skill
 
 - Creating mappers between Domain entities and Infrastructure DOs (Domain ↔ DO)
-- Creating mappers between Domain entities and Adapter DTOs/Cmds (Domain ↔ DTO/Cmd)
+- Creating app-layer mappers between flat client DTO/Cmd objects and behavior-carrying domain VOs (`XxxDtoVoConvertor`)
+- Creating app-layer read mappers from Infrastructure DOs to client DTOs (`XxxDOConverter`)
 - Configuring MapStruct annotation processing with Lombok in Spring Boot
 - Implementing update mappings with `@MappingTarget` for partial updates
 
@@ -60,14 +60,15 @@ Set default component model globally:
 
 ## Converter Naming (anchored to ddd-cola)
 
-Two converter types, two distinct names — do NOT use the same suffix for both:
+Three converter roles, distinct names - do NOT use the same suffix for different boundaries:
 
 | Converter | Direction | Location | Class Name |
 |-----------|-----------|----------|------------|
+| `XxxDtoVoConvertor` | client DTO/Cmd ↔ domain VO (when needed) | `app/{domain}/convertor/` | e.g. `OrderDtoVoConvertor` |
+| `XxxDOConverter` | DO → client DTO (read path) | `app/{domain}/convertor/` | e.g. `OrderDOConverter` |
 | `XxxDomainConverter` | Domain ↔ DO | `infrastructure/{domain}/gatewayimpl/database/` | e.g. `OrderDomainConverter` |
-| `XxxDOConverter` | DO → DTO (read path) | `app/{domain}/converter/` | e.g. `OrderDOConverter` |
 
-> Never name a Domain↔DO converter `XxxDOConverter` — that suffix is reserved for the DO→DTO converter used by `QryExe`.
+> Never name a Domain↔DO converter `XxxDOConverter`; that suffix is reserved for the DO→DTO converter used by `QryExe`.
 
 For COLA module structure and converter placement, see `ddd-cola` skill.
 
@@ -95,15 +96,15 @@ public interface OrderDOConverter {
 }
 ```
 
-## Domain ↔ DTO/Cmd Mapper (App Layer, Write Path)
+## DTO/Cmd ↔ Domain VO Convertor (App Layer, Write Path)
 
-Only use when Cmd has 5+ fields that map 1:1 to Domain. Many CmdExe build Domain via factory method and do not need a converter.
+Only use when a Cmd carries nested DTOs or value-object-shaped data that must become domain VOs. Many CmdExe classes build the domain entity via factory methods from primitive fields and do not need this convertor. Domain entities must not receive client Cmd/DTO directly.
 
 ```java
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface OrderDTOConverter {
-    OrderDTO toDTO(Order order);
-    Order fromCreateCmd(CreateOrderCmd cmd);
+public interface OrderDtoVoConvertor {
+    OrderRule toOrderRule(OrderRuleDTO dto);
+    OrderRuleDTO toOrderRuleDTO(OrderRule rule);
 }
 ```
 

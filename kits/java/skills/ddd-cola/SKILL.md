@@ -2,7 +2,6 @@
 name: ddd-cola
 description: "COLA DDD Architecture: multi-module project structure, common/client/adapter/app/domain/infrastructure/start modules, Gateway pattern, CQRS, Feign API contracts. Use when a Java Spring Cloud service already uses COLA/DDD or when the task explicitly mentions COLA, DDD, domain/app/infrastructure/client layers, CmdExe, QryExe, Gateway, or ServiceI."
 version: "2.3.0"
-type: skill
 parameters:
   - name: service_name
     description: "Service name used as module prefix, for example demo-client and demo-adapter"
@@ -32,7 +31,7 @@ This is a resident core skill for Java feature work, so keep it as a quick decis
 
 Load additional references only when needed:
 
-- `references/code-examples.md`: concrete class templates for ServiceI, FeignClient, Controller, CmdExe, QryExe, Gateway, GatewayImpl.
+- `references/code-examples.md`: concrete class templates for ServiceI, FeignClient, Controller, CmdExe, QryExe, DtoVoConvertor, DOConverter, Gateway, GatewayImpl.
 - `references/pom-templates.md`: parent/module POMs, Java 21, Spring Boot 3.5, Lombok/mvnd compiler settings.
 
 ## When To Apply
@@ -56,13 +55,13 @@ Do not force COLA onto simple MVC CRUD modules. For plain controller-service-map
 
 ## Module Model
 
-Standard modules (7 modules — `common` is the shared kernel that keeps `client` and `domain` as leaves):
+Team standard modules (official COLA distributed web archetype plus local `common`; `common` is the shared kernel that keeps `client` and `domain` as leaves):
 
 ```text
 service-common          shared kernel: Result, PageResult, BusinessException, Command, Query, ErrorCode
 service-client          API contracts: Cmd/Qry/DTO (flat), ServiceI, FeignClient
 service-adapter         HTTP controllers and inbound adapters
-service-app             application services, CmdExe, QryExe, Convertor (DTO ↔ Domain VO)
+service-app             application services, CmdExe, QryExe, DtoVoConvertor (DTO ↔ Domain VO), DOConverter (DO → DTO)
 service-domain          domain entities, value objects, gateways, domain services
 service-infrastructure  GatewayImpl, Mapper, DO, external clients
 service-start           Spring Boot bootstrap and runtime config
@@ -80,6 +79,7 @@ app  ← adapter  ← start
 
 Key invariants:
 
+- Official COLA `cola-archetype-web` provides `client`, `adapter`, `app`, `domain`, `infrastructure`, and `start`. Our kit adds `common` because we use project-local `Result`, `PageResult`, `BusinessException`, `Command`, `Query`, and `ErrorCode` instead of COLA component types.
 - `client` and `domain` have ZERO dependency between them. This matches the official COLA `cola-samples/craftsman` layout where `craftsman-client` and `craftsman-domain` are both leaf modules.
 - Client DTO fields are flat (primitives + client enums). If a complex structure (ConditionGroup, StepDefinition, RewardSpec) is needed on both sides, define a flat DTO in `client` and a behavior-carrying VO in `domain`. App Convertor bridges them.
 - Pragmatic read-path exception: QryExe may query infrastructure Mapper directly for read performance. Write paths must go through the domain Gateway.
@@ -96,7 +96,7 @@ Key invariants:
 - Never pass domain entities to infrastructure HTTP/Feign/MQ clients. Convert to primitive values or DTOs first.
 - Before generating a CmdExe or QryExe, read the actual Gateway, Mapper, client, and DTO signatures. Do not invent parameters.
 - All executor methods use `execute(...)`.
-- Use MapStruct for boundary conversion. Two conversion points: app `DtoVoConvertor` (DTO ↔ domain VO) and infrastructure `DomainConverter` (Domain ↔ DO).
+- Use MapStruct for boundary conversion. Standard converter roles: app `DtoVoConvertor` (client DTO/Cmd ↔ domain VO when needed), app `DOConverter` (read-path DO → client DTO), and infrastructure `DomainConverter` (Domain ↔ DO).
 
 ## Naming
 
@@ -110,6 +110,7 @@ Key invariants:
 | app write executor | `XxxCreateCmdExe` |
 | app read executor | `XxxPageQryExe` |
 | app DTO↔VO converter | `XxxDtoVoConvertor` (MapStruct, in app) |
+| app DO→DTO converter | `XxxDOConverter` (MapStruct, in app, read path) |
 | domain entity | `Xxx` |
 | domain value object | `XxxVO` or bare name (e.g., `ConditionGroup`, `RewardSpec`) |
 | domain port | `XxxGateway` |

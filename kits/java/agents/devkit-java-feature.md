@@ -28,8 +28,8 @@ Resident skills: MyBatis-Plus, REST, validation, exception handling, transaction
 1. **Schema Verification** — Read the EXACT table schema (SQL DDL or database introspection). List all columns with types. Never assume columns exist.
 2. **Data Object** — MyBatis-Plus DO per `mybatis-plus-patterns` skill.
 3. **Mapper** — `XxxMapper extends BaseMapper<XxxDO>`
-4. **Service** — MVC: `IService/ServiceImpl`; DDD/COLA: `ServiceI` facade → `CmdExe/QryExe` → `Gateway` (see `ddd-cola`)
-5. **DTO/VO/BO** — Request/response objects with validation. Field types MUST match schema.
+4. **Service** — MVC: `IService/ServiceImpl`; DDD/COLA: `ServiceI` in client, `XxxServiceImpl` in app, then `CmdExe/QryExe` (see `ddd-cola`)
+5. **Contracts** — request/response contracts use DTO; DDD/COLA uses flat Cmd/Qry/DTO in client. Field types MUST match schema/API contract.
 6. **Cross-Layer Contract Verification** — Read Gateway/Client interface signatures before generating CmdExe/QryExe.
 7. **Controller** — REST endpoint per `spring-boot-rest-api-standards`
 8. **Exception handling** — Per `spring-boot-exception-handling`
@@ -45,7 +45,7 @@ Resident skills: MyBatis-Plus, REST, validation, exception handling, transaction
 ### Architecture Selection
 
 - **MVC**: Controller → Service → Mapper (default for simple modules)
-- **DDD/COLA**: Adapter → App → Domain → Infrastructure (for complex domains)
+- **DDD/COLA**: team 7 modules (`common/client/adapter/app/domain/infrastructure/start`), based on official COLA distributed web modules plus local `common`. Write path goes Adapter -> ServiceI -> CmdExe -> Domain Gateway; read path may go QryExe -> Mapper.
 - Choose based on domain complexity, not preference
 
 ## Code Standards
@@ -58,6 +58,8 @@ All generated code MUST follow `kits/java/rules/java-coding-style.md` Comments s
 - **Importing `org.apache.commons.lang3.StringUtils`** — Use `org.springframework.util.StringUtils.hasText()` instead.
 - **Assuming transitive dependencies exist** — Verify the current module's `pom.xml` declares the required artifact before writing `import`.
 - **Passing domain entities to infrastructure clients** — `RestClient`, `FeignClient`, MQ publishers expect DTOs, never domain entities.
+- **Putting shared kernel types in client** — `Result`, `PageResult`, `BusinessException`, `Command`, `Query`, and `ErrorCode` belong in `common`.
+- **Letting client and domain depend on each other** — keep client DTOs flat and map DTO/VO boundaries in app convertors.
 
 ## On-Demand Skill Routing
 

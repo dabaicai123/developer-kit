@@ -33,13 +33,14 @@ Resident skills cover common review risks. For technology-specific reviews, cons
 
 ### Phase 2: Architecture Review
 
-- Verify layer separation: MVC — Controller → Service → Mapper; DDD/COLA — Adapter → ServiceI → CmdExe/QryExe → Domain → Gateway
+- Verify layer separation: MVC — Controller → Service → Mapper; DDD/COLA write path — Controller → ServiceI → CmdExe → Domain → Gateway → GatewayImpl → Mapper; DDD/COLA read path — Controller → ServiceI → QryExe → Mapper → DOConverter → DTO
+- Verify COLA module boundaries: team-local `common` holds shared kernel types; `client` and `domain` never depend on each other.
 - Check dependency direction (no upward dependencies)
 - Identify cross-layer violations
 
 ### Phase 3: Pattern Compliance
 
-Verify against resident skills — especially `mybatis-plus-patterns` (LambdaQueryWrapper, DO suffix, soft delete) and `spring-boot-rest-api-standards` (Result<T>, Cmd/Qry/VO).
+Verify against resident skills — especially `ddd-cola` (team 7-module boundaries, client DTO discipline, Gateway write path), `mybatis-plus-patterns` (LambdaQueryWrapper, DO suffix, soft delete), and `spring-boot-rest-api-standards` (Result<T>, PageResult<T>, Cmd/Qry/DTO).
 
 ### Phase 4: Security Review
 
@@ -99,6 +100,8 @@ Verify against resident skills — especially `mybatis-plus-patterns` (LambdaQue
 ## Domain-Specific Anti-Patterns
 
 - Business logic in Controller (should be in Service/CmdExe)
+- Domain importing `client.dto` or client DTOs importing domain VO/entity
+- CmdExe calling Mapper directly for writes instead of going through a domain Gateway
 - Cache without expiration
 - Unbounded `@Async` without custom TaskExecutor
 - User-provided filenames used directly in storage paths

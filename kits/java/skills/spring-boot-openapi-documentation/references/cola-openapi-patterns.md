@@ -1,13 +1,13 @@
 # COLA/DDD OpenAPI Patterns
 
-OpenAPI annotation patterns for COLA REST APIs. All `@Tag`, `@Operation`, `@Schema`, `@ApiResponse` descriptions use Chinese.
+OpenAPI annotation patterns for COLA REST APIs. Chinese-user-facing APIs should use Chinese in `@Tag`, `@Operation`, `@Schema`, and `@ApiResponse` descriptions.
 
-> Supplement to `ddd-cola` and `spring-boot-rest-api-standards/references/cola-rest-patterns.md`. Covers OpenAPI/Swagger annotations only. For REST patterns, URL design, and pagination, see `cola-rest-patterns.md`.
+This file covers OpenAPI annotations only. For REST patterns, URL design, and pagination, see `spring-boot-rest-api-standards/references/cola-rest-patterns.md`.
 
 ## Controller Documentation (Adapter Layer)
 
 ```java
-// adapter/web/CustomerController.java
+// service-adapter: web/CustomerController.java
 @RestController
 @RequestMapping("/v1/customers")
 @Tag(name = "Customer", description = "客户管理接口")
@@ -16,18 +16,18 @@ OpenAPI annotation patterns for COLA REST APIs. All `@Tag`, `@Operation`, `@Sche
 public class CustomerController {
     private final CustomerServiceI customerService;
 
-    @Operation(summary = "创建客户", description = "提交新客户，走写路径")
+    @Operation(summary = "创建客户", description = "提交客户信息并创建客户")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "客户创建成功"),
         @ApiResponse(responseCode = "400", description = "参数校验失败"),
-        @ApiResponse(responseCode = "409", description = "客户名冲突")
+        @ApiResponse(responseCode = "409", description = "客户名称冲突")
     })
     @PostMapping
     public Result<Void> addCustomer(@Valid @RequestBody CustomerAddCmd cmd) {
         return customerService.addCustomer(cmd);
     }
 
-    @Operation(summary = "查询客户", description = "按 ID 查询客户详情，走读路径")
+    @Operation(summary = "查询客户", description = "按客户编号查询客户详情")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @ApiResponse(responseCode = "404", description = "客户不存在")
     @GetMapping("/{customerId}")
@@ -39,24 +39,20 @@ public class CustomerController {
 
     @Operation(summary = "客户列表", description = "分页查询客户")
     @GetMapping
-    public Result<PageResult<CustomerDTO>> listCustomers(
-            @RequestParam(defaultValue = "1") long page,
-            @RequestParam(defaultValue = "10") long pageSize,
-            @RequestParam(required = false)
-            @Parameter(description = "客户类型筛选", example = "IMPORTANT") String customerType) {
-        return customerService.listCustomers(page, pageSize, customerType);
+    public Result<PageResult<CustomerDTO>> listCustomers(@ParameterObject @Valid CustomerPageQry qry) {
+        return customerService.listCustomers(qry);
     }
 }
 ```
 
-## Model Documentation (Client Module — Cmd/Qry/DTO)
+## Model Documentation (Client Module)
 
-> Cmd, Qry, DTO live in the **client module** (`client/dto/`) per `ddd-cola` SKILL.md.
+Cmd, Qry, and DTO live in the client module per `ddd-cola`.
 
-### Command Object (Write Path)
+### Command Object
 
 ```java
-// client/dto/CustomerAddCmd.java
+// service-client: dto/CustomerAddCmd.java
 @Schema(description = "创建客户命令")
 @Data
 public class CustomerAddCmd extends Command {
@@ -70,24 +66,30 @@ public class CustomerAddCmd extends Command {
 }
 ```
 
-### Query Object (Read Path)
+### Query Object
 
 ```java
-// client/dto/CustomerListByNameQry.java
-@Schema(description = "按名称查询客户参数")
+// service-client: dto/CustomerPageQry.java
+@Schema(description = "客户分页查询参数")
 @Data
-@AllArgsConstructor
-public class CustomerListByNameQry extends Query {
-    @Schema(description = "客户名称", example = "示例科技", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "名称不能为空")
-    private String name;
+public class CustomerPageQry extends Query {
+    @Schema(description = "页码", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Min(value = 1, message = "页码必须大于 0")
+    private long page = 1;
+
+    @Schema(description = "每页条数", example = "10", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Min(value = 1, message = "每页条数必须大于 0")
+    private long pageSize = 10;
+
+    @Schema(description = "客户类型筛选", example = "IMPORTANT")
+    private String customerType;
 }
 ```
 
-### DTO Object (Response)
+### DTO Object
 
 ```java
-// client/dto/data/CustomerDTO.java
+// service-client: dto/data/CustomerDTO.java
 @Schema(description = "客户数据传输对象")
 @Data
 public class CustomerDTO {
@@ -109,91 +111,80 @@ public class CustomerDTO {
 public enum CustomerType {
     @Schema(description = "潜在客户")
     POTENTIAL,
+
     @Schema(description = "意向客户")
     INTENTIONAL,
+
     @Schema(description = "重要客户")
     IMPORTANT,
+
     @Schema(description = "VIP 客户")
     VIP
 }
 ```
 
-## NOT: What Never to Annotate
+## What Never to Annotate
 
 | Object | Package | Reason |
 |--------|---------|--------|
 | Domain Entity | `domain/customer/` | Internal to domain; must not leak to API |
+| Domain VO | `domain/customer/vo/` | Behavior-carrying internal type |
 | Gateway Interface | `domain/customer/gateway/` | Internal port; not exposed to clients |
-| DO Object | `infrastructure/customer/` | Persistence-only; not in API contract |
+| DO Object | `infrastructure/customer/gatewayimpl/database/dataobject/` | Persistence-only; not in API contract |
 | Gateway Impl | `infrastructure/customer/` | Infrastructure internal |
 
-**NOT** adding `@Schema` to domain entities — the annotation leaks internal domain structure into public API documentation, breaking DDD encapsulation. Annotate only objects in `client/dto/` that cross the adapter boundary.
-
-**NOT** importing domain entities as `@Schema` response types in controllers — use DTO from `client/dto/data/` instead:
+Annotate only client-module objects that cross the adapter boundary. Do not import domain entities as response types in controllers.
 
 ```java
-// NOT: domain entity as response type
-public Result<CustomerEntity> getCustomer(@PathVariable String id) { }
+// NOT
+public Result<Customer> getCustomer(@PathVariable String id) { }
 
-// Correct: DTO as response type
+// Correct
 public Result<CustomerDTO> getCustomer(@PathVariable String id) { }
 ```
 
 ## Pagination with PageResult
 
-COLA uses `Result<PageResult<T>>` for paginated responses. Use `@RequestParam` for page/pageSize:
-
 ```java
 @Operation(summary = "客户列表", description = "分页查询客户")
 @GetMapping
-public Result<PageResult<CustomerDTO>> listCustomers(
-        @RequestParam(defaultValue = "1") long page,
-        @RequestParam(defaultValue = "10") long pageSize,
-        @RequestParam(required = false)
-        @Parameter(description = "客户类型筛选") String customerType) {
-    return customerService.listCustomers(page, pageSize, customerType);
+public Result<PageResult<CustomerDTO>> listCustomers(@ParameterObject @Valid CustomerPageQry qry) {
+    return customerService.listCustomers(qry);
 }
 ```
 
-`PageResult<T>` wraps MyBatis-Plus `Page<T>` — see `spring-boot-rest-api-standards`.
-
-For SpringDoc-native pagination (non-COLA projects), use `@ParameterObject Pageable`:
-
-```java
-public Result<PageResult<OrderDTO>> listOrders(@ParameterObject Pageable pageable) { }
-```
+For SpringDoc-native pagination in non-COLA projects, use `@ParameterObject Pageable`.
 
 ## Error Response Documentation
 
-COLA uses `Result<Void>` with error codes for all errors:
+COLA uses `Result<Void>` with integer error codes for errors:
 
 ```java
 @Operation(summary = "创建客户")
 @ApiResponse(responseCode = "200", description = "成功")
 @ApiResponse(responseCode = "400", description = "参数校验失败",
     content = @Content(schema = @Schema(implementation = Result.class)))
-@ApiResponse(responseCode = "409", description = "客户名冲突",
+@ApiResponse(responseCode = "409", description = "客户名称冲突",
     content = @Content(schema = @Schema(implementation = Result.class)))
 @PostMapping
-public Result<Void> addCustomer(@Valid @RequestBody CustomerAddCmd cmd) { ... }
+public Result<Void> addCustomer(@Valid @RequestBody CustomerAddCmd cmd) {
+    return customerService.addCustomer(cmd);
+}
 ```
 
-Global exception handler returns `Result<Void>` — see `spring-boot-exception-handling`. Mark handler methods with `@Operation(hidden = true)` to exclude them from docs.
+Global exception handler returns `Result<Void>`; see `spring-boot-exception-handling`. Mark handler methods with `@Operation(hidden = true)` if they appear in generated docs.
 
 ## Hidden Fields and Access Modes
 
 ```java
-// Hide internal fields from API documentation
 @Schema(hidden = true)
 private String internalField;
 
-// Read-only: server-generated, not in request
-@Schema(description = "创建时间", example = "2024-01-15T10:30:00", accessMode = Schema.AccessMode.READ_ONLY)
+@Schema(description = "创建时间", example = "2026-05-14T10:30:00", accessMode = Schema.AccessMode.READ_ONLY)
 private LocalDateTime createdAt;
 
-// Write-only: sent in request, not in response
 @Schema(description = "密码", accessMode = Schema.AccessMode.WRITE_ONLY)
 private String password;
 ```
 
-**NOT** using `@Schema(example=...)` for passwords, tokens, or PII — sensitive data must not appear in Swagger UI examples. Use `accessMode = WRITE_ONLY` for passwords and `hidden = true` for internal fields.
+Do not use sensitive values in `@Schema(example=...)`.

@@ -17,7 +17,7 @@ PostgreSQL + MyBatis-Plus expert for schema design, query optimization, security
 
 ## Tech Stack
 
-PostgreSQL 18+, MyBatis-Plus 3.5.9, manual SQL changesets (no auto-migrate), COLA DDD persistence in `infrastructure/gatewayimpl/` + `mapper/`.
+PostgreSQL 18+, MyBatis-Plus 3.5.9, manual SQL changesets (no auto-migrate), COLA DDD persistence in infrastructure domain packages: `{domain}/GatewayImpl`, `{domain}/gatewayimpl/database/Mapper`, and `{domain}/gatewayimpl/database/dataobject/DO`.
 
 ## Diagnostic Commands
 

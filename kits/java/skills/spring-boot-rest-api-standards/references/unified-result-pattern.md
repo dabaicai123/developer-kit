@@ -1,8 +1,9 @@
 # Unified Result Pattern Reference
 
-All Spring Boot REST APIs use `Result<T>` wrapper. Outer structure: exactly `code`, `msg`, `data`.
+All Spring Boot REST APIs use `Result<T>`. The outer JSON shape is exactly `code`, `msg`, and `data`.
 
 Spring Boot 3.5 defaults ProblemDetail (`spring.mvc.problemdetails.enabled=true`). COLA projects must disable it:
+
 ```yaml
 spring:
   mvc:
@@ -10,7 +11,18 @@ spring:
       enabled: false
 ```
 
-NOT `ProblemDetail`, `ResponseEntity`, or `ErrorResponse` → use `Result<T>`.
+Do not return `ProblemDetail`, `ResponseEntity`, raw entities, or raw `Result`.
+
+## COLA Placement
+
+| Type | Module | Package | Notes |
+|------|--------|---------|-------|
+| `Result<T>` | common | `common.result` | Pure Java response wrapper |
+| `PageResult<T>` | common | `common.result` | No MyBatis-Plus dependency |
+| `BusinessException` | common | `common.exception` | Pure Java exception root |
+| `GlobalExceptionHandler` | adapter | `web.advice` | Spring Web `@RestControllerAdvice` |
+
+`common` must not depend on Spring Web. Keep the exception hierarchy there, but put the handler in adapter.
 
 ## Result.java
 
@@ -49,24 +61,26 @@ public class Result<T> {
 }
 ```
 
-NOT String codes like "SUCCESS" or "NOT_FOUND" → always integer HTTP status codes.
-NOT extra fields in outer structure → exactly `code/msg/data`.
-NOT `Result<Object>`, `Result<?>`, or raw `Result` → always declare the concrete payload type, e.g. `Result<UserVO>`, `Result<PageResult<UserVO>>`, `Result<List<UserVO>>`, `Result<Void>` for no-payload responses. `Result<Object>` defeats OpenAPI/Swagger schema generation, breaks IDE auto-completion at call sites, and silently hides DTO contract drift — never use it as a shortcut.
+Rules:
 
-### Choosing the right type parameter
+- Use integer codes, not strings like `"SUCCESS"` or `"NOT_FOUND"`.
+- Keep the outer fields exactly `code/msg/data`.
+- Always declare a concrete payload type.
+
+## Type Parameter Decision Table
 
 | Endpoint shape | Correct return type | Anti-pattern |
 |----------------|--------------------|--------------|
-| Returns single resource | `Result<UserVO>` | `Result<Object>` / `Result<Map<String,Object>>` |
-| Returns paginated list | `Result<PageResult<UserVO>>` | `Result<Object>` / `Result<PageResult>` (raw) |
-| Returns flat list | `Result<List<UserVO>>` | `Result<List>` (raw) / `Result<Object>` |
-| Returns nothing (CUD) | `Result<Void>` | `Result<Object>` with `null` data / `Result<Boolean>` for plain success flags |
-| Returns ID after create | `Result<Long>` or `Result<UserVO>` | `Result<Object>` |
-| Returns one of several shapes | Split into separate endpoints, or use a sealed DTO | `Result<Object>` / `Result<Map<String,Object>>` |
+| Returns single resource | `Result<UserDTO>` | `Result<Object>` / `Result<Map<String,Object>>` |
+| Returns paginated list | `Result<PageResult<UserDTO>>` | `Result<Object>` / raw `Result<PageResult>` |
+| Returns flat list | `Result<List<UserDTO>>` | raw `Result<List>` / `Result<Object>` |
+| Returns nothing | `Result<Void>` | `Result<Object>` with `null` data |
+| Returns ID after create | `Result<Long>` or `Result<UserDTO>` | `Result<Object>` |
+| Returns one of several shapes | Split endpoints or use a sealed DTO | `Result<Object>` / `Map<String,Object>` |
 
-Rule of thumb: if you can name what `data` is, that name belongs in the generic. If you genuinely cannot name it, redesign the endpoint — `Object` is a smell, not a type.
+Use DTO for REST response contracts. Reserve VO terminology for domain value objects, not API responses.
 
-## PageResult.java (no MyBatis-Plus dependency)
+## PageResult.java
 
 ```java
 package com.example.common.result;
@@ -79,32 +93,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 分页结果封装，提供统一的分页响应格式。
+ * Unified pagination response.
  *
- * <p>包含 {@code records / total / page / pageSize} 四个字段，
- * 通过 {@link #of(List, long, long, long)} 工厂方法从查询结果构造，
- * 通过 {@link #map(Function)} 方法可将 DO 列表转换为 VO/DTO 列表。
- *
- * <p>不依赖 MyBatis-Plus 类型，保持 api 模块轻量。app/infrastructure 层
- * 可在调用点直接解构 MP 的 {@code Page<T>}（records/total/current/size）传入 {@link #of(List, long, long, long)}，
- * 避免 api 模块反向依赖 MyBatis-Plus。
- *
- * @author agent
- * @since 1.0.0
+ * <p>Does not depend on MyBatis-Plus. App/infrastructure code destructures
+ * MyBatis-Plus Page records/total/current/size at the call site.
  */
 @Data
 public class PageResult<T> {
 
-    /** 当前页数据列表 */
     private List<T> records;
-
-    /** 总记录数 */
     private long total;
-
-    /** 当前页码（从 1 开始） */
     private long page;
-
-    /** 每页大小 */
     private long pageSize;
 
     public PageResult(List<T> records, long total, long page, long pageSize) {
@@ -114,30 +113,24 @@ public class PageResult<T> {
         this.pageSize = pageSize;
     }
 
-    /**
-     * 从查询结果列表直接构造分页结果。
-     *
-     * @param records  当前页数据列表
-     * @param total    总记录数
-     * @param page     当前页码
-     * @param pageSize 每页大小
-     * @return 分页结果
-     */
     public static <T> PageResult<T> of(List<T> records, long total, long page, long pageSize) {
         return new PageResult<>(records, total, page, pageSize);
     }
 
-    /**
-     * 将当前分页结果中的 records 映射为另一种类型（通常用于 DO → VO/DTO 转换）。
-     *
-     * @param converter 类型转换函数
-     * @return 转换后的新分页结果，total/page/pageSize 保持不变
-     */
     public <U> PageResult<U> map(Function<T, U> converter) {
         List<U> mapped = records.stream().map(converter).collect(Collectors.toList());
         return new PageResult<>(mapped, total, page, pageSize);
     }
 }
+```
+
+COLA read path example:
+
+```java
+Page<CustomerDO> mpPage = customerMapper.selectPage(new Page<>(qry.getPage(), qry.getPageSize()), wrapper);
+PageResult<CustomerDTO> result = PageResult
+    .of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
+    .map(customerDOConverter::toDTO);
 ```
 
 ## BusinessException.java
@@ -155,46 +148,46 @@ public class BusinessException extends RuntimeException {
         this.msg = msg;
     }
 
-    public int getCode() { return code; }
-    public String getMsg() { return msg; }
-}
+    public int getCode() {
+        return code;
+    }
 
-// NOT jakarta.validation.ValidationException → use BizValidationException to avoid collision
-public class BizValidationException extends BusinessException {
-    public BizValidationException(String msg) { super(400, msg); }
+    public String getMsg() {
+        return msg;
+    }
 }
+```
 
+Use business-specific subclasses:
+
+```java
 public class NotFoundException extends BusinessException {
     public NotFoundException(String resource, Object id) {
         super(404, resource + " not found: " + id);
     }
 }
 
-public class UnauthorizedException extends BusinessException {
-    public UnauthorizedException(String msg) { super(401, msg); }
-}
-
-public class ForbiddenException extends BusinessException {
-    public ForbiddenException(String msg) { super(403, msg); }
-}
-
 public class ConflictException extends BusinessException {
-    public ConflictException(String msg) { super(409, msg); }
+    public ConflictException(String msg) {
+        super(409, msg);
+    }
 }
 ```
 
-NOT `jakarta.validation.ValidationException` for business validation → use `BizValidationException`.
+Do not use `jakarta.validation.ValidationException` for business validation. Use a project-specific `InputValidationException` or `BizValidationException` to avoid collision with Jakarta validation.
 
 ## GlobalExceptionHandler.java
 
 ```java
-package com.example.common.exception;
+package com.example.web.advice;
 
+import com.example.common.exception.BusinessException;
 import com.example.common.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -224,23 +217,64 @@ public class GlobalExceptionHandler {
 }
 ```
 
-NOT letting raw exceptions bubble up → `@RestControllerAdvice` catches all.
-NOT `@ExceptionHandler` returning `ResponseEntity` → return `Result<Void>`.
+Do not put this class in `common`; it depends on Spring Web and belongs to the adapter module.
+
+## COLA Controller Pattern
+
+```java
+package com.example.web;
+
+import com.example.api.UserServiceI;
+import com.example.common.result.PageResult;
+import com.example.common.result.Result;
+import com.example.dto.UserCreateCmd;
+import com.example.dto.UserPageQry;
+import com.example.dto.data.UserDTO;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/v1/users")
+@RequiredArgsConstructor
+public class UserController {
+    private final UserServiceI userService;
+
+    @GetMapping
+    public Result<PageResult<UserDTO>> page(@ParameterObject @Valid UserPageQry qry) {
+        return userService.page(qry);
+    }
+
+    @PostMapping
+    public Result<Void> create(@Valid @RequestBody UserCreateCmd cmd) {
+        return userService.create(cmd);
+    }
+}
+```
+
+Controller delegates and does not wrap `Result.success()` again because `ServiceI` already returns `Result<T>`.
 
 ## JSON Response Examples
 
-### Single item
+Single item:
+
 ```json
-{"code": 200, "msg": "success", "data": {"id": 1, "name": "John", "email": "john@example.com"}}
+{"code": 200, "msg": "success", "data": {"id": 1, "name": "Alice"}}
 ```
 
-### Page query
+Page query:
+
 ```json
 {
   "code": 200,
   "msg": "success",
   "data": {
-    "records": [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}],
+    "records": [{"id": 1, "name": "Alice"}],
     "total": 100,
     "page": 1,
     "pageSize": 10
@@ -248,111 +282,14 @@ NOT `@ExceptionHandler` returning `ResponseEntity` → return `Result<Void>`.
 }
 ```
 
-### List (no pagination)
-```json
-{"code": 200, "msg": "success", "data": [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]}
-```
+No data:
 
-### Create/Update/Delete (no data)
 ```json
 {"code": 200, "msg": "success", "data": null}
 ```
 
-### Error
+Error:
+
 ```json
 {"code": 404, "msg": "User not found: 123", "data": null}
 ```
-
-### Validation error
-```json
-{"code": 400, "msg": "name: cannot be blank; email: invalid format", "data": null}
-```
-
-## Controller Pattern
-
-```java
-@RestController
-@RequestMapping("/v1/users")
-@RequiredArgsConstructor
-public class UserController {
-    private final UserServiceI userServiceI;
-
-    @GetMapping("/{id}")
-    public Result<UserVO> getById(@PathVariable Long id) {
-        return Result.success(userServiceI.getById(id));
-    }
-
-    @GetMapping
-    public Result<PageResult<UserVO>> page(
-            @RequestParam(defaultValue = "1") long page,
-            @RequestParam(defaultValue = "10") long pageSize) {
-        return Result.success(userServiceI.page(page, pageSize));
-    }
-
-    @GetMapping("/list")
-    public Result<List<UserVO>> list() {
-        return Result.success(userServiceI.list());
-    }
-
-    @PostMapping
-    public Result<Void> create(@Valid @RequestBody UserCreateDTO dto) {
-        userServiceI.create(dto);
-        return Result.success();
-    }
-
-    @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
-        userServiceI.update(id, dto);
-        return Result.success();
-    }
-
-    @DeleteMapping("/{id}")
-    public Result<Void> remove(@PathVariable Long id) {
-        userServiceI.removeById(id);
-        return Result.success();
-    }
-}
-```
-
-NOT Controller wrapping `Result.success()` again → Service already returns `Result<T>`.
-
-## Service Pattern (MyBatis-Plus)
-
-```java
-@Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserServiceI {
-
-    @Override
-    public UserVO getById(Long id) {
-        UserDO entity = baseMapper.selectById(id);
-        if (entity == null) {
-            throw new NotFoundException("User", id);
-        }
-        return UserConverter.toVO(entity);
-    }
-
-    @Override
-    public PageResult<UserVO> page(long page, long pageSize) {
-        Page<UserDO> mpPage = baseMapper.selectPage(
-            new Page<>(page, pageSize),
-            lambdaQuery().orderByDesc(UserDO::getCreatedAt)
-        );
-        return PageResult.of(mpPage.getRecords(), mpPage.getTotal(), mpPage.getCurrent(), mpPage.getSize())
-            .map(UserConverter::toVO);
-    }
-}
-```
-
-## Error Code Convention
-
-| code | Usage |
-|------|-------|
-| 200 | All successful operations |
-| 400 | Validation errors, invalid input |
-| 401 | Missing or invalid auth |
-| 403 | No permission |
-| 404 | Resource not found |
-| 409 | Duplicate, state conflict |
-| 500 | Unexpected server errors |
-
-NOT String codes → always integer HTTP status codes. NOT extra outer fields → exactly `code/msg/data`.

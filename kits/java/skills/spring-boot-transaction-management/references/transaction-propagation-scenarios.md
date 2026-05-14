@@ -113,10 +113,10 @@ public void sendNotification(String email, String subject, String content) {
 /** NEVER — enforces non-transactional execution; throws exception if caller has a transaction */
 @Override
 @Transactional(propagation = Propagation.NEVER)
-public List<UserExportVO> exportAll() {
+public List<UserExportDTO> exportAll() {
     return baseMapper.selectList(null)
         .stream()
-        .map(UserConverter::toExportVO)
+        .map(UserConverter::toExportDTO)
         .toList();
 }
 ```

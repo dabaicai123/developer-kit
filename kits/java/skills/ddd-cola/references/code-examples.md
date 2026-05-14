@@ -323,7 +323,7 @@ public interface CustomerDomainConverter {
     Customer toDomain(CustomerDO customerDO);
 }
 
-// app module — customer/converter/CustomerDOConverter.java — MapStruct converter for DO→DTO (read path)
+// app module — customer/convertor/CustomerDOConverter.java — MapStruct converter for DO→DTO (read path)
 @Mapper(componentModel = "spring")
 public interface CustomerDOConverter {
     CustomerDTO toDTO(CustomerDO customerDO);
