@@ -10,7 +10,7 @@
 
 Developers default to `useState` + `useEffect` for all data because SPA habits treat every data source as client-side. In the Pages Router era, all components were client components, so this pattern was the only option. With App Router, server components can fetch directly, and TanStack Query provides a superior client-side caching layer. But the old pattern persists through copy-paste and habit.
 
-**Why this happens**: The mental model for data fetching in SPAs is "fetch in effect, store in state." Developers carry this model into Next.js App Router without updating it. The pattern also feels simple at first — just two hooks — but it quickly grows into loading/error/refetch state management that duplicates what TanStack Query handles automatically.
+**Why this happens**: The mental model for data fetching in SPAs is "fetch in effect, store in state." Developers carry this model into Next.js App Router without updating it. The pattern also feels simple at first - just two hooks - but it quickly grows into loading/error/refetch state management that duplicates what TanStack Query handles automatically.
 
 ### Before
 
@@ -74,7 +74,7 @@ function UserProfile({ userId }: { userId: string }) {
 Or, if the data does not depend on client interaction, use a server component:
 
 ```tsx
-// Server component — no hooks needed
+// Server component - no hooks needed
 async function UserProfile({ userId }: { userId: string }) {
   const user = await db.user.findUnique({ where: { id: userId } });
   return <div>{user.name}</div>;
@@ -88,7 +88,7 @@ async function UserProfile({ userId }: { userId: string }) {
 3. If it does depend on client interaction, install TanStack Query and replace the pattern
 4. Define a `queryKey` that uniquely identifies the data (include all parameters)
 5. Move the fetch logic into `queryFn`
-6. Remove `useState` for loading, error, and data — TanStack Query provides these
+6. Remove `useState` for loading, error, and data - TanStack Query provides these
 7. Add `staleTime` configuration if the data should not refetch on every window focus
 8. Consider adding `loading.tsx` and `error.tsx` for the route segment as fallbacks
 
@@ -98,7 +98,7 @@ async function UserProfile({ userId }: { userId: string }) {
 
 ### Root cause analysis
 
-Developers model component state as separate boolean variables because it mirrors how they think about state verbally: "is it loading? is there an error? did it succeed?" Each question maps to a boolean. The problem is that booleans are independent — they can all be true or false simultaneously, creating impossible states the code must guard against.
+Developers model component state as separate boolean variables because it mirrors how they think about state verbally: "is it loading? is there an error? did it succeed?" Each question maps to a boolean. The problem is that booleans are independent - they can all be true or false simultaneously, creating impossible states the code must guard against.
 
 **Why this happens**: Boolean flags are the simplest mental model. They feel natural when describing UI states conversationally. Developers do not realize that the flags are independent until they encounter a bug where `isLoading` and `isError` are both true, or all flags are false after an unexpected condition.
 
@@ -193,9 +193,9 @@ Impossible states are now impossible: the component can only be in one status at
 
 ### Root cause analysis
 
-Developers use `useEffect` to compute values from other values because they treat it as a "watcher" or "observer" pattern. This pattern is common in Vue (watch/computed) and Angular (subscriptions). In React, derived values should be computed during render — effects run after render and cause an extra render cycle.
+Developers use `useEffect` to compute values from other values because they treat it as a "watcher" or "observer" pattern. This pattern is common in Vue (watch/computed) and Angular (subscriptions). In React, derived values should be computed during render - effects run after render and cause an extra render cycle.
 
-**Why this happens**: The watcher pattern feels intuitive — "when X changes, update Y." But in React, the render itself is the reactive mechanism. Computing Y from X during render means Y is always up-to-date without an extra effect cycle. Effects are for side effects (subscriptions, network requests), not for synchronizing state.
+**Why this happens**: The watcher pattern feels intuitive -"when X changes, update Y." But in React, the render itself is the reactive mechanism. Computing Y from X during render means Y is always up-to-date without an extra effect cycle. Effects are for side effects (subscriptions, network requests), not for synchronizing state.
 
 ### Before
 
@@ -235,7 +235,7 @@ function SearchPage() {
   const [items, setItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Compute during render — always up-to-date, no extra render cycle
+  // Compute during render - always up-to-date, no extra render cycle
   const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -282,7 +282,7 @@ Developers skip `loading.tsx` because pages render fast in development (data is 
 ### Before
 
 ```tsx
-// app/dashboard/page.tsx — no loading.tsx, no Suspense
+// app/dashboard/page.tsx - no loading.tsx, no Suspense
 async function DashboardPage() {
   const stats = await fetchDashboardStats();     // 1-2s in production
   const recentOrders = await fetchRecentOrders(); // 500ms in production
@@ -305,15 +305,15 @@ async function DashboardPage() {
 // app/dashboard/loading.tsx
 export default function DashboardLoading() {
   return (
-    <div className="flex flex-col gap-[--spacing-4]">
-      <Skeleton className="h-[--spacing-16] w-full rounded-[--radius-md]" />
-      <Skeleton className="h-[--spacing-32] w-full rounded-[--radius-md]" />
-      <Skeleton className="h-[--spacing-8] w-full rounded-[--radius-md]" />
+    <div className="flex flex-col gap-4">
+      <Skeleton className="h-16 w-full rounded-md" />
+      <Skeleton className="h-32 w-full rounded-md" />
+      <Skeleton className="h-8 w-full rounded-md" />
     </div>
   );
 }
 
-// app/dashboard/page.tsx — streaming with Suspense
+// app/dashboard/page.tsx - streaming with Suspense
 import { Suspense } from 'react';
 
 async function DashboardPage() {
@@ -336,10 +336,10 @@ async function DashboardPage() {
 
 ### Step-by-step fix
 
-1. Add `loading.tsx` alongside every page that fetches data asynchronously
+1. Add `loading.tsx` when the whole route needs an instant fallback, or add local `<Suspense>` around nested slow sections
 2. Use skeleton placeholders that match the layout of the real content (same grid, same spacing)
 3. For pages with multiple async sections, wrap each in `<Suspense>` with a targeted fallback
-4. Test in development with throttled network (Chrome DevTools → Network → Slow 3G) to verify loading UI appears
+4. Test in development with throttled network (Chrome DevTools -> Network -> Slow 3G) to verify loading UI appears
 5. Verify streaming works: each section should fill in independently, not wait for all sections to complete
 
 ---
@@ -355,7 +355,7 @@ Developers add `'use client'` to every component file because the Pages Router r
 ### Before
 
 ```tsx
-// 'use client' — unnecessary, this component is static
+// 'use client' - unnecessary, this component is static
 'use client';
 import { User } from './types';
 
@@ -364,7 +364,7 @@ function UserAvatar({ user }: { user: User }) {
     <img
       src={user.avatarUrl}
       alt={user.name}
-      className="w-[--spacing-10] h-[--spacing-10] rounded-[--radius-full]"
+      className="w-10 h-10 rounded-full"
     />
   );
 }
@@ -373,7 +373,7 @@ function UserAvatar({ user }: { user: User }) {
 ### After
 
 ```tsx
-// Server component — no directive needed
+// Server component - no directive needed
 import { User } from './types';
 
 function UserAvatar({ user }: { user: User }) {
@@ -381,7 +381,7 @@ function UserAvatar({ user }: { user: User }) {
     <img
       src={user.avatarUrl}
       alt={user.name}
-      className="w-[--spacing-10] h-[--spacing-10] rounded-[--radius-full]"
+      className="w-10 h-10 rounded-full"
     />
   );
 }
@@ -390,7 +390,7 @@ function UserAvatar({ user }: { user: User }) {
 Only add `'use client'` when the component genuinely needs client features:
 
 ```tsx
-// Legitimate 'use client' — has onClick handler and useState
+// Legitimate 'use client' - has onClick handler and useState
 'use client';
 import { useState } from 'react';
 
@@ -415,9 +415,9 @@ Push the client boundary down: keep the parent as a server component and make on
 function ProductPage({ product }: { product: Product }) {
   return (
     <div>
-      <ProductHeader product={product} />          {/* Server — static */}
-      <ProductGallery images={product.images} />   {/* Server — static */}
-      <AddToCartButton productId={product.id} />    {/* Client — has onClick */}
+      <ProductHeader product={product} />          {/* Server - static */}
+      <ProductGallery images={product.images} />   {/* Server - static */}
+      <AddToCartButton productId={product.id} />    {/* Client - has onClick */}
     </div>
   );
 }
@@ -428,7 +428,7 @@ function ProductPage({ product }: { product: Product }) {
 1. List all files with `'use client'` directive
 2. For each file, check if it uses client-only features: event handlers, hooks, browser APIs
 3. Remove `'use client'` from files that do not need it
-4. For files that need `'use client'`, check if the client boundary can be pushed further down — extract the interactive part into a separate client component and keep the parent as a server component
+4. For files that need `'use client'`, check if the client boundary can be pushed further down - extract the interactive part into a separate client component and keep the parent as a server component
 5. Verify the app still works after removing unnecessary directives (hydration should succeed)
 
 ---
@@ -437,7 +437,7 @@ function ProductPage({ product }: { product: Product }) {
 
 ### Root cause analysis
 
-Developers copy colors and spacing from design specs as literal Tailwind utility values (`bg-blue-500`, `text-gray-700`) because the design system tokens are not set up yet, or they are unfamiliar with Tailwind v4 `@theme` syntax. Hardcoded values drift from the design system over time — one component uses `blue-500` while another uses `blue-600` for the same semantic concept (primary color).
+Developers copy colors and spacing from design specs as literal Tailwind utility values (`bg-blue-500`, `text-gray-700`) because the design system tokens are not set up yet, or they are unfamiliar with Tailwind v4 `@theme` syntax. Hardcoded values drift from the design system over time - one component uses `blue-500` while another uses `blue-600` for the same semantic concept (primary color).
 
 **Why this happens**: In Tailwind v3, the color palette was predefined (blue-100 through blue-900). Developers learned to pick a shade from this palette. Tailwind v4 shifts to `@theme` tokens with OKLCH colors and semantic naming. Developers who have not adopted the v4 token system continue using the old palette-style approach.
 
@@ -463,7 +463,7 @@ Problems: changing the primary color requires updating every component individua
 ### After
 
 ```tsx
-// globals.css — define tokens
+// globals.css - define tokens
 @import "tailwindcss";
 
 @theme {
@@ -478,13 +478,13 @@ Problems: changing the primary color requires updating every component individua
   --radius-md: 0.5rem;
 }
 
-// Component — uses tokens
+// Component - uses tokens
 function CallToAction() {
   return (
-    <div className="bg-[--color-primary] text-[--color-on-primary] p-[--spacing-4] rounded-[--radius-lg]">
-      <h2 className="text-[--font-size-heading-2] font-[--font-weight-heading]">Sign up now</h2>
-      <p className="text-[--font-size-body] text-[--color-text-secondary] mt-[--spacing-2]">Get started in minutes</p>
-      <button className="bg-[--color-primary-hover] hover:bg-[--color-primary-hover] text-[--color-on-primary] px-[--spacing-6] py-[--spacing-2] rounded-[--radius-md] mt-[--spacing-4]">
+    <div className="bg-primary text-on-primary p-4 rounded-lg">
+      <h2 className="text-heading-2 font-heading">Sign up now</h2>
+      <p className="text-body text-text-secondary mt-2">Get started in minutes</p>
+      <button className="bg-primary-hover hover:bg-primary-hover text-on-primary px-6 py-2 rounded-md mt-4">
         Create account
       </button>
     </div>
@@ -499,7 +499,7 @@ Changing the primary color now requires updating one token, not dozens of compon
 1. Identify all hardcoded utility classes in the codebase: `bg-blue-*`, `text-gray-*`, `p-[Npx]`, `mt-[Npx]`
 2. Map each hardcoded value to a semantic concept (primary color, secondary text, default spacing)
 3. Define semantic tokens in `globals.css` `@theme` block
-4. Replace hardcoded classes with token references: `bg-blue-500` → `bg-[--color-primary]`
+4. Replace hardcoded classes with token references: `bg-blue-500` -> `bg-primary`
 5. Verify visual fidelity: token values should match the original hardcoded values
 6. Delete any unused hardcoded values from the `@theme` block
 
@@ -511,7 +511,7 @@ Changing the primary color now requires updating one token, not dozens of compon
 
 Developers pass data through intermediate components because adding context or restructuring feels like over-engineering for a "simple" data flow. Each new feature adds another prop to the chain, and the drilling grows organically. By the time it exceeds 2 levels, the refactoring cost is high enough that developers tolerate it rather than fix it.
 
-**Why this happens**: The initial implementation is genuinely simple — just pass a prop down. The drilling grows incrementally as requirements change. Developers do not notice the threshold (2 levels) because each addition is small. Context feels heavy for a single prop, and restructuring the component tree feels like a bigger change than adding one more prop.
+**Why this happens**: The initial implementation is genuinely simple - just pass a prop down. The drilling grows incrementally as requirements change. Developers do not notice the threshold (2 levels) because each addition is small. Context feels heavy for a single prop, and restructuring the component tree feels like a bigger change than adding one more prop.
 
 ### Before
 
@@ -547,9 +547,9 @@ function ThemeToggle({ theme, onToggle }) {
 }
 ```
 
-Three intermediate levels (App → Layout → Header → ThemeToggle) pass props they do not use.
+Three intermediate levels (App -> Layout -> Header -> ThemeToggle) pass props they do not use.
 
-### After — Option A: Context
+### After - Option A: Context
 
 ```tsx
 const ThemeContext = createContext<{
@@ -583,7 +583,7 @@ function ThemeToggle() {
 }
 ```
 
-### After — Option B: Composition (children)
+### After - Option B: Composition (children)
 
 ```tsx
 function App() {
@@ -617,7 +617,7 @@ function Header({ children }) {
    - **Lift**: Move state to the consumer's parent, pass callbacks instead of state
 3. Remove the forwarded props from all intermediate components
 4. Verify that the consumer still receives the data it needs
-5. Keep the context API small and well-defined — do not expose the full state slice; expose specific getters and setters
+5. Keep the context API small and well-defined - do not expose the full state slice; expose specific getters and setters
 
 ---
 
@@ -659,7 +659,7 @@ function StatusBadge({ status }: { status: string }) {
 ### After
 
 ```tsx
-// globals.css — add semantic tokens for status colors
+// globals.css - add semantic tokens for status colors
 @theme {
   --color-status-active: oklch(0.55 0.17 145);
   --color-status-pending: oklch(0.75 0.15 80);
@@ -667,16 +667,16 @@ function StatusBadge({ status }: { status: string }) {
   --color-on-status: oklch(1.0 0 0);
 }
 
-// Component — use Tailwind with token references
+// Component - use Tailwind with token references
 function StatusBadge({ status }: { status: string }) {
   const variantClass = {
-    active: 'bg-[--color-status-active]',
-    pending: 'bg-[--color-status-pending]',
-    error: 'bg-[--color-status-error]',
+    active: 'bg-status-active',
+    pending: 'bg-status-pending',
+    error: 'bg-status-error',
   };
 
   return (
-    <span className={`${variantClass[status]} text-[--color-on-status] px-[--spacing-3] py-[--spacing-1] rounded-[--radius-lg] text-[--font-size-caption] font-[--font-weight-heading]`}>
+    <span className={`${variantClass[status]} text-on-status px-3 py-1 rounded-lg text-caption font-heading`}>
       {status}
     </span>
   );
@@ -694,7 +694,7 @@ For truly one-off values that will not be reused, use Tailwind arbitrary propert
 
 1. Find all `style={{ }}` usage in the codebase
 2. For each inline style, determine if the value should be a reusable token (used in multiple places) or a one-off
-3. For reusable values: add a token to `@theme` in `globals.css`, reference it with `bg-[--token-name]`
+3. For reusable values: add a token to `@theme` in `globals.css`, reference it with the generated utility (`bg-token-name`)
 4. For one-off values: replace `style={{ }}` with Tailwind arbitrary properties `[property:value]`
 5. Delete all `style={{ }}` usage
 6. Verify visual fidelity matches the original inline style values
@@ -705,7 +705,7 @@ For truly one-off values that will not be reused, use Tailwind arbitrary propert
 
 ### Root cause analysis
 
-Developers skip runtime validation on form inputs and API responses because TypeScript provides static type checking. They trust that the types they defined match the actual data shape. But TypeScript types exist only at compile time — at runtime, data from user input or external APIs can have any shape. Without runtime validation, malformed data passes through the application silently, causing runtime errors in unrelated components.
+Developers skip runtime validation on form inputs and API responses because TypeScript provides static type checking. They trust that the types they defined match the actual data shape. But TypeScript types exist only at compile time - at runtime, data from user input or external APIs can have any shape. Without runtime validation, malformed data passes through the application silently, causing runtime errors in unrelated components.
 
 **Why this happens**: TypeScript's type system is powerful enough that developers feel "covered" by it. The compiler guarantees that the code uses data according to the type definition. But the compiler cannot guarantee that external data conforms to the type definition. This gap is invisible in development because test data is usually well-formed.
 
@@ -715,7 +715,7 @@ Developers skip runtime validation on form inputs and API responses because Type
 'use client';
 import { useState } from 'react';
 
-// No validation — trust that the API returns the expected shape
+// No validation - trust that the API returns the expected shape
 interface User {
   id: string;
   name: string;
@@ -730,7 +730,7 @@ async function createUser(formData: FormData): Promise<User> {
       email: formData.get('email'),
     }),
   });
-  return response.json() as User; // Cast — no runtime validation
+  return response.json() as User; // Cast - no runtime validation
 }
 ```
 
@@ -743,13 +743,13 @@ Problems: `formData.get('name')` could be null; the API response could have a di
 import { useState } from 'react';
 import { z } from 'zod';
 
-// Define schema at the boundary — form input
+// Define schema at the boundary - form input
 const createUserSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   email: z.string().email('Invalid email format'),
 });
 
-// Define schema at the boundary — API response
+// Define schema at the boundary - API response
 const userResponseSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -798,7 +798,7 @@ Developers skip `error.tsx` because they handle errors within components using t
 ### Before
 
 ```tsx
-// app/settings/page.tsx — no error.tsx
+// app/settings/page.tsx - no error.tsx
 async function SettingsPage() {
   // If this throws (database timeout, malformed data), the entire page crashes
   const settings = await fetchSettings();
@@ -816,12 +816,12 @@ export default function SettingsError({ error, reset }: {
   reset: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-[--spacing-4] p-[--spacing-8]">
-      <h2 className="text-[--font-size-heading-2] text-[--color-error]">Something went wrong</h2>
-      <p className="text-[--font-size-body] text-[--color-text-secondary]">{error.message}</p>
+    <div className="flex flex-col items-center gap-4 p-8">
+      <h2 className="text-heading-2 text-error">Something went wrong</h2>
+      <p className="text-body text-text-secondary">{error.message}</p>
       <button
         onClick={reset}
-        className="bg-[--color-primary] text-[--color-on-primary] px-[--spacing-4] py-[--spacing-2] rounded-[--radius-md]"
+        className="bg-primary text-on-primary px-4 py-2 rounded-md"
       >
         Try again
       </button>
@@ -829,7 +829,7 @@ export default function SettingsError({ error, reset }: {
   );
 }
 
-// app/settings/page.tsx — unchanged, error.tsx catches render failures
+// app/settings/page.tsx - unchanged, error.tsx catches render failures
 async function SettingsPage() {
   const settings = await fetchSettings();
   return <SettingsForm settings={settings} />;
@@ -839,11 +839,11 @@ async function SettingsPage() {
 ### Step-by-step fix
 
 1. List all route segments in the app (`app/*/page.tsx`, `app/*/*/page.tsx`)
-2. Add `error.tsx` alongside every `page.tsx` that performs async operations or renders dynamic data
+2. Add `error.tsx` at route or feature boundaries where async operations or dynamic rendering failures should be contained
 3. The `error.tsx` component must be a client component (`'use client'`) because it uses the `reset` callback
 4. Include a `reset` button that calls `reset()` to re-attempt the render
 5. Display a clear error message from `error.message`
-6. For nested route segments, add `error.tsx` at each level — errors are caught at the nearest boundary
+6. For nested route segments, add `error.tsx` at each level - errors are caught at the nearest boundary
 
 ---
 
@@ -860,7 +860,7 @@ Developers call `fetch()` and cast the response with `as SomeType` or annotate t
 ```tsx
 async function getProducts(): Promise<Product[]> {
   const response = await fetch('/api/products');
-  // Cast — no runtime validation, any shape passes
+  // Cast - no runtime validation, any shape passes
   return response.json() as Product[];
 }
 
@@ -935,7 +935,7 @@ async function ProductList() {
 
 ### Root cause analysis
 
-Developers focus on visual design and functionality first, treating accessibility as a compliance step added at the end. By the time they "add accessibility," the component architecture is locked in — adding keyboard handlers to a mouse-only dropdown or ARIA labels to a div-based button requires significant restructuring. The cost of retrofitting is higher than building accessibility in from the start.
+Developers focus on visual design and functionality first, treating accessibility as a compliance step added at the end. By the time they "add accessibility," the component architecture is locked in - adding keyboard handlers to a mouse-only dropdown or ARIA labels to a div-based button requires significant restructuring. The cost of retrofitting is higher than building accessibility in from the start.
 
 **Why this happens**: Visual design is visible and testable immediately. Accessibility is invisible to developers who do not use assistive technologies. Testing accessibility requires different tools (screen readers, keyboard-only navigation) that most developers do not use daily. The delay creates a gap where accessibility is "known important" but "practically deferred."
 

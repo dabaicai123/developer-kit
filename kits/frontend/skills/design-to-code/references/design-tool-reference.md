@@ -1,6 +1,6 @@
 # Design Tool Reference
 
-Quick reference for reading and interpreting output from Figma, ClaudeDesign, and OpenDesign. Each tool produces design specifications in a different format — this guide explains how to read each format and map properties to Tailwind v4 tokens.
+Quick reference for reading and interpreting output from Figma, ClaudeDesign, and OpenDesign. Each tool produces design specifications in a different format - this guide explains how to read each format and map properties to Tailwind v4 tokens.
 
 ## Figma
 
@@ -8,7 +8,7 @@ Quick reference for reading and interpreting output from Figma, ClaudeDesign, an
 
 Figma provides design data through several channels. The most common for design-to-code workflows:
 
-**1. Figma Dev Mode — CSS Export**
+**1. Figma Dev Mode - CSS Export**
 
 Figma's Dev Mode panel shows CSS properties for selected elements. Copy values directly:
 
@@ -39,7 +39,7 @@ Figma's Dev Mode panel shows CSS properties for selected elements. Copy values d
 The Figma-to-Tailwind plugin (community plugin) attempts direct Tailwind class mapping. However, it often produces suboptimal output and may not align with your custom `@theme` tokens. Use it as a reference, not as the final output.
 
 ```html
-<!-- Plugin output example — USE AS REFERENCE ONLY -->
+<!-- Plugin output example - USE AS REFERENCE ONLY -->
 <div class="flex flex-col items-center p-[80px_32px] gap-4 bg-gray-50 rounded-xl">
   <h1 class="font-Inter text-[36px] font-bold leading-[120%] tracking-tight text-gray-900">
 ```
@@ -52,35 +52,35 @@ Issues with plugin output:
 
 **3. Design Spec Documents (PDF/Notion)**
 
-Design teams often export annotated specs with measurements, colors, and component states. These require manual reading — map each value to a `@theme` token.
+Design teams often export annotated specs with measurements, colors, and component states. These require manual reading - map each value to a `@theme` token.
 
 ### Figma Property Mapping
 
 | Figma Property | Tailwind @theme Token | Tailwind Class |
 |---|---|---|
-| `Fill: #2563EB` | `--color-primary: oklch(0.55 0.18 250)` | `bg-[--color-primary]` |
-| `Stroke: 1px #E5E7EB` | `--color-border: oklch(0.88 0.01 250)` | `border border-[--color-border]` |
-| `Font: Inter / 36px / Bold` | `--font-size-heading-1: 2.25rem` + `--font-weight-heading: 700` | `text-[--font-size-heading-1] font-[--font-weight-heading]` |
-| `Line height: 120%` | `--line-height-heading: 1.2` | `leading-[--line-height-heading]` |
-| `Letter spacing: -0.02em` | `--tracking-tight: -0.02em` | `tracking-[--tracking-tight]` |
-| `Spacing: 80px (top)` | `--spacing-20: 5rem` | `pt-[--spacing-20]` |
-| `Gap: 16px` | `--spacing-4: 1rem` | `gap-[--spacing-4]` |
-| `Border radius: 12px` | `--radius-lg: 0.75rem` | `rounded-[--radius-lg]` |
-| `Effect: Drop shadow 4px 6px rgba(0,0,0,0.1)` | `--shadow-md` | `shadow-[--shadow-md]` |
-| `Opacity: 50%` | Use `oklch(0 0 0 / 0.5)` in shadow/color tokens | `bg-[--color-text]/50` or token with opacity baked in |
-| `Auto layout → horizontal` | Flex row | `flex flex-row` |
-| `Auto layout → vertical` | Flex column | `flex flex-col` |
-| `Auto layout → gap: 16` | Gap | `gap-[--spacing-4]` |
-| `Auto layout → padding: 24` | Padding | `p-[--spacing-6]` |
+| `Fill: #2563EB` | `--color-primary: oklch(0.55 0.18 250)` | `bg-primary` |
+| `Stroke: 1px #E5E7EB` | `--color-border: oklch(0.88 0.01 250)` | `border border-border` |
+| `Font: Inter / 36px / Bold` | `--text-heading-1: 2.25rem` + `--font-weight-heading: 700` | `text-heading-1 font-heading` |
+| `Line height: 120%` | `--line-height-heading: 1.2` | `leading-heading` |
+| `Letter spacing: -0.02em` | `--tracking-tight: -0.02em` | `tracking-tight` |
+| `Spacing: 80px (top)` | `--spacing-20: 5rem` | `pt-20` |
+| `Gap: 16px` | `--spacing-4: 1rem` | `gap-4` |
+| `Border radius: 12px` | `--radius-lg: 0.75rem` | `rounded-lg` |
+| `Effect: Drop shadow 4px 6px rgba(0,0,0,0.1)` | `--shadow-md` | `shadow-md` |
+| `Opacity: 50%` | Use `oklch(0 0 0 / 0.5)` in shadow/color tokens | `bg-text/50` or token with opacity baked in |
+| `Auto layout -> horizontal` | Flex row | `flex flex-row` |
+| `Auto layout -> vertical` | Flex column | `flex flex-col` |
+| `Auto layout -> gap: 16` | Gap | `gap-4` |
+| `Auto layout -> padding: 24` | Padding | `p-6` |
 | `Constraints: center` | Flex alignment | `items-center` / `justify-center` |
 | `Fill container (width)` | Width | `w-full` |
 
 ### Figma-Specific Considerations
 
-- **Auto Layout** maps directly to flexbox. Figma's "Auto Layout" panel is your flex reference — direction, gap, padding, alignment all translate to Tailwind flex utilities.
+- **Auto Layout** maps directly to flexbox. Figma's "Auto Layout" panel is your flex reference - direction, gap, padding, alignment all translate to Tailwind flex utilities.
 - **Components** in Figma represent reusable elements. Each Figma component variant should map to a React component with a `variant` prop.
-- **Responsive** — Figma may have separate frames for each breakpoint. Read each frame independently and combine with responsive Tailwind prefixes.
-- **Design tokens** — if the Figma team has defined design tokens in the Figma Tokens plugin, they map directly to `@theme` definitions. Token names may need renaming to match your semantic naming convention.
+- **Responsive** - Figma may have separate frames for each breakpoint. Read each frame independently and combine with responsive Tailwind prefixes.
+- **Design tokens** - if the Figma team has defined design tokens in the Figma Tokens plugin, they map directly to `@theme` definitions. Token names may need renaming to match your semantic naming convention.
 
 ## ClaudeDesign
 
@@ -118,11 +118,11 @@ ClaudeDesign output uses inline `style` attributes on every element. To convert:
 4. **Add responsive variants** where the design implies responsive behavior
 
 **ClaudeDesign conventions:**
-- Colors are always in hex format (`#2563EB`, `#111827`) — convert to OKLCH
-- Spacing values are in px (`32px`, `16px`) — convert to rem with spacing scale tokens
-- Font sizes are in px (`48px`, `14px`) — convert to rem with typography scale tokens
-- Layout uses flexbox (`display: flex`, `justify-content`, `gap`) — maps directly to Tailwind flex utilities
-- `max-width` + `margin: 0 auto` — maps to `max-w-*` + `mx-auto` container utilities
+- Colors are always in hex format (`#2563EB`, `#111827`) - convert to OKLCH
+- Spacing values are in px (`32px`, `16px`) - convert to rem with spacing scale tokens
+- Font sizes are in px (`48px`, `14px`) - convert to rem with typography scale tokens
+- Layout uses flexbox (`display: flex`, `justify-content`, `gap`) - maps directly to Tailwind flex utilities
+- `max-width` + `margin: 0 auto` - maps to `max-w-*` + `mx-auto` container utilities
 
 ### ClaudeDesign Conversion Example
 
@@ -138,11 +138,11 @@ ClaudeDesign output uses inline `style` attributes on every element. To convert:
 
 ```tsx
 // AFTER: Tailwind prototype with @theme tokens
-<section className="text-center py-[--spacing-24]">
-  <h1 className="text-[--font-size-heading-1] md:text-[3rem] font-[--font-weight-heading]
-    text-[--color-text] tracking-[--tracking-tight]">Build Something Great</h1>
-  <p className="text-[--font-size-body-large] text-[--color-text-muted]
-    mt-[--spacing-4] max-w-[600px] mx-auto">
+<section className="text-center py-24">
+  <h1 className="text-heading-1 md:text-[3rem] font-heading
+    text-text tracking-tight">Build Something Great</h1>
+  <p className="text-body-large text-text-muted
+    mt-4 max-w-[600px] mx-auto">
     Create applications faster with our platform.
   </p>
 </section>
@@ -155,7 +155,7 @@ ClaudeDesign output uses inline `style` attributes on every element. To convert:
 OpenDesign follows structured conventions for design specification output. The format combines CSS properties with design intent annotations.
 
 ```css
-/* OpenDesign output example — structured CSS with design annotations */
+/* OpenDesign output example - structured CSS with design annotations */
 /* @section: hero */
 /* @responsive: mobile-stack / desktop-center */
 .hero {
@@ -188,9 +188,9 @@ OpenDesign follows structured conventions for design specification output. The f
 
 OpenDesign output already uses CSS custom properties (variables) with semantic names. This makes token mapping more direct:
 
-1. **OpenDesign variables map directly to `@theme` tokens** — the names may differ but the semantics align
+1. **OpenDesign variables map directly to `@theme` tokens** - the names may differ but the semantics align
 2. **Design annotations** (`@section`, `@responsive`) provide decomposition and responsive guidance
-3. **Responsive annotations** indicate breakpoint behavior — translate to Tailwind responsive prefixes
+3. **Responsive annotations** indicate breakpoint behavior - translate to Tailwind responsive prefixes
 
 **OpenDesign variable mapping to @theme tokens:**
 
@@ -206,7 +206,7 @@ OpenDesign output already uses CSS custom properties (variables) with semantic n
 | `var(--spacing-lg)` | `--spacing-6` | |
 | `var(--spacing-xl)` | `--spacing-8` | |
 | `var(--spacing-2xl)` | `--spacing-12` | |
-| `var(--font-heading-1)` | `--font-size-heading-1` | Add "size" prefix |
+| `var(--font-heading-1)` | `--text-heading-1` | Rename to Tailwind text namespace |
 | `var(--font-weight-bold)` | `--font-weight-heading` | Semantic name |
 | `var(--radius-sm)` | `--radius-sm` | Same |
 | `var(--radius-md)` | `--radius-md` | Same |
@@ -234,10 +234,10 @@ OpenDesign output already uses CSS custom properties (variables) with semantic n
 ```
 
 ```tsx
-// AFTER: Tailwind prototype — OpenDesign variables map directly
+// AFTER: Tailwind prototype - OpenDesign variables map directly
 <section className="flex flex-col items-center
-  py-[--spacing-8] px-[--spacing-4]
-  bg-[--color-surface-subtle]">
+  py-8 px-4
+  bg-surface-subtle">
 ```
 
 ## Cross-Tool Comparison
@@ -250,14 +250,14 @@ OpenDesign output already uses CSS custom properties (variables) with semantic n
 | Layout info | Auto Layout panel | Inline flexbox CSS | Flexbox with variable references |
 | Responsive info | Separate breakpoint frames | Single frame, implicit responsive | `@responsive` annotations |
 | Component info | Figma Components panel | No explicit component hints | `@section` annotations |
-| Token mapping | Manual: hex → OKLCH → semantic name | Manual: hex → OKLCH → semantic name | Direct: rename variables to @theme names |
-| Easiest to convert | OpenDesign (already semantic) | ClaudeDesign (inline → Tailwind) | Figma (requires reading Dev Mode) |
+| Token mapping | Manual: hex -> OKLCH -> semantic name | Manual: hex -> OKLCH -> semantic name | Direct: rename variables to @theme names |
+| Easiest to convert | OpenDesign (already semantic) | ClaudeDesign (inline -> Tailwind) | Figma (requires reading Dev Mode) |
 
 ## Conversion Priority
 
 When a design spec uses different naming from your `@theme` tokens:
 
-1. **Always use your `@theme` token names** — never adopt the design tool's naming into your codebase
-2. **Map values, not names** — `#2563EB` from any tool maps to your `--color-primary` token
-3. **Normalize across tools** — if Figma calls it "Blue 600" and ClaudeDesign outputs `#2563EB`, both map to the same `--color-primary` token
-4. **One token system, one naming convention** — your `@theme` is the canonical source, design tools are inputs that get normalized
+1. **Always use your `@theme` token names** - never adopt the design tool's naming into your codebase
+2. **Map values, not names** - `#2563EB` from any tool maps to your `--color-primary` token
+3. **Normalize across tools** - if Figma calls it "Blue 600" and ClaudeDesign outputs `#2563EB`, both map to the same `--color-primary` token
+4. **One token system, one naming convention** - your `@theme` is the canonical source, design tools are inputs that get normalized

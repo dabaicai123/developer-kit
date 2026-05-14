@@ -14,7 +14,7 @@ Enforce consistent Next.js App Router patterns. For detailed patterns, use `next
 
 2. **Fetch data in server components** — use `async/await` directly in server components and `generateStaticParams` for static generation. Server components can access databases, APIs, and file systems without client-side fetch calls.
 
-3. **Add `loading.tsx` and `error.tsx`** — every route segment with async data must have a `loading.tsx` Suspense fallback and an `error.tsx` boundary. Never leave users staring at a blank page during fetches or on errors.
+3. **Add loading and error boundaries at useful route boundaries** — use `loading.tsx` for route-level async fallbacks, explicit `<Suspense>` for nested slow sections, and `error.tsx` at route or feature boundaries where a failure should be contained. Never leave users staring at a blank page during fetches or on errors.
 
 4. **Use `generateMetadata` for SEO** — export `generateMetadata` or `metadata` from `page.tsx` for dynamic or static metadata. Never render `<title>` or `<meta>` tags manually in layout/page components.
 
@@ -27,7 +27,7 @@ Enforce consistent Next.js App Router patterns. For detailed patterns, use `next
 ## Anti-Patterns
 
 - Client-side `fetch` when server component can access data directly — prefer server-side data fetching
-- Missing `loading.tsx` or `error.tsx` for routes with async data — always provide Suspense and error boundaries
+- Missing loading or error UI for async/dynamic routes — provide route-level `loading.tsx`/`error.tsx` or local `<Suspense>`/error boundaries at the right containment level
 - Raw `<img>` tags instead of `next/image` — always use the Image component for optimization
 - Raw font imports via `<link>` or CSS `@import` instead of `next/font` — always use the font module
 - Synchronous access to `params` in Next.js 15+ — always `await` params and searchParams

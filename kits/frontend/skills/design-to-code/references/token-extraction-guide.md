@@ -44,11 +44,11 @@ Tailwind v4 recommends OKLCH for better perceptual uniformity and wider gamut su
 Name tokens by **purpose**, not by appearance:
 
 ```css
-/* WRONG — appearance-based names */
+/* WRONG - appearance-based names */
 --color-blue-600: oklch(0.55 0.18 250);
 --color-gray-100: oklch(0.93 0.01 250);
 
-/* RIGHT — purpose-based names */
+/* RIGHT - purpose-based names */
 --color-primary: oklch(0.55 0.18 250);
 --color-surface: oklch(0.93 0.01 250);
 ```
@@ -83,17 +83,17 @@ Define font sizes as semantic names matching the design's type hierarchy:
 
 ```css
 @theme {
-  --font-family-sans: "Inter", system-ui, sans-serif;
-  --font-family-mono: "JetBrains Mono", monospace;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
-  /* Type scale — semantic names */
-  --font-size-heading-1: 2.25rem;      /* 36px — page title */
-  --font-size-heading-2: 1.5rem;       /* 24px — section title */
-  --font-size-heading-3: 1.125rem;     /* 18px — card/component title */
-  --font-size-body: 0.875rem;          /* 14px — default body text */
-  --font-size-body-large: 1rem;        /* 16px — emphasized body */
-  --font-size-caption: 0.75rem;        /* 12px — labels, metadata */
-  --font-size-overline: 0.625rem;      /* 10px — tiny labels */
+  /* Type scale - semantic names */
+  --text-heading-1: 2.25rem;      /* 36px - page title */
+  --text-heading-2: 1.5rem;       /* 24px - section title */
+  --text-heading-3: 1.125rem;     /* 18px - card/component title */
+  --text-body: 0.875rem;          /* 14px - default body text */
+  --text-body-large: 1rem;        /* 16px - emphasized body */
+  --text-caption: 0.75rem;        /* 12px - labels, metadata */
+  --text-overline: 0.625rem;      /* 10px - tiny labels */
 
   /* Font weights */
   --font-weight-heading: 700;
@@ -101,7 +101,7 @@ Define font sizes as semantic names matching the design's type hierarchy:
   --font-weight-medium: 500;
   --font-weight-bold: 700;
 
-  /* Line heights — paired with size tokens */
+  /* Line heights - paired with size tokens */
   --line-height-heading: 1.2;
   --line-height-body: 1.5;
   --line-height-caption: 1.4;
@@ -112,11 +112,11 @@ Define font sizes as semantic names matching the design's type hierarchy:
 
 | Design Tool Property | Tailwind @theme Token | Tailwind Class |
 |---|---|---|
-| `font-size: 36px` | `--font-size-heading-1: 2.25rem` | `text-[--font-size-heading-1]` |
-| `font-weight: Bold (700)` | `--font-weight-heading: 700` | `font-[--font-weight-heading]` |
-| `font-family: Inter` | `--font-family-sans: "Inter", ...` | `font-[--font-family-sans]` |
-| `line-height: 120%` | `--line-height-heading: 1.2` | `leading-[--line-height-heading]` |
-| `letter-spacing: -0.02em` | `--tracking-tight: -0.02em` | `tracking-[--tracking-tight]` |
+| `font-size: 36px` | `--text-heading-1: 2.25rem` | `text-heading-1` |
+| `font-weight: Bold (700)` | `--font-weight-heading: 700` | `font-heading` |
+| `font-family: Inter` | `--font-sans: "Inter", ...` | `font-sans` |
+| `line-height: 120%` | `--line-height-heading: 1.2` | `leading-heading` |
+| `letter-spacing: -0.02em` | `--tracking-tight: -0.02em` | `tracking-tight` |
 
 ## Spacing Scale
 
@@ -124,7 +124,7 @@ Define spacing tokens on a **4px base unit** (0.25rem). This aligns with Tailwin
 
 ```css
 @theme {
-  /* Spacing — 4px grid */
+  /* Spacing - 4px grid */
   --spacing-0: 0;
   --spacing-1: 0.25rem;    /* 4px */
   --spacing-2: 0.5rem;     /* 8px */
@@ -155,22 +155,22 @@ Define spacing tokens on a **4px base unit** (0.25rem). This aligns with Tailwin
 ```css
 @theme {
   --radius-none: 0;
-  --radius-sm: 0.25rem;     /* 4px — small elements */
-  --radius-md: 0.5rem;      /* 8px — buttons, inputs */
-  --radius-lg: 0.75rem;     /* 12px — cards */
-  --radius-xl: 1rem;        /* 16px — modals, large cards */
-  --radius-2xl: 1.5rem;     /* 24px — hero sections */
-  --radius-full: 9999px;    /* circular — avatars, pills */
+  --radius-sm: 0.25rem;     /* 4px - small elements */
+  --radius-md: 0.5rem;      /* 8px - buttons, inputs */
+  --radius-lg: 0.75rem;     /* 12px - cards */
+  --radius-xl: 1rem;        /* 16px - modals, large cards */
+  --radius-2xl: 1.5rem;     /* 24px - hero sections */
+  --radius-full: 9999px;    /* circular - avatars, pills */
 }
 ```
 
 | Design Value | Token | Tailwind Class |
 |---|---|---|
-| 4px | `--radius-sm` | `rounded-[--radius-sm]` |
-| 8px | `--radius-md` | `rounded-[--radius-md]` |
-| 12px | `--radius-lg` | `rounded-[--radius-lg]` |
-| 16px | `--radius-xl` | `rounded-[--radius-xl]` |
-| circle/pill | `--radius-full` | `rounded-[--radius-full]` |
+| 4px | `--radius-sm` | `rounded-sm` |
+| 8px | `--radius-md` | `rounded-md` |
+| 12px | `--radius-lg` | `rounded-lg` |
+| 16px | `--radius-xl` | `rounded-xl` |
+| circle/pill | `--radius-full` | `rounded-full` |
 
 ## Shadows
 
@@ -189,10 +189,10 @@ Define shadows using OKLCH for the shadow color, ensuring they adapt to theme ch
 
 | Design Value | Token | Tailwind Class |
 |---|---|---|
-| Subtle card elevation | `--shadow-sm` | `shadow-[--shadow-sm]` |
-| Standard card elevation | `--shadow-md` | `shadow-[--shadow-md]` |
-| Dropdown/popover elevation | `--shadow-lg` | `shadow-[--shadow-lg]` |
-| Modal overlay elevation | `--shadow-xl` | `shadow-[--shadow-xl]` |
+| Subtle card elevation | `--shadow-sm` | `shadow-sm` |
+| Standard card elevation | `--shadow-md` | `shadow-md` |
+| Dropdown/popover elevation | `--shadow-lg` | `shadow-lg` |
+| Modal overlay elevation | `--shadow-xl` | `shadow-xl` |
 
 ## Token Naming Convention
 
@@ -202,7 +202,7 @@ Follow these naming rules for all tokens:
 2. **Use semantic names:** `--color-primary` not `--color-blue-600`
 3. **Use kebab-case:** `--color-text-secondary` not `--colorTextSecondary`
 4. **Suffix states:** `--color-primary-hover`, `--color-primary-active`, `--color-primary-disabled`
-5. **Suffix size levels:** `--font-size-heading-1`, `--font-size-heading-2` (numbered hierarchy)
+5. **Suffix size levels:** `--text-heading-1`, `--text-heading-2` (numbered hierarchy)
 6. **Suffix intensity:** `--color-border`, `--color-border-strong`, `--color-surface-subtle`
 
 ## Verification Checklist
@@ -215,5 +215,5 @@ After defining tokens, verify:
 - [ ] Spacing tokens follow the 4px grid (or have explicit intermediate values)
 - [ ] Border radius tokens cover all component types in the spec
 - [ ] Shadow tokens cover all elevation levels in the spec
-- [ ] No hardcoded values remain in Tailwind class usage — all reference tokens
+- [ ] No hardcoded values remain in Tailwind class usage - all reference tokens
 - [ ] Token names are semantic (purpose-based), not appearance-based

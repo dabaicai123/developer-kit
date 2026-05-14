@@ -17,7 +17,7 @@ The `@theme` directive defines design tokens that generate both CSS variables an
 **Key behaviors:**
 - Tokens defined in `@theme` become CSS variables on `:root` and generate matching utility classes
 - Namespace prefixes (`--color-*`, `--text-*`, etc.) determine which utilities are created
-- Define tokens top-level — never nest under selectors or media queries
+- Define tokens top-level - never nest under selectors or media queries
 - Use `@theme inline { ... }` when referencing other variables (resolves the reference at compile time)
 - Use `@theme static { ... }` to force all CSS variables into output even if unused
 
@@ -51,7 +51,7 @@ Reset everything and start from scratch:
   --*: initial;  /* removes all default theme tokens */
 
   --spacing: 4px;
-  --font-family-sans: Inter, sans-serif;
+  --font-sans: Inter, sans-serif;
   --color-primary: oklch(0.55 0.18 250);
   /* ... only your tokens */
 }
@@ -66,7 +66,7 @@ Extract shared tokens into a separate CSS file for monorepo setups:
 @theme {
   --color-primary: oklch(0.55 0.18 250);
   --color-text: oklch(0.22 0.02 250);
-  --font-family-sans: Inter, sans-serif;
+  --font-sans: Inter, sans-serif;
 }
 ```
 
@@ -78,16 +78,16 @@ Extract shared tokens into a separate CSS file for monorepo setups:
 
 ## OKLCH Palette Generation
 
-OKLCH (`oklch(L C H)`) separates lightness, chroma, and hue into independent channels. This produces palettes where equal L-steps feel equally distant to human perception — unlike hex/RGB where green-to-yellow looks like a jump while navy-to-blue feels like a crawl.
+OKLCH (`oklch(L C H)`) separates lightness, chroma, and hue into independent channels. This produces palettes where equal L-steps feel equally distant to human perception - unlike hex/RGB where green-to-yellow looks like a jump while navy-to-blue feels like a crawl.
 
 ### Format
 
 ```
 oklch(L C H)
 
-L: lightness  — 0 (black) to 1 (white)
-C: chroma     — 0 (gray) to ~0.4 (max saturated); typical palette range 0.02-0.25
-H: hue angle  — 0-360 (0=red, 120=green, 250=blue, etc.)
+L: lightness  - 0 (black) to 1 (white)
+C: chroma     - 0 (gray) to ~0.4 (max saturated); typical palette range 0.02-0.25
+H: hue angle  - 0-360 (0=red, 120=green, 250=blue, etc.)
 ```
 
 ### Generating a palette from a base color
@@ -95,22 +95,22 @@ H: hue angle  — 0-360 (0=red, 120=green, 250=blue, etc.)
 1. Start with your base color (the "500" level). Convert from hex if needed.
 2. Lock the hue (H) constant across all shades.
 3. Step lightness (L) in even increments across the 50-950 range.
-4. Taper chroma (C) — peak at mid-range (400-600), reduce at extremes.
+4. Taper chroma (C) - peak at mid-range (400-600), reduce at extremes.
 
 **Example: Blue palette (H=250)**
 
 | Step | L | C | Result |
 |---|---|---|---|
-| 50 | 0.97 | 0.02 | `oklch(0.97 0.02 250)` — near-white tint |
+| 50 | 0.97 | 0.02 | `oklch(0.97 0.02 250)` - near-white tint |
 | 100 | 0.93 | 0.05 | `oklch(0.93 0.05 250)` |
 | 200 | 0.85 | 0.10 | `oklch(0.85 0.10 250)` |
 | 300 | 0.75 | 0.15 | `oklch(0.75 0.15 250)` |
 | 400 | 0.65 | 0.18 | `oklch(0.65 0.18 250)` |
-| 500 | 0.55 | 0.18 | `oklch(0.55 0.18 250)` — base |
+| 500 | 0.55 | 0.18 | `oklch(0.55 0.18 250)` - base |
 | 600 | 0.48 | 0.18 | `oklch(0.48 0.18 250)` |
 | 700 | 0.40 | 0.15 | `oklch(0.40 0.15 250)` |
 | 800 | 0.32 | 0.10 | `oklch(0.32 0.10 250)` |
-| 900 | 0.25 | 0.06 | `oklch(0.25 0.06 250)` — near-black shade |
+| 900 | 0.25 | 0.06 | `oklch(0.25 0.06 250)` - near-black shade |
 
 ### Hex-to-OKLCH conversion
 
@@ -124,9 +124,9 @@ Use one of these methods:
 
 ```
 For a color like #3366CC (medium blue):
-1. Estimate hue: blue ≈ H 250
-2. Estimate lightness: medium ≈ L 0.55
-3. Estimate chroma: moderate saturation ≈ C 0.18
+1. Estimate hue: blue ~H 250
+2. Estimate lightness: medium ~L 0.55
+3. Estimate chroma: moderate saturation ~C 0.18
 4. Refine by comparing with oklch.com or DevTools
 Result: oklch(0.55 0.18 250)
 ```
@@ -165,11 +165,11 @@ Use semantic-first for most projects. Use scale-based when you need fine-grained
 
 ## Token Hierarchy
 
-Organize tokens in this order in your `@theme` block: colors, typography, spacing, borders, shadows. This matches the dependency direction — colors are referenced by shadows, spacing by borders, etc.
+Organize tokens in this order in your `@theme` block: colors, typography, spacing, borders, shadows. This matches the dependency direction - colors are referenced by shadows, spacing by borders, etc.
 
 ```css
 @theme {
-  /* 1. Colors — foundation of everything */
+  /* 1. Colors - foundation of everything */
   --color-*: initial;
   --color-primary: oklch(0.55 0.18 250);
   --color-primary-hover: oklch(0.48 0.18 250);
@@ -183,8 +183,8 @@ Organize tokens in this order in your `@theme` block: colors, typography, spacin
   --color-success: oklch(0.55 0.17 145);
   --color-warning: oklch(0.75 0.15 80);
 
-  /* 2. Typography — referenced by component text styles */
-  --font-family-sans: Inter, system-ui, sans-serif;
+  /* 2. Typography - referenced by component text styles */
+  --font-sans: Inter, system-ui, sans-serif;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -199,23 +199,23 @@ Organize tokens in this order in your `@theme` block: colors, typography, spacin
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
 
-  /* 3. Spacing — referenced by padding, margins, gaps */
+  /* 3. Spacing - referenced by padding, margins, gaps */
   --spacing: 0.25rem; /* base unit = 4px; p-4 = 16px */
 
-  /* 4. Borders — referenced by cards, inputs, dividers */
+  /* 4. Borders - referenced by cards, inputs, dividers */
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-full: 9999px;
 
-  /* 5. Shadows — referenced by cards, dropdowns, modals */
+  /* 5. Shadows - referenced by cards, dropdowns, modals */
   --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px oklch(0 0 0 / 0.1), 0 4px 6px -4px oklch(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px oklch(0 0 0 / 0.1), 0 8px 10px -6px oklch(0 0 0 / 0.1);
 
-  /* 6. Breakpoints — referenced by responsive variants */
+  /* 6. Breakpoints - referenced by responsive variants */
   --breakpoint-sm: 40rem;
   --breakpoint-md: 48rem;
   --breakpoint-lg: 64rem;

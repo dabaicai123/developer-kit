@@ -337,4 +337,4 @@ app/
 │   │   └── not-found.tsx   ← analytics 404
 ```
 
-Place `error.tsx` at every route level that has async data fetching. Without it, errors in a child route propagate up to the parent layout, potentially breaking navigation for the entire section.
+Place `error.tsx` where an error should be contained: a route segment, nested feature area, or high-risk dynamic section. Without an appropriate boundary, errors in a child route propagate up to the parent layout, potentially breaking navigation for the entire section.

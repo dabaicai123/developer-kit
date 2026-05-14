@@ -2,7 +2,7 @@
 
 SSR/CSR mismatch diagnosis and fixes for Next.js App Router.
 
-## What is Hyration Mismatch?
+## What is Hydration Mismatch?
 
 React renders the component tree on the server (SSR), then attaches event handlers on the client (hydration). If the server HTML and the initial client render produce different output, React warns:
 
@@ -24,53 +24,52 @@ START: You see a hydration mismatch warning
   v
 [Q1] Is date/time rendered differently on server vs client?
   |
-  YES → Fix: Use useEffect to render client-side time
+  YES -> Fix: Use useEffect to render client-side time
   |      Or: pass time from server, don't compute client time during first render
   |
-  NO → continue
+  NO -> continue
   |
   v
 [Q2] Are you using browser-only APIs during render?
   |    (window, document, navigator, localStorage, matchMedia)
   |
-  YES → Fix: Move browser API calls to useEffect
+  YES -> Fix: Move browser API calls to useEffect
   |      Or: use dynamic import with ssr: false
   |
-  NO → continue
+  NO -> continue
   |
   v
 [Q3] Is there conditional rendering based on client-only state?
   |    (useState/useReducer with different initial value than server)
   |
-  YES → Fix: Use suppressHydrationWarning on the mismatched element
-  |      Or: render placeholder on server, real content in useEffect
+  YES -> Fix: Render the same placeholder on server and initial client render
+  |      Or: use suppressHydrationWarning only for intentional, unavoidable text/attribute mismatches
   |
-  NO → continue
+  NO -> continue
   |
   v
 [Q4] Are third-party scripts modifying the DOM before hydration?
   |    (analytics, ads, browser extensions)
   |
-  YES → Fix: Move script to afterHydration
-  |      Or: Use next/script with strategy="afterInteractive"
+  YES -> Fix: Use next/script with strategy="afterInteractive" or "lazyOnload"
   |
-  NO → continue
+  NO -> continue
   |
   v
 [Q5] Is Zustand persist rehydration causing mismatch?
   |
-  YES → Fix: Use hydration guard pattern
+  YES -> Fix: Use hydration guard pattern
   |      Or: dynamic import with ssr: false
   |
-  NO → continue
+  NO -> continue
   |
   v
 [Q6] Is there a random value (Math.random, UUID) in render?
   |
-  YES → Fix: Generate random values in useEffect, not during render
+  YES -> Fix: Generate random values in useEffect, not during render
   |      Or: Pass deterministic value from server
   |
-  NO → Re-read the error carefully. Check the exact element mentioned.
+  NO -> Re-read the error carefully. Check the exact element mentioned.
 ```
 
 ## Fixes for Each Cause
@@ -160,9 +159,9 @@ function UserMenu() {
   if (user) return <UserAvatar user={user} />;
   return <LoginButton />;
 }
-// Server renders LoginButton, client renders UserAvatar → mismatch
+// Server renders LoginButton, client renders UserAvatar -> mismatch
 
-// FIX 1: suppressHydrationWarning on the specific element
+// ESCAPE HATCH: suppressHydrationWarning on the specific element
 function UserMenu() {
   const { user } = useAuth();
   return (
@@ -172,7 +171,7 @@ function UserMenu() {
   );
 }
 
-// FIX 2: Render placeholder on server, real content after hydration
+// PREFERRED FIX: Render placeholder on server, real content after hydration
 function UserMenu() {
   const { user, isLoading } = useAuth();
   if (isLoading) return <MenuSkeleton />;
@@ -181,7 +180,7 @@ function UserMenu() {
 }
 ```
 
-**When to use `suppressHydrationWarning`**: Only when the mismatch is intentional and expected (e.g., auth state, theme preference). Do not use it to hide real bugs.
+**When to use `suppressHydrationWarning`**: Only when the mismatch is intentional and unavoidable, and keep it on the smallest element that differs. Prefer rendering identical server and initial-client output, then updating after hydration. Do not use it to hide real bugs.
 
 ### 4. Third-Party Scripts
 

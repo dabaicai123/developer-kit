@@ -15,7 +15,7 @@ Project-owned markup comes first. Copied CSS is allowed as source material. Preb
 
 ## NOT Rules
 
-- Do NOT install MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar UI control libraries for buttons, cards, dialogs, forms, menus, tables, tabs, toasts, or layout.
+- Do NOT install prebuilt UI control libraries for standard controls unless explicitly requested.
 - Do NOT replace copied CSS with a component library just because a similar control exists.
 - Do NOT paste third-party CSS globally.
 - Do NOT keep broad copied selectors like `button`, `input`, `a`, `div`, `*`, or `body` unless they are scoped under a project namespace.

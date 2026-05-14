@@ -12,7 +12,7 @@ Implement a frontend feature following type-safe, production-ready patterns.
 
 ## Non-Negotiables / Do NOT
 
-- Do NOT install or use prebuilt UI control libraries such as MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar packages for standard controls.
+- Do NOT install or use prebuilt UI control libraries for standard controls; follow `third-party-css-conventions` for project-owned UI.
 - Do NOT replace copied third-party CSS with a library default component.
 - Do NOT leave copied CSS as broad global selectors. Scope it under a feature root, CSS Module, or dedicated feature CSS entry.
 - Do NOT import remote CDN CSS, external resets, external font CSS, or vendor JavaScript behavior casually.
@@ -31,17 +31,17 @@ Implement a frontend feature following type-safe, production-ready patterns.
 
 ### 2. Determine Server/Client Boundary
 
-- **Server component** (default) — data fetching, static rendering, SEO pages
-- **Client component** (only when needed) — event handlers, hooks, browser APIs
+- **Server component** (default) - data fetching, static rendering, SEO pages
+- **Client component** (only when needed) - event handlers, hooks, browser APIs
 - Keep data fetching in server components whenever possible
 - Move interactivity to the smallest possible client component subtree
 
 ### 3. Design Component Hierarchy
 
-- Identify visual sections → separate components
-- Identify repetition → reusable components
+- Identify visual sections -> separate components
+- Identify repetition -> reusable components
 - Use composition patterns for complex APIs (compound components)
-- Define props interfaces — `interface` for props, `type` for unions
+- Define props interfaces - `interface` for props, `type` for unions
 - Use discriminated unions for state, not boolean flags
 
 ### 4. Implement with TypeScript + Tailwind Tokens
@@ -49,11 +49,11 @@ Implement a frontend feature following type-safe, production-ready patterns.
 - Declare functions with explicit props parameter (no `React.FC`)
 - Use explicit event handler types (no implicit `any`)
 - Use `useRef<HTMLSpecificElement>` (no generic `HTMLElement`)
-- Use Tailwind semantic tokens: `bg-[--color-primary]`, not `bg-blue-500`
+- Use Tailwind semantic tokens: `bg-primary`, not `bg-blue-500`
 - Scope copied CSS first; promote repeated values to `@theme` tokens only after inventory
 - Use `tv()` only for genuine multi-variant components
 - Mobile-first responsive design
-- Add ARIA attributes for interactive elements
+- Use semantic HTML first; add ARIA only where native semantics are insufficient
 
 ### 5. Add Zod Validation (If Forms)
 
@@ -64,8 +64,8 @@ Implement a frontend feature following type-safe, production-ready patterns.
 
 ### 6. Add Loading/Error States
 
-- `loading.tsx` Suspense fallback for every route with async data
-- `error.tsx` error boundary for every route with async data
+- `loading.tsx` for route-level async fallbacks, or local `<Suspense>` for nested slow sections
+- `error.tsx` at route/feature boundaries where failures should be contained
 - `not-found.tsx` for 404 cases
 - Empty state UI for zero-data scenarios
 

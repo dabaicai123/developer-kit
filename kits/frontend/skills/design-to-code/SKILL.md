@@ -25,7 +25,7 @@ Copied HTML/CSS is acceptable input. Prebuilt UI control libraries are not the d
 
 **Do NOT:**
 
-- Do NOT install or import MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar controls for standard UI.
+- Do NOT install or import prebuilt UI control libraries for standard UI unless explicitly requested; follow `third-party-css-conventions` for project-owned UI.
 - Do NOT install a component library to recreate copied CSS.
 - Do NOT paste third-party CSS globally without scoping it under a feature root or CSS Module.
 - Do NOT import remote CDN CSS, external resets, external font CSS, or vendor JavaScript behavior casually.
@@ -46,7 +46,7 @@ Read the design specification and extract visual properties into semantic tokens
 
 **Process:**
 
-1. Read design spec output (HTML/CSS, Figma export, etc.) — see `design-tool-reference`
+1. Read design spec output (HTML/CSS, Figma export, etc.) - see `design-tool-reference`
 2. Identify all distinct colors, font sizes/weights, spacing values, border radii, shadows
 3. Normalize values: convert hex colors to OKLCH, round spacing to a 4px scale, align font sizes to the type scale
 4. Define semantic tokens in `@theme` block in `app/globals.css`
@@ -57,7 +57,7 @@ Read the design specification and extract visual properties into semantic tokens
 @import "tailwindcss";
 
 @theme {
-  /* Colors — always OKLCH format */
+  /* Colors - always OKLCH format */
   --color-primary: oklch(0.55 0.18 250);
   --color-primary-hover: oklch(0.48 0.18 250);
   --color-surface: oklch(0.98 0.01 250);
@@ -68,17 +68,17 @@ Read the design specification and extract visual properties into semantic tokens
   --color-error: oklch(0.55 0.22 25);
   --color-success: oklch(0.55 0.17 145);
 
-  /* Typography — reference by semantic name */
-  --font-family-sans: "Inter", system-ui, sans-serif;
-  --font-size-heading-1: 2.25rem;
-  --font-size-heading-2: 1.5rem;
-  --font-size-heading-3: 1.125rem;
-  --font-size-body: 0.875rem;
-  --font-size-caption: 0.75rem;
+  /* Typography - reference by semantic name */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --text-heading-1: 2.25rem;
+  --text-heading-2: 1.5rem;
+  --text-heading-3: 1.125rem;
+  --text-body: 0.875rem;
+  --text-caption: 0.75rem;
   --font-weight-heading: 700;
   --font-weight-body: 400;
 
-  /* Spacing — 4px scale */
+  /* Spacing - 4px scale */
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;
   --spacing-3: 0.75rem;
@@ -106,7 +106,7 @@ Read the design specification and extract visual properties into semantic tokens
 
 ### Stage 2: HTML/CSS Prototyping
 
-Build a static HTML page using Tailwind classes that matches the design spec visually. Do not componentize yet — verify visual fidelity first.
+Build a static HTML page using Tailwind classes that matches the design spec visually. Do not componentize yet - verify visual fidelity first.
 
 **Why prototype first:**
 - Catch layout/spacing/color mismatches before component logic obscures them
@@ -116,7 +116,7 @@ Build a static HTML page using Tailwind classes that matches the design spec vis
 **Process:**
 
 1. Create a single HTML file (or a Next.js page returning raw JSX) with all sections laid out
-2. Apply Tailwind classes using `@theme` token references (`bg-[--color-primary]`, `text-[--font-size-heading-1]`)
+2. Apply Tailwind classes using `@theme` token references (`bg-primary`, `text-heading-1`)
 3. Verify against the design spec at each breakpoint (mobile, tablet, desktop)
 4. Iterate until visual fidelity is confirmed
 
@@ -125,31 +125,31 @@ Build a static HTML page using Tailwind classes that matches the design spec vis
 **Prototype page structure:**
 
 ```tsx
-// app/prototype/page.tsx — temporary, for visual verification only
+// app/prototype/page.tsx - temporary, for visual verification only
 export default function PrototypePage() {
   return (
-    <div className="min-h-screen bg-[--color-surface] text-[--color-text]">
+    <div className="min-h-screen bg-surface text-text">
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-[--spacing-8] py-[--spacing-4]">
-        <div className="text-[--font-size-heading-3] font-[--font-weight-heading]">Brand</div>
-        <div className="flex gap-[--spacing-6] text-[--font-size-body]">
-          <a href="#" className="text-[--color-text-secondary] hover:text-[--color-primary]">Products</a>
-          <a href="#" className="text-[--color-text-secondary] hover:text-[--color-primary]">About</a>
-          <a href="#" className="bg-[--color-primary] text-[--color-surface-elevated] px-[--spacing-4] py-[--spacing-2] rounded-[--radius-md]">Sign Up</a>
+      <nav className="flex items-center justify-between px-8 py-4">
+        <div className="text-heading-3 font-heading">Brand</div>
+        <div className="flex gap-6 text-body">
+          <a href="#" className="text-text-secondary hover:text-primary">Products</a>
+          <a href="#" className="text-text-secondary hover:text-primary">About</a>
+          <a href="#" className="bg-primary text-surface-elevated px-4 py-2 rounded-md">Sign Up</a>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="flex flex-col items-center py-[--spacing-16] px-[--spacing-8]">
-        <h1 className="text-[--font-size-heading-1] font-[--font-weight-heading] text-center">
+      <section className="flex flex-col items-center py-16 px-8">
+        <h1 className="text-heading-1 font-heading text-center">
           Build faster with modern tools
         </h1>
-        <p className="text-[--font-size-body] text-[--color-text-secondary] mt-[--spacing-4] max-w-prose text-center">
+        <p className="text-body text-text-secondary mt-4 max-w-prose text-center">
           Streamline your workflow with our integrated platform.
         </p>
-        <button className="bg-[--color-primary] hover:bg-[--color-primary-hover] text-[--color-surface-elevated]
-          px-[--spacing-8] py-[--spacing-3] rounded-[--radius-md] mt-[--spacing-8]
-          text-[--font-size-body] font-[--font-weight-heading]">
+        <button className="bg-primary hover:bg-primary-hover text-surface-elevated
+          px-8 py-3 rounded-md mt-8
+          text-body font-heading">
           Get Started
         </button>
       </section>
@@ -168,26 +168,26 @@ Map the prototype's inline styles and custom CSS to Tailwind utility classes. Re
 
 | CSS Property | Tailwind Utility | Token Reference Pattern |
 |---|---|---|
-| `background-color: #3366CC` | `bg-[--color-primary]` | Semantic token, not hex |
-| `color: #333333` | `text-[--color-text]` | Semantic token |
-| `font-size: 36px` | `text-[--font-size-heading-1]` | Type scale token |
-| `font-weight: 700` | `font-[--font-weight-heading]` | Weight token |
-| `padding: 16px` | `p-[--spacing-4]` | Spacing scale token |
-| `margin-top: 24px` | `mt-[--spacing-6]` | Spacing scale token |
-| `border-radius: 8px` | `rounded-[--radius-lg]` | Radius token |
-| `box-shadow: ...` | `shadow-[--shadow-md]` | Shadow token |
+| `background-color: #3366CC` | `bg-primary` | Semantic token, not hex |
+| `color: #333333` | `text-text` | Semantic token |
+| `font-size: 36px` | `text-heading-1` | Type scale token |
+| `font-weight: 700` | `font-heading` | Weight token |
+| `padding: 16px` | `p-4` | Spacing scale token |
+| `margin-top: 24px` | `mt-6` | Spacing scale token |
+| `border-radius: 8px` | `rounded-lg` | Radius token |
+| `box-shadow: ...` | `shadow-md` | Shadow token |
 | `display: flex` | `flex` | Standard utility |
-| `gap: 24px` | `gap-[--spacing-6]` | Spacing token |
+| `gap: 24px` | `gap-6` | Spacing token |
 | `width: 100%` | `w-full` | Standard utility |
 | `max-width: 640px` | `max-w-prose` | Container utility |
 
-**Responsive variants — apply at the prototype stage:**
+**Responsive variants - apply at the prototype stage:**
 
 ```tsx
 <div className="
   flex flex-col            /* mobile: stacked */
-  md:flex-row md:gap-[--spacing-8]  /* tablet+: side-by-side */
-  lg:max-w-[--spacing-16]          /* desktop: wider */
+  md:flex-row md:gap-8  /* tablet+: side-by-side */
+  lg:max-w-5xl                 /* desktop: wider */
 ">
 ```
 
@@ -199,27 +199,27 @@ Break the verified prototype into a React component tree. Identify visual bounda
 
 **Process:**
 
-1. Identify visual boundaries in the prototype — each distinct section becomes a component candidate
-2. Define component hierarchy — page composition at top, leaf components at bottom
-3. Decide props interface for each component — what data flows in, what callbacks flow out
-4. Mark server vs client boundary — default to server; only add `"use client"` when interactivity requires it
+1. Identify visual boundaries in the prototype - each distinct section becomes a component candidate
+2. Define component hierarchy - page composition at top, leaf components at bottom
+3. Decide props interface for each component - what data flows in, what callbacks flow out
+4. Mark server vs client boundary - default to server; only add `"use client"` when interactivity requires it
 5. Extract shared patterns into composition components (slots, wrappers)
 
 **Component tree from a typical page prototype:**
 
 ```
 Page (Server Component)
-├── Navbar (Client — has mobile menu toggle; CSS hover alone does not require Client)
-│   ├── NavbarBrand (Server — static link)
-│   ├── NavbarLinks (Server — static links)
-│   └── NavbarAction (Server — button, but parent toggles mobile menu)
-├── HeroSection (Server — static content)
-│   ├── HeroHeading (Server)
-│   ├── HeroDescription (Server)
-│   └── HeroCta (Server — CSS hover/focus animation only)
-├── FeatureGrid (Server — maps over data)
-│   └── FeatureCard (Server — receives props)
-└── Footer (Server — static content)
+|- Navbar (Client - has mobile menu toggle; CSS hover alone does not require Client)
+|  |- NavbarBrand (Server - static link)
+|  |- NavbarLinks (Server - static links)
+|  `- NavbarAction (Server - button, but parent toggles mobile menu)
+|- HeroSection (Server - static content)
+|  |- HeroHeading (Server)
+|  |- HeroDescription (Server)
+|  `- HeroCta (Server - CSS hover/focus animation only)
+|- FeatureGrid (Server - maps over data)
+|  `- FeatureCard (Server - receives props)
+`- Footer (Server - static content)
 ```
 
 **Boundary correction:** CSS-only hover, focus, active, transition, and animation states do not require a Client Component. Add `"use client"` only for event handlers, React state/effects, browser APIs, imperative measurements, or third-party client-only code.
@@ -236,18 +236,18 @@ Replace static prototype content with props, state, and interactions. Add loadin
 2. Add state management for interactive elements
 3. Implement event handlers (click, submit, toggle)
 4. Add loading and error states
-5. Add ARIA attributes for accessibility
+5. Use semantic HTML first; add ARIA only where native semantics are insufficient
 6. Delete the prototype page
 
 **Static to dynamic transition example:**
 
 ```tsx
 // BEFORE: Prototype (Stage 2)
-<section className="flex flex-col items-center py-[--spacing-16] px-[--spacing-8]">
-  <h1 className="text-[--font-size-heading-1] font-[--font-weight-heading] text-center">
+<section className="flex flex-col items-center py-16 px-8">
+  <h1 className="text-heading-1 font-heading text-center">
     Build faster with modern tools
   </h1>
-  <p className="text-[--font-size-body] text-[--color-text-secondary] mt-[--spacing-4]">
+  <p className="text-body text-text-secondary mt-4">
     Streamline your workflow with our integrated platform.
   </p>
 </section>
@@ -263,20 +263,20 @@ interface HeroSectionProps {
 export default function HeroSection({ heading, description, ctaLabel, ctaHref }: HeroSectionProps) {
   return (
     <section
-      className="flex flex-col items-center py-[--spacing-16] px-[--spacing-8]"
+      className="flex flex-col items-center py-16 px-8"
       aria-labelledby="hero-heading"
     >
-      <h1 id="hero-heading" className="text-[--font-size-heading-1] font-[--font-weight-heading] text-center">
+      <h1 id="hero-heading" className="text-heading-1 font-heading text-center">
         {heading}
       </h1>
-      <p className="text-[--font-size-body] text-[--color-text-secondary] mt-[--spacing-4] max-w-prose text-center">
+      <p className="text-body text-text-secondary mt-4 max-w-prose text-center">
         {description}
       </p>
       <a
         href={ctaHref}
-        className="bg-[--color-primary] hover:bg-[--color-primary-hover] text-[--color-surface-elevated]
-          px-[--spacing-8] py-[--spacing-3] rounded-[--radius-md] mt-[--spacing-8]
-          text-[--font-size-body] font-[--font-weight-heading]"
+        className="bg-primary hover:bg-primary-hover text-surface-elevated
+          px-8 py-3 rounded-md mt-8
+          text-body font-heading"
         aria-label={ctaLabel}
       >
         {ctaLabel}
@@ -322,7 +322,7 @@ export default function HeroSection({ heading, description, ctaLabel, ctaHref }:
 | Maps over server-fetched data | Server |
 | Wraps client children | Server (passes children as props) |
 
-**Rule: Start with server. Add `"use client"` only when you must.** Server components reduce bundle size and enable streaming. Push the client boundary as far down the tree as possible — make the leaf interactive component a client component, keep its parent server.
+**Rule: Start with server. Add `"use client"` only when you must.** Server components reduce bundle size and enable streaming. Push the client boundary as far down the tree as possible - make the leaf interactive component a client component, keep its parent server.
 
 ## Anti-patterns
 
@@ -334,21 +334,21 @@ export default function HeroSection({ heading, description, ctaLabel, ctaHref }:
 | Everything as client components | Larger bundle, no streaming, slower TTI | Default to server; client only for interactivity |
 | Copying Figma hex colors directly | No semantic meaning, impossible to theme | Define semantic tokens in `@theme` |
 | Using `style={{ }}` for one-off values | Breaks Tailwind consistency | Add a theme token |
-| Mixing Tailwind tokens with arbitrary values | `bg-[--color-primary]` next to `text-[#333]` | Consistent: all values via `@theme` tokens |
+| Mixing Tailwind tokens with arbitrary values | `bg-primary` next to `text-[#333]` | Consistent: all values via `@theme` tokens |
 | Building components before verifying layout | Visual bugs discovered after props/state added | Prototype first, componentize second |
 | Installing a UI library for copied CSS | Library DOM and theme APIs make later edits harder | Own the markup; scope and adapt the copied CSS |
 | Global copied selectors | Leaks styles into unrelated components | Namespace or CSS Module before import |
 
 ## Component Scaffold
 
-Use `templates/component-scaffold.tsx` as the starting point for every new component. It includes TypeScript interface, Tailwind `@theme` token references, ARIA attributes, and server/client declaration.
+Use `templates/component-scaffold.tsx` as the starting point for every new component. It includes TypeScript interface, Tailwind `@theme` token references, semantic HTML/accessibility hooks, and server/client declaration.
 
 ## Related Skills
 
-- `tailwind-v4` — Tailwind v4 `@theme` configuration, utility classes, responsive design, custom variants
-- `react-composition` — Component composition patterns, slots, compound components, children patterns
-- `web-design-audit` — Auditing implemented pages against design specs for visual fidelity
-- `nextjs-app-router` — App Router conventions, server/client component boundaries, data fetching
+- `tailwind-v4` - Tailwind v4 `@theme` configuration, utility classes, responsive design, custom variants
+- `react-composition` - Component composition patterns, slots, compound components, children patterns
+- `web-design-audit` - Auditing implemented pages against design specs for visual fidelity
+- `nextjs-app-router` - App Router conventions, server/client component boundaries, data fetching
 
 ## Keywords
 

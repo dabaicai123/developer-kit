@@ -60,7 +60,7 @@ Defects that prevent users with disabilities from using the application.
 
 | Pattern | Example | Impact |
 |---|---|---|
-| Missing ARIA labels on interactive elements | Icon button with no `aria-label` | Screen reader users cannot identify the button's purpose |
+| Missing accessible names on icon-only/custom controls | Icon button with no `aria-label` | Screen reader users cannot identify the button's purpose |
 | No keyboard navigation | Custom dropdown that requires mouse to operate | Keyboard-only users cannot access the feature |
 | Focus trap absent in modals | Modal opens but focus escapes to background | Screen reader users lose context |
 | Color-only indicators | Error state shown only with red border | Color-blind users miss the error |
@@ -119,11 +119,11 @@ Order of Tailwind utilities within a `className` string.
 
 ```tsx
 // Preference: class ordering
-// Option A: Logical grouping (layout → spacing → visual → responsive)
-<div className="flex items-center p-4 bg-[--color-surface] text-[--color-text] md:flex-col md:p-6">
+// Option A: Logical grouping (layout -> spacing -> visual -> responsive)
+<div className="flex items-center p-4 bg-surface text-text md:flex-col md:p-6">
 
 // Option B: Alphabetical
-<div className="bg-[--color-surface] flex items-center md:flex-col md:p-6 p-4 text-[--color-text]">
+<div className="bg-surface flex items-center md:flex-col md:p-6 p-4 text-text">
 
 // Neither affects functionality; the team picks one for consistency
 ```
@@ -195,7 +195,7 @@ function UserPanel({ user, onLogout }) {
 **Example**:
 
 ```tsx
-// SMELL: God component — 150 lines, 9 props
+// SMELL: God component - 150 lines, 9 props
 interface DashboardProps {
   user: User;
   notifications: Notification[];
@@ -376,7 +376,7 @@ Example:
 ```
 [PREFERENCE] Naming: Boolean variable naming style
 
-This variable is named `loading` which is ambiguous — is it a boolean or
+This variable is named `loading` which is ambiguous - is it a boolean or
 a loading state object? The team convention uses `isX` for boolean flags.
 
 Consider: `isLoading` to clarify it is a boolean.
@@ -398,7 +398,7 @@ Example:
 [SMELL] Props drilling: user prop forwarded through 3 levels
 
 Dashboard and Sidebar receive the user prop but only forward it to UserPanel.
-This creates a fragile coupling — any change to the user data shape requires
+This creates a fragile coupling - any change to the user data shape requires
 updates to all intermediate components.
 
 Fix options:

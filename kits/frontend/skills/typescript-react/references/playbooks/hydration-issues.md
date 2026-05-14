@@ -15,7 +15,7 @@ START: You see a hydration mismatch warning
   |
   YES → Cause 1: Date/Time Mismatch
   |     Detection: time-dependent text in render output
-  |     Fix: suppressHydrationWarning or compute client-only
+  |     Fix: compute client-only, pass a deterministic server value, or narrowly suppress if unavoidable
   |
   NO → continue
   |
@@ -36,7 +36,7 @@ START: You see a hydration mismatch warning
   |
   YES → Cause 3: Client-Only Conditional Rendering
   |     Detection: component renders differently based on state that differs SSR vs CSR
-  |     Fix: useEffect client flag or suppressHydrationWarning
+  |     Fix: useEffect client flag; use suppressHydrationWarning only as a narrow escape hatch
   |
   NO → continue
   |
@@ -114,7 +114,7 @@ function Clock() {
   return <span>{time}</span>;
 }
 
-// FIX 2: suppressHydrationWarning on the specific element (when minor mismatch is acceptable)
+// ESCAPE HATCH: suppressHydrationWarning on the specific element (when minor mismatch is unavoidable)
 function LastUpdated({ date }: { date: string }) {
   return (
     <time suppressHydrationWarning dateTime={date}>
@@ -205,7 +205,7 @@ function UserMenu() {
   return <LoginButton />;
 }
 
-// FIX 2: suppressHydrationWarning for intentional mismatches
+// ESCAPE HATCH: suppressHydrationWarning for intentional, unavoidable mismatches
 function UserMenu() {
   const { user } = useAuth();
   return (
@@ -378,9 +378,9 @@ export default async function Page() {
 
 | Cause | Detection | Fix |
 |---|---|---|
-| Date/time mismatch | `new Date()` in render body | useEffect for client-only time, or suppressHydrationWarning |
+| Date/time mismatch | `new Date()` in render body | useEffect for client-only time, deterministic server value, or narrow suppression |
 | Browser API access | `window`/`document` outside useEffect | useEffect, or dynamic import with ssr:false |
-| Client-only conditional | Different state on server vs client | Loading state pattern, or suppressHydrationWarning |
+| Client-only conditional | Different state on server vs client | Loading state pattern; suppress only unavoidable mismatches |
 | Third-party script | DOM modified before hydration | next/script with strategy="afterInteractive" |
 | CSS-in-JS mismatch | Different class names SSR vs CSR | Use Tailwind (our standard), configure SSR extraction |
 | Random value mismatch | `Math.random()` or `uuid()` in render | useEffect, or React.useId() |

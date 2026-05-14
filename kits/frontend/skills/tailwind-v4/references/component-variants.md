@@ -72,7 +72,7 @@ export function Button({ variant, size, fullWidth, className, children }: Button
 }
 ```
 
-**Passing extra classes** — the `className` prop merges with the `tv()` output:
+**Passing extra classes** - the `className` prop merges with the `tv()` output:
 
 ```tsx
 <Button className="mt-4" variant="outline" size="sm">
@@ -92,7 +92,7 @@ const card = tv({
   slots: {
     base: "rounded-lg shadow-md overflow-hidden bg-surface",
     header: "px-4 py-3 border-b border-border",
-    title: "text-xl font-weight-semibold text-text",
+    title: "text-xl font-semibold text-text",
     body: "px-4 py-4 text-base text-text-secondary",
     footer: "px-4 py-3 border-t border-border flex justify-end gap-2",
   },
@@ -299,7 +299,7 @@ Put the base styles first so variant styles can override them.
 
 ## Utility Functions
 
-### cn — Merge with conflict resolution
+### cn - Merge with conflict resolution
 
 ```ts
 import { cn } from "tailwind-variants";
@@ -308,7 +308,7 @@ cn("bg-primary", "bg-secondary"); // => "bg-secondary" (second wins)
 cn("px-2", "px-4", "py-2"); // => "px-4 py-2" (px-4 overrides px-2)
 ```
 
-### cx — Simple concatenation (no conflict resolution)
+### cx - Simple concatenation (no conflict resolution)
 
 ```ts
 import { cx } from "tailwind-variants";
@@ -318,7 +318,7 @@ cx("px-2", "px-4"); // => "px-2 px-4" (both kept, no merging)
 
 Use `cx` when you want simple concatenation. Use `cn` when conflicting Tailwind classes need automatic resolution (last one wins per property group).
 
-### cnMerge — Custom merge configuration
+### cnMerge - Custom merge configuration
 
 ```ts
 import { cnMerge } from "tailwind-variants";

@@ -355,7 +355,7 @@ const nextConfig = {
 - **Always add `loading.tsx`** — provides instant loading UI via Suspense; prevents blank screens
 - **Use `next/image` for all images** — automatic optimization, lazy loading, and responsive sizing
 - **Use `next/font` for all fonts** — zero layout shift, self-hosted, no external network requests
-- **Define `error.tsx` at every route level** — prevents unhandled errors from breaking the entire layout
+- **Define `error.tsx` at containment boundaries** — prevents unhandled errors from breaking unrelated layouts without adding redundant boundaries to every segment
 - **Await params/searchParams** — Next.js 15+ makes these Promises; always await before use
 - **Stream with Suspense** — wrap slow sections so fast content renders immediately
 - **Use Server Actions for mutations** — progressive enhancement, no client API route needed

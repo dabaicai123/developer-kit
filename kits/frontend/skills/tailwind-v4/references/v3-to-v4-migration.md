@@ -48,11 +48,11 @@ module.exports = {
 @theme {
   --color-primary: oklch(0.55 0.18 250);
   --color-surface: oklch(0.98 0.01 250);
-  --font-family-sans: Inter, system-ui, sans-serif;
+  --font-sans: Inter, system-ui, sans-serif;
 }
 ```
 
-**Legacy JS config** — if you cannot fully migrate, you can still load a JS config via the `@config` directive:
+**Legacy JS config** - if you cannot fully migrate, you can still load a JS config via the `@config` directive:
 
 ```css
 @import "tailwindcss";
@@ -110,7 +110,7 @@ module.exports = {
 };
 ```
 
-Remove `postcss-import` and `autoprefixer` — v4 handles vendor prefixing and CSS imports internally.
+Remove `postcss-import` and `autoprefixer` - v4 handles vendor prefixing and CSS imports internally.
 
 For Next.js, if you use the built-in PostCSS support, update `postcss.config.mjs`:
 
@@ -198,7 +198,7 @@ Preserve v3 defaults:
 
 ### 9. Container queries built-in
 
-The `@tailwindcss/container-queries` plugin is no longer needed — container queries are built into v4.
+The `@tailwindcss/container-queries` plugin is no longer needed - container queries are built into v4.
 
 **Before (v3):**
 

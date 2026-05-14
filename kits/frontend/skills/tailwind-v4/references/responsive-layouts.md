@@ -1,4 +1,4 @@
-# Responsive Layouts in Tailwind v4
+﻿# Responsive Layouts in Tailwind v4
 
 Mobile-first responsive patterns, breakpoint customization, container queries, and grid/flex layout patterns for Next.js + Tailwind v4 projects.
 
@@ -322,7 +322,7 @@ Reference container dimensions in other utilities using `cqw` (container query w
 ### Section spacing with semantic tokens
 
 ```tsx
-<section className="py-[--spacing-8] md:py-[--spacing-12] lg:py-[--spacing-16]">
+<section className="py-8 md:py-12 lg:py-16">
   Content
 </section>
 ```

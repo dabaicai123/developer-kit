@@ -7,7 +7,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Tailwind CSS v4 Patterns
 
-CSS-first configuration, OKLCH colors, semantic tokens, and component variants for Next.js + Tailwind v4 + TypeScript projects. The team does NOT use shadcn/ui or prebuilt UI control libraries for ordinary components.
+CSS-first configuration, OKLCH colors, semantic tokens, and component variants for Next.js + Tailwind v4 + TypeScript projects. The team uses project-owned UI controls for ordinary components unless explicitly requested otherwise.
 
 ## When to use this skill
 
@@ -28,24 +28,24 @@ Copied CSS is allowed. Prebuilt UI controls are not the default.
 
 **Do NOT:**
 
-- Do NOT install shadcn/ui components, MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, or similar packages for standard controls.
+- Do NOT install prebuilt UI control libraries for standard controls unless explicitly requested; follow `third-party-css-conventions` for project-owned UI.
 - Do NOT replace a copied CSS snippet with a library component if semantic HTML plus scoped CSS is enough.
 - Do NOT leave third-party CSS global; scope it first, then extract repeated values into `@theme`.
 - Do NOT use Tailwind conversion as busywork; keep complex one-off effects in scoped CSS when that is simpler and safer.
 
 ## Overview
 
-Tailwind v4 replaces `tailwind.config.js` with CSS-first `@theme` blocks. All design tokens become CSS variables. Colors use OKLCH format for perceptually uniform gradients and consistent lightness ramps. Dynamic values work without config extension. New CSS-native variants (`not-*`, `in-*`, `nth-*`) and `@starting-style` reduce JavaScript dependency for styling.
+Tailwind v4 uses CSS-first `@theme` blocks for new configuration. Legacy JavaScript config can still be loaded with `@config` during migration, but new tokens should live in CSS. Colors use OKLCH format for perceptually uniform gradients and consistent lightness ramps. Dynamic values work without config extension. New CSS-native variants (`not-*`, `in-*`, `nth-*`) and `@starting-style` reduce JavaScript dependency for styling.
 
 ## @theme Configuration
 
-No JavaScript config file. Define everything in CSS.
+Default to CSS configuration. Use JavaScript config only as a legacy migration bridge via `@config`.
 
 ```css
 @import "tailwindcss";
 
 @theme {
-  /* Colors — OKLCH format, semantic names */
+  /* Colors - OKLCH format, semantic names */
   --color-primary: oklch(0.55 0.18 250);
   --color-primary-hover: oklch(0.48 0.18 250);
   --color-secondary: oklch(0.65 0.15 30);
@@ -58,7 +58,7 @@ No JavaScript config file. Define everything in CSS.
   --color-success: oklch(0.55 0.17 145);
 
   /* Typography */
-  --font-family-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -70,7 +70,7 @@ No JavaScript config file. Define everything in CSS.
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* Spacing — 4px scale via --spacing */
+  /* Spacing - 4px scale via --spacing */
   --spacing: 0.25rem;
 
   /* Border radius */
@@ -92,9 +92,9 @@ No JavaScript config file. Define everything in CSS.
 | Namespace | Utilities generated |
 |---|---|
 | `--color-*` | `bg-primary`, `text-text`, `border-border`, etc. |
-| `--font-*` | `font-family-sans` |
+| `--font-*` | `font-sans` |
 | `--text-*` | `text-xs`, `text-sm`, `text-base`, etc. |
-| `--font-weight-*` | `font-weight-bold` |
+| `--font-weight-*` | `font-bold`, `font-heading`, etc. |
 | `--spacing-*` | Spacing and sizing utilities; or `--spacing` for the base unit |
 | `--breakpoint-*` | Responsive variants: `sm:*`, `md:*`, etc. |
 | `--container-*` | Container query variants: `@sm:*`, `@md:*`, etc. |
@@ -142,9 +142,9 @@ OKLCH separates lightness (L), chroma (C), and hue (H) into independent channels
 --color-primary-900: oklch(0.25 0.06 250);  /* very dark */
 ```
 
-**Hex to OKLCH conversion** — use the browser DevTools color picker, or an online converter like oklch.com. Keep the hue constant across a palette; step lightness in even increments (0.05-0.08 per step). Chroma peaks at the mid-range (500-600) and tapers at extremes.
+**Hex to OKLCH conversion** - use the browser DevTools color picker, or an online converter like oklch.com. Keep the hue constant across a palette; step lightness in even increments (0.05-0.08 per step). Chroma peaks at the mid-range (500-600) and tapers at extremes.
 
-**Gradient interpolation** — v4 defaults to OKLAB. Override with a modifier:
+**Gradient interpolation** - v4 defaults to OKLAB. Override with a modifier:
 
 ```html
 <div class="bg-linear-to-r/oklch from-indigo-500 to-teal-400">
@@ -176,11 +176,11 @@ Use purpose-based names, not palette-based names. A token named `--color-primary
 </button>
 ```
 
-Never reference palette scales directly in component code (`bg-blue-500`) — that breaks theme retuning.
+Never reference palette scales directly in component code (`bg-blue-500`) - that breaks theme retuning.
 
 ## Dynamic Utility Values
 
-v4 lets you use arbitrary values inline without extending any config. Use brackets `[]` for one-off values.
+v4 lets you use arbitrary values inline without extending any config. Use generated utilities for `@theme` tokens (`bg-primary`) and arbitrary values for one-offs. For a one-off CSS variable, prefer the CSS-variable shorthand (`bg-(--brand-color)`) or explicit `var()` form (`bg-[var(--brand-color)]`).
 
 ```html
 <!-- Arbitrary spacing -->
@@ -188,6 +188,9 @@ v4 lets you use arbitrary values inline without extending any config. Use bracke
 
 <!-- Arbitrary colors (use OKLCH or hex) -->
 <div class="bg-[oklch(0.7_0.15_120)]">
+
+<!-- One-off CSS variable -->
+<div class="bg-(--brand-color)">
 
 <!-- Arbitrary grid -->
 <div class="grid-cols-[1fr_2fr_1fr]">
@@ -329,7 +332,7 @@ const button = tv({
 </Button>
 ```
 
-**Slots** — for components with multiple styled parts:
+**Slots** - for components with multiple styled parts:
 
 ```tsx
 const card = tv({
@@ -365,7 +368,7 @@ const { base, header, body, footer } = card({ variant: "elevated" });
 </section>
 ```
 
-**Compound variants** — styles that apply only when multiple variants are active simultaneously:
+**Compound variants** - styles that apply only when multiple variants are active simultaneously:
 
 ```tsx
 const button = tv({
@@ -402,11 +405,11 @@ const button = tv({
 
 > For complete tv() patterns including responsive variants and extend, see `references/component-variants`.
 
-## v3 to v4 Migration — Key Changes
+## v3 to v4 Migration - Key Changes
 
 | v3 | v4 | Notes |
 |---|---|---|
-| `tailwind.config.js` | `@theme` CSS block | No JS config; use `@config` directive only for legacy |
+| `tailwind.config.js` | `@theme` CSS block | Prefer CSS config; use `@config` directive only for legacy |
 | `@tailwind base; @tailwind components; @tailwind utilities;` | `@import "tailwindcss";` | Single import replaces three directives |
 | `bg-gradient-to-r` | `bg-linear-to-r` | Gradient renamed |
 | `ring-width` / `ring-color` defaults | `currentColor` / 3px default | Override with `--default-ring-width` / `--default-ring-color` |
@@ -427,15 +430,15 @@ npx @tailwindcss/upgrade@latest
 
 ## Best Practices
 
-- Define all design tokens in `@theme` — never scatter values across component code
-- Use OKLCH for color definitions — perceptually uniform, better gradients, wider gamut
-- Name tokens by purpose (`--color-primary`) not by palette (`--color-blue-500`) — enables theme retuning without touching components
+- Define all design tokens in `@theme` - never scatter values across component code
+- Use OKLCH for color definitions - perceptually uniform, better gradients, wider gamut
+- Name tokens by purpose (`--color-primary`) not by palette (`--color-blue-500`) - enables theme retuning without touching components
 - Use `tv()` for components with 3+ variant combinations; use conditional classes for simpler cases
 - Use `@starting-style` for enter/exit transitions instead of JavaScript animation libraries
 - Use `not-*` instead of `first:` + `last:` workarounds where it simplifies logic
-- Reference semantic tokens in utility classes (`bg-primary`, `text-text`) — not palette scales
+- Reference semantic tokens in utility classes (`bg-primary`, `text-text`) - not palette scales
 - Prefer CSS variables (`var(--color-primary)`) over the `theme()` function
-- Use `--spacing: 0.25rem` to set the base spacing unit — all spacing utilities scale from it
+- Use `--spacing: 0.25rem` to set the base spacing unit - all spacing utilities scale from it
 - Put shared theme tokens in a separate CSS file for monorepo sharing: `@import "../brand/theme.css"`
 
 ## Anti-patterns
@@ -456,17 +459,17 @@ npx @tailwindcss/upgrade@latest
 
 ## References
 
-- `references/theme-setup` — Complete @theme configuration with OKLCH palette generation and token hierarchy
-- `references/component-variants` — tailwind-variants (tv()) patterns: slots, compound variants, responsive variants, extend
-- `references/v3-to-v4-migration` — Full migration guide: JS config removal, @theme blocks, renamed utilities, deprecated features
-- `references/responsive-layouts` — Responsive patterns: mobile-first, breakpoint customization, container queries, grid/flex
-- `references/new-utilities-and-variants` — @starting-style, not-*, in-*, nth-*, field-sizing, color-scheme, 3D transforms
+- `references/theme-setup` - Complete @theme configuration with OKLCH palette generation and token hierarchy
+- `references/component-variants` - tailwind-variants (tv()) patterns: slots, compound variants, responsive variants, extend
+- `references/v3-to-v4-migration` - Full migration guide: JS config removal, @theme blocks, renamed utilities, deprecated features
+- `references/responsive-layouts` - Responsive patterns: mobile-first, breakpoint customization, container queries, grid/flex
+- `references/new-utilities-and-variants` - @starting-style, not-*, in-*, nth-*, field-sizing, color-scheme, 3D transforms
 
 ## Related Skills
 
-- `design-to-code` — Converting Figma/ClaudeDesign/OpenDesign specs to React components using Tailwind tokens
-- `nextjs-app-router` — App Router conventions, server/client boundaries, layout patterns
-- `react-composition` — Component composition patterns, slots, compound components
+- `design-to-code` - Converting Figma/ClaudeDesign/OpenDesign specs to React components using Tailwind tokens
+- `nextjs-app-router` - App Router conventions, server/client boundaries, layout patterns
+- `react-composition` - Component composition patterns, slots, compound components
 
 ## Keywords
 

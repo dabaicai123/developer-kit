@@ -351,7 +351,7 @@ export function ProductList() {
 - [ ] No invalid HTML nesting (`<div>` inside `<p>`, etc.)
 - [ ] `useSearchParams()` wrapped in Suspense in Server Components
 - [ ] `loading.tsx` defined for routes with async data
-- [ ] `error.tsx` defined at every route level with async data
+- [ ] `error.tsx` defined at route or feature boundaries where failures should be contained
 - [ ] Slow data sections wrapped in Suspense for streaming
-- [ ] `suppressHydrationWarning` used for intentional mismatches (time, random values)
-- [ ] No `new Date()` or `Math.random()` in render without `suppressHydrationWarning`
+- [ ] `suppressHydrationWarning` used only as a narrow escape hatch for intentional, unavoidable mismatches
+- [ ] No `new Date()` or `Math.random()` in render unless output is deterministic, client-only after hydration, or narrowly suppressed

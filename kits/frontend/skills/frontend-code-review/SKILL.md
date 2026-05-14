@@ -30,7 +30,7 @@ Findings that can cause security vulnerabilities, data loss, performance degrada
 | Security vulnerability | XSS via unescaped input, exposed secrets in client bundles, missing CSRF on state-mutating requests |
 | Data loss potential | Unvalidated form submissions, optimistic updates without rollback, missing error handling on mutations |
 | Performance bottleneck | Unbounded client-side fetching, missing Suspense boundaries, large client bundles, unnecessary re-renders from state misuse |
-| Accessibility violation | Missing ARIA labels on interactive elements, no keyboard navigation, focus trap absent in modals, color-only indicators |
+| Accessibility violation | Missing labels for icon-only/custom controls, no keyboard navigation, focus trap absent in modals, color-only indicators |
 | Hydration mismatch risk | Server/client content divergence, Date/time rendering without suppression, random values in server components |
 | UI ownership risk | Prebuilt UI control library added for ordinary controls, copied CSS leaked globally, or vendor JS/CSS imported without review |
 
@@ -59,7 +59,7 @@ Architecture smells indicate structural problems that degrade maintainability ov
 | Shared state without clear ownership | Multiple components read/write same state, no single owner for updates | Any occurrence |
 | Fetch in wrong boundary | Client component fetching data that a server component could fetch instead | Any occurrence |
 | Over-abstracted hooks | Custom hook with many parameters, multiple return values, complex internal logic | 5+ parameters or 4+ return values |
-| UI library dependency drift | MUI/AntD/Chakra/Mantine/Bootstrap JS/DaisyUI/Flowbite/shadcn controls introduced for standard UI | Any occurrence unless explicitly requested |
+| UI library dependency drift | Prebuilt UI control library introduced for standard UI | Any occurrence unless explicitly requested |
 | Copied CSS leakage | Third-party selectors affect global `button`, `input`, `a`, `div`, `*`, or `body` | Any occurrence |
 
 ### How to detect smells during review
@@ -102,7 +102,7 @@ Each anti-pattern includes the root cause (why it happens) and the fix (what to 
 
 **Root cause**: Developers skip `loading.tsx` because the page renders fast in development, or they treat loading states as an afterthought added "when we have time."
 
-**Fix**: Add `loading.tsx` alongside every page that fetches data. For nested async components, wrap them in `<Suspense>` with appropriate fallbacks. This enables streaming and prevents the whole page from blocking.
+**Fix**: Add `loading.tsx` when the whole route needs an instant fallback. For nested async components, wrap them in `<Suspense>` with appropriate local fallbacks. This enables streaming and prevents unrelated sections from blocking.
 
 ### 5. Unnecessary 'use client'
 
@@ -114,7 +114,7 @@ Each anti-pattern includes the root cause (why it happens) and the fix (what to 
 
 **Root cause**: Developers copy colors and spacing from design specs as literal values (`bg-blue-500`, `text-gray-700`) instead of referencing the design system tokens. This happens when the token system is not yet set up or when developers are unfamiliar with Tailwind v4 `@theme`.
 
-**Fix**: Use `@theme` tokens. Define semantic tokens in `globals.css` and reference them with `bg-[--color-primary]`, `text-[--color-text]`. Never use hardcoded utility classes for colors or spacing that should be part of the design system.
+**Fix**: Use `@theme` tokens. Define semantic tokens in `globals.css` and reference them with `bg-primary`, `text-text`. Never use hardcoded utility classes for colors or spacing that should be part of the design system.
 
 ### 7. Prop drilling
 
@@ -138,7 +138,7 @@ Each anti-pattern includes the root cause (why it happens) and the fix (what to 
 
 **Root cause**: Developers skip `error.tsx` because errors are "handled" in the component with try/catch or conditional rendering. Runtime errors from failed renders still crash the entire page without a boundary.
 
-**Fix**: Add `error.tsx` alongside every route segment. This catches unexpected render failures and shows a recovery UI. For client components with error-prone operations, wrap them in an `<ErrorBoundary>` component.
+**Fix**: Add `error.tsx` at route or feature boundaries where failures should be contained. This catches unexpected render failures and shows a recovery UI. For client components with error-prone operations, wrap them in an `<ErrorBoundary>` component.
 
 ### 11. Untyped fetch responses
 
@@ -148,9 +148,9 @@ Each anti-pattern includes the root cause (why it happens) and the fix (what to 
 
 ### 12. Missing accessibility
 
-**Root cause**: Developers focus on visual design and functionality first, treating accessibility as a compliance checkbox added at the end. This leaves interactive elements without keyboard support, ARIA attributes, or focus management.
+**Root cause**: Developers focus on visual design and functionality first, treating accessibility as a compliance checkbox added at the end. This leaves controls without keyboard support, accessible names, or focus management.
 
-**Fix**: Add accessibility during implementation, not after. Every interactive element needs an ARIA label if the visual label is insufficient, keyboard handlers (Enter/Space for buttons, Escape for dismiss), and focus management (trap in modals, return focus on close). Use semantic HTML elements first; ARIA only when HTML semantics are insufficient.
+**Fix**: Add accessibility during implementation, not after. Use semantic HTML elements first. Add an ARIA label only when the visual label is insufficient, add keyboard handling for custom widgets, and manage focus where needed (trap in modals, return focus on close).
 
 ## Review Checklist
 
@@ -164,10 +164,10 @@ Copy and paste this checklist into your review. Check items by risk category.
 - [ ] API responses validated with Zod before entering the app
 - [ ] Server data fetched via TanStack Query, not useState + useEffect
 - [ ] No hydration mismatch risks (consistent server/client rendering)
-- [ ] `loading.tsx` present for every page that fetches data
-- [ ] `error.tsx` present for every route segment
+- [ ] Async routes have route-level `loading.tsx` or local `<Suspense>` at the right boundary
+- [ ] Dynamic/error-prone routes have `error.tsx` or a feature-level error boundary where failure should be contained
 - [ ] Interactive elements keyboard-accessible (buttons, links, modals)
-- [ ] ARIA labels on icon-only buttons and custom widgets
+- [ ] Accessible names on icon-only buttons and custom widgets
 - [ ] Focus trap in modals and dialogs
 - [ ] No unbounded client-side data fetching
 - [ ] `'use client'` only on components that need client features
@@ -187,12 +187,12 @@ Copy and paste this checklist into your review. Check items by risk category.
 
 ## Related Skills
 
-- `react-best-practices` — Component patterns, hooks guidelines, composition patterns
-- `typescript-react` — TypeScript patterns for React, typed props, discriminated unions
-- `web-design-audit` — Auditing implemented pages against design specs for visual fidelity
-- `frontend-debugging` — Debugging React rendering, state, hydration, and performance issues
+- `react-best-practices` - Component patterns, hooks guidelines, composition patterns
+- `typescript-react` - TypeScript patterns for React, typed props, discriminated unions
+- `web-design-audit` - Auditing implemented pages against design specs for visual fidelity
+- `frontend-debugging` - Debugging React rendering, state, hydration, and performance issues
 
 ## References
 
-- [Review Heuristics](references/review-heuristics.md) — Full risk-vs-preference framework with examples, architecture smell catalog, and review comment templates
-- [Anti-Patterns with Fixes](references/anti-patterns-with-fixes.md) — 12 anti-patterns expanded with root cause analysis, before/after code examples, and step-by-step fix instructions
+- [Review Heuristics](references/review-heuristics.md) - Full risk-vs-preference framework with examples, architecture smell catalog, and review comment templates
+- [Anti-Patterns with Fixes](references/anti-patterns-with-fixes.md) - 12 anti-patterns expanded with root cause analysis, before/after code examples, and step-by-step fix instructions

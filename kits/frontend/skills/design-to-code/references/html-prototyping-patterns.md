@@ -21,45 +21,45 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 ### After (Tailwind prototype with theme tokens)
 
 ```tsx
-<nav className="flex items-center justify-between px-[--spacing-8] py-[--spacing-4]
-  bg-[--color-surface-elevated] border-b border-[--color-border]">
-  <div className="text-[--font-size-heading-3] font-[--font-weight-heading] text-[--color-text]">Brand</div>
-  <div className="flex items-center gap-[--spacing-6]">
-    <a className="text-[--font-size-body] text-[--color-text-muted] hover:text-[--color-primary]">Products</a>
-    <a className="text-[--font-size-body] text-[--color-text-muted] hover:text-[--color-primary]">About</a>
-    <a className="text-[--font-size-body] text-[--color-text-muted] hover:text-[--color-primary]">Blog</a>
-    <button className="bg-[--color-primary] text-[--color-surface-elevated]
-      px-[--spacing-4] py-[--spacing-2] rounded-[--radius-md]
-      text-[--font-size-body] font-[--font-weight-heading]
-      hover:bg-[--color-primary-hover]">Sign Up</button>
+<nav className="flex items-center justify-between px-8 py-4
+  bg-surface-elevated border-b border-border">
+  <div className="text-heading-3 font-heading text-text">Brand</div>
+  <div className="flex items-center gap-6">
+    <a className="text-body text-text-muted hover:text-primary">Products</a>
+    <a className="text-body text-text-muted hover:text-primary">About</a>
+    <a className="text-body text-text-muted hover:text-primary">Blog</a>
+    <button className="bg-primary text-surface-elevated
+      px-4 py-2 rounded-md
+      text-body font-heading
+      hover:bg-primary-hover">Sign Up</button>
   </div>
 </nav>
 ```
 
-### Responsive — mobile hamburger
+### Responsive - mobile hamburger
 
 ```tsx
-<nav className="flex items-center justify-between px-[--spacing-4] md:px-[--spacing-8] py-[--spacing-4]
-  bg-[--color-surface-elevated] border-b border-[--color-border]">
-  <div className="text-[--font-size-heading-3] font-[--font-weight-heading] text-[--color-text]">Brand</div>
+<nav className="flex items-center justify-between px-4 md:px-8 py-4
+  bg-surface-elevated border-b border-border">
+  <div className="text-heading-3 font-heading text-text">Brand</div>
 
-  {/* Mobile menu button — visible only on small screens */}
-  <button className="md:hidden text-[--color-text]"
+  {/* Mobile menu button - visible only on small screens */}
+  <button className="md:hidden text-text"
     aria-label="Toggle navigation menu" aria-expanded="false">
     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
     </svg>
   </button>
 
-  {/* Desktop links — hidden on small screens */}
-  <div className="hidden md:flex items-center gap-[--spacing-6]">
-    <a className="text-[--font-size-body] text-[--color-text-muted] hover:text-[--color-primary]">Products</a>
-    <a className="text-[--font-size-body] text-[--color-text-muted] hover:text-[--color-primary]">About</a>
-    <a className="text-[--font-size-body] text-[--color-text-muted] hover:text-[--color-primary]">Blog</a>
-    <button className="bg-[--color-primary] text-[--color-surface-elevated]
-      px-[--spacing-4] py-[--spacing-2] rounded-[--radius-md]
-      text-[--font-size-body] font-[--font-weight-heading]
-      hover:bg-[--color-primary-hover]">Sign Up</button>
+  {/* Desktop links - hidden on small screens */}
+  <div className="hidden md:flex items-center gap-6">
+    <a className="text-body text-text-muted hover:text-primary">Products</a>
+    <a className="text-body text-text-muted hover:text-primary">About</a>
+    <a className="text-body text-text-muted hover:text-primary">Blog</a>
+    <button className="bg-primary text-surface-elevated
+      px-4 py-2 rounded-md
+      text-body font-heading
+      hover:bg-primary-hover">Sign Up</button>
   </div>
 </nav>
 ```
@@ -83,24 +83,24 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 
 ```tsx
 <section className="flex flex-col items-center justify-center
-  py-[--spacing-20] px-[--spacing-8]
-  bg-[--color-surface-subtle] text-center">
-  <h1 className="text-[--font-size-heading-1] font-[--font-weight-heading] text-[--color-text] max-w-prose">
+  py-20 px-8
+  bg-surface-subtle text-center">
+  <h1 className="text-heading-1 font-heading text-text max-w-prose">
     Build faster with modern tools
   </h1>
-  <p className="text-[--font-size-body] text-[--color-text-muted] mt-[--spacing-4] max-w-[480px]">
+  <p className="text-body text-text-muted mt-4 max-w-[480px]">
     Streamline your workflow with our integrated platform designed for speed and simplicity.
   </p>
-  <div className="flex gap-[--spacing-4] mt-[--spacing-8]">
-    <button className="bg-[--color-primary] text-[--color-surface-elevated]
-      px-[--spacing-8] py-[--spacing-3] rounded-[--radius-md]
-      text-[--font-size-body] font-[--font-weight-heading]
-      hover:bg-[--color-primary-hover]">Get Started</button>
-    <button className="bg-[--color-surface-elevated] text-[--color-primary]
-      px-[--spacing-8] py-[--spacing-3] rounded-[--radius-md]
-      text-[--font-size-body] font-[--font-weight-heading]
-      border border-[--color-primary]
-      hover:bg-[--color-primary-light]">Learn More</button>
+  <div className="flex gap-4 mt-8">
+    <button className="bg-primary text-surface-elevated
+      px-8 py-3 rounded-md
+      text-body font-heading
+      hover:bg-primary-hover">Get Started</button>
+    <button className="bg-surface-elevated text-primary
+      px-8 py-3 rounded-md
+      text-body font-heading
+      border border-primary
+      hover:bg-primary-light">Learn More</button>
   </div>
 </section>
 ```
@@ -125,17 +125,17 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 ### After (Tailwind prototype)
 
 ```tsx
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[--spacing-6]
-  px-[--spacing-8] py-[--spacing-12]">
-  <div className="bg-[--color-surface-elevated] border border-[--color-border]
-    rounded-[--radius-lg] p-[--spacing-6] shadow-[--shadow-md]">
-    <div className="w-12 h-12 bg-[--color-primary-light] rounded-[--radius-md]
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+  px-8 py-12">
+  <div className="bg-surface-elevated border border-border
+    rounded-lg p-6 shadow-md">
+    <div className="w-12 h-12 bg-primary-light rounded-md
       flex items-center justify-center">
-      <svg className="w-6 h-6 text-[--color-primary]">...</svg>
+      <svg className="w-6 h-6 text-primary">...</svg>
     </div>
-    <h3 className="text-[--font-size-heading-3] font-[--font-weight-heading]
-      text-[--color-text] mt-[--spacing-4]">Feature One</h3>
-    <p className="text-[--font-size-body] text-[--color-text-muted] mt-[--spacing-2]">
+    <h3 className="text-heading-3 font-heading
+      text-text mt-4">Feature One</h3>
+    <p className="text-body text-text-muted mt-2">
       Description of feature one goes here.
     </p>
   </div>
@@ -143,7 +143,7 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 </div>
 ```
 
-**Responsive grid:** `grid-cols-1` (mobile) → `md:grid-cols-2` (tablet) → `lg:grid-cols-3` (desktop). Always start from mobile and scale up.
+**Responsive grid:** `grid-cols-1` (mobile) -> `md:grid-cols-2` (tablet) -> `lg:grid-cols-3` (desktop). Always start from mobile and scale up.
 
 ## Form Layout
 
@@ -166,29 +166,29 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 ### After (Tailwind prototype)
 
 ```tsx
-<form className="max-w-[480px] mx-auto py-[--spacing-8]">
-  <div className="mb-[--spacing-6]">
-    <label className="text-[--font-size-body] font-[--font-weight-medium] text-[--color-text]
-      block mb-[--spacing-2]">Email</label>
+<form className="max-w-[480px] mx-auto py-8">
+  <div className="mb-6">
+    <label className="text-body font-medium text-text
+      block mb-2">Email</label>
     <input type="email" placeholder="Enter your email"
-      className="w-full px-[--spacing-4] py-[--spacing-3]
-        border border-[--color-border] rounded-[--radius-md]
-        text-[--font-size-body] text-[--color-text]
-        focus:border-[--color-primary] focus:ring-1 focus:ring-[--color-primary]" />
+      className="w-full px-4 py-3
+        border border-border rounded-md
+        text-body text-text
+        focus:border-primary focus:ring-1 focus:ring-primary" />
   </div>
-  <div className="mb-[--spacing-6]">
-    <label className="text-[--font-size-body] font-[--font-weight-medium] text-[--color-text]
-      block mb-[--spacing-2]">Password</label>
+  <div className="mb-6">
+    <label className="text-body font-medium text-text
+      block mb-2">Password</label>
     <input type="password" placeholder="Enter your password"
-      className="w-full px-[--spacing-4] py-[--spacing-3]
-        border border-[--color-border] rounded-[--radius-md]
-        text-[--font-size-body] text-[--color-text]
-        focus:border-[--color-primary] focus:ring-1 focus:ring-[--color-primary]" />
+      className="w-full px-4 py-3
+        border border-border rounded-md
+        text-body text-text
+        focus:border-primary focus:ring-1 focus:ring-primary" />
   </div>
-  <button className="w-full bg-[--color-primary] text-[--color-surface-elevated]
-    py-[--spacing-3] rounded-[--radius-md]
-    text-[--font-size-body] font-[--font-weight-heading]
-    hover:bg-[--color-primary-hover]">Sign In</button>
+  <button className="w-full bg-primary text-surface-elevated
+    py-3 rounded-md
+    text-body font-heading
+    hover:bg-primary-hover">Sign In</button>
 </form>
 ```
 
@@ -217,33 +217,33 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 <div className="flex min-h-screen">
   {/* Sidebar */}
   <aside className="hidden lg:flex lg:w-[240px] lg:flex-col
-    bg-[--color-text] p-[--spacing-6]">
-    <div className="text-[--font-size-heading-3] font-[--font-weight-heading]
-      text-[--color-surface-elevated] mb-[--spacing-8]">Dashboard</div>
-    <a className="text-[--font-size-body] text-[--color-border]
-      px-[--spacing-2] py-[--spacing-2] rounded-[--radius-md] mb-[--spacing-1]
-      hover:bg-[--color-text-secondary]">Overview</a>
-    <a className="text-[--font-size-body] text-[--color-border]
-      px-[--spacing-2] py-[--spacing-2] rounded-[--radius-md] mb-[--spacing-1]
-      bg-[--color-text-secondary]">Analytics</a>
-    <a className="text-[--font-size-body] text-[--color-border]
-      px-[--spacing-2] py-[--spacing-2] rounded-[--radius-md] mb-[--spacing-1]
-      hover:bg-[--color-text-secondary]">Settings</a>
+    bg-text p-6">
+    <div className="text-heading-3 font-heading
+      text-surface-elevated mb-8">Dashboard</div>
+    <a className="text-body text-border
+      px-2 py-2 rounded-md mb-1
+      hover:bg-text-secondary">Overview</a>
+    <a className="text-body text-border
+      px-2 py-2 rounded-md mb-1
+      bg-text-secondary">Analytics</a>
+    <a className="text-body text-border
+      px-2 py-2 rounded-md mb-1
+      hover:bg-text-secondary">Settings</a>
   </aside>
 
   {/* Main content */}
-  <main className="flex-1 p-[--spacing-8] bg-[--color-surface-subtle]">
-    <h2 className="text-[--font-size-heading-2] font-[--font-weight-heading] text-[--color-text]">
+  <main className="flex-1 p-8 bg-surface-subtle">
+    <h2 className="text-heading-2 font-heading text-text">
       Analytics Overview
     </h2>
-    <p className="text-[--font-size-body] text-[--color-text-muted] mt-[--spacing-2]">
+    <p className="text-body text-text-muted mt-2">
       Your performance metrics for this month.
     </p>
   </main>
 </div>
 ```
 
-**Mobile responsive:** Sidebar is `hidden lg:flex` — only visible on desktop. On mobile, use a slide-out overlay or bottom tab bar (implemented in Stage 5 with client component state).
+**Mobile responsive:** Sidebar is `hidden lg:flex` - only visible on desktop. On mobile, use a slide-out overlay or bottom tab bar (implemented in Stage 5 with client component state).
 
 ## Responsive Breakpoint Strategy
 
@@ -255,13 +255,13 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 | 1024px+ | `lg:` | Laptops |
 | 1280px+ | `xl:` | Desktops |
 
-**Design for mobile first** — write base classes for mobile, then add responsive variants for larger screens:
+**Design for mobile first** - write base classes for mobile, then add responsive variants for larger screens:
 
 ```tsx
 // Mobile: stacked layout, small padding
 // Tablet: side-by-side, medium padding
 // Desktop: wider, large padding
-<div className="flex flex-col p-[--spacing-4] md:flex-row md:gap-[--spacing-6] md:p-[--spacing-8] lg:max-w-[1200px]">
+<div className="flex flex-col p-4 md:flex-row md:gap-6 md:p-8 lg:max-w-[1200px]">
 ```
 
 ## Common Responsive Pattern Transformations
@@ -272,6 +272,6 @@ Common layout patterns for static HTML prototyping with Tailwind v4. Each patter
 | Full-width cards | 2-col grid | `grid grid-cols-1 md:grid-cols-2` |
 | 2-col grid | 3-col grid | `grid grid-cols-2 lg:grid-cols-3` |
 | Hidden sidebar | Visible sidebar | `hidden lg:block` |
-| Small padding | Large padding | `p-[--spacing-4] md:p-[--spacing-8]` |
-| Small heading | Large heading | `text-[--font-size-heading-3] md:text-[--font-size-heading-1]` |
+| Small padding | Large padding | `p-4 md:p-8` |
+| Small heading | Large heading | `text-heading-3 md:text-heading-1` |
 | Truncated text | Full text | `truncate md:whitespace-normal` |

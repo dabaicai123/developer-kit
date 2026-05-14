@@ -15,17 +15,17 @@ When reviewing code, follow this systematic approach:
 
 ### 1. Performance Review
 
-- Identify unnecessary `'use client'` directives — server components should be default
+- Identify unnecessary `'use client'` directives - server components should be default
 - Check for client-side fetch when server component can access data directly
 - Verify `next/image` usage instead of raw `<img>` tags
 - Verify `next/font` usage instead of external font imports
 - Check for missing `loading.tsx` and `error.tsx` in routes with async data
-- Look for premature `React.memo` or `useMemo` — memoize only when profiling shows need
+- Look for premature `React.memo` or `useMemo` - memoize only when profiling shows need
 - Check bundle impact: large imports, unused dependencies, dynamic imports for heavy modules
 
 ### 2. Accessibility Review
 
-- Interactive elements must have ARIA attributes (aria-label on icon buttons, aria-expanded on collapsibles)
+- Prefer semantic HTML; add ARIA only when native semantics are insufficient (aria-label on icon-only buttons, aria-expanded on collapsibles, roles for custom widgets)
 - All interactive elements must be keyboard-accessible
 - Images must have alt text (decorative images use `alt=""`)
 - Color contrast must meet WCAG 2.1 AA (4.5:1 for text, 3:1 for large text)
@@ -34,17 +34,17 @@ When reviewing code, follow this systematic approach:
 
 ### 3. Architecture Review
 
-- Server/client boundary correctness — data fetching in server components, interactivity in client components
-- Component decomposition — composition over configuration props
-- State management — discriminated unions not boolean flags
-- Prop drilling depth — context or composition beyond 2 levels
-- Error boundary coverage — every route with async data needs `error.tsx`
+- Server/client boundary correctness - data fetching in server components, interactivity in client components
+- Component decomposition - composition over configuration props
+- State management - discriminated unions not boolean flags
+- Prop drilling depth - context or composition beyond 2 levels
+- Error boundary coverage - dynamic routes need a deliberate route-level or feature-level containment strategy
 - Zod validation at API/form boundaries
 
 ### 4. TypeScript Review
 
-- No `React.FC` — functions with explicit props parameter
-- No implicit `any` — explicit event handler types
+- No `React.FC` - use plain function signatures with explicit props parameter
+- No implicit `any` - explicit event handler types
 - Discriminated unions for state, not boolean flags
 - Specific `useRef` element types, not generic `HTMLElement`
 - Types derived from Zod schemas via `z.infer`, not duplicated interfaces
@@ -52,9 +52,9 @@ When reviewing code, follow this systematic approach:
 
 ### 5. Tailwind Review
 
-- No `tailwind.config.js` in v4 — tokens in `@theme` CSS blocks
+- New Tailwind v4 tokens live in `@theme` CSS blocks; `tailwind.config.js` is acceptable only as a legacy `@config` bridge
 - Semantic token names (`--color-primary`) not color-specific (`--color-blue-500`)
-- Token references in classes (`bg-[--color-primary]`) not hardcoded utilities (`bg-blue-500`)
+- Token references in classes (`bg-primary`) not hardcoded utilities (`bg-blue-500`)
 - `tv()` only for genuine multi-variant components
 - Mobile-first responsive, not desktop-first
 - OKLCH color space in theme tokens
@@ -62,7 +62,7 @@ When reviewing code, follow this systematic approach:
 ### 6. Third-Party CSS and UI Ownership Review
 
 - Do NOT accept new prebuilt UI control libraries for standard controls unless the user explicitly requested them.
-- Flag MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar packages when project-owned markup would work.
+- Flag prebuilt UI control libraries for standard UI when project-owned markup would work.
 - Copied third-party CSS must be scoped under a feature root, CSS Module, or dedicated feature CSS entry.
 - Broad copied selectors (`button`, `input`, `a`, `div`, `*`, `body`) must not leak globally.
 - Remote CDN CSS, external reset CSS, external font CSS, and vendor JavaScript need explicit justification.

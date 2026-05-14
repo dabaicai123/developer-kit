@@ -4,11 +4,11 @@ How to analyze a static prototype page and break it into a React component tree.
 
 ## Decomposition Process
 
-1. **Identify visual boundaries** — find distinct sections in the prototype
-2. **Define component hierarchy** — organize sections into parent-child tree
-3. **Decide props interface** — determine what data flows in and out
-4. **Choose server/client boundary** — mark where interactivity begins
-5. **Extract shared patterns** — pull repeated structures into composition components
+1. **Identify visual boundaries** - find distinct sections in the prototype
+2. **Define component hierarchy** - organize sections into parent-child tree
+3. **Decide props interface** - determine what data flows in and out
+4. **Choose server/client boundary** - mark where interactivity begins
+5. **Extract shared patterns** - pull repeated structures into composition components
 
 ## Identifying Visual Boundaries
 
@@ -33,40 +33,39 @@ A single monolithic page with: sidebar navigation, top bar with search and user 
 ### Step 1: Mark Visual Boundaries
 
 ```
-┌─────────────────────────────────────────────────────┐
-│ SIDEBAR          │  TOPBAR (search + avatar)         │ ← boundary: sidebar vs main area
-│                  │────────────────────────────────── │ ← boundary: topbar vs content
-│  Nav links       │  METRIC CARDS (4 cards in grid)  │ ← boundary: metrics grid
-│                  │────────────────────────────────── │ ← boundary: between sections
-│                  │  RECENT ACTIVITY (5 items)        │ ← boundary: activity list
-│                  │────────────────────────────────── │
-│                  │  CHART SECTION                    │ ← boundary: chart area
-└─────────────────────────────────────────────────────┘
-```
++------------------------------------------------------+
+| SIDEBAR          | TOPBAR (search + avatar)          | -> boundary: sidebar vs main area
+|                  +-----------------------------------+ -> boundary: topbar vs content
+| Nav links        | METRIC CARDS (4 cards in grid)   | -> boundary: metrics grid
+|                  +-----------------------------------+ -> boundary: between sections
+|                  | RECENT ACTIVITY (5 items)        | -> boundary: activity list
+|                  +-----------------------------------+
+|                  | CHART SECTION                    | -> boundary: chart area
++------------------------------------------------------+
 
 ### Step 2: Define Component Hierarchy
 
 ```
 DashboardPage (Server Component)
-├── Sidebar (Client — has active state toggle)
-│   ├── SidebarBrand (Server — logo/link)
-│   └── SidebarNav (Client — active link highlighting)
-│       └── SidebarNavItem (Server — single link, receives active prop)
-├── MainContent (Server — layout wrapper)
-│   ├── TopBar (Server — static search form + avatar)
-│   │   ├── SearchInput (Client — live search interaction)
-│   │   └── UserAvatar (Server — displays user info)
-│   ├── MetricsGrid (Server — maps over data)
-│   │   └── MetricCard (Server — receives metric data)
-│   ├── ActivityList (Server — maps over data)
-│   │   └── ActivityItem (Server — receives item data)
-│   └── ChartSection (Client — interactive chart)
+|- Sidebar (Client - has active state toggle)
+|  |- SidebarBrand (Server - logo/link)
+|  `- SidebarNav (Client - active link highlighting)
+|      `- SidebarNavItem (Server - single link, receives active prop)
+`- MainContent (Server - layout wrapper)
+   |- TopBar (Server - static search form + avatar)
+   |  |- SearchInput (Client - live search interaction)
+   |  `- UserAvatar (Server - displays user info)
+   |- MetricsGrid (Server - maps over data)
+   |  `- MetricCard (Server - receives metric data)
+   |- ActivityList (Server - maps over data)
+   |  `- ActivityItem (Server - receives item data)
+   `- ChartSection (Client - interactive chart)
 ```
 
 ### Step 3: Define Props Interfaces
 
 ```tsx
-// MetricCard — receives data, no interaction
+// MetricCard - receives data, no interaction
 interface MetricCardProps {
   title: string
   value: string
@@ -75,7 +74,7 @@ interface MetricCardProps {
   icon: React.ReactNode
 }
 
-// SidebarNavItem — receives active state from parent
+// SidebarNavItem - receives active state from parent
 interface SidebarNavItemProps {
   label: string
   href: string
@@ -83,7 +82,7 @@ interface SidebarNavItemProps {
   active?: boolean
 }
 
-// ActivityItem — receives data, links out
+// ActivityItem - receives data, links out
 interface ActivityItemProps {
   user: string
   action: string
@@ -92,7 +91,7 @@ interface ActivityItemProps {
   href: string
 }
 
-// DashboardPage — fetches data at server level
+// DashboardPage - fetches data at server level
 interface DashboardPageProps {
   userId: string           // used for data fetching
 }
@@ -117,7 +116,7 @@ Client Components ("use client"):
 **MetricCard and ActivityItem share a "card" pattern:**
 
 ```tsx
-// Composition component — provides card chrome, content via slot
+// Composition component - provides card chrome, content via slot
 // Server Component (no interactivity)
 interface CardProps {
   children: React.ReactNode
@@ -127,8 +126,8 @@ interface CardProps {
 export default function Card({ children, className }: CardProps) {
   return (
     <div className={cn(
-      "bg-[--color-surface-elevated] border border-[--color-border]",
-      "rounded-[--radius-lg] p-[--spacing-6] shadow-[--shadow-sm]",
+      "bg-surface-elevated border border-border",
+      "rounded-lg p-6 shadow-sm",
       className
     )}>
       {children}
@@ -140,21 +139,21 @@ export default function Card({ children, className }: CardProps) {
 Both `MetricCard` and `ActivityItem` compose with `Card` rather than repeating border/radius/shadow tokens:
 
 ```tsx
-// MetricCard — composes with Card
+// MetricCard - composes with Card
 export default function MetricCard({ title, value, change, changeType, icon }: MetricCardProps) {
   return (
     <Card>
-      <div className="flex items-center gap-[--spacing-3]">
-        <div className="w-12 h-12 bg-[--color-primary-light] rounded-[--radius-md]
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 bg-primary-light rounded-md
           flex items-center justify-center">{icon}</div>
         <div>
-          <p className="text-[--font-size-caption] text-[--color-text-muted]">{title}</p>
-          <p className="text-[--font-size-heading-2] font-[--font-weight-heading] text-[--color-text]">{value}</p>
+          <p className="text-caption text-text-muted">{title}</p>
+          <p className="text-heading-2 font-heading text-text">{value}</p>
         </div>
       </div>
       <p className={cn(
-        "text-[--font-size-caption] mt-[--spacing-2]",
-        changeType === "positive" ? "text-[--color-success]" : "text-[--color-error]"
+        "text-caption mt-2",
+        changeType === "positive" ? "text-success" : "text-error"
       )}>{change}</p>
     </Card>
   )
@@ -167,34 +166,34 @@ After decomposition, organize files following Next.js App Router conventions:
 
 ```
 app/
-├── dashboard/
-│   ├── page.tsx                    # DashboardPage (Server)
-│   └── layout.tsx                  # DashboardLayout — sidebar + main wrapper
-├── globals.css                     # @theme tokens
+|- dashboard/
+|  |- page.tsx                    # DashboardPage (Server)
+|  `- layout.tsx                  # DashboardLayout - sidebar + main wrapper
+`- globals.css                    # @theme tokens
 components/
-├── layout/
-│   ├── sidebar.tsx                 # Sidebar (Client)
-│   ├── sidebar-brand.tsx           # SidebarBrand (Server)
-│   ├── sidebar-nav.tsx             # SidebarNav (Client)
-│   ├── sidebar-nav-item.tsx        # SidebarNavItem (Server)
-│   ├── top-bar.tsx                 # TopBar (Server)
-│   └── search-input.tsx            # SearchInput (Client)
-│   └── user-avatar.tsx             # UserAvatar (Server)
-├── dashboard/
-│   ├── metrics-grid.tsx            # MetricsGrid (Server)
-│   ├── metric-card.tsx             # MetricCard (Server)
-│   ├── activity-list.tsx           # ActivityList (Server)
-│   ├── activity-item.tsx           # ActivityItem (Server)
-│   └── chart-section.tsx           # ChartSection (Client)
-├── shared/
-│   ├── card.tsx                    # Card composition (Server)
-│   └── button.tsx                  # Button variants (Server for static, Client for interactive)
+|- layout/
+|  |- sidebar.tsx                 # Sidebar (Client)
+|  |- sidebar-brand.tsx           # SidebarBrand (Server)
+|  |- sidebar-nav.tsx             # SidebarNav (Client)
+|  |- sidebar-nav-item.tsx        # SidebarNavItem (Server)
+|  |- top-bar.tsx                 # TopBar (Server)
+|  |- search-input.tsx            # SearchInput (Client)
+|  `- user-avatar.tsx             # UserAvatar (Server)
+|- dashboard/
+|  |- metrics-grid.tsx            # MetricsGrid (Server)
+|  |- metric-card.tsx             # MetricCard (Server)
+|  |- activity-list.tsx           # ActivityList (Server)
+|  |- activity-item.tsx           # ActivityItem (Server)
+|  `- chart-section.tsx           # ChartSection (Client)
+`- shared/
+   |- card.tsx                    # Card composition (Server)
+   `- button.tsx                  # Button variants (Server for static, Client for interactive)
 ```
 
 **Naming convention:**
 - File name = component name in kebab-case
 - One component per file (no barrel exports)
-- Group by domain (layout, dashboard, shared) — not by type (server, client)
+- Group by domain (layout, dashboard, shared) - not by type (server, client)
 
 ## Server vs Client Decision Matrix
 
@@ -208,14 +207,14 @@ For each component, answer these questions. If any answer is "yes", the componen
 | Does it use a client-only library (chart lib, animation lib)? | Client | Server |
 | Does it render children that are client components? | **Server** (pass children as props) | Server |
 
-**Key insight:** A server component CAN render client components as children. The boundary is at the component that needs interactivity, not its parent. `MetricsGrid` (server) renders `MetricCard` (server) — both server. `Sidebar` (client) renders `SidebarNavItem` (server) — this works because Sidebar passes data as props to the server component? No — **client components cannot import server components as children.** The rule is:
+**Key insight:** A server component CAN render client components as children. The boundary is at the component that needs interactivity, not its parent. `MetricsGrid` (server) renders `MetricCard` (server) - both server. `Sidebar` (client) renders `SidebarNavItem` (server) - this works because Sidebar passes data as props to the server component? No -**client components cannot import server components as children.** The rule is:
 
-- Server component → can import and render server OR client components
-- Client component → can import and render client components only
-- Server → Client boundary: use `children` prop to pass server-rendered content into client wrapper
+- Server component -> can import and render server OR client components
+- Client component -> can import and render client components only
+- Server -> Client boundary: use `children` prop to pass server-rendered content into client wrapper
 
 ```tsx
-// Sidebar.tsx — Client component
+// Sidebar.tsx - Client component
 "use client"
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
@@ -228,7 +227,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   )
 }
 
-// layout.tsx — Server component
+// layout.tsx - Server component
 import Sidebar from "@/components/layout/sidebar"
 import SidebarNav from "@/components/layout/sidebar-nav"
 
@@ -250,7 +249,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 5. **Primitive types in leaf components:** Leaf components (cards, buttons, items) receive `string`, `number`, `boolean`. Container components (grids, lists) receive structured data.
 
 ```tsx
-// Leaf component — primitive props
+// Leaf component - primitive props
 interface MetricCardProps {
   title: string
   value: string
@@ -259,7 +258,7 @@ interface MetricCardProps {
   icon: React.ReactNode
 }
 
-// Container component — structured data
+// Container component - structured data
 interface MetricsGridProps {
   metrics: Array<{
     title: string
@@ -273,10 +272,10 @@ interface MetricsGridProps {
 
 ## Composition Patterns
 
-### Slot Pattern — flexible layout containers
+### Slot Pattern - flexible layout containers
 
 ```tsx
-// Server Component — no interactivity, just layout
+// Server Component - no interactivity, just layout
 interface PageLayoutProps {
   header: React.ReactNode
   sidebar: React.ReactNode
@@ -286,20 +285,20 @@ interface PageLayoutProps {
 export default function PageLayout({ header, sidebar, children }: PageLayoutProps) {
   return (
     <div className="flex min-h-screen">
-      <aside className="w-60 border-r border-[--color-border]">{sidebar}</aside>
+      <aside className="w-60 border-r border-border">{sidebar}</aside>
       <div className="flex-1">
-        <header className="border-b border-[--color-border]">{header}</header>
-        <main className="p-[--spacing-8]">{children}</main>
+        <header className="border-b border-border">{header}</header>
+        <main className="p-8">{children}</main>
       </div>
     </div>
   )
 }
 ```
 
-### Variant Pattern — same structure, different style
+### Variant Pattern - same structure, different style
 
 ```tsx
-// Button — variant determines visual style, not structure
+// Button - variant determines visual style, not structure
 interface ButtonProps {
   variant?: "primary" | "secondary" | "ghost"
   size?: "sm" | "md" | "lg"
@@ -308,21 +307,21 @@ interface ButtonProps {
 }
 
 const variantStyles = {
-  primary: "bg-[--color-primary] text-[--color-surface-elevated] hover:bg-[--color-primary-hover]",
-  secondary: "bg-[--color-surface-elevated] text-[--color-primary] border border-[--color-primary] hover:bg-[--color-primary-light]",
-  ghost: "text-[--color-text] hover:bg-[--color-surface-subtle]",
+  primary: "bg-primary text-surface-elevated hover:bg-primary-hover",
+  secondary: "bg-surface-elevated text-primary border border-primary hover:bg-primary-light",
+  ghost: "text-text hover:bg-surface-subtle",
 }
 
 const sizeStyles = {
-  sm: "px-[--spacing-2] py-[--spacing-1] text-[--font-size-caption]",
-  md: "px-[--spacing-4] py-[--spacing-2] text-[--font-size-body]",
-  lg: "px-[--spacing-8] py-[--spacing-3] text-[--font-size-body-large]",
+  sm: "px-2 py-1 text-caption",
+  md: "px-4 py-2 text-body",
+  lg: "px-8 py-3 text-body-large",
 }
 
 export default function Button({ variant = "primary", size = "md", children, onClick }: ButtonProps) {
   return (
     <button className={cn(
-      "rounded-[--radius-md] font-[--font-weight-heading]",
+      "rounded-md font-heading",
       variantStyles[variant],
       sizeStyles[size]
     )} onClick={onClick}>
@@ -340,6 +339,6 @@ export default function Button({ variant = "primary", size = "md", children, onC
 - [ ] Server/client boundary is marked at the smallest interactive unit
 - [ ] Client components receive server content through `children` props, not imports
 - [ ] Shared patterns (cards, buttons, layouts) are in `components/shared/`
-- [ ] Props are minimal — leaf components receive primitives, containers receive structured data
+- [ ] Props are minimal - leaf components receive primitives, containers receive structured data
 - [ ] No prop drilling beyond 2 levels (use context or lift state if needed)
 - [ ] Files organized by domain, not by component type
