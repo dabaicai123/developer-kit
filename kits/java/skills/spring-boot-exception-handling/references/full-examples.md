@@ -3,6 +3,9 @@
 ## BusinessException Hierarchy
 
 ```java
+import lombok.Getter;
+
+@Getter
 public class BusinessException extends RuntimeException {
     private final int code;
     private final String msg;
@@ -14,8 +17,6 @@ public class BusinessException extends RuntimeException {
     }
 
     public int httpStatus() { return ErrorCodes.httpStatus(code); }
-    public int getCode() { return code; }
-    public String getMsg() { return msg; }
 }
 
 public class NotFoundException extends BusinessException {

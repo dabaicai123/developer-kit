@@ -138,6 +138,9 @@ PageResult<CustomerDTO> result = PageResult
 ```java
 package com.example.common.exception;
 
+import lombok.Getter;
+
+@Getter
 public class BusinessException extends RuntimeException {
     private final int code;
     private final String msg;
@@ -146,14 +149,6 @@ public class BusinessException extends RuntimeException {
         super(msg);
         this.code = code;
         this.msg = msg;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
     }
 }
 ```

@@ -349,17 +349,14 @@ When an aggregate has many events, replaying from the beginning becomes expensiv
 
 ```java
 // Domain-level snapshot value object (lives in domain module)
+import lombok.Data;
+
+@Data
 public class AccountSnapshot {
     private UUID accountId;
     private BigDecimal balance;
     private Instant snapshotTimestamp;
     private long eventVersion;
-
-    // getters/setters omitted
-    public UUID getAccountId() { return accountId; }
-    public BigDecimal getBalance() { return balance; }
-    public Instant getSnapshotTimestamp() { return snapshotTimestamp; }
-    public long getEventVersion() { return eventVersion; }
 }
 ```
 

@@ -8,6 +8,7 @@ A simple product lifecycle with domain events.
 
 ```java
 // Domain event
+@Getter
 public class ProductCreatedEvent extends DomainEvent {
     private final String productId;
     private final String name;
@@ -19,8 +20,6 @@ public class ProductCreatedEvent extends DomainEvent {
         this.name = name;
         this.price = price;
     }
-
-    // Getters
 }
 
 // Aggregate publishing events

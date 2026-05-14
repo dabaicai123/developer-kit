@@ -164,6 +164,7 @@ spring:
 ```java
 @Service
 @RefreshScope
+@Getter
 @RequiredArgsConstructor
 @Slf4j
 public class DynamicConfigService {
@@ -174,14 +175,6 @@ public class DynamicConfigService {
 
     @Value("${app.max-connections:100}")
     private int maxConnections;
-
-    public boolean isFeatureEnabled() {
-        return featureEnabled;
-    }
-
-    public int getMaxConnections() {
-        return maxConnections;
-    }
 }
 ```
 
@@ -193,25 +186,14 @@ public class DynamicConfigService {
 @ConfigurationProperties(prefix = "app.rate-limit")
 @RefreshScope
 @Validated
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RateLimitProperties {
     @NotNull @Min(1)
     private Integer requestsPerSecond;
     @NotNull @Min(1)
     private Integer burstCapacity;
-
-    // CGLIB requires a no-args constructor; Spring injects values after proxy creation
-    public RateLimitProperties() {}
-
-    public RateLimitProperties(Integer requestsPerSecond, Integer burstCapacity) {
-        this.requestsPerSecond = requestsPerSecond;
-        this.burstCapacity = burstCapacity;
-    }
-
-    // getters and setters required for CGLIB proxy
-    public Integer getRequestsPerSecond() { return requestsPerSecond; }
-    public void setRequestsPerSecond(Integer requestsPerSecond) { this.requestsPerSecond = requestsPerSecond; }
-    public Integer getBurstCapacity() { return burstCapacity; }
-    public void setBurstCapacity(Integer burstCapacity) { this.burstCapacity = burstCapacity; }
 }
 ```
 

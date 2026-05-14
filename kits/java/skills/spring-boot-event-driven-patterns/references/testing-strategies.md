@@ -461,6 +461,7 @@ void shouldHandleEventProcessingFailure() {
 
 ```java
 @Component
+@Getter
 static class DltConsumer {
     private volatile Message<?> dltMessage;
 
@@ -468,8 +469,6 @@ static class DltConsumer {
     public void consumeDlt(Message<?> message) {
         this.dltMessage = message;
     }
-
-    public Message<?> getDltMessage() { return dltMessage; }
 }
 
 @Test

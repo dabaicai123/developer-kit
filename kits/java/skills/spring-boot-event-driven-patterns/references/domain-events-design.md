@@ -5,17 +5,20 @@
 Create an immutable base class for all domain events:
 
 ```java
-import java.time.Instant;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 public abstract class DomainEvent {
     private final UUID eventId;
-    private final Instant occurredAt;
+    private final LocalDateTime occurredAt;
     private final UUID correlationId;
 
     protected DomainEvent() {
         this.eventId = UUID.randomUUID();
-        this.occurredAt = Instant.now();
+        this.occurredAt = LocalDateTime.now();
         this.correlationId = UUID.randomUUID();
     }
 
@@ -23,18 +26,6 @@ public abstract class DomainEvent {
         this.eventId = UUID.randomUUID();
         this.occurredAt = LocalDateTime.now();
         this.correlationId = correlationId;
-    }
-
-    public UUID getEventId() {
-        return eventId;
-    }
-
-    public LocalDateTime getOccurredAt() {
-        return occurredAt;
-    }
-
-    public UUID getCorrelationId() {
-        return correlationId;
     }
 }
 ```
@@ -44,9 +35,11 @@ public abstract class DomainEvent {
 ### Product Created Event
 
 ```java
-import java.math.BigDecimal;
-import java.util.UUID;
+import lombok.Getter;
 
+import java.math.BigDecimal;
+
+@Getter
 public class ProductCreatedEvent extends DomainEvent {
     private final ProductId productId;
     private final String name;
@@ -60,28 +53,15 @@ public class ProductCreatedEvent extends DomainEvent {
         this.price = price;
         this.stock = stock;
     }
-
-    public ProductId getProductId() {
-        return productId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
 }
 ```
 
 ### Product Stock Decreased Event
 
 ```java
+import lombok.Getter;
+
+@Getter
 public class ProductStockDecreasedEvent extends DomainEvent {
     private final ProductId productId;
     private final Integer quantity;
@@ -93,26 +73,17 @@ public class ProductStockDecreasedEvent extends DomainEvent {
         this.quantity = quantity;
         this.remainingStock = remainingStock;
     }
-
-    public ProductId getProductId() {
-        return productId;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public Integer getRemainingStock() {
-        return remainingStock;
-    }
 }
 ```
 
 ### Order Created Event
 
 ```java
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class OrderCreatedEvent extends DomainEvent {
     private final OrderId orderId;
     private final CustomerId customerId;
@@ -125,22 +96,6 @@ public class OrderCreatedEvent extends DomainEvent {
         this.customerId = customerId;
         this.items = List.copyOf(items);
         this.total = total;
-    }
-
-    public OrderId getOrderId() {
-        return orderId;
-    }
-
-    public CustomerId getCustomerId() {
-        return customerId;
-    }
-
-    public List<OrderItem> getItems() {
-        return items;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
     }
 }
 ```
@@ -168,6 +123,9 @@ public class OrderCreatedEvent extends DomainEvent {
 ### Example: Rich Event Design
 
 ```java
+import lombok.Getter;
+
+@Getter
 public class OrderPlacedEvent extends DomainEvent {
     private final OrderId orderId;
     private final CustomerId customerId;
@@ -197,8 +155,6 @@ public class OrderPlacedEvent extends DomainEvent {
         this.estimatedDeliveryDate = estimatedDeliveryDate;
     }
 
-    // Getters...
-
     public record OrderItem(
         ProductId productId,
         String productName,
@@ -214,7 +170,9 @@ public class OrderPlacedEvent extends DomainEvent {
 
 ```java
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
 
+@Getter
 public class ProductCreatedEvent extends DomainEvent {
     private final String productId;
     private final String name;
@@ -226,15 +184,16 @@ public class ProductCreatedEvent extends DomainEvent {
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private final LocalDateTime occurredAt;
-
-    // Constructor and getters...
 }
 ```
 
 ### Event DTO Pattern
 
 ```java
+import lombok.Getter;
+
 // Domain event (internal)
+@Getter
 public class ProductCreatedEvent extends DomainEvent {
     private final ProductId productId;
     private final String name;
@@ -268,6 +227,9 @@ public class ProductCreatedEventDto {
 ### Versioned Events
 
 ```java
+import lombok.Getter;
+
+@Getter
 public class ProductCreatedEventV2 extends DomainEvent {
     private final ProductId productId;
     private final String name;
@@ -277,8 +239,6 @@ public class ProductCreatedEventV2 extends DomainEvent {
 
     // Include version information
     private final String eventVersion = "2.0";
-
-    // Constructor and getters...
 }
 ```
 

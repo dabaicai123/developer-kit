@@ -48,6 +48,9 @@ public record DatabaseProperties(
 For classes (when you cannot use records), constructor binding requires exactly one constructor:
 
 ```java
+import lombok.Getter;
+
+@Getter
 @ConfigurationProperties(prefix = "app.database")
 @Validated
 public class DatabaseProperties {
@@ -70,12 +73,6 @@ public class DatabaseProperties {
         this.password = password;
         this.poolSize = poolSize == null ? 10 : poolSize;
     }
-
-    // Getters (no setters — immutable)
-    public String getUrl() { return url; }
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public Integer getPoolSize() { return poolSize; }
 }
 ```
 
