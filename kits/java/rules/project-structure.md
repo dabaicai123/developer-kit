@@ -47,12 +47,9 @@ infrastructure:  com.example.customer/CustomerGatewayImpl.java,
 
 For full COLA/DDD architecture details, use the `ddd-cola` skill.
 
-## Naming Per Architecture
+## Naming Boundary
 
-| Architecture | Persistence Object | Domain Entity | Data Access |
-|---|---|---|---|
-| MVC | `UserDO` (DO suffix) | N/A | `UserService extends IService<UserDO>` |
-| COLA/DDD | `OrderDO` (DO suffix, in infrastructure `{domain}/gatewayimpl/database/dataobject/`) | `Order` (bare name, in domain) | `OrderGateway` interface + `OrderGatewayImpl` |
+This file defines where code lives. Detailed suffix and class naming rules live in `naming-conventions.md`.
 
 ## Dependency Direction
 

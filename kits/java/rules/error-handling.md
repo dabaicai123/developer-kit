@@ -9,27 +9,19 @@ Enforce consistent error handling patterns across Spring Boot + MyBatis-Plus pro
 
 ## Guidelines
 
-1. **Use `BusinessException` hierarchy** - create specific subclasses (`NotFoundException`, `InputValidationException`, `UnauthorizedException`) with integer HTTP status codes, never string codes.
-
-2. **Keep COLA placement clean** - `BusinessException`, subclasses, and `ErrorCode` live in `common.exception` as pure Java types. `GlobalExceptionHandler` lives in the adapter module (`web.advice`) because it depends on Spring Web.
-
-3. **Use `@RestControllerAdvice`** - centralized exception handling with `@ExceptionHandler` for each exception type. Log business errors at `WARN`, unexpected errors at `ERROR` with stack trace.
-
-4. **Use unified `Result<T>` wrapper** - all API responses must follow `code/msg/data` format. Use `Result.success(data)` for success, `Result.fail(intCode, msg)` for errors. Never return bare objects or `ResponseEntity`. Always declare a concrete payload type (`Result<UserDTO>`, `Result<PageResult<UserDTO>>`, `Result<List<UserDTO>>`, `Result<Void>`). Never use `Result<Object>`, `Result<?>`, or raw `Result`.
-
-5. **Throw specific exceptions from app/domain code** - never return null for missing resources; throw `NotFoundException`. Never use generic `RuntimeException` for business errors.
-
-6. **Log with context** - `log.error("Failed to create user: username={}", dto.getUsername(), e)`. Never log only `getMessage()` without stack trace for unexpected errors.
+1. **Business exceptions** - use `BusinessException` subclasses such as `NotFoundException`, `InputValidationException`, and `UnauthorizedException`; use integer HTTP status codes, never string codes.
+2. **COLA placement** - keep `BusinessException`, subclasses, and `ErrorCode` in `common.exception`; put `GlobalExceptionHandler` in adapter `web.advice`.
+3. **Central handler** - use `@RestControllerAdvice` with typed `@ExceptionHandler` methods. Log business errors at `WARN`; log unexpected errors at `ERROR` with stack trace.
+4. **API shape** - REST APIs return concrete `Result<T>` payloads with `code/msg/data`, such as `Result<UserDTO>` or `Result<Void>`. Avoid `Result<Object>`, `Result<?>`, and raw `Result`.
+5. **Fail explicitly** - app/domain code throws specific exceptions for missing resources and business failures; it does not return `null` or throw generic `RuntimeException`.
+6. **Log context** - include stable identifiers in logs, for example `username` or `orderId`; do not log only `getMessage()` for unexpected errors.
 
 ## Anti-Patterns
 
-- Catching `Exception` and returning null - throw specific exceptions.
-- Using `RuntimeException` for business errors - use `BusinessException`.
-- Putting `@RestControllerAdvice` in `common` - this leaks Spring Web into the shared kernel.
-- Logging only `getMessage()` - include stack trace for unexpected errors.
-- Swallowing exceptions silently - always log or throw.
-- Returning null instead of throwing - fail explicitly.
-- String error codes - use integer HTTP status codes.
-- Duplicate error code names with different values - use distinct names for different semantics.
-- Bare objects in API responses - use `Result<T>` wrapper.
-- `Result<Object>` / `Result<?>` / raw `Result` - declare the concrete payload type.
+- Catching `Exception` and returning `null`.
+- Using generic `RuntimeException` for business errors.
+- Putting `@RestControllerAdvice` in `common`.
+- Logging only `getMessage()` for unexpected errors.
+- Swallowing exceptions silently.
+- String error codes or duplicate code names with different meanings.
+- Bare API objects, `Result<Object>`, `Result<?>`, or raw `Result`.

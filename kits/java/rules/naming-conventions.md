@@ -41,18 +41,11 @@ Basic Java naming (PascalCase/camelCase/SCREAMING_SNAKE_CASE) — see `java-codi
 - Boolean: `isXxx`, `hasXxx`
 - Event handlers: `onXxx`
 
-## Package Naming (COLA Architecture)
+## Package Naming
 
-COLA package naming follows the team 7-module model from `ddd-cola` (official COLA distributed web modules plus local `common`). Avoid old single-module packages such as `domain.model.entity` or `infrastructure.mapper`.
+Package layout belongs to `project-structure.md`. This rule only enforces names inside that structure.
 
-| Module | Package |
-|-------|---------|
-| common | `common.result`, `common.exception`, `common.dto` |
-| client | `api`, `dto`, `dto.data`, `dto.event` |
-| adapter | `web` |
-| app | `{domain}`, `{domain}.executor`, `{domain}.executor.query`, `{domain}.convertor` |
-| domain | `domain.{domain}`, `domain.{domain}.vo`, `domain.{domain}.gateway`, `domain.{domain}.domainservice` |
-| infrastructure | `{domain}`, `{domain}.gatewayimpl.database`, `{domain}.gatewayimpl.database.dataobject`, `{domain}.gatewayimpl.rpc`, `config`, `external` |
+Avoid old single-module COLA packages such as `domain.model.entity` or `infrastructure.mapper`.
 
 ## Anti-Patterns
 
@@ -60,4 +53,3 @@ COLA package naming follows the team 7-module model from `ddd-cola` (official CO
 - `UserRequest` / `UserResponse` - use `UserCreateDTO` / `UserDTO` in simple modules; use `XxxCmd` / `XxxQry` / `XxxDTO` in COLA client module
 - `XxxDTO` importing domain VO/entity - define a flat client DTO and map it in app `XxxDtoVoConvertor`
 - `UserServiceImple` / `UserServiceImpl2` — typo or numbered suffix
-- `t_xxx` table prefix — use plain snake_case
