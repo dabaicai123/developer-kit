@@ -6,43 +6,64 @@ param(
     [string]$Platform = "both"
 )
 
-$Repo = "https://github.com/dabaicai123/developer-kit.git"
-$Tmp = Join-Path $env:TEMP "developer-kit-$(Get-Random)"
+$ErrorActionPreference = "Stop"
 
-git clone --depth 1 $Repo $Tmp
-if ($LASTEXITCODE -ne 0) {
-    Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue
-    exit $LASTEXITCODE
-}
+function Resolve-InstallTarget($path) {
+    if ([IO.Path]::IsPathRooted($path)) {
+        $resolved = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
+    }
+    else {
+        $resolved = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(
+            (Join-Path (Get-Location).ProviderPath $path)
+        )
+    }
+    $system32 = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Join-Path $env:WINDIR "System32"))
 
-function Copy-KitFiles($name, $dst) {
-    $src = Join-Path $Tmp "kits\$name"
-    if (-not (Test-Path $src)) {
-        Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue
-        throw "Unknown kit: $name (expected: java | frontend | base | agent | all)"
+    if ($resolved.TrimEnd("\") -ieq $system32.TrimEnd("\")) {
+        throw "Target resolves to $resolved. Run this installer from your project root or pass -Target <project-path>."
     }
 
-    New-Item -ItemType Directory -Force -Path "$dst\skills","$dst\agents","$dst\commands","$dst\rules" | Out-Null
-    if (Test-Path "$src\skills")   { Copy-Item -Recurse -Force "$src\skills\*"    "$dst\skills\" }
-    if (Test-Path "$src\agents")   { Get-ChildItem "$src\agents" -Filter "*.md"   | Copy-Item -Force -Destination "$dst\agents\" }
-    if (Test-Path "$src\commands") { Get-ChildItem "$src\commands" -Filter "*.md" | Copy-Item -Force -Destination "$dst\commands\" }
-    if (Test-Path "$src\rules")    { Get-ChildItem "$src\rules" -Filter "*.md"    | Copy-Item -Force -Destination "$dst\rules\" }
+    return $resolved
+}
+
+$Target = Resolve-InstallTarget $Target
+
+$Repo = "https://github.com/dabaicai123/developer-kit.git"
+$Tmp = $null
+
+if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot "kits"))) {
+    $RepoRoot = $PSScriptRoot
+}
+else {
+    $Tmp = Join-Path $env:TEMP "developer-kit-$(Get-Random)"
+    git clone --depth 1 $Repo $Tmp
+    if ($LASTEXITCODE -ne 0) {
+        Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue
+        exit $LASTEXITCODE
+    }
+    $RepoRoot = $Tmp
 }
 
 function Install-KitForPlatform($name, $platform) {
-    if ($platform -eq "claude") {
-        $dst = Join-Path $Target ".claude"
-        Copy-KitFiles $name $dst
-        Write-Host "Installed $name -> $dst"
+    $src = Join-Path $RepoRoot "kits\$name"
+    if (-not (Test-Path $src)) {
+        if ($Tmp) { Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue }
+        throw "Unknown kit: $name (expected: java | frontend | base | agent | all)"
     }
-    elseif ($platform -eq "codex") {
-        $dst = Join-Path $Target ".codex"
-        Copy-KitFiles $name $dst
-        Write-Host "Installed $name -> $dst"
+
+    $installer = Join-Path $RepoRoot "$platform\install.ps1"
+    if (-not (Test-Path $installer)) {
+        if ($Tmp) { Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue }
+        throw "Missing installer for platform: $platform"
     }
-    else {
-        throw "Unknown platform: $platform (expected: both | claude | codex)"
+
+    $dst = Join-Path $Target ".$platform"
+    & $installer -KitPath $src -TargetPath $dst
+    if (-not $?) {
+        if ($Tmp) { Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue }
+        exit 1
     }
+    Write-Host "Installed $name -> $dst"
 }
 
 function Install-Kit($name) {
@@ -55,11 +76,22 @@ function Install-Kit($name) {
     }
 }
 
-if ($Kit -eq "all") { Install-Kit "java"; Install-Kit "frontend"; Install-Kit "base"; Install-Kit "agent" }
-else                { Install-Kit $Kit }
+if ($Kit -eq "all") {
+    Install-Kit "java"
+    Install-Kit "frontend"
+    Install-Kit "base"
+    Install-Kit "agent"
+}
+else {
+    Install-Kit $Kit
+}
 
-Remove-Item -Recurse -Force $Tmp
+if ($Tmp) {
+    Remove-Item -Recurse -Force $Tmp
+}
 
 if ($Platform -eq "codex" -or $Platform -eq "both") {
-    Write-Host "Codex note: restart Codex after installing so new skills are discovered."
+    Write-Host "Codex note: restart Codex after installing so new skills and agents are discovered."
+    Write-Host "Codex note: Claude agents are converted to Codex subagents, for example devkit_java_feature."
+    Write-Host "Codex note: ensure ~/.codex/config.toml has [features] skills = true."
 }

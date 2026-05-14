@@ -4,6 +4,8 @@
 #   target_dir: defaults to current directory
 #   platform:   both (default) | claude | codex
 
+set -e
+
 KIT="${1:-java}"
 TARGET="${2:-.}"
 PLATFORM="${3:-both}"
@@ -17,50 +19,52 @@ if [ "$#" -eq 2 ]; then
   esac
 fi
 
+case "$PLATFORM" in
+  both|claude|codex) ;;
+  *)
+    echo "Unknown platform: $PLATFORM (expected: both | claude | codex)" >&2
+    exit 1
+    ;;
+esac
+
 REPO="https://github.com/dabaicai123/developer-kit.git"
-TMP=$(mktemp -d)
+TMP=""
 
-if ! git clone --depth 1 "$REPO" "$TMP"; then
-  rm -rf "$TMP"
-  exit 1
-fi
-
-copy_kit_files() {
-  local src="$TMP/kits/$1"
-  local dst="$2"
-
-  if [ ! -d "$src" ]; then
-    echo "Unknown kit: $1 (expected: java | frontend | base | agent | all)" >&2
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || true)"
+if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/kits" ]; then
+  REPO_ROOT="$SCRIPT_DIR"
+else
+  TMP="$(mktemp -d)"
+  if ! git clone --depth 1 "$REPO" "$TMP"; then
     rm -rf "$TMP"
     exit 1
   fi
+  REPO_ROOT="$TMP"
+fi
 
-  mkdir -p "$dst/skills" "$dst/agents" "$dst/commands" "$dst/rules"
-  [ -d "$src/skills" ]   && cp -rf "$src/skills/"*    "$dst/skills/"
-  [ -d "$src/agents" ]   && cp -f  "$src/agents/"*.md "$dst/agents/" 2>/dev/null || true
-  [ -d "$src/commands" ] && cp -f  "$src/commands/"*.md "$dst/commands/" 2>/dev/null || true
-  [ -d "$src/rules" ]    && cp -f  "$src/rules/"*.md "$dst/rules/" 2>/dev/null || true
+cleanup() {
+  [ -n "$TMP" ] && rm -rf "$TMP"
 }
+trap cleanup EXIT
 
 install_kit_for_platform() {
   local name="$1"
   local platform="$2"
+  local src="$REPO_ROOT/kits/$name"
+  local installer="$REPO_ROOT/$platform/install.sh"
+  local dst="$TARGET/.$platform"
 
-  case "$platform" in
-    claude)
-      copy_kit_files "$name" "$TARGET/.claude"
-      echo "Installed $name -> $TARGET/.claude/"
-      ;;
-    codex)
-      copy_kit_files "$name" "$TARGET/.codex"
-      echo "Installed $name -> $TARGET/.codex/"
-      ;;
-    *)
-      echo "Unknown platform: $platform (expected: both | claude | codex)" >&2
-      rm -rf "$TMP"
-      exit 1
-      ;;
-  esac
+  if [ ! -d "$src" ]; then
+    echo "Unknown kit: $name (expected: java | frontend | base | agent | all)" >&2
+    exit 1
+  fi
+  if [ ! -f "$installer" ]; then
+    echo "Missing installer for platform: $platform" >&2
+    exit 1
+  fi
+
+  bash "$installer" "$src" "$dst"
+  echo "Installed $name -> $dst/"
 }
 
 install_kit() {
@@ -74,21 +78,23 @@ install_kit() {
     claude|codex)
       install_kit_for_platform "$name" "$PLATFORM"
       ;;
-    *)
-      echo "Unknown platform: $PLATFORM (expected: both | claude | codex)" >&2
-      rm -rf "$TMP"
-      exit 1
-      ;;
   esac
 }
 
 case "$KIT" in
-  all)  install_kit java; install_kit frontend; install_kit base; install_kit agent ;;
-  *)    install_kit "$KIT" ;;
+  all)
+    install_kit java
+    install_kit frontend
+    install_kit base
+    install_kit agent
+    ;;
+  *)
+    install_kit "$KIT"
+    ;;
 esac
 
-rm -rf "$TMP"
-
 if [ "$PLATFORM" = "codex" ] || [ "$PLATFORM" = "both" ]; then
-  echo "Codex note: restart Codex after installing so new skills are discovered."
+  echo "Codex note: restart Codex after installing so new skills and agents are discovered."
+  echo "Codex note: Claude agents are converted to Codex subagents, for example devkit_java_feature."
+  echo "Codex note: ensure ~/.codex/config.toml has [features] skills = true."
 fi

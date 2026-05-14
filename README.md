@@ -82,8 +82,22 @@ $s = irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/instal
 ```
 
 Codex loads project skills from `.codex/skills`; restart Codex after installing new skills.
+Make sure skills are enabled in `~/.codex/config.toml`:
+
+```toml
+[features]
+skills = true
+```
+
+Claude agents are converted to Codex subagents in `.codex/agents/*.toml`, using Codex-friendly names such as `devkit_java_feature`. The installer also creates `.codex/config.toml` with an `[agents]` section when it is missing.
 
 Codex 会从 `.codex/skills` 加载项目技能；安装新技能后需要重启 Codex。
+
+Codex 自定义智能体会安装为 `.codex/agents/*.toml`；Claude 的 agent markdown 会在安装到 Codex 时自动转换。
+
+Platform-specific installers live in `claude/` and `codex/`; root install scripts only select kits, clone or locate the repo, and dispatch to the platform installer.
+
+平台差异安装逻辑分别放在 `claude/` 与 `codex/` 目录；根安装脚本只负责选择 kit、定位仓库并分发到对应平台安装器。
 
 ### Skills-only Installation / 仅安装技能
 
