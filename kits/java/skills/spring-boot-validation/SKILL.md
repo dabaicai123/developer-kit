@@ -1,12 +1,12 @@
 ---
 name: spring-boot-validation
-description: "Applies Jakarta Bean Validation for Spring Boot 3.5.x, including @Valid vs @Validated, constraint placement, groups, and validation anti-patterns. Use when validating request DTOs, method parameters, or domain inputs."
+description: "Applies Jakarta Bean Validation for Spring Boot, including @Valid vs @Validated, constraint placement, groups, and validation anti-patterns. Use when validating request DTOs, method parameters, or domain inputs."
 version: "1.1.0"
 ---
 
 # Spring Boot Validation
 
-Jakarta Bean Validation (JSR-380) decision guide for Spring Boot 3.5.x.
+Jakarta Bean Validation decision guide for Spring Boot.
 
 ## When to use this skill
 
