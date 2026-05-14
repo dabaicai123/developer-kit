@@ -25,9 +25,9 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 
 ## Installation / 安装
 
-Run from your project root. Installs into `.claude/` and safely overwrites on re-run.
+Run from your project root. Installs into `.claude/` and `.codex/` by default and safely overwrites on re-run.
 
-从项目根目录运行，安装至 `.claude/` 目录，重复运行会安全覆盖。
+从项目根目录运行，默认同时安装至 `.claude/` 和 `.codex/` 目录，重复运行会安全覆盖。
 
 ### Script Installation (Recommended) / 脚本安装（推荐）
 
@@ -47,6 +47,12 @@ bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/ma
 
 # all kits / 全部工具包
 bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.sh) all
+
+# Codex only / 仅安装到 Codex
+bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.sh) java codex
+
+# Claude Code only / 仅安装到 Claude Code
+bash <(curl -fsSL https://raw.githubusercontent.com/dabaicai123/developer-kit/main/install.sh) java claude
 ```
 
 **Windows (PowerShell):**
@@ -67,7 +73,17 @@ $s = irm https://raw.githubusercontent.com/dabaicai123/developer-kit/main/instal
 
 # all kits / 全部工具包
 & ([scriptblock]::Create($s)) -Kit all
+
+# Codex only / 仅安装到 Codex
+& ([scriptblock]::Create($s)) -Kit java -Platform codex
+
+# Claude Code only / 仅安装到 Claude Code
+& ([scriptblock]::Create($s)) -Kit java -Platform claude
 ```
+
+Codex loads project skills from `.codex/skills`; restart Codex after installing new skills.
+
+Codex 会从 `.codex/skills` 加载项目技能；安装新技能后需要重启 Codex。
 
 ### Skills-only Installation / 仅安装技能
 
@@ -80,11 +96,13 @@ npx skills add dabaicai123/developer-kit -g -y
 **macOS / Linux:**
 ```bash
 rm -rf .claude/skills .claude/agents .claude/commands .claude/rules
+rm -rf .codex/skills .codex/agents .codex/commands .codex/rules
 ```
 
 **Windows (PowerShell):**
 ```powershell
 Remove-Item -Recurse -Force .claude\skills, .claude\agents, .claude\commands, .claude\rules
+Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .codex\rules
 ```
 
 ---
