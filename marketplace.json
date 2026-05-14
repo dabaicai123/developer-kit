@@ -30,6 +30,16 @@
       "author": "Internal Team",
       "license": "MIT",
       "keywords": ["nextjs", "react", "tailwind", "typescript", "frontend"]
+    },
+    {
+      "name": "developer-kit-agent",
+      "displayName": "Developer Kit - Agent",
+      "description": "AI agent development toolkit with general agent architecture, CrewAI, LangGraph, LlamaIndex RAG, MCP, OpenAI Agents SDK, PydanticAI, guardrails, evaluation, and observability",
+      "version": "1.0.0",
+      "path": "kits/agent",
+      "author": "Internal Team",
+      "license": "MIT",
+      "keywords": ["agent", "langgraph", "crewai", "llamaindex", "mcp", "rag"]
     }
   ]
 }

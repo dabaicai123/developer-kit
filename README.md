@@ -10,10 +10,10 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 |-----|---------------------|--------|--------|----------|-------|
 | **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 40 | 6 | 6 | 6 |
 | **frontend** | Next.js + Tailwind v4 + React + TypeScript / 前端全栈 | 13 | 3 | 3 | 5 |
-| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 22 | 2 | 1 | 3 |
+| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 21 | 3 | 1 | 0 |
 | **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
 
-> **78 skills total / 共 78 个技能**
+> **77 skills total / 共 77 个技能**
 
 ## Tech Stack / 技术栈
 
@@ -305,7 +305,6 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | `multi-agent-orchestration` | Multi-agent coordination, routing / 多智能体编排 |
 | `langgraph-patterns` | LangGraph state graphs, branching, persistence / LangGraph 状态图模式 |
 | `crewai-patterns` | CrewAI crew/process/task patterns / CrewAI 多角色协作模式 |
-| `crewai-project-architecture` | CrewAI project scaffolding, YAML-first definitions / CrewAI 项目架构 |
 | `llamaindex-rag-patterns` | LlamaIndex RAG pipelines, chunking, retrieval / LlamaIndex RAG 管线模式 |
 | `mcp-integration` | MCP server design, tool registration / MCP 集成与工具注册 |
 | `openai-agents-pydantic-ai` | OpenAI Agents SDK & PydanticAI patterns / OpenAI Agents 与 PydanticAI 模式 |
@@ -315,6 +314,7 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 
 | Agent | Description / 描述 |
 |-------|---------------------|
+| `devkit:agent:core` | General agent system builder / 通用智能体系统构建专家 |
 | `devkit:agent:crewai` | CrewAI system builder / CrewAI 系统构建专家 |
 | `devkit:agent:rag` | RAG pipeline builder / RAG 管线构建专家 |
 
@@ -323,14 +323,6 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | Command | Description / 描述 |
 |---------|---------------------|
 | `/devkit.agent` | Scaffold, build, or evaluate an AI agent / 构建、评估 AI 智能体 |
-
-### Agent Rules / 智能体规则
-
-| Rule | Applies to / 作用于 |
-|------|----------------------|
-| `agent-project-structure` | `**/*.py` / 智能体项目结构 |
-| `agent-naming-conventions` | `**/*.py` / 智能体命名约定 |
-| `agent-safety-conventions` | `**/*.py` / 智能体安全约定 |
 
 ---
 

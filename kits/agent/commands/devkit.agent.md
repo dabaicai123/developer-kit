@@ -1,5 +1,5 @@
 ---
-description: "Scaffold, build, or evaluate an AI agent project. Delegates to agent-development-expert for implementation, crewai-development-expert for CrewAI systems, or llamaindex-rag-expert for RAG pipelines."
+description: "Build, scaffold, review, or harden an AI agent project. Routes general agents to devkit:agent:core, CrewAI systems to devkit:agent:crewai, and RAG or document pipelines to devkit:agent:rag."
 argument-hint: "<agent task description>"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
@@ -7,75 +7,64 @@ model: inherit
 
 # Agent Development Command
 
-Build, scaffold, or evaluate an AI agent system following production-grade patterns.
+Use this command for agent systems, tool-using LLM workflows, multi-agent orchestration, RAG pipelines, guardrails, evaluation, observability, and production hardening.
 
-## Workflow
+## Routing
 
-### 1. Determine Agent Type
+| Task signal | Primary agent | Required skills |
+|---|---|---|
+| General tool-using agent, LangGraph workflow, OpenAI Agents SDK, PydanticAI, prompt/tool architecture | `devkit:agent:core` | `agent-loop-patterns`, `agent-tool-design`, `agent-project-architecture` |
+| CrewAI Crew, Flow, YAML config, role-based team, CrewAI project structure | `devkit:agent:crewai` | `crewai-patterns`, `multi-agent-orchestration` |
+| RAG, ingestion, indexing, retrieval, document QA, LlamaIndex Workflow or AgentWorkflow | `devkit:agent:rag` | `llamaindex-rag-patterns`, `agent-evaluation` |
 
-Identify which agent architecture fits the task:
+If a task spans categories, choose the agent that owns the runtime framework and load only the additional skills needed for the missing concern.
 
-| Signal | Agent Type | Delegate To |
-|--------|-----------|-------------|
-| Single agent with tools | General-purpose agent | `agent-development-expert` |
-| Role-based multi-agent team | CrewAI Crew + Flow | `crewai-development-expert` |
-| Document retrieval / RAG pipeline | LlamaIndex Workflow | `llamaindex-rag-expert` |
-| State machine with conditional branching | LangGraph graph | `agent-development-expert` |
-| Monitoring / scheduled task | Heartbeat agent | `agent-development-expert` |
+## Required Workflow
 
-### 2. Design Checklist
+1. Define the user-visible success criteria and non-goals.
+2. Select the framework or loop pattern and state why it fits.
+3. Define tools, state, memory, guardrails, observability, and eval gates before implementation.
+4. Implement the smallest production-capable path.
+5. Verify with tests, eval cases, trace checks, or a documented manual run.
 
-Before implementation, define:
+## Design Gates
 
-- **Task scope** — inputs, actions, outputs
-- **Success criteria** — measurable outcomes, not vague goals
-- **Tool selection** — 3-8 tools max, strict JSON schemas
-- **Loop pattern** — ReAct (default), Plan+Execute, Reflection, etc.
-- **Memory strategy** — which layers (working, summary, artifact, long-term)
-- **Guardrails** — policy-as-code, approval gates, spend limits
-- **Evaluation set** — 50+ test cases covering happy path, edge cases, adversarial inputs
+- Tool calls use strict schemas, typed errors, side-effect labels, and approval rules.
+- Loops have max steps, max cost, timeout, retry limits, and stop conditions.
+- Memory and context management are separate decisions.
+- Guardrails are enforceable in code or policy, not only prompt text.
+- Production paths emit trace IDs, model route, tool events, cost, and guardrail decisions.
+- Eval gates include normal, edge, adversarial, and failure cases.
 
-### 3. Build Order
+## Skill Map
 
-1. Tool contracts + Pydantic validation
-2. Agent loop / workflow orchestration
-3. Tracing (OpenTelemetry spans)
-4. Small eval dataset (20-50 realistic cases)
-5. Policy gating + approval UX
-6. Memory layers (summary + artifacts first)
-
-### 4. Production Checklist
-
-- Structured logging with trace IDs
-- Cost monitoring dashboard with alert thresholds
-- Error alerting with on-call routing
-- Performance baseline against golden eval dataset
-- System prompt version-controlled and pinned
-- Output validation layer
-- Guardrails for PII and content policy
-- Human-in-the-loop for low-confidence outputs
-- Hard limits: max step count (10-20), max cost per session ($1-5)
-
-## Skills Integration
-
-| Step | Skill |
-|------|-------|
-| Agent loop architecture | `agent-loop-patterns` |
-| Memory design | `agent-memory-systems` |
+| Concern | Skill |
+|---|---|
+| Project structure | `agent-project-architecture` |
+| Loop or workflow pattern | `agent-loop-patterns` |
+| Planning strategy | `agent-planning-reasoning` |
+| Prompt design | `agent-prompt-engineering` |
 | Tool contracts | `agent-tool-design` |
-| Prompt assembly | `agent-prompt-engineering` |
-| Observability | `agent-observability` |
-| Evaluation | `agent-evaluation` |
-| Safety guardrails | `agent-guardrails` |
-| Multi-agent patterns | `multi-agent-orchestration` |
-| Context management | `agent-context-management` |
 | MCP integration | `mcp-integration` |
-| CrewAI patterns | `crewai-patterns` |
-| LlamaIndex RAG | `llamaindex-rag-patterns` |
-| LangGraph patterns | `langgraph-patterns` |
-| OpenAI Agents / PydanticAI | `openai-agents-pydantic-ai` |
-| Streaming & realtime | `agent-streaming-realtime` |
+| Context window | `agent-context-management` |
+| Durable memory | `agent-memory-systems` |
+| Guardrails and approvals | `agent-guardrails` |
 | Human interaction | `agent-human-interaction` |
+| Evaluation | `agent-evaluation` |
+| Testing and debugging | `agent-testing-debugging` |
+| Observability | `agent-observability` |
+| Cost controls | `agent-cost-optimization` |
 | Error recovery | `agent-error-recovery` |
-| Planning & reasoning | `agent-planning-reasoning` |
-| Cost optimization | `agent-cost-optimization` |
+| Streaming and realtime | `agent-streaming-realtime` |
+| Multi-agent topology | `multi-agent-orchestration` |
+| CrewAI | `crewai-patterns` |
+| LangGraph | `langgraph-patterns` |
+| LlamaIndex RAG | `llamaindex-rag-patterns` |
+| OpenAI Agents SDK or PydanticAI | `openai-agents-pydantic-ai` |
+
+## Completion Checklist
+
+- The selected agent and skills exist in `kits/agent`.
+- The implementation names explicit framework versions or uses current official docs when exact API compatibility matters.
+- The design has no unresolved ownership conflicts between skills.
+- Tests, evals, or manual verification cover the stated success criteria.
