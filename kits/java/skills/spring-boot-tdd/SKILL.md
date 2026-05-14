@@ -6,7 +6,7 @@ version: "1.1.0"
 
 # Spring Boot TDD Workflow
 
-TDD for Spring Boot 3.5.x services with 80%+ coverage (unit + integration).
+TDD for Spring Boot 3.5.x services with >90% coverage (unit + integration).
 
 ## When to use
 
@@ -105,6 +105,7 @@ class MarketBuilder {
 - Unit tests run < 1s each
 - NOT share state between tests — each test must be independent
 - NOT assert internal method calls — assert observable behavior (output, state changes)
+- NOT add Chinese comments that describe test scenarios; use descriptive test method names instead
 - Verify imports after writing tests: common missing imports include `java.util.Map`, Hamcrest matchers, sealed interface types
 
 ## References

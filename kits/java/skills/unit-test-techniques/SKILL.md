@@ -267,6 +267,7 @@ class DateUtilsTest {
 - Parameter count in data source must match test method signature
 - `@ValueSource` only supports primitives, strings, and enums — NOT null or objects
 - Strings with commas in `@CsvSource` must use single-quote escaping
+- NOT add Chinese comments that describe test scenarios; use descriptive test method names instead
 - Static utility methods must be thread-safe; see [concurrent-testing](references/concurrent-testing.md)
 
 ## References

@@ -95,6 +95,7 @@ See [references/basic-testing.md](references/basic-testing.md) for more patterns
 - **Role prefix**: Spring adds `ROLE_` automatically; use `hasRole('ADMIN')` not `hasRole('ROLE_ADMIN')`
 - **`@WithMockUser`**: Creates simple `User` principal; custom properties require `@WithUserDetails`
 - **Thread-local context**: Security context is thread-local; async tests need `DelegatingSecurityContextExecutorService`
+- **No scenario comments**: NOT add Chinese comments that describe test scenarios; use descriptive test method names instead
 
 ## References
 

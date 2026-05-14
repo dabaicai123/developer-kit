@@ -121,6 +121,7 @@ See `references/advanced-examples.md` for error scenarios, body verification, ti
 - NOT rely on stub registration order — WireMock matches by specificity, not insertion order
 - NOT use `@RegisterExtension` with `@SpringBootTest` — use `@EnableWireMock`
 - Keep stubs aligned with actual API contracts — stale stubs hide integration drift
+- NOT add Chinese comments that describe test scenarios; use descriptive test method names instead
 
 ## Troubleshooting
 
