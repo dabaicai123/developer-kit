@@ -1,4 +1,4 @@
-# Usage: .\install.ps1 [-Kit java|frontend|base|all] [-Target .]
+# Usage: .\install.ps1 [-Kit java|frontend|base|agent|all] [-Target .]
 param(
     [string]$Kit = "java",
     [string]$Target = "."
@@ -20,7 +20,7 @@ function Install-Kit($name) {
     Write-Host "Installed $name -> $dst"
 }
 
-if ($Kit -eq "all") { Install-Kit "java"; Install-Kit "frontend"; Install-Kit "base" }
+if ($Kit -eq "all") { Install-Kit "java"; Install-Kit "frontend"; Install-Kit "base"; Install-Kit "agent" }
 else                { Install-Kit $Kit }
 
 Remove-Item -Recurse -Force $Tmp
