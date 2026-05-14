@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-context-management
 description: "Defines context-window budgets, compaction triggers, summarization, retrieval reinjection, and sub-agent context isolation. Use when building long-running agents, context compression, prompt budgets, or conversation state handling."
 version: "1.1.0"

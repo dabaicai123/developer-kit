@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-guardrails
 description: "Defines production guardrails for agent input, output, tools, approvals, spend, privacy, and prompt-injection defense. Use when deploying agents or controlling risky actions."
 version: "1.1.0"

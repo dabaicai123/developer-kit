@@ -1,4 +1,4 @@
-﻿---
+---
 name: crewai-patterns
 description: "Applies CrewAI patterns for Crews, Flows, YAML config, tools, memory, planning, human input, MCP, and project layout. Use when building or restructuring CrewAI systems."
 version: "1.1.0"

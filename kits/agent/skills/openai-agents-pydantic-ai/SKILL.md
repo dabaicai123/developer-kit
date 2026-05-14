@@ -1,4 +1,4 @@
-﻿---
+---
 name: openai-agents-pydantic-ai
 description: "Applies OpenAI Agents SDK and PydanticAI patterns: agents, tools, handoffs, guardrails, structured output, dependencies, streaming, and tracing. Use with these Python agent frameworks."
 version: "1.1.0"

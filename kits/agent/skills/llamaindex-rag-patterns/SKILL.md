@@ -1,4 +1,4 @@
-﻿---
+---
 name: llamaindex-rag-patterns
 description: "Applies LlamaIndex patterns for ingestion, indexing, retrieval, query engines, agentic RAG, Workflows, AgentWorkflow, and RAG evaluation. Use for document-heavy agents."
 version: "1.1.0"

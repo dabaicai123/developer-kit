@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-planning-reasoning
 description: "Selects planning and reasoning strategies for complex agents: task decomposition, plan validation, search, constraints, temporal reasoning, and replanning. Use for multi-step decisions."
 version: "1.1.0"

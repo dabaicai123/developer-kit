@@ -1,4 +1,4 @@
-﻿---
+---
 name: langgraph-patterns
 description: "Applies LangGraph patterns: StateGraph, nodes, conditional routing, ToolNode, interrupts, checkpointers, memory, subgraphs, and multi-agent graphs. Use for stateful graph agents."
 version: "1.1.0"

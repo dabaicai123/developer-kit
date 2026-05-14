@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-project-architecture
 description: "Defines production project structure for agent systems: packages, config, prompts, tools, workflows, evals, observability, and deployment. Use when scaffolding or restructuring agents."
 version: "1.1.0"

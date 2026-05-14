@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-loop-patterns
 description: "Chooses and implements agent execution loops: ReAct, plan-execute, reflection, graph state machines, event-driven workflows, code-as-action, and heartbeat agents. Use when designing orchestration."
 version: "1.1.0"

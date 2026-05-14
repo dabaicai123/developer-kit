@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-memory-systems
 description: "Designs durable agent memory: working records, episodic logs, semantic vector memory, user profiles, retention, retrieval, and privacy controls. Use for cross-session remembering."
 version: "1.2.0"

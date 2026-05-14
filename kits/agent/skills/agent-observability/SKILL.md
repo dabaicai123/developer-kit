@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-observability
 description: "Instruments agent systems with traces, metrics, logs, cost telemetry, evaluation links, and alerting. Use when debugging or operating production agents."
 version: "1.1.0"
