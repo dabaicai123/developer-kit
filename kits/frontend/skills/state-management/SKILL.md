@@ -30,12 +30,25 @@ Choose the right state mechanism for every piece of state in your React app.
 | `useReducer` | Local state with complex transitions, many actions | Multi-step form, game state, complex editor |
 | React Context | State shared across many components at various depths | Theme, locale, auth identity (not auth data) |
 | Zustand | Global client-only state needed by unrelated components | UI preferences, draft form data, feature flags |
-| TanStack Query | Any state that comes from or syncs with a server | User profile, products, search results, any API data |
+| Server Components / route loaders | Server data needed before render in Next.js App Router | Product detail, dashboard summary, SEO content |
+| TanStack Query | Server state owned by Client Components that needs caching, refetching, or background sync | Client-side search results, live filters, optimistic mutations |
 | URL state (nuqs) | State that should survive navigation, be shareable, or persist across page loads | Filters, sort, pagination, selected tab, search query |
 
 ### Decision Flow
 
-1. **Is it server data?** → TanStack Query. Period.
+Use this order for Next.js App Router projects:
+
+1. **Server data needed before render** - fetch in a Server Component or route handler.
+2. **Server state owned by a Client Component** - use TanStack Query.
+3. **Shareable navigation state** - use URL state (nuqs).
+4. **Global client-only state** - use Zustand.
+5. **Subtree state** - use React Context.
+6. **Complex local transitions** - use useReducer.
+7. **Simple local UI state** - use useState.
+
+Legacy shorthand below should be read through the server/client boundary rule above.
+
+1. **Is it server data?** → Server Component fetch for initial render; TanStack Query for Client Component server state.
 2. **Should it survive page navigation or be shareable via URL?** → URL state (nuqs).
 3. **Is it needed by many unrelated components across the app?** → Zustand.
 4. **Is it needed by many components within a subtree?** → React Context.
@@ -44,7 +57,7 @@ Choose the right state mechanism for every piece of state in your React app.
 
 ## [HARD RULE] Never Store Server Data in Zustand
 
-Server data belongs in TanStack Query only. Zustand is for client-only state.
+Do NOT put server data in Zustand or plain `useState` caches. In Next.js App Router, fetch server data in Server Components when it is needed for initial render. Use TanStack Query when a Client Component owns server state that needs caching, refetching, optimistic updates, or background synchronization.
 
 ```tsx
 // WRONG: storing server data in Zustand

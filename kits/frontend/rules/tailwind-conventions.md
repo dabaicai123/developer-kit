@@ -22,8 +22,12 @@ Enforce consistent Tailwind CSS v4 patterns. For detailed patterns, use `tailwin
 
 6. **Mobile-first responsive design** — write base styles for mobile, then add `sm:`, `md:`, `lg:`, `xl:` for larger screens. Never start with desktop styles and scale down with `max-sm:` or `max-md:`.
 
+7. **Integrate copied CSS deliberately** - scope third-party CSS under a feature root or CSS Module first, then promote repeated values to `@theme`. Do not install UI control libraries to avoid adapting copied CSS.
+
 ## Anti-Patterns
 
+- Unscoped copied third-party CSS - namespace or CSS Module before import
+- Adding UI control libraries for styling convenience - own the markup and adapt scoped CSS
 - `tailwind.config.js` in Tailwind v4 — configuration lives in CSS `@theme` blocks
 - Hardcoded color utilities (`bg-blue-500`, `text-gray-700`) — always use semantic token references
 - Color-specific token names (`--color-blue-500`) — tokens must be semantic (`--color-primary`)

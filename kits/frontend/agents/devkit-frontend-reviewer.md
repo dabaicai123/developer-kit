@@ -59,6 +59,18 @@ When reviewing code, follow this systematic approach:
 - Mobile-first responsive, not desktop-first
 - OKLCH color space in theme tokens
 
+### 6. Third-Party CSS and UI Ownership Review
+
+- Do NOT accept new prebuilt UI control libraries for standard controls unless the user explicitly requested them.
+- Flag MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar packages when project-owned markup would work.
+- Copied third-party CSS must be scoped under a feature root, CSS Module, or dedicated feature CSS entry.
+- Broad copied selectors (`button`, `input`, `a`, `div`, `*`, `body`) must not leak globally.
+- Remote CDN CSS, external reset CSS, external font CSS, and vendor JavaScript need explicit justification.
+- `!important`, broad selectors, and higher-specificity overrides must not be the default conflict strategy.
+- Repeated copied values should be promoted to Tailwind v4 `@theme` semantic tokens.
+- Purely visual state should use CSS-native selectors, Tailwind v4 variants, container queries, or `@starting-style` before JavaScript.
+- Interactive copied controls must include focus-visible, disabled, loading, empty, and error states where relevant.
+
 ## Output Format
 
 For each issue found, report:
@@ -79,3 +91,4 @@ Reference these skills for detailed patterns during review:
 | TypeScript patterns | `typescript-react` |
 | Code review checklist | `frontend-code-review` |
 | Design/UX audit | `web-design-audit` |
+| Copied CSS integration | `third-party-css-integration` |

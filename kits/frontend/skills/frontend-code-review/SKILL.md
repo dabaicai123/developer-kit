@@ -32,6 +32,7 @@ Findings that can cause security vulnerabilities, data loss, performance degrada
 | Performance bottleneck | Unbounded client-side fetching, missing Suspense boundaries, large client bundles, unnecessary re-renders from state misuse |
 | Accessibility violation | Missing ARIA labels on interactive elements, no keyboard navigation, focus trap absent in modals, color-only indicators |
 | Hydration mismatch risk | Server/client content divergence, Date/time rendering without suppression, random values in server components |
+| UI ownership risk | Prebuilt UI control library added for ordinary controls, copied CSS leaked globally, or vendor JS/CSS imported without review |
 
 ### Preference (discuss, not block)
 
@@ -42,6 +43,7 @@ Findings that affect code style, organization, or consistency but cannot cause u
 | Naming convention | Variable names, function names, file names that differ from team style |
 | Component organization | Grouping of related components, folder structure preferences |
 | CSS class ordering | Order of Tailwind utility classes within a className string |
+| Minor CSS organization | Local ordering of already-scoped selectors when behavior and visual output are unchanged |
 | Variable naming style | `isX` vs `hasX` for booleans, `fetchX` vs `getX` for data access |
 
 > For the full framework with examples and review comment templates, see `references/review-heuristics`.
@@ -57,6 +59,8 @@ Architecture smells indicate structural problems that degrade maintainability ov
 | Shared state without clear ownership | Multiple components read/write same state, no single owner for updates | Any occurrence |
 | Fetch in wrong boundary | Client component fetching data that a server component could fetch instead | Any occurrence |
 | Over-abstracted hooks | Custom hook with many parameters, multiple return values, complex internal logic | 5+ parameters or 4+ return values |
+| UI library dependency drift | MUI/AntD/Chakra/Mantine/Bootstrap JS/DaisyUI/Flowbite/shadcn controls introduced for standard UI | Any occurrence unless explicitly requested |
+| Copied CSS leakage | Third-party selectors affect global `button`, `input`, `a`, `div`, `*`, or `body` | Any occurrence |
 
 ### How to detect smells during review
 

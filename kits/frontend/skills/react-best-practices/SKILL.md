@@ -9,6 +9,8 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Priority-ranked rules for React + Next.js + TypeScript performance optimization. 8 categories, ordered by impact.
 
+Project UI policy: do NOT add prebuilt UI control libraries for ordinary UI. Bundle examples that mention packages like MUI are dependency-risk examples, not permission to use those controls.
+
 ## When to use this skill
 
 - Writing new React components or Next.js pages
@@ -50,7 +52,7 @@ Barrel file imports and eagerly-loaded heavy components directly impact TTI and 
 
 Key rules:
 
-- **Avoid barrel imports** -- Import directly from source files. A single `import { Button } from '@mui/material'` loads 2,225 modules. Use `optimizePackageImports` in Next.js or deep import paths.
+- **Avoid barrel imports** -- Import directly from source files. A single `import { Button } from '@mui/material'` loads 2,225 modules. This is a dependency-risk example; do not add MUI for ordinary UI controls. Use `optimizePackageImports` in Next.js or deep import paths for unavoidable heavy libraries.
 - **Dynamic imports** -- Use `next/dynamic` for heavy components (editors, charts) not needed on initial render. Add `ssr: false` for client-only modules.
 - **Conditional loading** -- Lazy-load modules only when a feature flag or user action activates them.
 - **Statically analyzable paths** -- Use explicit import maps instead of dynamic string concatenation in `import()` or `fs` paths. The bundler cannot analyze `import(VARIABLE)` and widens the trace.

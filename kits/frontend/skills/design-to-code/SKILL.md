@@ -15,8 +15,26 @@ Bridge design specifications (Figma, ClaudeDesign, OpenDesign) to production Nex
 - Setting up design tokens from a visual design specification
 - Breaking a static mockup into a component hierarchy
 - Converting raw HTML/CSS design output to Tailwind utility classes
+- Integrating copied third-party HTML/CSS while keeping project-owned markup and avoiding prebuilt UI controls
 - Implementing responsive layouts from desktop/mobile design specs
 - Deciding server vs client component boundaries for a page
+
+## Third-Party CSS Copy Rules
+
+Copied HTML/CSS is acceptable input. Prebuilt UI control libraries are not the default implementation path.
+
+**Do NOT:**
+
+- Do NOT install or import MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar controls for standard UI.
+- Do NOT install a component library to recreate copied CSS.
+- Do NOT paste third-party CSS globally without scoping it under a feature root or CSS Module.
+- Do NOT import remote CDN CSS, external resets, external font CSS, or vendor JavaScript behavior casually.
+- Do NOT solve copied CSS conflicts with `!important`, broad selectors, or higher-specificity overrides.
+- Do NOT convert every one-off copied value into global `@theme`; only repeated semantic values become tokens.
+- Do NOT replace semantic HTML with div-only custom widgets.
+- Do NOT ship copied controls without responsive, keyboard, focus-visible, disabled, loading, empty, and error states.
+
+Use `third-party-css-integration` when the source includes usable CSS snippets, demos, templates, or copied component styles.
 
 ## The 5-Stage Pipeline
 
@@ -102,6 +120,8 @@ Build a static HTML page using Tailwind classes that matches the design spec vis
 3. Verify against the design spec at each breakpoint (mobile, tablet, desktop)
 4. Iterate until visual fidelity is confirmed
 
+**When starting from third-party CSS:** keep the copied CSS scoped in one feature file during the prototype. Convert repeated design values and simple layout utilities first; leave complex animations, media queries, and low-churn visual effects in scoped CSS until fidelity is stable.
+
 **Prototype page structure:**
 
 ```tsx
@@ -171,7 +191,7 @@ Map the prototype's inline styles and custom CSS to Tailwind utility classes. Re
 ">
 ```
 
-**Key rule:** Never use hardcoded pixel values in Tailwind classes. If a value is not on the spacing scale, add a new token to `@theme` rather than writing `p-[32px]`.
+**Key rule:** Do not use repeated hardcoded pixel values in Tailwind classes. If a value appears more than once or carries semantic meaning, add a new token to `@theme`. Keep true one-off copied values local when tokenizing them would add noise.
 
 ### Stage 4: Component Decomposition
 
@@ -189,18 +209,20 @@ Break the verified prototype into a React component tree. Identify visual bounda
 
 ```
 Page (Server Component)
-├── Navbar (Client — has hover states, mobile menu toggle)
+├── Navbar (Client — has mobile menu toggle; CSS hover alone does not require Client)
 │   ├── NavbarBrand (Server — static link)
 │   ├── NavbarLinks (Server — static links)
 │   └── NavbarAction (Server — button, but parent toggles mobile menu)
 ├── HeroSection (Server — static content)
 │   ├── HeroHeading (Server)
 │   ├── HeroDescription (Server)
-│   └── HeroCta (Client — has hover animation)
+│   └── HeroCta (Server — CSS hover/focus animation only)
 ├── FeatureGrid (Server — maps over data)
 │   └── FeatureCard (Server — receives props)
 └── Footer (Server — static content)
 ```
+
+**Boundary correction:** CSS-only hover, focus, active, transition, and animation states do not require a Client Component. Add `"use client"` only for event handlers, React state/effects, browser APIs, imperative measurements, or third-party client-only code.
 
 > For detailed decomposition walkthrough, see `references/component-decomposition-guide`.
 
@@ -293,7 +315,8 @@ export default function HeroSection({ heading, description, ctaLabel, ctaHref }:
 |---|---|
 | Static content display | Server |
 | Data fetching from server | Server (use async/await) |
-| Interactive (hover, click, toggle) | Client |
+| CSS hover/focus/active/transition only | Server |
+| Interactive (click, toggle, form events) | Client |
 | Uses browser APIs (window, localStorage) | Client |
 | Uses React hooks (useState, useEffect) | Client |
 | Maps over server-fetched data | Server |
@@ -313,6 +336,8 @@ export default function HeroSection({ heading, description, ctaLabel, ctaHref }:
 | Using `style={{ }}` for one-off values | Breaks Tailwind consistency | Add a theme token |
 | Mixing Tailwind tokens with arbitrary values | `bg-[--color-primary]` next to `text-[#333]` | Consistent: all values via `@theme` tokens |
 | Building components before verifying layout | Visual bugs discovered after props/state added | Prototype first, componentize second |
+| Installing a UI library for copied CSS | Library DOM and theme APIs make later edits harder | Own the markup; scope and adapt the copied CSS |
+| Global copied selectors | Leaks styles into unrelated components | Namespace or CSS Module before import |
 
 ## Component Scaffold
 

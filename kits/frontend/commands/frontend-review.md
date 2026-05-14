@@ -74,6 +74,17 @@ Organized by severity: **Must-fix** (broken/inaccessible) → **Should-fix** (no
 - [ ] Missing `@starting-style` for entry transitions — add CSS transition-from-zero
 - [ ] Non-OKLCH colors in `@theme` — convert for perceptual uniformity
 
+### Third-Party CSS / UI Ownership (Should-fix)
+
+- [ ] New prebuilt UI control library dependency - remove unless explicitly requested
+- [ ] shadcn/ui, MUI, Ant Design, Chakra, Mantine, Bootstrap JS, DaisyUI, Flowbite, or similar controls used for standard UI - replace with project-owned semantic markup
+- [ ] Copied CSS left as broad global selectors - scope under a feature root or CSS Module
+- [ ] Remote CDN CSS, external reset CSS, external font CSS, or vendor JavaScript imported casually - remove or justify explicitly
+- [ ] `!important`, broad selectors, or higher-specificity overrides used for copied CSS conflicts - fix the scope or cascade
+- [ ] Repeated copied values not promoted to `@theme` - extract semantic tokens
+- [ ] JavaScript used for purely visual styling state - prefer CSS-native selectors, Tailwind v4 variants, or `@starting-style`
+- [ ] Copied interactive controls missing focus-visible, disabled, loading, empty, or error states - add usability states
+
 ## Review Output Format
 
 For each issue, report:
@@ -90,3 +101,4 @@ For each issue, report:
 | React patterns | `react-best-practices` |
 | Design audit | `web-design-audit` |
 | TypeScript | `typescript-react` |
+| Copied CSS integration | `third-party-css-integration` |

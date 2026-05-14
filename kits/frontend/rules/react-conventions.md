@@ -22,8 +22,12 @@ Enforce consistent React patterns across Next.js App Router projects. For detail
 
 6. **Memoize only when profiling shows a problem** — never preemptively wrap in React.memo or useMemo. Start simple, optimize when measured.
 
+7. **Use project-owned UI controls** - build controls with semantic HTML and local components. Do not introduce prebuilt UI control libraries for standard buttons, forms, dialogs, menus, tabs, tables, cards, or layout unless explicitly requested.
+
 ## Anti-Patterns
 
+- Prebuilt UI control libraries for ordinary UI - own the markup so copied CSS stays easy to modify
+- Copied CSS with broad global selectors - scope styles before wiring React components
 - Adding `'use client'` to every component — only add when client features are needed
 - Boolean prop proliferation (isLoading, isError, isSuccess) — use discriminated unions for state
 - Prop drilling beyond 2 levels — use context or composition

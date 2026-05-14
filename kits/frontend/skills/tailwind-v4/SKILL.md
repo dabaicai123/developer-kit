@@ -7,7 +7,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # Tailwind CSS v4 Patterns
 
-CSS-first configuration, OKLCH colors, semantic tokens, and component variants for Next.js + Tailwind v4 + TypeScript projects. The team does NOT use shadcn/ui.
+CSS-first configuration, OKLCH colors, semantic tokens, and component variants for Next.js + Tailwind v4 + TypeScript projects. The team does NOT use shadcn/ui or prebuilt UI control libraries for ordinary components.
 
 ## When to use this skill
 
@@ -20,6 +20,18 @@ CSS-first configuration, OKLCH colors, semantic tokens, and component variants f
 - Using dynamic arbitrary values without extending config
 - Migrating from Tailwind v3 to v4
 - Building responsive layouts with container queries
+- Integrating copied third-party CSS without adopting its UI component library
+
+## UI Dependency Policy
+
+Copied CSS is allowed. Prebuilt UI controls are not the default.
+
+**Do NOT:**
+
+- Do NOT install shadcn/ui components, MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, or similar packages for standard controls.
+- Do NOT replace a copied CSS snippet with a library component if semantic HTML plus scoped CSS is enough.
+- Do NOT leave third-party CSS global; scope it first, then extract repeated values into `@theme`.
+- Do NOT use Tailwind conversion as busywork; keep complex one-off effects in scoped CSS when that is simpler and safer.
 
 ## Overview
 
@@ -439,6 +451,8 @@ npx @tailwindcss/upgrade@latest
 | Using `@apply` extensively | Runtime cost, harder to debug | Use utility classes directly in JSX, or CSS variables in custom CSS |
 | Keeping `postcss-import` / `autoprefixer` | v4 handles these internally | Remove from PostCSS config |
 | Importing `@tailwindcss/container-queries` plugin | Built into v4 | Remove the package |
+| Installing UI control libraries for copied CSS | Baked DOM/theme APIs make later edits harder | Project-owned markup plus scoped CSS |
+| Unscoped third-party selectors | Global leaks cause unrelated UI regressions | Namespace or CSS Module before import |
 
 ## References
 

@@ -8,8 +8,8 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 
 | Kit | Description / 描述 | Skills | Agents | Commands | Rules |
 |-----|---------------------|--------|--------|----------|-------|
-| **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 40 | 6 | 6 | 6 |
-| **frontend** | Next.js + Tailwind v4 + React + TypeScript / 前端全栈 | 13 | 3 | 3 | 5 |
+| **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 39 | 6 | 6 | 6 |
+| **frontend** | Next.js + Tailwind v4 + React + TypeScript / 前端全栈 | 14 | 3 | 3 | 6 |
 | **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 21 | 3 | 1 | 0 |
 | **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
 
@@ -251,6 +251,7 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | `frontend-debugging` | Type errors, hydration, effect bugs / 前端调试技巧 |
 | `frontend-code-review` | Review heuristics, anti-pattern fixes / 前端代码审查 |
 | `design-to-code` | Design spec → React component (Figma, screenshots) / 设计稿转组件 |
+| `third-party-css-integration` | Copied CSS integration without prebuilt UI controls / 第三方 CSS 接入与自有组件 |
 | `web-design-audit` | Visual design quality audit / Web 视觉设计审计 |
 
 ### Frontend Agents / 前端智能体
@@ -277,6 +278,7 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | `nextjs-conventions` | Next.js patterns / Next.js 约定 |
 | `tailwind-conventions` | Tailwind usage / Tailwind 使用约定 |
 | `typescript-react-conventions` | TypeScript + React types / TS+React 类型约定 |
+| `third-party-css-conventions` | Copied CSS and project-owned UI controls / 第三方 CSS 与自有 UI |
 | `common-coding-style` | General style / 通用编码风格 |
 
 ---

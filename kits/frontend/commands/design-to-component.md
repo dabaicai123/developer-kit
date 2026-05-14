@@ -10,6 +10,16 @@ model: inherit
 
 Convert a visual design specification to a production-ready Next.js React component with Tailwind v4 styling.
 
+## Non-Negotiables / Do NOT
+
+- Do NOT add or use prebuilt UI control libraries such as MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar packages unless the user explicitly asks.
+- Do NOT replace copied third-party CSS with a library default component.
+- Do NOT leave copied CSS global. Scope it under a feature root or CSS Module before importing it.
+- Do NOT import remote CDN CSS, external resets, external font CSS, or vendor JavaScript behavior casually.
+- Do NOT solve copied CSS conflicts with `!important`, broad selectors, or higher-specificity overrides.
+- Do NOT convert all copied CSS to Tailwind before visual fidelity is verified; keep complex low-churn effects in scoped CSS when that is simpler.
+- Do NOT ship controls without keyboard, focus-visible, disabled, loading, empty, and error states where relevant.
+
 ## Workflow
 
 ### 1. Receive Design Input
@@ -17,6 +27,7 @@ Convert a visual design specification to a production-ready Next.js React compon
 - **Screenshot path** — Read the image file and extract visual information
 - **Written specification** — Parse text description into visual requirements
 - **Figma/OpenDesign specification** — Parse structured design data
+- Identify copied third-party HTML/CSS inputs: selectors, assets, animations, broad globals, and repeated values
 - Identify all visual elements: colors, typography, spacing, layout, interactive states
 
 ### 2. Extract Tokens into @theme
@@ -31,6 +42,7 @@ Convert a visual design specification to a production-ready Next.js React compon
 
 - Create static HTML matching the design pixel-for-pixel
 - Use token references in classes: `bg-[--color-primary]`, `text-[--color-on-surface]`
+- Keep copied CSS scoped in one feature CSS file or CSS Module until the layout is stable
 - Match layout structure: flexbox/grid positioning, responsive behavior
 - Include all text content from the design
 - Verify visual fidelity against original
@@ -89,6 +101,7 @@ Convert a visual design specification to a production-ready Next.js React compon
 |------|-------|
 | Token extraction | `design-to-code` |
 | Tailwind patterns | `tailwind-v4` |
+| Copied CSS integration | `third-party-css-integration` |
 | React patterns | `react-best-practices` |
 | TypeScript patterns | `typescript-react` |
 | Accessibility | `web-design-audit` |

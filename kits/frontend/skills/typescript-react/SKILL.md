@@ -7,7 +7,9 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # TypeScript for React and Next.js
 
-TypeScript patterns for our Next.js + Tailwind v4 + TypeScript stack. No shadcn/ui — we write our own components.
+TypeScript patterns for our Next.js + Tailwind v4 + TypeScript stack. No prebuilt UI control libraries for ordinary UI - we write our own components.
+
+Project UI policy: do NOT use shadcn/ui, MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, or similar prebuilt UI controls for ordinary UI. Write project-owned components with semantic HTML and project-owned CSS/Tailwind styling.
 
 ## Rule Taxonomy
 

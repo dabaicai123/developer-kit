@@ -10,6 +10,15 @@ model: inherit
 
 Implement a frontend feature following type-safe, production-ready patterns.
 
+## Non-Negotiables / Do NOT
+
+- Do NOT install or use prebuilt UI control libraries such as MUI, Ant Design, Chakra, Mantine, Bootstrap JS components, DaisyUI, Flowbite, shadcn/ui components, or similar packages for standard controls.
+- Do NOT replace copied third-party CSS with a library default component.
+- Do NOT leave copied CSS as broad global selectors. Scope it under a feature root, CSS Module, or dedicated feature CSS entry.
+- Do NOT import remote CDN CSS, external resets, external font CSS, or vendor JavaScript behavior casually.
+- Do NOT add JavaScript for visual state that CSS can express with native selectors, Tailwind v4 variants, container queries, or `@starting-style`.
+- Do NOT add speculative variants, catch-all config props, or wrappers that make simple UI harder to edit.
+
 ## Workflow
 
 ### 1. Understand Requirement
@@ -18,6 +27,7 @@ Implement a frontend feature following type-safe, production-ready patterns.
 - Identify data sources: server components, API routes, Server Actions
 - Determine user interactions: display-only, interactive, form submission
 - Identify edge cases: loading states, error states, empty states
+- Identify whether the feature starts from copied third-party CSS, a template, or a design export
 
 ### 2. Determine Server/Client Boundary
 
@@ -40,6 +50,7 @@ Implement a frontend feature following type-safe, production-ready patterns.
 - Use explicit event handler types (no implicit `any`)
 - Use `useRef<HTMLSpecificElement>` (no generic `HTMLElement`)
 - Use Tailwind semantic tokens: `bg-[--color-primary]`, not `bg-blue-500`
+- Scope copied CSS first; promote repeated values to `@theme` tokens only after inventory
 - Use `tv()` only for genuine multi-variant components
 - Mobile-first responsive design
 - Add ARIA attributes for interactive elements
@@ -71,5 +82,6 @@ Implement a frontend feature following type-safe, production-ready patterns.
 | React patterns | `react-best-practices` |
 | TypeScript patterns | `typescript-react` |
 | Tailwind patterns | `tailwind-v4` |
+| Copied CSS integration | `third-party-css-integration` |
 | Next.js patterns | `nextjs-app-router` |
 | Testing patterns | `frontend-testing` |
