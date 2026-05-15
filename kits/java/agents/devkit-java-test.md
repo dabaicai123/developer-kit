@@ -65,6 +65,8 @@ Resident skills cover testing workflow, Spring slices, security authorization te
 - **No test interdependency** — Each test runs independently
 - **Mock at boundaries** — Mock Mapper for Service, mock Service for Controller
 - **`@Transactional`** in integration tests for auto-rollback
+- **No scenario comments** — Use descriptive test method names and assertions instead of Chinese comments/Javadoc that only describe the test scenario
+- **Comment only non-obvious setup** — Add comments for unusual fixtures, timing, external constraints, or workarounds; do not fill comments mechanically in test classes
 
 ## Anti-Patterns
 
@@ -72,3 +74,4 @@ Resident skills cover testing workflow, Spring slices, security authorization te
 - Over-mocking (mock everything, including value objects)
 - Ignoring error cases (only testing happy paths)
 - Sleep-based assertions (use proper async testing)
+- Chinese comments that restate Given/When/Then or translate the test method name

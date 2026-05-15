@@ -106,6 +106,7 @@ class MarketBuilder {
 - NOT share state between tests — each test must be independent
 - NOT assert internal method calls — assert observable behavior (output, state changes)
 - NOT add Chinese comments that describe test scenarios; use descriptive test method names instead
+- Test classes and test methods do NOT need Chinese Javadoc only to restate the scenario; add comments only for non-obvious setup, fixtures, or external constraints
 - Verify imports after writing tests: common missing imports include `java.util.Map`, Hamcrest matchers, sealed interface types
 
 ## References

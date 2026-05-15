@@ -73,7 +73,9 @@ Use this checklist inside the TDD loop. Each production artifact should be backe
 
 ## Code Standards
 
-All generated code MUST follow `kits/java/rules/java-coding-style.md` Comments section. Missing comments = incomplete delivery.
+Production code MUST follow `kits/java/rules/java-coding-style.md` Comments section. Missing production comments = incomplete delivery.
+
+Test code follows `spring-boot-tdd`: express scenarios through descriptive test method names and assertions. Do not add Chinese scenario comments or test-method Javadoc only to describe the case being tested.
 
 ## Anti-Patterns
 

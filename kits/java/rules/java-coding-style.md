@@ -77,6 +77,7 @@ Use comments to explain business meaning and non-obvious decisions, not to resta
 - Inline comments explain WHY: business constraints, workarounds, ordering requirements, external system behavior, or algorithms.
 - Do not add comments that merely translate names or repeat assignments.
 - Generated test methods should express scenarios through method names and assertions, not Chinese scenario comments.
+- Test classes and test methods do not need Chinese Javadoc only to restate the scenario. Comment tests only for non-obvious setup, fixtures, external constraints, or workarounds.
 
 Layer-specific emphasis:
 
