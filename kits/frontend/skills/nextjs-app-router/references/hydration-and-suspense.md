@@ -251,7 +251,7 @@ export function ProductDetail({ id }: { id: string }) {
 }
 
 // Parent must wrap in Suspense
-export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   return (
     <Suspense fallback={<ProductSkeleton />}>

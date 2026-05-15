@@ -412,6 +412,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 ## References
 
+These references are canonical for type design and TypeScript-first prevention patterns. Use `frontend-debugging` for incident-style runtime debugging flows so duplicated playbooks do not drift.
+
 - `references/typescript-core.md` - narrowing, union/intersection types, generics with constraints, utility types, `as const`, `satisfies`
 - `references/react-typescript-patterns.md` - props typing, hook typing, forwardRef, context, polymorphic components
 - `references/nextjs-typescript.md` - App Router async params, Server Actions, route handlers, middleware, Edge runtime, useOptimistic

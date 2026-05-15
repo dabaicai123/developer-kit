@@ -174,7 +174,7 @@ Screen readers interrupt immediately.
 | Situation | Use |
 |---|---|
 | Field validation error | `role="alert"` on the error message (near the field) |
-| Form-level error summary | `role="alert"` + `aria-live="polite"` |
+| Form-level error summary | `role="status"` + `aria-live="polite"` for non-urgent summaries, or `role="alert"` for immediate errors |
 | Success toast notification | `aria-live="polite"` + `role="status"` |
 | Critical system error | `aria-live="assertive"` + `role="alert"` |
 | Search results count | `aria-live="polite"` + `role="status"` |

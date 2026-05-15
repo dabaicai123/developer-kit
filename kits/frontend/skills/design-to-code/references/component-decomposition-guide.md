@@ -42,15 +42,16 @@ A single monolithic page with: sidebar navigation, top bar with search and user 
 |                  +-----------------------------------+
 |                  | CHART SECTION                    | -> boundary: chart area
 +------------------------------------------------------+
+```
 
 ### Step 2: Define Component Hierarchy
 
 ```
 DashboardPage (Server Component)
 |- Sidebar (Client - has active state toggle)
-|  |- SidebarBrand (Server - logo/link)
+|  |- SidebarBrand (Client - imported by Sidebar)
 |  `- SidebarNav (Client - active link highlighting)
-|      `- SidebarNavItem (Server - single link, receives active prop)
+|      `- SidebarNavItem (Client - imported by SidebarNav)
 `- MainContent (Server - layout wrapper)
    |- TopBar (Server - static search form + avatar)
    |  |- SearchInput (Client - live search interaction)
@@ -173,9 +174,9 @@ app/
 components/
 |- layout/
 |  |- sidebar.tsx                 # Sidebar (Client)
-|  |- sidebar-brand.tsx           # SidebarBrand (Server)
+|  |- sidebar-brand.tsx           # SidebarBrand (Client)
 |  |- sidebar-nav.tsx             # SidebarNav (Client)
-|  |- sidebar-nav-item.tsx        # SidebarNavItem (Server)
+|  |- sidebar-nav-item.tsx        # SidebarNavItem (Client)
 |  |- top-bar.tsx                 # TopBar (Server)
 |  |- search-input.tsx            # SearchInput (Client)
 |  `- user-avatar.tsx             # UserAvatar (Server)
@@ -205,9 +206,9 @@ For each component, answer these questions. If any answer is "yes", the componen
 | Does it handle click/submit/change events? | Client | Server |
 | Does it use browser-only APIs (`window`, `document`, `localStorage`)? | Client | Server |
 | Does it use a client-only library (chart lib, animation lib)? | Client | Server |
-| Does it render children that are client components? | **Server** (pass children as props) | Server |
+| Does it only wrap/render children without its own interactivity? | Server | Check other rows |
 
-**Key insight:** A server component CAN render client components as children. The boundary is at the component that needs interactivity, not its parent. `MetricsGrid` (server) renders `MetricCard` (server) - both server. `Sidebar` (client) renders `SidebarNavItem` (server) - this works because Sidebar passes data as props to the server component? No -**client components cannot import server components as children.** The rule is:
+**Key insight:** A Server Component can render Client Components as children. The boundary is at the component that needs interactivity, not its parent. `MetricsGrid` (server) renders `MetricCard` (server) - both server. `DashboardPage` (server) can render `Sidebar` (client), but `Sidebar` cannot import Server Components directly. The rule is:
 
 - Server component -> can import and render server OR client components
 - Client component -> can import and render client components only

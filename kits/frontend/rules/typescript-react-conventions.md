@@ -19,7 +19,7 @@ Enforce consistent TypeScript patterns for React components. For detailed patter
 
 5. **Use `useRef` with specific element types** - `useRef<HTMLDivElement>(null)`, `useRef<HTMLInputElement>(null)`. Never use generic `useRef<HTMLElement>` when the actual element type is known.
 
-6. **Use Zod validation at boundaries** - validate incoming data (API responses, form inputs, URL params) with Zod schemas. Derive TypeScript types from schemas: `type User = z.infer<typeof userSchema>`. Never define separate TypeScript interfaces that duplicate Zod schema fields.
+6. **Use Zod validation at untrusted boundaries** - validate incoming data from external APIs, forms, URL params, and cross-process/network boundaries with Zod schemas. Derive TypeScript types from schemas: `type User = z.infer<typeof userSchema>`. Never define separate TypeScript interfaces that duplicate Zod schema fields.
 
 7. **Use `satisfies` for type validation** - `const config = { theme: 'dark' } satisfies AppConfig` to validate shape without widening types. Prefer `satisfies` over type assertions (`as`) and explicit type annotations when you need both validation and inference.
 
@@ -30,5 +30,5 @@ Enforce consistent TypeScript patterns for React components. For detailed patter
 - Boolean flags for state (`isLoading`, `isError`) - use discriminated unions
 - Generic `useRef<HTMLElement>` - use specific element types (`HTMLDivElement`, etc.)
 - Duplicate TypeScript interfaces alongside Zod schemas - derive types via `z.infer`
-- Unvalidated fetch/API response consumption - always validate at boundaries with Zod
+- Unvalidated external or untrusted fetch/API response consumption - validate boundaries with Zod
 - `as` type assertions instead of `satisfies` - use `satisfies` for validation with inference

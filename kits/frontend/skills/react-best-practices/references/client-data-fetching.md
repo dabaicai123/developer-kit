@@ -4,9 +4,9 @@ Rules for fetching data on the client. When data must be fetched client-side (in
 
 ---
 
-## Rule 1: Use SWR or TanStack Query -- Never Raw useEffect + fetch
+## Rule 1: Use TanStack Query by Default -- Never Raw useEffect + fetch
 
-Raw `useEffect + fetch` causes waterfalls, no deduplication, no caching, and stale data bugs. SWR and TanStack Query solve all of these.
+Raw `useEffect + fetch` causes waterfalls, no deduplication, no caching, and stale data bugs. TanStack Query is the default client server-state library for this kit. Use SWR only in existing codebases that already standardize on it.
 
 **Bad (no deduplication, no caching, stale data risk):**
 
@@ -56,7 +56,7 @@ function UserList() {
 }
 ```
 
-**Good (SWR):**
+**Existing SWR codebase only:**
 
 ```tsx
 'use client'
@@ -196,7 +196,7 @@ function ProductList() {
 }
 ```
 
-**SWR configuration:**
+**SWR configuration for existing SWR codebases:**
 
 ```tsx
 'use client'
@@ -226,7 +226,7 @@ const { data: config } = useQuery({
   gcTime: Infinity,      // Keep in cache forever
 })
 
-// SWR — immutable data
+// SWR - immutable data in an existing SWR codebase
 const { data: config } = useSWR('/api/config', fetcher, {
   revalidateIfStale: false,
   revalidateOnFocus: false,

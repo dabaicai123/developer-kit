@@ -13,13 +13,13 @@ allowed-tools:
 
 # Data Fetching
 
-Fetch data correctly in Next.js App Router: server-side in RSC, client-side with TanStack Query, always validated with Zod.
+Fetch data correctly in Next.js App Router: server-side in RSC, client-side with TanStack Query, and runtime validation at untrusted boundaries.
 
 ## When to Use This Skill
 
 - Fetching data in Server Components vs Client Components
 - Setting up TanStack Query for client-side data fetching
-- Validating API responses with Zod
+- Validating external or untrusted API responses with Zod
 - Implementing pagination (cursor-based, offset, infinite scroll)
 - Creating typed API patterns with Result<T,E>
 
@@ -36,9 +36,9 @@ Fetch data correctly in Next.js App Router: server-side in RSC, client-side with
 | Data behind user interaction | No | Yes |
 | Mutation responses | No | Yes (useMutation) |
 
-## [HARD RULE] Always Validate with Zod
+## [HARD RULE] Validate Untrusted Boundaries with Zod
 
-Every API response must be validated with Zod before use. Never trust raw JSON from any endpoint.
+Validate external APIs, cross-process/network responses, form input, URL params, and other untrusted data with Zod before use. In-process data that is already typed and controlled by the same codebase can be validated according to risk.
 
 ```tsx
 // WRONG: trusting raw response

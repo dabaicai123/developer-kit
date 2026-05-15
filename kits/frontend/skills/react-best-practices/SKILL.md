@@ -26,7 +26,7 @@ Project UI policy: do NOT add prebuilt UI control libraries for ordinary UI. Bun
 | 1 | Eliminating Waterfalls | CRITICAL | Parallel fetching, Suspense streaming |
 | 2 | Bundle Size Optimization | CRITICAL | Direct imports, dynamic imports, tree-shaking |
 | 3 | Server-Side Performance | HIGH | Lean RSCs, React.cache, streaming |
-| 4 | Client-Side Data Fetching | MEDIUM-HIGH | SWR/TanStack Query, request dedup |
+| 4 | Client-Side Data Fetching | MEDIUM-HIGH | TanStack Query by default, request dedup |
 | 5 | Re-render Optimization | MEDIUM | Memoize when profiling shows need, stable callbacks |
 | 6 | Rendering Performance | MEDIUM | Virtualization, content-visibility, layout shifts |
 | 7 | JavaScript Performance | LOW-MEDIUM | Map/Set lookups, early exits, CSS transitions |
@@ -80,7 +80,7 @@ When data must be fetched on the client, use a dedicated library for deduplicati
 
 Key rules:
 
-- **SWR or TanStack Query** -- Never use raw `useEffect + fetch`. These libraries deduplicate requests across component instances, cache responses, and revalidate automatically.
+- **TanStack Query by default** -- Never use raw `useEffect + fetch`. TanStack Query deduplicates requests across component instances, caches responses, and revalidates automatically. Use SWR only in existing codebases that already standardize on it.
 - **Colocate fetch with consumer** -- Each component fetches its own data. Avoid top-level fetches that pass data through multiple layers of props.
 - **Stale-while-revalidate** -- Show cached data immediately, then refresh in the background. Users never wait for repeated visits.
 - **Request deduplication** -- Multiple components requesting the same key share one network call.
@@ -143,7 +143,7 @@ Key rules:
 
 - **Sequential await for independent data** -- `const a = await fetchA(); const b = await fetchB()` when neither depends on the other
 - **Barrel file imports** -- `import { X } from 'huge-library'` that loads thousands of modules
-- **Raw useEffect + fetch** -- `useEffect(() => { fetch(url).then(...) }, [])` instead of SWR/TanStack Query
+- **Raw useEffect + fetch** -- `useEffect(() => { fetch(url).then(...) }, [])` instead of the project-standard server-state library
 - **Inline component definitions** -- `const Inner = () => ...` inside a parent component body
 - **Syncing derived state via effects** -- `useEffect(() => setFullName(first + last), [first, last])`
 - **Passing full objects across RSC boundaries** -- `<ClientComp user={user50Fields} />` when only `name` is used
@@ -159,7 +159,7 @@ Key rules:
   1. `eliminating-waterfalls.md` -- Parallel fetching, Suspense streaming, promise chaining, API route patterns
   2. `bundle-size-optimization.md` -- Barrel imports, dynamic imports, conditional loading, preload, tree-shaking
   3. `server-side-performance.md` -- RSC patterns, React.cache, serialization, hoisting, after()
-  4. `client-data-fetching.md` -- SWR/TanStack Query, colocated fetching, stale-while-revalidate, cache config
+  4. `client-data-fetching.md` -- TanStack Query, colocated fetching, stale-while-revalidate, cache config
   5. `re-render-optimization.md` -- Memo guidelines, stable callbacks, derived state, no inline components, narrow deps
   6. `rendering-performance.md` -- Virtualization, content-visibility, layout shifts, resource hints, conditional rendering
 
@@ -172,4 +172,4 @@ Key rules:
 
 ## Keywords
 
-react, performance, optimization, waterfalls, bundle-size, rsc, server-components, re-render, memo, useCallback, useMemo, Suspense, streaming, virtualization, TanStack Query, SWR, dynamic-import, tree-shaking, Next.js
+react, performance, optimization, waterfalls, bundle-size, rsc, server-components, re-render, memo, useCallback, useMemo, Suspense, streaming, virtualization, TanStack Query, dynamic-import, tree-shaking, Next.js

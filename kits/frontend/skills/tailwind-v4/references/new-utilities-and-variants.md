@@ -262,16 +262,16 @@ Control the color scheme for scrollbars, form controls, and other browser-native
 ```tsx
 // Dark mode page with matching dark scrollbars
 <div className="dark">
-  <main className="color-scheme-dark">
+  <main className="scheme-dark">
     {/* Scrollbars, form controls, and native UI elements use dark theme */}
   </main>
 </div>
 
 // Light mode page
-<main className="color-scheme-light">
+<main className="scheme-light">
 
 // Inherit from parent
-<main className="color-scheme-normal">
+<main className="scheme-normal">
 ```
 
 **Typical dark mode setup:**
@@ -288,7 +288,7 @@ Control the color scheme for scrollbars, form controls, and other browser-native
 Or per-component:
 
 ```tsx
-<div className="dark:bg-surface dark:color-scheme-dark">
+<div className="dark:bg-surface dark:scheme-dark">
   Content with dark scrollbars
 </div>
 ```
@@ -432,9 +432,9 @@ Use sparingly — descendant styles override specificity predictably only in sim
 |---|---|---|
 | `field-sizing-content` | `field-sizing: content` | Auto-resize textarea to match content |
 | `field-sizing-fixed` | `field-sizing: fixed` | Standard fixed textarea height |
-| `color-scheme-dark` | `color-scheme: dark` | Dark scrollbars and native controls |
-| `color-scheme-light` | `color-scheme: light` | Light scrollbars and native controls |
-| `color-scheme-normal` | `color-scheme: normal` | Inherit color scheme |
+| `scheme-dark` | `color-scheme: dark` | Dark scrollbars and native controls |
+| `scheme-light` | `color-scheme: light` | Light scrollbars and native controls |
+| `scheme-normal` | `color-scheme: normal` | Inherit color scheme |
 | `rotate-x-*` | 3D rotate around X axis | Tilt forward/back |
 | `rotate-y-*` | 3D rotate around Y axis | Turn left/right |
 | `rotate-z-*` | 3D rotate around Z axis | Spin |

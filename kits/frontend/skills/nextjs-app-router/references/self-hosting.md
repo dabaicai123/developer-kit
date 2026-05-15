@@ -239,7 +239,7 @@ On-demand revalidation via Route Handler (for webhook-triggered updates):
 
 ```tsx
 // app/api/revalidate/route.ts
-import { revalidateTag, revalidatePath } from 'next/headers'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { NextRequest } from 'next/server'
 
 export async function POST(request: NextRequest) {

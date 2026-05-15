@@ -236,24 +236,17 @@ export default function CreateProductPage() {
 }
 ```
 
-Server Actions can also be defined inline in a `'use client'` component:
+Client Components use Server Actions by importing them from a top-level `'use server'` module:
 
 ```tsx
-// app/products/create/page.tsx — Client Component with inline Server Action
+// app/products/create/create-form.tsx - Client Component
 'use client'
 
-import { revalidatePath } from 'next/cache' // allowed in 'use server' functions
+import { createProduct } from '../actions'
 
-async function handleSubmit(formData: FormData) {
-  'use server'                 // inline Server Action within Client Component
-  const name = formData.get('name') as string
-  await db.product.create({ data: { name } })
-  revalidatePath('/products')
-}
-
-export default function CreateProductPage() {
+export function CreateProductForm() {
   return (
-    <form action={handleSubmit}>
+    <form action={createProduct}>
       <input name="name" required />
       <button type="submit">Create</button>
     </form>
@@ -267,6 +260,7 @@ Server Action constraints:
 - Cannot use client-only hooks or APIs inside the `'use server'` function
 - Return values must be serializable
 - Always execute on the server, even when called from Client Components
+- Inline Server Actions belong in Server Components; Client Components import actions from a top-level `'use server'` module
 
 ## Component Placement Strategy
 

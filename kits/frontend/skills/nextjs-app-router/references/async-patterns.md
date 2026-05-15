@@ -177,13 +177,18 @@ Run the codemod before upgrading to Next.js 15. Review the output — the codemo
 
 ## Async APIs in Route Handlers
 
-Route Handlers receive `Request` directly — no changes needed for `params` or `searchParams`. However, `cookies()` and `headers()` are now async:
+Route Handlers receive `Request` directly for query-string access, so read search params from `new URL(request.url)`. Dynamic route `params` are still async and must be awaited. `cookies()` and `headers()` are also async:
 
 ```tsx
-// app/api/auth/route.ts
+// app/api/products/[id]/route.ts
 import { cookies, headers } from 'next/headers'
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const searchParams = new URL(request.url).searchParams
   const headersList = await headers()
   const cookieStore = await cookies()
 

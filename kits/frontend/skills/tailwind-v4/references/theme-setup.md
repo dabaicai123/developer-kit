@@ -276,7 +276,7 @@ If you need keyframes always included regardless of usage, define them outside `
 
 ### Dark mode tokens
 
-Define dark overrides using the `@custom-variant` directive and a separate `@theme` block:
+Define the dark variant with `@custom-variant`, then override CSS variables under the same selector that activates dark mode:
 
 ```css
 @import "tailwindcss";
@@ -287,10 +287,10 @@ Define dark overrides using the `@custom-variant` directive and a separate `@the
   --color-surface: oklch(0.98 0.01 250);
 }
 
-@theme dark {
+.dark {
   --color-text: oklch(0.90 0.01 250);
   --color-surface: oklch(0.15 0.01 250);
 }
 ```
 
-This generates `dark:text-text`, `dark:bg-surface`, etc. that automatically swap tokens when the `.dark` class is on a parent element.
+Use normal token utilities (`text-text`, `bg-surface`) inside the dark subtree so the overridden variables take effect. Use `dark:*` variants only when a utility itself should apply conditionally.

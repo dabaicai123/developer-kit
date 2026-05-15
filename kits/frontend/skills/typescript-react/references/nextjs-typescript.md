@@ -334,7 +334,7 @@ export const config = {
 };
 ```
 
-Middleware always runs on Edge. Do not import Node.js modules here.
+Middleware runs on the Edge runtime by default. If the project targets a Next.js version that supports Node.js middleware runtime, set `runtime: 'nodejs'` before using Node.js APIs.
 
 ## useOptimistic Typing
 

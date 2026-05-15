@@ -37,6 +37,8 @@ Systematic playbooks for the four most common frontend debugging scenarios.
 
 ## The Four Playbooks
 
+These playbooks are the canonical incident-debugging entry points. Type-level prevention patterns stay in `typescript-react`; link there instead of duplicating type-design guidance here.
+
 ### 1. Type Error Debugging
 
 **Symptoms**: TypeScript compiler errors, `as` assertions needed, runtime `undefined` crashes.

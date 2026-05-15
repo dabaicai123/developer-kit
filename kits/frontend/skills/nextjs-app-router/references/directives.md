@@ -23,40 +23,46 @@ export function Counter() {
 
 ### Scope
 
-`'use client'` applies to the entire module. All exports from a `'use client'` file become Client Components. Any module that imports from a `'use client'` file is automatically a Client Component too (the boundary propagates upward through imports).
+`'use client'` applies to the entire module. All exports from a `'use client'` file are Client Component entry points. Modules imported by that Client Component become part of the client bundle, but a Server Component can import and render a Client Component without becoming a Client Component itself.
 
 ```tsx
-// components/ui/button.tsx — 'use client'
+// components/ui/button.tsx - 'use client'
 'use client'
 
-export function Button({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
-  return <button onClick={onClick}>{children}</button>
+export function Button({ children }: { children: React.ReactNode }) {
+  return <button onClick={() => console.log('clicked')}><ButtonIcon />{children}</button>
 }
 
-// app/header.tsx — imports from 'use client' file, becomes Client Component implicitly
-import { Button } from '@/components/ui/button' // Button is 'use client'
-
-export function Header() {
-  // This file is now implicitly a Client Component because it imports Button
-  // Even without an explicit 'use client' directive
+// components/ui/button-icon.tsx - imported by Button, part of the client graph
+export function ButtonIcon() {
+  return <span aria-hidden>+</span>
 }
 ```
 
-To prevent boundary propagation, import Client Components only in Server Components and pass them as JSX:
+Server Components can render Client Components at an explicit boundary. Props passed across that boundary must be serializable; event handlers and other functions stay inside the Client Component.
 
 ```tsx
-// app/page.tsx — Server Component imports Client Component, boundary stops here
+// app/page.tsx - Server Component imports Client Component, boundary stays at Button
 import { Button } from '@/components/ui/button'
 
 export default function Page() {
   return (
     <div>
       <h1>Page title</h1>          {/* Server-rendered */}
-      <Button onClick={() => {}}>   {/* Client Component — boundary at Button only */}
-        Click me
-      </Button>
+      <Button>Click me</Button>    {/* Client Component boundary */}
     </div>
   )
+}
+```
+
+Do not pass functions from Server Components into Client Components:
+
+```tsx
+// BAD: function props are not serializable across the Server -> Client boundary
+import { Button } from '@/components/ui/button'
+
+export default function Page() {
+  return <Button onClick={() => {}}>Click me</Button>
 }
 ```
 
@@ -132,17 +138,16 @@ export async function deleteProduct(formData: FormData) {
 }
 ```
 
-2. **Inline in a function**: Marks a single function within a `'use client'` component as a Server Action. Must be at the top of the function body.
+2. **Inline in a Server Component**: Marks a single function inside a Server Component. Must be at the top of the function body.
 
 ```tsx
-// app/products/page.tsx — Client Component with inline Server Action
-'use client'
-
+// app/products/page.tsx - Server Component with inline Server Action
 import { revalidatePath } from 'next/cache'
+import { db } from '@/lib/db'
 
-export function ProductActions() {
+export default function ProductPage() {
   async function handleDelete(formData: FormData) {
-    'use server'                  // marks this function as a Server Action
+    'use server'
     const id = formData.get('id') as string
     await db.product.delete({ where: { id } })
     revalidatePath('/products')
@@ -151,6 +156,8 @@ export function ProductActions() {
   return <form action={handleDelete}><input name="id" /><button>Delete</button></form>
 }
 ```
+
+Client Components must import Server Actions from a top-level `'use server'` module; do not define inline Server Actions inside a `'use client'` file.
 
 ### Rules
 
@@ -289,7 +296,7 @@ export async function updateProduct(id: string, data: UpdateData) {
 | Directive | File-level | Inline | Server runtime | Client runtime |
 |-----------|-----------|--------|----------------|----------------|
 | `'use client'` | Yes | No | Pre-render to HTML | Hydrate + interactive |
-| `'use server'` | Yes | Yes | Execute on server | Called via RPC |
+| `'use server'` | Yes | Server Components only | Execute on server | Called via imported Server Action |
 | `'use cache'` | Yes | Yes | Cache output | Transparent |
 
-A file cannot have both `'use client'` and `'use server'`. A `'use client'` file can contain inline `'use server'` functions.
+A file cannot have both `'use client'` and `'use server'`. A `'use client'` file imports Server Actions from a separate top-level `'use server'` file.

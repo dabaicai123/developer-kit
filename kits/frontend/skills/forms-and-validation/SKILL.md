@@ -13,12 +13,12 @@ allowed-tools:
 
 # Forms and Validation
 
-Build robust forms with React Hook Form + Zod. Handle validation, errors, and Server Actions correctly.
+Build robust forms with Zod, Server Actions, and React Hook Form when client-side form state needs it. Handle validation and errors correctly.
 
 ## When to Use This Skill
 
 - Creating form components with validation
-- Setting up React Hook Form with Zod resolver
+- Setting up React Hook Form with Zod resolver for complex client-side forms
 - Handling form submissions via Server Actions
 - Displaying validation errors near inputs
 - Implementing controlled vs uncontrolled form patterns
@@ -42,9 +42,9 @@ Server Action (validate again on server)
 UI (field errors near inputs, form-level errors as summary)
 ```
 
-## [HARD RULE] Always Use a Zod Schema
+## [HARD RULE] Validate Forms with Zod
 
-Every form must have a Zod schema. No manual type definitions for form data. No validation logic in the component.
+Every submitted form payload must be validated with a Zod schema at the server/action boundary. Simple Server Action forms can use the native `action` prop without React Hook Form; use React Hook Form + resolver for complex client-side validation, dynamic fields, or rich pending/error UI. No manual type definitions for form data. No validation logic in the component.
 
 ```tsx
 // WRONG: manual validation
