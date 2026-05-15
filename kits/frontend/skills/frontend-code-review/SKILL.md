@@ -2,12 +2,14 @@
 name: frontend-code-review
 description: "Code review heuristics for React/Next.js/TypeScript/Tailwind with risk-vs-preference classification, architecture smell detection, and 12 common anti-patterns with root causes. Use when reviewing frontend PRs, conducting architecture reviews, or establishing team review standards."
 version: "1.0.0"
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+allowed-tools: Read, Bash, Glob, Grep
 ---
 
 # Frontend Code Review
 
 Structured code review heuristics for Next.js + Tailwind v4 + TypeScript projects. Classify findings as risk (must fix) or preference (discuss, not block), detect architecture smells early, and identify 12 common anti-patterns with root causes and fixes.
+
+This skill is review-only by default: report findings and concrete fixes, but do not edit files unless the user explicitly asks for an implementation pass.
 
 ## When to use this skill
 
@@ -46,7 +48,7 @@ Findings that affect code style, organization, or consistency but cannot cause u
 | Minor CSS organization | Local ordering of already-scoped selectors when behavior and visual output are unchanged |
 | Variable naming style | `isX` vs `hasX` for booleans, `fetchX` vs `getX` for data access |
 
-> For the full framework with examples and review comment templates, see `references/review-heuristics`.
+> For the full framework with examples and review comment templates, see [Review Heuristics](references/review-heuristics.md).
 
 ## Architecture Smell Detection
 
@@ -74,17 +76,17 @@ Architecture smells indicate structural problems that degrade maintainability ov
 
 5. **Over-abstracted hooks**: If a hook's parameter list or return object is large, it wraps too much logic. Split into smaller, focused hooks or inline the logic in the component.
 
-> For detection patterns and smell catalog with examples, see `references/review-heuristics`.
+> For detection patterns and smell catalog with examples, see [Review Heuristics](references/review-heuristics.md).
 
 ## 12 Anti-Patterns
 
-Each anti-pattern includes the root cause (why it happens) and the fix (what to do instead). For expanded analysis with before/after code examples, see `references/anti-patterns-with-fixes`.
+Each anti-pattern includes the root cause (why it happens) and the fix (what to do instead). For expanded analysis with before/after code examples, see [Anti-Patterns with Fixes](references/anti-patterns-with-fixes.md).
 
 ### 1. Storing server data in client state
 
 **Root cause**: Developers default to `useState` + `useEffect` for all data, treating server responses like local UI state. This pattern comes from SPA habits where everything runs on the client.
 
-**Fix**: Use TanStack Query (React Query) for server state. It handles caching, refetching, stale-while-revalidate, and avoids manual loading/error state management.
+**Fix**: Fetch initial/SEO-critical data in Server Components when possible. Use TanStack Query (React Query) for server state owned by Client Components, where caching, refetching, stale-while-revalidate, or optimistic updates are needed.
 
 ### 2. Boolean flags for state
 
@@ -162,7 +164,7 @@ Copy and paste this checklist into your review. Check items by risk category.
 - [ ] No secrets exposed in client bundles (API keys, tokens in client components)
 - [ ] Form mutations validated with Zod schemas at the boundary
 - [ ] API responses validated with Zod before entering the app
-- [ ] Server data fetched via TanStack Query, not useState + useEffect
+- [ ] Client-owned server state fetched via TanStack Query, not useState + useEffect
 - [ ] No hydration mismatch risks (consistent server/client rendering)
 - [ ] Async routes have route-level `loading.tsx` or local `<Suspense>` at the right boundary
 - [ ] Dynamic/error-prone routes have `error.tsx` or a feature-level error boundary where failure should be contained

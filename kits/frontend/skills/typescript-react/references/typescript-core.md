@@ -226,7 +226,7 @@ function List<T>({ items, renderItem, keyExtractor }: ListProps<T>) {
 />
 ```
 
-See `references/component-patterns.md` for advanced generic component patterns.
+See [component-patterns.md](component-patterns.md) for advanced generic component patterns.
 
 ## Utility Types
 

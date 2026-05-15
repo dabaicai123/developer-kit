@@ -142,7 +142,7 @@ interface BadState {
 [HARD RULE] Use explicit React event types for handlers. Never rely on inference from inline handlers when extracting callbacks.
 
 ```typescript
-import { type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react';
+import { type ChangeEvent, type FocusEvent, type FormEvent, type KeyboardEvent } from 'react';
 
 // Input change handler
 function handleSearchChange(e: ChangeEvent<HTMLInputElement>) {
@@ -375,8 +375,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 - Void-returning wrappers for async event handlers - React handlers must return `void`
 - `as const` for literal type inference in arrays and objects
 - Extract event handler types (`ChangeEvent<HTMLInputElement>`) explicitly, never rely on inference alone
-- Use `keyof` and mapped types for variant-based component APIs -> see `references/component-patterns.md`
-- Type Server Actions with explicit input/output types -> see `references/nextjs-typescript.md`
+- Use `keyof` and mapped types for variant-based component APIs -> see [references/component-patterns.md](references/component-patterns.md)
+- Type Server Actions with explicit input/output types -> see [references/nextjs-typescript.md](references/nextjs-typescript.md)
 
 ## Anti-patterns
 
@@ -399,29 +399,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 | Symptom | Likely cause | Reference |
 |---|---|---|
-| "Object is possibly null" on ref access | `useRef(null)` without element type or missing null check | `references/hooks-and-events.md` - useRef section |
-| "Property does not exist on type '{}'" | Untyped event handler - `e.target` is generic | `references/hooks-and-events.md` - event handlers |
-| Hydration mismatch warning | SSR renders different output than CSR | `references/playbooks/hydration-issues.md` |
-| Infinite re-render loop | Unstable dep in useEffect or setState in render | `references/playbooks/effect-dependency-bugs.md` |
-| Type error on `params` in App Router page | `params` is now `Promise`, not plain object | `references/nextjs-typescript.md` |
+| "Object is possibly null" on ref access | `useRef(null)` without element type or missing null check | [references/hooks-and-events.md](references/hooks-and-events.md) - useRef section |
+| "Property does not exist on type '{}'" | Untyped event handler - `e.target` is generic | [references/hooks-and-events.md](references/hooks-and-events.md) - event handlers |
+| Hydration mismatch warning | SSR renders different output than CSR | [references/playbooks/hydration-issues.md](references/playbooks/hydration-issues.md) |
+| Infinite re-render loop | Unstable dep in useEffect or setState in render | [references/playbooks/effect-dependency-bugs.md](references/playbooks/effect-dependency-bugs.md) |
+| Type error on `params` in App Router page | `params` is now `Promise`, not plain object | [references/nextjs-typescript.md](references/nextjs-typescript.md) |
 | "Cannot read property of undefined" on state | Boolean flags allow invalid state combinations | Instructions section - discriminated unions |
-| Switch statement misses a case | Non-exhaustive matching on union | `references/typescript-core.md` - discriminated unions |
+| Switch statement misses a case | Non-exhaustive matching on union | [references/typescript-core.md](references/typescript-core.md) - discriminated unions |
 | `as const` not working on object | Object not typed with `satisfies`, literals widened | Instructions section - satisfies |
-| "Type 'string' is not assignable to type ..." | Over-wide inference, needs explicit annotation or `as const` | `references/playbooks/type-error-debugging.md` |
-| Event handler `e.target.value` typed as `any` | Handler parameter untyped | `references/hooks-and-events.md` - event handlers |
+| "Type 'string' is not assignable to type ..." | Over-wide inference, needs explicit annotation or `as const` | [references/playbooks/type-error-debugging.md](references/playbooks/type-error-debugging.md) |
+| Event handler `e.target.value` typed as `any` | Handler parameter untyped | [references/hooks-and-events.md](references/hooks-and-events.md) - event handlers |
 
 ## References
 
 These references are canonical for type design and TypeScript-first prevention patterns. Use `frontend-debugging` for incident-style runtime debugging flows so duplicated playbooks do not drift.
 
-- `references/typescript-core.md` - narrowing, union/intersection types, generics with constraints, utility types, `as const`, `satisfies`
-- `references/react-typescript-patterns.md` - props typing, hook typing, forwardRef, context, polymorphic components
-- `references/nextjs-typescript.md` - App Router async params, Server Actions, route handlers, middleware, Edge runtime, useOptimistic
-- `references/component-patterns.md` - discriminated props, compound components, render props, display name, generic components
-- `references/hooks-and-events.md` - useState, useReducer, useEffect, custom hooks, event handler types, async handlers
-- `references/playbooks/type-error-debugging.md` - systematic flowchart for diagnosing and fixing type errors
-- `references/playbooks/hydration-issues.md` - SSR/CSR mismatch diagnosis and resolution
-- `references/playbooks/effect-dependency-bugs.md` - infinite loops, stale closures, missing cleanup
+- [TypeScript Core](references/typescript-core.md) - narrowing, union/intersection types, generics with constraints, utility types, `as const`, `satisfies`
+- [React TypeScript Patterns](references/react-typescript-patterns.md) - props typing, hook typing, forwardRef, context, polymorphic components
+- [Next.js TypeScript](references/nextjs-typescript.md) - App Router async params, Server Actions, route handlers, middleware, Edge runtime, useOptimistic
+- [Component Patterns](references/component-patterns.md) - discriminated props, compound components, render props, display name, generic components
+- [Hooks and Events](references/hooks-and-events.md) - useState, useReducer, useEffect, custom hooks, event handler types, async handlers
+- [Type Error Debugging](../frontend-debugging/references/type-error-debugging.md) - canonical incident-debugging flowchart
+- [Hydration Issues](../frontend-debugging/references/hydration-issues.md) - canonical SSR/CSR mismatch diagnosis and resolution
+- [Effect Dependency Bugs](../frontend-debugging/references/effect-dependency-bugs.md) - canonical infinite loops, stale closures, and cleanup guide
 
 ## Related Skills
 

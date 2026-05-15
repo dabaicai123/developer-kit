@@ -121,7 +121,7 @@ Default to CSS configuration. Use JavaScript config only as a legacy migration b
 }
 ```
 
-> For complete @theme setup with OKLCH palette generation, see `references/theme-setup`.
+> For complete @theme setup with OKLCH palette generation, see [references/theme-setup.md](references/theme-setup.md).
 
 ## OKLCH Color Format
 
@@ -403,7 +403,7 @@ const button = tv({
 | One-off conditional style | `clsx` or ternary in className |
 | Shared base style across many variants | Use `tv()` with `base` |
 
-> For complete tv() patterns including responsive variants and extend, see `references/component-variants`.
+> For complete tv() patterns including responsive variants and extend, see [references/component-variants.md](references/component-variants.md).
 
 ## v3 to v4 Migration - Key Changes
 
@@ -426,7 +426,7 @@ const button = tv({
 npx @tailwindcss/upgrade@latest
 ```
 
-> For complete migration guide, see `references/v3-to-v4-migration`.
+> For complete migration guide, see [references/v3-to-v4-migration.md](references/v3-to-v4-migration.md).
 
 ## Best Practices
 
@@ -459,11 +459,11 @@ npx @tailwindcss/upgrade@latest
 
 ## References
 
-- `references/theme-setup` - Complete @theme configuration with OKLCH palette generation and token hierarchy
-- `references/component-variants` - tailwind-variants (tv()) patterns: slots, compound variants, responsive variants, extend
-- `references/v3-to-v4-migration` - Full migration guide: JS config removal, @theme blocks, renamed utilities, deprecated features
-- `references/responsive-layouts` - Responsive patterns: mobile-first, breakpoint customization, container queries, grid/flex
-- `references/new-utilities-and-variants` - @starting-style, not-*, in-*, nth-*, field-sizing, color-scheme, 3D transforms
+- [Theme Setup](references/theme-setup.md) - Complete @theme configuration with OKLCH palette generation and token hierarchy
+- [Component Variants](references/component-variants.md) - tailwind-variants (tv()) patterns: slots, compound variants, responsive variants, extend
+- [v3 to v4 Migration](references/v3-to-v4-migration.md) - Full migration guide: JS config removal, @theme blocks, renamed utilities, deprecated features
+- [Responsive Layouts](references/responsive-layouts.md) - Responsive patterns: mobile-first, breakpoint customization, container queries, grid/flex
+- [New Utilities and Variants](references/new-utilities-and-variants.md) - @starting-style, not-*, in-*, nth-*, field-sizing, color-scheme, 3D transforms
 
 ## Related Skills
 

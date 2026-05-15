@@ -190,7 +190,7 @@ export async function POST(request: Request) {
 }
 ```
 
-> For full Route Handler patterns, see `references/route-handlers.md`.
+> For full Route Handler patterns, see [route-handlers.md](route-handlers.md).
 
 ## Request Deduplication
 

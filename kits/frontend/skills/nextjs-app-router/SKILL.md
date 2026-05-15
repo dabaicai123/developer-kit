@@ -37,7 +37,7 @@ The App Router uses file-based routing under `src/app/`. Each route segment is a
 | `default.tsx` | Fallback for unmatched parallel routes | Server |
 | `template.tsx` | Re-rendered layout (no state persistence) | Server |
 
-> For full project structure and route segment details, see `references/file-conventions.md`.
+> For full project structure and route segment details, see [references/file-conventions.md](references/file-conventions.md).
 
 ### 2. Place 'use client' Judiciously
 
@@ -90,7 +90,7 @@ export function StatsGrid({ stats }: { stats: Stats[] }) {
 }
 ```
 
-> For detailed RSC boundary rules and Server Action exceptions, see `references/rsc-boundaries.md`.
+> For detailed RSC boundary rules and Server Action exceptions, see [references/rsc-boundaries.md](references/rsc-boundaries.md).
 
 ### 3. Fetch Data on the Server
 
@@ -141,7 +141,7 @@ export default function CreateProductPage() {
 }
 ```
 
-> For full data patterns, streaming, and waterfall avoidance, see `references/data-patterns.md`.
+> For full data patterns, streaming, and waterfall avoidance, see [references/data-patterns.md](references/data-patterns.md).
 
 ### 4. Handle Async APIs (Next.js 15+)
 
@@ -160,7 +160,7 @@ export default async function ProductPage({
 }
 ```
 
-> For migration guide and all async API changes, see `references/async-patterns.md`.
+> For migration guide and all async API changes, see [references/async-patterns.md](references/async-patterns.md).
 
 ### 5. Handle Errors and Redirects
 
@@ -201,7 +201,7 @@ export default function NotFound() {
 
 For intentional redirects, use `redirect()` in Server Components and `useRouter().push()` in Client Components.
 
-> For full error handling patterns, `global-error.tsx`, and `unstable_rethrow`, see `references/error-handling.md`.
+> For full error handling patterns, `global-error.tsx`, and `unstable_rethrow`, see [references/error-handling.md](references/error-handling.md).
 
 ### 6. Set Up Metadata and SEO
 
@@ -233,7 +233,7 @@ export async function generateMetadata({
 }
 ```
 
-> For OG images, sitemaps, and file-based conventions, see `references/metadata.md`.
+> For OG images, sitemaps, and file-based conventions, see [references/metadata.md](references/metadata.md).
 
 ### 7. Optimize Images and Fonts
 
@@ -262,7 +262,7 @@ export default function Hero() {
 }
 ```
 
-> For remote images, blur placeholders, and Tailwind font integration, see `references/image-font-optimization.md`.
+> For remote images, blur placeholders, and Tailwind font integration, see [references/image-font-optimization.md](references/image-font-optimization.md).
 
 ### 8. Stream with Suspense
 
@@ -287,7 +287,7 @@ export default async function DashboardPage() {
 }
 ```
 
-> For hydration debugging and CSR bailout patterns, see `references/hydration-and-suspense.md`.
+> For hydration debugging and CSR bailout patterns, see [references/hydration-and-suspense.md](references/hydration-and-suspense.md).
 
 ### 9. Use Directives Correctly
 
@@ -297,7 +297,7 @@ export default async function DashboardPage() {
 | `'use server'` | Top of file or function | Marks Server Actions callable from client |
 | `'use cache'` | Top of file or function | Marks function/component output as cacheable (experimental) |
 
-> For full directive rules and placement, see `references/directives.md`.
+> For full directive rules and placement, see [references/directives.md](references/directives.md).
 
 ### 10. Implement Parallel Routes and Modals
 
@@ -316,7 +316,7 @@ app/
 │   └ login/             ← actual /login route
 ```
 
-> For full patterns and `default.tsx` requirements, see `references/parallel-routes.md`.
+> For full patterns and `default.tsx` requirements, see [references/parallel-routes.md](references/parallel-routes.md).
 
 ### 11. Handle Bundling Issues
 
@@ -332,7 +332,7 @@ const nextConfig = {
 }
 ```
 
-> For full bundling, CSS imports, polyfills, and script loading, see `references/bundling-and-scripts.md`.
+> For full bundling, CSS imports, polyfills, and script loading, see [references/bundling-and-scripts.md](references/bundling-and-scripts.md).
 
 ### 12. Self-Host with Standalone Output
 
@@ -345,7 +345,7 @@ const nextConfig = {
 }
 ```
 
-> For Docker setup, custom cache handlers, and ISR, see `references/self-hosting.md`.
+> For Docker setup, custom cache handlers, and ISR, see [references/self-hosting.md](references/self-hosting.md).
 
 ## Best Practices
 

@@ -44,7 +44,7 @@ Key rules:
 - **Start promises early** -- In API routes and Server Actions, create all promises upfront, then await only when results are needed.
 - **Chain nested fetches per item** -- When fetching nested data (chat -> author), chain within each item's promise so a slow item doesn't block the rest.
 
-> See `references/eliminating-waterfalls.md` for full rules with bad/good code examples.
+> See [references/eliminating-waterfalls.md](references/eliminating-waterfalls.md) for full rules with bad/good code examples.
 
 ## 2. Bundle Size Optimization (CRITICAL)
 
@@ -58,7 +58,7 @@ Key rules:
 - **Statically analyzable paths** -- Use explicit import maps instead of dynamic string concatenation in `import()` or `fs` paths. The bundler cannot analyze `import(VARIABLE)` and widens the trace.
 - **Preload on intent** -- Call `void import('./heavy-module')` on hover/focus to reduce perceived latency.
 
-> See `references/bundle-size-optimization.md` for full rules with bad/good code examples.
+> See [references/bundle-size-optimization.md](references/bundle-size-optimization.md) for full rules with bad/good code examples.
 
 ## 3. Server-Side Performance (HIGH)
 
@@ -72,7 +72,7 @@ Key rules:
 - **Parallel fetching via composition** -- Split fetches into separate async components so they run concurrently instead of sequentially down the tree.
 - **after() for non-blocking work** -- Use `after()` from `next/server` to schedule logging, analytics, and cache invalidation after the response is sent.
 
-> See `references/server-side-performance.md` for full rules with bad/good code examples.
+> See [references/server-side-performance.md](references/server-side-performance.md) for full rules with bad/good code examples.
 
 ## 4. Client-Side Data Fetching (MEDIUM-HIGH)
 
@@ -85,7 +85,7 @@ Key rules:
 - **Stale-while-revalidate** -- Show cached data immediately, then refresh in the background. Users never wait for repeated visits.
 - **Request deduplication** -- Multiple components requesting the same key share one network call.
 
-> See `references/client-data-fetching.md` for full rules with bad/good code examples.
+> See [references/client-data-fetching.md](references/client-data-fetching.md) for full rules with bad/good code examples.
 
 ## 5. Re-render Optimization (MEDIUM)
 
@@ -100,7 +100,7 @@ Key rules:
 - **Narrow dependencies** -- Use primitive deps (`user.id` instead of `user`) in effects. Subscribe to derived booleans (`isMobile`) instead of continuous values (`width`).
 - **Split combined computations** -- When a `useMemo` has independent sub-computations with different deps, split them into separate `useMemo` calls.
 
-> See `references/re-render-optimization.md` for full rules with bad/good code examples.
+> See [references/re-render-optimization.md](references/re-render-optimization.md) for full rules with bad/good code examples.
 
 ## 6. Rendering Performance (MEDIUM)
 
@@ -115,7 +115,7 @@ Key rules:
 - **Resource hints** -- Use React DOM's `prefetchDNS`, `preconnect`, `preload` in server components to start loading critical resources before the client receives HTML.
 - **Hoist static JSX** -- Extract large static SVGs and skeleton elements to module-level constants to avoid re-creation.
 
-> See `references/rendering-performance.md` for full rules with bad/good code examples.
+> See [references/rendering-performance.md](references/rendering-performance.md) for full rules with bad/good code examples.
 
 ## 7. JavaScript Performance (LOW-MEDIUM)
 

@@ -30,11 +30,12 @@ Fetch data correctly in Next.js App Router: server-side in RSC, client-side with
 | Initial page load data | Yes | No |
 | SEO-critical data | Yes | No |
 | Data that rarely changes | Yes | No |
-| Interactive data (filters, search) | No | Yes |
+| URL/searchParams filters needed for initial render or SEO | Yes | No |
+| Client-owned interactive filters/search after initial render | No | Yes |
 | Data that updates frequently | No | Yes |
 | Real-time or polling data | No | Yes |
 | Data behind user interaction | No | Yes |
-| Mutation responses | No | Yes (useMutation) |
+| Form submissions and UI mutations | Yes (Server Actions) | Optional, when coordinating client cache or optimistic UI |
 
 ## [HARD RULE] Validate Untrusted Boundaries with Zod
 

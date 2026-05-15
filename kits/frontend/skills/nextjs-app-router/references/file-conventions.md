@@ -332,7 +332,7 @@ export default function DashboardLayout({
 }
 ```
 
-See `references/parallel-routes.md` for full parallel and intercepting route patterns.
+See [parallel-routes.md](parallel-routes.md) for full parallel and intercepting route patterns.
 
 ## Intercepting Routes
 

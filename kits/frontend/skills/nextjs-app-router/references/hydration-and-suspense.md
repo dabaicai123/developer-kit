@@ -350,7 +350,7 @@ export function ProductList() {
 - [ ] No `window`, `document`, or `localStorage` during render (move to `useEffect`)
 - [ ] No invalid HTML nesting (`<div>` inside `<p>`, etc.)
 - [ ] `useSearchParams()` wrapped in Suspense in Server Components
-- [ ] `loading.tsx` defined for routes with async data
+- [ ] Route-level `loading.tsx` or local `<Suspense>` defined for async UI at the right boundary
 - [ ] `error.tsx` defined at route or feature boundaries where failures should be contained
 - [ ] Slow data sections wrapped in Suspense for streaming
 - [ ] `suppressHydrationWarning` used only as a narrow escape hatch for intentional, unavoidable mismatches

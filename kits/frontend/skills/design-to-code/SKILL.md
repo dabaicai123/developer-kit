@@ -102,7 +102,7 @@ Read the design specification and extract visual properties into semantic tokens
 }
 ```
 
-> For detailed token extraction and hex-to-OKLCH conversion, see `references/token-extraction-guide`.
+> For detailed token extraction and hex-to-OKLCH conversion, see [Token Extraction Guide](references/token-extraction-guide.md).
 
 ### Stage 2: HTML/CSS Prototyping
 
@@ -158,7 +158,7 @@ export default function PrototypePage() {
 }
 ```
 
-> For layout pattern examples, see `references/html-prototyping-patterns`.
+> For layout pattern examples, see [HTML Prototyping Patterns](references/html-prototyping-patterns.md).
 
 ### Stage 3: Tailwind Conversion
 
@@ -224,7 +224,7 @@ Page (Server Component)
 
 **Boundary correction:** CSS-only hover, focus, active, transition, and animation states do not require a Client Component. Add `"use client"` only for event handlers, React state/effects, browser APIs, imperative measurements, or third-party client-only code.
 
-> For detailed decomposition walkthrough, see `references/component-decomposition-guide`.
+> For detailed decomposition walkthrough, see [Component Decomposition Guide](references/component-decomposition-guide.md).
 
 ### Stage 5: Dynamic Implementation
 

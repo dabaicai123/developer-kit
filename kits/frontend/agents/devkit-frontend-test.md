@@ -55,7 +55,7 @@ describe('ComponentName', () => {
 ### Pattern
 
 ```typescript
-import { mockServerAction } from '@/test/helpers'
+import { createUser } from '@/app/users/actions'
 
 // Test the action directly
 it('creates user with valid data', async () => {
@@ -76,7 +76,8 @@ it('rejects invalid data', async () => {
 2. Test success path with valid input data
 3. Test validation rejection with Zod-invalid input
 4. Test error handling for database/API failures
-5. Verify Zod schema is the gate — no unvalidated data reaches business logic
+5. Mock persistence, cache, and navigation dependencies when needed; do not mock the Server Action under test
+6. Verify Zod schema is the gate — no unvalidated data reaches business logic
 
 ## E2E Testing with Playwright
 
@@ -104,7 +105,7 @@ When setting up testing infrastructure:
 
 1. **Vitest config** — `vitest.config.ts` with `@vitejs/plugin-react` and path aliases
 2. **Setup file** — `setup.ts` with Testing Library cleanup and mock configuration
-3. **Helpers** — `test/helpers.ts` with `renderWithProviders`, `mockServerAction`, `createMockFormData`
+3. **Helpers** — `test/helpers.ts` with `renderWithProviders`, dependency mocks, and `createMockFormData`
 4. **Playwright config** — `playwright.config.ts` with baseURL, timeouts, retry settings
 
 ## Skills Integration

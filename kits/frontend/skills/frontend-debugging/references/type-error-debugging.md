@@ -290,9 +290,15 @@ const product = data as Product; // if data shape is wrong, runtime crash
 // GOOD: validate with Zod
 const product = ProductSchema.parse(data); // runtime validation
 
-// GOOD: satisfies for type checking
-const product = data satisfies Product; // compile-time check, preserves inference
+// GOOD: satisfies for trusted literals/config objects
+const productDefaults = {
+  id: "draft",
+  name: "Untitled",
+  price: 0,
+} satisfies Product; // compile-time check only, preserves inference
 ```
+
+`satisfies` never validates runtime data. For values from JSON, forms, URL params, or external APIs, parse with Zod or another runtime validator before use.
 
 ### Using `@ts-ignore` or `@ts-expect-error`
 
