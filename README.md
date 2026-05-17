@@ -9,11 +9,11 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 | Kit | Description / 描述 | Skills | Agents | Commands | Rules |
 |-----|---------------------|--------|--------|----------|-------|
 | **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 39 | 6 | 6 | 6 |
-| **frontend** | Next.js + Tailwind v4 + React + TypeScript / 前端全栈 | 14 | 3 | 3 | 6 |
+| **frontend** | Next.js + Tailwind v4 + React + TypeScript / 前端全栈 | 16 | 3 | 3 | 6 |
 | **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 21 | 3 | 1 | 0 |
 | **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
 
-> **77 skills total / 共 77 个技能**
+> **79 skills total / 共 79 个技能**
 
 ## Tech Stack / 技术栈
 
@@ -246,11 +246,13 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | `react-composition` | Compound components, state lifting, API design / React 组合模式 |
 | `state-management` | Zustand, URL state, decision guide / 状态管理决策与 Zustand |
 | `data-fetching` | Server/client fetching, typed API, pagination / 数据获取与分页模式 |
+| `nextjs-supabase-template` | Next.js + Supabase auth starter template / Next.js + Supabase 认证项目模板 |
 | `forms-and-validation` | React Hook Form + Zod, server actions / 表单校验与 Server Actions |
 | `frontend-testing` | Vitest, Testing Library, Playwright E2E / 前端测试全栈 |
 | `frontend-debugging` | Type errors, hydration, effect bugs / 前端调试技巧 |
 | `frontend-code-review` | Review heuristics, anti-pattern fixes / 前端代码审查 |
 | `design-to-code` | Design spec → React component (Figma, screenshots) / 设计稿转组件 |
+| `html-css-nextjs-migration` | Native HTML/CSS temp/ migration to reusable Next.js design system / 原生 HTML/CSS 迁移为 Next.js 组件体系 |
 | `third-party-css-integration` | Copied CSS integration without prebuilt UI controls / 第三方 CSS 接入与自有组件 |
 | `web-design-audit` | Visual design quality audit / Web 视觉设计审计 |
 
