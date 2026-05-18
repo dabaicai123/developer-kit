@@ -60,7 +60,27 @@ the important boundaries are:
 Do not move `createServerClient` into module-global state. Create a new Supabase
 server client for each request or server function.
 
-### 4. Adapt the UI
+### 4. Avoid Remote Font Build Dependencies
+
+The official example may import Google fonts through `next/font/google`, such as
+`Geist` in `app/layout.tsx`. In restricted network environments, production
+builds can fail while fetching fonts from Google. This is a build-time network
+failure, not a Supabase configuration problem.
+
+After scaffolding, inspect the generated layout and replace remote Google font
+usage with a system font stack before running `npm run build`:
+
+- Remove `next/font/google` imports and font initialization.
+- Remove `font.variable`, `font.className`, or similar generated font references
+  from the root layout.
+- Define the app font in CSS with a local system stack, for example
+  `font-family: Arial, Helvetica, sans-serif;`, or keep the existing project
+  Tailwind/CSS pattern if it already defines a system stack.
+
+Do not add another remote font provider unless the user explicitly accepts a
+network-dependent build.
+
+### 5. Adapt the UI
 
 The template includes shadcn/ui-style primitives under `components/ui`, auth
 forms, a protected route, and Tailwind styling. Keep the auth flow working
@@ -76,7 +96,7 @@ For larger UI changes, also use:
 - `frontend-quality-gates` when verifying auth pages, protected routes, and
   release readiness.
 
-### 5. Verify
+### 6. Verify
 
 Install dependencies and run the standard checks from the scaffolded project:
 
