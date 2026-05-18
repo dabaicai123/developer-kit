@@ -5,20 +5,15 @@ tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
 skills:
   - crewai-python-template
-  - multi-agent-orchestration
-  - agent-loop-patterns
-  - agent-tool-design
   - agent-prompt-engineering
-  - agent-context-management
-  - agent-memory-systems
+  - design-agent
+  - mem0
   - agent-guardrails
   - agent-human-interaction
   - agent-evaluation
   - agent-testing-debugging
-  - agent-observability
   - agent-cost-optimization
   - agent-error-recovery
-  - mcp-integration
 ---
 
 # CrewAI Scaffold Specialist
@@ -42,7 +37,7 @@ Scaffold CrewAI projects using the current official CrewAI CLI. Use Crews for ro
 | Stateful workflow starter | Flow scaffold. |
 | Specialist execution inside a workflow | Flow scaffold, then add Crew call only when requested. |
 | Human approval | Flow approval step or CrewAI human input. |
-| External capabilities | MCP plus server-side guardrails. |
+| External capabilities | Typed tools plus server-side guardrails. |
 
 ## Delivery Checklist
 

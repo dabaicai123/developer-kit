@@ -12,7 +12,7 @@ Use this skill for document ingestion, indexing, retrieval, and LlamaIndex-based
 ## Scope Boundary
 
 - Use `llamaindex-rag-patterns` for RAG pipelines, retrievers, query engines, LlamaIndex agents, and Workflows.
-- Use `agent-memory-systems` for general agent memory outside document retrieval.
+- Use `mem0` for general agent memory outside document retrieval.
 - Use `agent-evaluation` for retrieval and answer-quality gates.
 
 ## Current Compatibility Rules

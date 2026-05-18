@@ -5,19 +5,14 @@ tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
 skills:
   - llamaindex-rag-patterns
-  - agent-loop-patterns
-  - agent-tool-design
   - agent-prompt-engineering
-  - agent-context-management
-  - agent-memory-systems
+  - mem0
   - agent-guardrails
   - agent-human-interaction
   - agent-evaluation
   - agent-testing-debugging
-  - agent-observability
   - agent-cost-optimization
   - agent-error-recovery
-  - mcp-integration
 ---
 
 # RAG Agent Development Specialist

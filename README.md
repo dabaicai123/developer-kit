@@ -10,10 +10,10 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 |-----|---------------------|--------|--------|----------|-------|
 | **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 39 | 6 | 6 | 6 |
 | **frontend** | Next.js + Supabase + TanStack Query frontend workflow / 前端迁移、接口对接与多应用代理 | 6 | 3 | 3 | 5 |
-| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 21 | 3 | 1 | 0 |
+| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 13 | 3 | 1 | 0 |
 | **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
 
-> **69 skills total / 共 69 个技能**
+> **61 skills total / 共 61 个技能**
 
 ## Tech Stack / 技术栈
 
@@ -280,12 +280,8 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 
 | Skill | Description / 描述 |
 |-------|---------------------|
-| `agent-loop-patterns` | Agent loop design (ReAct, Plan-and-Execute) / 智能体循环模式 |
-| `agent-tool-design` | Tool/function design patterns / 工具/函数设计模式 |
 | `agent-prompt-engineering` | Prompt templates, system prompts / 提示词工程 |
-| `agent-context-management` | Context window, summarization, token budgets / 上下文管理与压缩 |
-| `agent-memory-systems` | Short-term/long-term memory, episodic / 智能体记忆系统 |
-| `agent-planning-reasoning` | Tree of Thought, MCTS, HTN, constraint satisfaction / 智能体规划与推理模式 |
+| `mem0` | Persistent memory for AI agents and apps / 智能体持久记忆 |
 | `agent-human-interaction` | Human-in-the-loop, escalation, clarification dialogs / 智能体人机交互模式 |
 | `agent-error-recovery` | Circuit breakers, retry, self-healing, fallback / 智能体容错与恢复模式 |
 
@@ -293,7 +289,6 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 
 | Skill | Description / 描述 |
 |-------|---------------------|
-| `agent-observability` | Logging, tracing, cost tracking / 智能体可观测性 |
 | `agent-evaluation` | Benchmarks, scoring, regression testing / 智能体评估 |
 | `agent-cost-optimization` | Token budgeting, model routing, LLM caching / 智能体成本优化 |
 
@@ -302,20 +297,17 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | Skill | Description / 描述 |
 |-------|---------------------|
 | `agent-guardrails` | Safety, validation, output filtering / 智能体安全护栏 |
-| `agent-streaming-realtime` | SSE/WebSocket streaming, progressive delivery / 智能体流式与实时模式 |
 | `agent-testing-debugging` | Unit/integration testing, trajectory replay, mock LLMs / 智能体测试与调试 |
 
 ### Multi-Agent & Frameworks / 多智能体与框架
 
 | Skill | Description / 描述 |
 |-------|---------------------|
-| `multi-agent-orchestration` | Multi-agent coordination, routing / 多智能体编排 |
-| `langgraph-patterns` | LangGraph state graphs, branching, persistence / LangGraph 状态图模式 |
-| `crewai-patterns` | CrewAI crew/process/task patterns / CrewAI 多角色协作模式 |
+| `langgraph-python-template` | Official LangGraph Python project scaffolding / LangGraph Python 项目脚手架 |
+| `langgraph-persistence` | Official LangGraph persistence and memory skill / LangGraph 官方持久化与记忆 |
+| `design-agent` | Official CrewAI agent design skill / CrewAI 官方 Agent 设计 |
+| `crewai-python-template` | Official CrewAI project scaffolding / CrewAI 官方项目脚手架 |
 | `llamaindex-rag-patterns` | LlamaIndex RAG pipelines, chunking, retrieval / LlamaIndex RAG 管线模式 |
-| `mcp-integration` | MCP server design, tool registration / MCP 集成与工具注册 |
-| `openai-agents-pydantic-ai` | OpenAI Agents SDK & PydanticAI patterns / OpenAI Agents 与 PydanticAI 模式 |
-| `agent-project-architecture` | General agent project scaffolding / 智能体项目架构 |
 
 ### Agent Agents / 智能体专用智能体
 

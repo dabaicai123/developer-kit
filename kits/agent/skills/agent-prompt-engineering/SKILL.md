@@ -12,8 +12,7 @@ Use this skill to make agent instructions precise, scoped, and maintainable.
 ## Scope Boundary
 
 - Use `agent-prompt-engineering` for instruction text, hierarchy, assembly, and prompt versioning.
-- Use `agent-context-management` for runtime compression and reinjection.
-- Use `agent-tool-design` for tool schema wording and descriptions.
+- Use framework-specific skills such as `design-agent` or `langgraph-persistence` for runtime context and persistence behavior.
 
 ## Prompt Layers
 

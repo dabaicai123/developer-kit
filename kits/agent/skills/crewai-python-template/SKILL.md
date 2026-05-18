@@ -13,7 +13,7 @@ Use this skill to create a new Python CrewAI project from the official CrewAI CL
 
 - Use `crewai-python-template` for new CrewAI project scaffolds.
 - Keep this skill focused on official CLI generation and first-run verification.
-- Use `multi-agent-orchestration` only when multiple agents have a concrete coordination benefit.
+- Add multiple agents only when their roles, tools, and outputs are clearly distinct.
 
 ## Template Choice
 

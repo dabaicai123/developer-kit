@@ -12,7 +12,7 @@ Use this skill to create a new Python LangGraph project from official LangGraph 
 ## Scope Boundary
 
 - Use `langgraph-python-template` for new Python LangGraph project scaffolds.
-- Use `langgraph-patterns` for StateGraph, nodes, routing, persistence, interrupts, and graph agent implementation.
+- Use `langgraph-persistence` for persistence, memory, checkpoints, and interrupts.
 - Use `agent-testing-debugging` and `agent-evaluation` for test and eval expansion.
 
 ## Template Choice

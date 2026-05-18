@@ -13,7 +13,7 @@ Use this skill to reduce agent operating cost without hiding quality regressions
 
 - Use `agent-cost-optimization` for spend limits, routing, caching, and cost telemetry.
 - Use `agent-evaluation` to prove cheaper routes keep acceptable quality.
-- Use `agent-context-management` to reduce prompt size safely.
+- Use framework-specific runtime context controls to reduce prompt size safely.
 
 ## Required Decisions
 

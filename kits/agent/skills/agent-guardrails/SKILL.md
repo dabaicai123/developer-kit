@@ -12,7 +12,6 @@ Use this skill to prevent unsafe, unauthorized, or policy-violating agent behavi
 ## Scope Boundary
 
 - Use `agent-guardrails` for policy, approvals, privacy, and safety enforcement.
-- Use `agent-tool-design` for strict tool schemas and idempotency.
 - Use `agent-error-recovery` for non-policy runtime failures.
 
 ## Control Layers

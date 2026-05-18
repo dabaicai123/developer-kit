@@ -13,7 +13,7 @@ Use this skill to decide whether an agent is good enough to ship or whether a ch
 
 - Use `agent-evaluation` for benchmarks, rubrics, scorecards, and release gates.
 - Use `agent-testing-debugging` for diagnosing a specific failed run.
-- Use `agent-observability` for production traces and metrics feeding evals.
+- Use runtime traces and metrics as evidence feeding evals.
 
 ## Required Decisions
 

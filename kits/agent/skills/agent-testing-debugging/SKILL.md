@@ -13,7 +13,7 @@ Use this skill to reproduce failures and protect behavior with tests. It owns di
 
 - Use `agent-testing-debugging` for failing runs, unit tests, mocks, replay, and CI diagnostics.
 - Use `agent-evaluation` for broad quality scoring and release gates.
-- Use `agent-observability` for production evidence used during debugging.
+- Use runtime traces and metrics for production evidence during debugging.
 
 ## Test Layers
 
