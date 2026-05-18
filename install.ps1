@@ -86,6 +86,72 @@ function Install-KitForPlatform($name, $platform) {
     Write-Host "Installed $name -> $dst"
 }
 
+function Get-SelectedKits {
+    if ($Kit -eq "all") {
+        return @("java", "frontend", "base", "agent")
+    }
+    return @($Kit)
+}
+
+function Get-SelectedPlatforms {
+    if ($Platform -eq "both") {
+        return @("claude", "codex")
+    }
+    return @($Platform)
+}
+
+function Assert-KitExists($name) {
+    $src = Join-Path $RepoRoot "kits\$name"
+    if (-not (Test-Path $src)) {
+        if ($Tmp) { Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue }
+        throw "Unknown kit: $name (expected: java | frontend | base | agent | all)"
+    }
+}
+
+function Remove-ManagedKitFilesForPlatform($platform) {
+    $dst = Join-Path $Target ".$platform"
+    if (-not (Test-Path $dst)) {
+        return
+    }
+
+    Get-ChildItem (Join-Path $RepoRoot "kits") -Directory | ForEach-Object {
+        $kitPath = $_.FullName
+
+        $skillsPath = Join-Path $kitPath "skills"
+        if (Test-Path $skillsPath) {
+            Get-ChildItem $skillsPath -Directory | ForEach-Object {
+                Remove-Item -Recurse -Force (Join-Path $dst "skills\$($_.Name)") -ErrorAction SilentlyContinue
+            }
+        }
+
+        $agentsPath = Join-Path $kitPath "agents"
+        if (Test-Path $agentsPath) {
+            Get-ChildItem $agentsPath -Filter "*.md" | ForEach-Object {
+                $extension = if ($platform -eq "codex") { ".toml" } else { ".md" }
+                Remove-Item -Force (Join-Path $dst "agents\$($_.BaseName)$extension") -ErrorAction SilentlyContinue
+            }
+        }
+
+        $commandsPath = Join-Path $kitPath "commands"
+        if (Test-Path $commandsPath) {
+            Get-ChildItem $commandsPath -Filter "*.md" | ForEach-Object {
+                Remove-Item -Force (Join-Path $dst "commands\$($_.Name)") -ErrorAction SilentlyContinue
+            }
+        }
+
+        $rulesPath = Join-Path $kitPath "rules"
+        if (Test-Path $rulesPath) {
+            Get-ChildItem $rulesPath -File |
+                Where-Object { $_.Extension -in @(".md", ".mdc") } |
+                ForEach-Object {
+                    Remove-Item -Force (Join-Path $dst "rules\$($_.Name)") -ErrorAction SilentlyContinue
+                }
+        }
+    }
+
+    Write-Host "Removed existing developer-kit entries -> $dst"
+}
+
 function Install-Kit($name) {
     if ($Platform -eq "both") {
         Install-KitForPlatform $name "claude"
@@ -96,15 +162,10 @@ function Install-Kit($name) {
     }
 }
 
-if ($Kit -eq "all") {
-    Install-Kit "java"
-    Install-Kit "frontend"
-    Install-Kit "base"
-    Install-Kit "agent"
-}
-else {
-    Install-Kit $Kit
-}
+$kitsToInstall = Get-SelectedKits
+$kitsToInstall | ForEach-Object { Assert-KitExists $_ }
+Get-SelectedPlatforms | ForEach-Object { Remove-ManagedKitFilesForPlatform $_ }
+$kitsToInstall | ForEach-Object { Install-Kit $_ }
 
 Install-ProjectInstructions
 
