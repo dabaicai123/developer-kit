@@ -87,74 +87,6 @@ install_kit_for_platform() {
   echo "Installed $name -> $dst/"
 }
 
-selected_kits() {
-  if [ "$KIT" = "all" ]; then
-    printf '%s\n' java frontend base agent
-  else
-    printf '%s\n' "$KIT"
-  fi
-}
-
-selected_platforms() {
-  if [ "$PLATFORM" = "both" ]; then
-    printf '%s\n' claude codex
-  else
-    printf '%s\n' "$PLATFORM"
-  fi
-}
-
-assert_kit_exists() {
-  local name="$1"
-  if [ ! -d "$REPO_ROOT/kits/$name" ]; then
-    echo "Unknown kit: $name (expected: java | frontend | base | agent | all)" >&2
-    exit 1
-  fi
-}
-
-remove_managed_kit_files_for_platform() {
-  local platform="$1"
-  local dst="$TARGET/.$platform"
-
-  [ -d "$dst" ] || return 0
-
-  for kit_path in "$REPO_ROOT/kits/"*; do
-    [ -d "$kit_path" ] || continue
-
-    if [ -d "$kit_path/skills" ]; then
-      for skill in "$kit_path/skills/"*; do
-        [ -d "$skill" ] && rm -rf "$dst/skills/$(basename "$skill")"
-      done
-    fi
-
-    if [ -d "$kit_path/agents" ]; then
-      for agent in "$kit_path/agents/"*.md; do
-        [ -e "$agent" ] || continue
-        local base
-        base="$(basename "$agent" .md)"
-        if [ "$platform" = "codex" ]; then
-          rm -f "$dst/agents/$base.toml"
-        else
-          rm -f "$dst/agents/$base.md"
-        fi
-      done
-    fi
-
-    if [ -d "$kit_path/commands" ]; then
-      for command in "$kit_path/commands/"*.md; do
-        [ -e "$command" ] && rm -f "$dst/commands/$(basename "$command")"
-      done
-    fi
-
-    if [ -d "$kit_path/rules" ]; then
-      for rule in "$kit_path/rules/"*.md "$kit_path/rules/"*.mdc; do
-        [ -e "$rule" ] && rm -f "$dst/rules/$(basename "$rule")"
-      done
-    fi
-  done
-
-  echo "Removed existing developer-kit entries -> $dst/"
-}
-
 install_kit() {
   local name="$1"
 
@@ -169,17 +101,17 @@ install_kit() {
   esac
 }
 
-while IFS= read -r kit; do
-  assert_kit_exists "$kit"
-done < <(selected_kits)
-
-while IFS= read -r platform; do
-  remove_managed_kit_files_for_platform "$platform"
-done < <(selected_platforms)
-
-while IFS= read -r kit; do
-  install_kit "$kit"
-done < <(selected_kits)
+case "$KIT" in
+  all)
+    install_kit java
+    install_kit frontend
+    install_kit base
+    install_kit agent
+    ;;
+  *)
+    install_kit "$KIT"
+    ;;
+esac
 
 install_project_instructions
 

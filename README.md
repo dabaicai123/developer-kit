@@ -25,9 +25,9 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 
 ## Installation / 安装
 
-Run from your project root. Installs into `.claude/` and `.codex/` by default. Re-running replaces developer-kit managed entries with the selected kit while preserving unrelated local files.
+Run from your project root. Installs into `.claude/` and `.codex/` by default. Re-running merges the selected kit into the existing installation and overwrites matching files from that kit.
 
-从项目根目录运行，默认同时安装至 `.claude/` 和 `.codex/` 目录。重复运行会用本次选择的 kit 替换 developer-kit 管理的条目，同时保留无关的本地文件。
+从项目根目录运行，默认同时安装至 `.claude/` 和 `.codex/` 目录。重复运行会把本次选择的 kit 合并到现有安装中，并覆盖该 kit 的同名文件。
 
 ### Script Installation (Recommended) / 脚本安装（推荐）
 
