@@ -12,7 +12,7 @@ Use this skill only when multiple agents materially improve capability, isolatio
 ## Scope Boundary
 
 - Use `multi-agent-orchestration` for framework-neutral topology, handoffs, and coordination policy.
-- Use `crewai-patterns` or `langgraph-patterns` for framework-specific multi-agent implementation.
+- Use `crewai-python-template` for CrewAI scaffold generation and `langgraph-patterns` for LangGraph-specific multi-agent implementation.
 - Use `agent-context-management` for delegation packets and sub-agent context isolation.
 
 ## Pattern Selection

@@ -12,12 +12,14 @@ Use this skill for stateful graph-based agents and workflows built with LangGrap
 ## Scope Boundary
 
 - Use `langgraph-patterns` for LangGraph StateGraph, nodes, routing, persistence, interrupts, and graph agents.
+- Use `langgraph-python-template` for new Python LangGraph project scaffolds.
 - Use `agent-loop-patterns` for framework-neutral loop selection.
 - Use `multi-agent-orchestration` for framework-neutral agent topology.
 
 ## Current Compatibility Rules
 
 - Follow the current LangGraph docs for package imports and prebuilt agents; avoid pinning old import paths in skill text.
+- Prefer `langgraph-python-template` for new projects before hand-writing packaging and runtime files.
 - Model graph state as a typed schema.
 - Keep node functions small and deterministic except for explicit model or tool nodes.
 - Use checkpointers for persistence, resume, and human-in-the-loop workflows.

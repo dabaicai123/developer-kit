@@ -13,8 +13,9 @@ Use this command for agent systems, tool-using LLM workflows, multi-agent orches
 
 | Task signal | Primary agent | Required skills |
 |---|---|---|
-| General tool-using agent, LangGraph workflow, OpenAI Agents SDK, PydanticAI, prompt/tool architecture | `devkit:agent:core` | `agent-loop-patterns`, `agent-tool-design`, `agent-project-architecture` |
-| CrewAI Crew, Flow, YAML config, role-based team, CrewAI project structure | `devkit:agent:crewai` | `crewai-patterns`, `multi-agent-orchestration` |
+| New LangGraph Python project or graph agent scaffold | `devkit:agent:core` | `langgraph-python-template` |
+| General tool-using agent, LangGraph workflow, OpenAI Agents SDK, PydanticAI, prompt/tool architecture | `devkit:agent:core` | `agent-loop-patterns`, `agent-tool-design` |
+| New CrewAI project scaffold, Crew, Flow, YAML config, role-based team, CrewAI project structure | `devkit:agent:crewai` | `crewai-python-template` |
 | RAG, ingestion, indexing, retrieval, document QA, LlamaIndex Workflow or AgentWorkflow | `devkit:agent:rag` | `llamaindex-rag-patterns`, `agent-evaluation` |
 
 If a task spans categories, choose the agent that owns the runtime framework and load only the additional skills needed for the missing concern.
@@ -40,7 +41,8 @@ If a task spans categories, choose the agent that owns the runtime framework and
 
 | Concern | Skill |
 |---|---|
-| Project structure | `agent-project-architecture` |
+| LangGraph Python scaffold | `langgraph-python-template` |
+| CrewAI Python scaffold | `crewai-python-template` |
 | Loop or workflow pattern | `agent-loop-patterns` |
 | Planning strategy | `agent-planning-reasoning` |
 | Prompt design | `agent-prompt-engineering` |
@@ -57,7 +59,6 @@ If a task spans categories, choose the agent that owns the runtime framework and
 | Error recovery | `agent-error-recovery` |
 | Streaming and realtime | `agent-streaming-realtime` |
 | Multi-agent topology | `multi-agent-orchestration` |
-| CrewAI | `crewai-patterns` |
 | LangGraph | `langgraph-patterns` |
 | LlamaIndex RAG | `llamaindex-rag-patterns` |
 | OpenAI Agents SDK or PydanticAI | `openai-agents-pydantic-ai` |
@@ -65,6 +66,7 @@ If a task spans categories, choose the agent that owns the runtime framework and
 ## Completion Checklist
 
 - The selected agent and skills exist in `kits/agent`.
+- New CrewAI or LangGraph projects use the official scaffold skill unless an existing codebase requires surgical adoption.
 - The implementation names explicit framework versions or uses current official docs when exact API compatibility matters.
 - The design has no unresolved ownership conflicts between skills.
 - Tests, evals, or manual verification cover the stated success criteria.

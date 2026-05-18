@@ -5,7 +5,6 @@ tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
 skills:
   - llamaindex-rag-patterns
-  - agent-project-architecture
   - agent-loop-patterns
   - agent-tool-design
   - agent-prompt-engineering
