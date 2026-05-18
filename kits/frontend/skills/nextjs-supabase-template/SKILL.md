@@ -68,10 +68,13 @@ before replacing the marketing/tutorial content.
 
 For larger UI changes, also use:
 
-- `nextjs-app-router` for App Router file conventions and RSC boundaries.
-- `tailwind-v4` when converting the template to Tailwind v4 project standards.
-- `forms-and-validation` when extending auth forms or adding mutations.
-- `frontend-testing` when adding route, form, or auth flow coverage.
+- `html-css-nextjs-migration` when migrating a native HTML/CSS frontend into
+  the Supabase-enabled project shell.
+- `tanstack-query` when authenticated client components consume backend APIs.
+- `frontend-api-contracts` when documenting backend contracts, auth headers,
+  environment variables, and response validation.
+- `frontend-quality-gates` when verifying auth pages, protected routes, and
+  release readiness.
 
 ### 5. Verify
 

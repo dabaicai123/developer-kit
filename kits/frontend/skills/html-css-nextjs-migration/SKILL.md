@@ -145,12 +145,13 @@ with a short comment explaining why.
 
 ## Related Skills
 
-- `design-to-code` for token extraction and component decomposition.
-- `third-party-css-integration` for scoped copied CSS rules.
-- `nextjs-app-router` for routing, layouts, and server/client boundaries.
-- `tailwind-v4` for Tailwind token and utility conventions.
-- `web-design-audit` for visual quality checks.
-- `frontend-testing` for regression coverage after migration.
+- `nextjs-supabase-template` for initializing or maintaining the Supabase
+  Auth-enabled Next.js shell.
+- `tanstack-query` for API-backed client state after the UI is migrated.
+- `frontend-api-contracts` for backend API contracts, generated clients, and
+  response validation.
+- `frontend-quality-gates` for visual, responsive, accessibility, and build
+  verification after migration.
 
 ## Completion Checklist
 

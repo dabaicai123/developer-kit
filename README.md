@@ -9,18 +9,18 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 | Kit | Description / 描述 | Skills | Agents | Commands | Rules |
 |-----|---------------------|--------|--------|----------|-------|
 | **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 39 | 6 | 6 | 6 |
-| **frontend** | Next.js + Tailwind v4 + React + TypeScript / 前端全栈 | 16 | 3 | 3 | 6 |
+| **frontend** | Next.js + Supabase + TanStack Query frontend workflow / 前端迁移与接口对接 | 5 | 3 | 3 | 5 |
 | **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 21 | 3 | 1 | 0 |
 | **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
 
-> **79 skills total / 共 79 个技能**
+> **68 skills total / 共 68 个技能**
 
 ## Tech Stack / 技术栈
 
 | Kit | Stack |
 |-----|-------|
 | java | Java 21, Spring Boot 3.5.x, MyBatis-Plus, PostgreSQL 18+, Spring Cloud Alibaba (Nacos / Sentinel / RocketMQ), OpenFeign, JetCache + Redisson, Spring Security 6.x + JWT (JJWT 0.12.6), SpringDoc OpenAPI 2.8.6, JUnit 5 + Mockito + MockMvc + Testcontainers + JaCoCo |
-| frontend | Next.js 15 (App Router), React 19, TypeScript 5.x, Tailwind CSS v4, React Hook Form + Zod, Zustand, Vitest + Testing Library + Playwright |
+| frontend | Next.js 15 (App Router), React 19, Supabase, TanStack Query, TypeScript, HTML/CSS migration, API contracts, frontend quality gates |
 | agent | LangGraph, CrewAI, LlamaIndex, MCP (Model Context Protocol), Python 3.12+ |
 
 ## Installation / 安装
@@ -239,49 +239,37 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 
 | Skill | Description / 描述 |
 |-------|---------------------|
-| `nextjs-app-router` | Next.js 15 App Router (RSC, routes, metadata) / Next.js App Router 全栈 |
-| `typescript-react` | TypeScript + React patterns (hooks, types, components) / TS+React 类型与模式 |
-| `tailwind-v4` | Tailwind CSS v4 (theme, variants, migration from v3) / Tailwind v4 主题与迁移 |
-| `react-best-practices` | Performance, rendering, bundle optimization / React 性能与渲染优化 |
-| `react-composition` | Compound components, state lifting, API design / React 组合模式 |
-| `state-management` | Zustand, URL state, decision guide / 状态管理决策与 Zustand |
-| `data-fetching` | Server/client fetching, typed API, pagination / 数据获取与分页模式 |
-| `nextjs-supabase-template` | Next.js + Supabase auth starter template / Next.js + Supabase 认证项目模板 |
-| `forms-and-validation` | React Hook Form + Zod, server actions / 表单校验与 Server Actions |
-| `frontend-testing` | Vitest, Testing Library, Playwright E2E / 前端测试全栈 |
-| `frontend-debugging` | Type errors, hydration, effect bugs / 前端调试技巧 |
-| `frontend-code-review` | Review heuristics, anti-pattern fixes / 前端代码审查 |
-| `design-to-code` | Design spec → React component (Figma, screenshots) / 设计稿转组件 |
 | `html-css-nextjs-migration` | Native HTML/CSS temp/ migration to reusable Next.js design system / 原生 HTML/CSS 迁移为 Next.js 组件体系 |
-| `third-party-css-integration` | Copied CSS integration without prebuilt UI controls / 第三方 CSS 接入与自有组件 |
-| `web-design-audit` | Visual design quality audit / Web 视觉设计审计 |
+| `nextjs-supabase-template` | Latest official Next.js with-supabase starter workflow / Next.js + Supabase 认证项目模板 |
+| `tanstack-query` | TanStack Query v5 API integration, cache, mutations, infinite queries / TanStack Query 后端接口对接与缓存 |
+| `frontend-api-contracts` | OpenAPI, typed clients, validation, errors, env, mocks / 前端 API 合同与后端接口约定 |
+| `frontend-quality-gates` | Build, visual, responsive, accessibility, API-state checks / 前端交付质量门禁 |
 
 ### Frontend Agents / 前端智能体
 
 | Agent | Description / 描述 |
 |-------|---------------------|
-| `devkit:frontend:design-to-react` | Design-to-React conversion / 设计稿转 React 组件 |
-| `devkit:frontend:reviewer` | Frontend code review / 前端代码审查 |
-| `devkit:frontend:test` | Frontend testing / 前端测试 |
+| `devkit:frontend:migration` | HTML/CSS migration to Next.js / 原生前端迁移 |
+| `devkit:frontend:api` | Backend API integration / 后端接口对接 |
+| `devkit:frontend:quality` | Frontend quality verification / 前端质量验证 |
 
 ### Frontend Commands / 前端命令
 
 | Command | Description / 描述 |
 |---------|---------------------|
-| `/devkit.frontend-feature` | Implement a frontend feature / 实现前端功能 |
-| `/devkit.design-to-component` | Design spec → React component / 设计稿转组件 |
-| `/devkit.frontend-review` | Review frontend code / 审查前端代码 |
+| `/devkit.frontend-migrate` | Migrate temp/ HTML/CSS into Next.js / 迁移原生 HTML/CSS |
+| `/devkit.frontend-api` | Integrate backend APIs with TanStack Query / 对接后端接口 |
+| `/devkit.frontend-verify` | Run frontend quality gates / 执行前端质量门禁 |
 
 ### Frontend Rules / 前端规则
 
 | Rule | Applies to / 作用于 |
 |------|----------------------|
-| `react-conventions` | React component patterns / React 组件约定 |
-| `nextjs-conventions` | Next.js patterns / Next.js 约定 |
-| `tailwind-conventions` | Tailwind usage / Tailwind 使用约定 |
-| `typescript-react-conventions` | TypeScript + React types / TS+React 类型约定 |
-| `third-party-css-conventions` | Copied CSS and project-owned UI controls / 第三方 CSS 与自有 UI |
-| `common-coding-style` | General style / 通用编码风格 |
+| `html-css-migration-conventions` | HTML/CSS migration and design system reuse / 原生前端迁移约定 |
+| `nextjs-supabase-conventions` | Supabase auth/session boundaries / Supabase 认证边界 |
+| `tanstack-query-conventions` | TanStack Query server-state rules / TanStack Query 服务端状态约定 |
+| `api-contract-conventions` | API contracts, errors, env, validation / API 合同约定 |
+| `frontend-quality-gates` | Build, visual, responsive, accessibility checks / 前端质量门禁 |
 
 ---
 
@@ -364,8 +352,8 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 # Example: implement a Spring Boot feature / 示例：实现 Spring Boot 功能
 /devkit.feature Add user registration endpoint with JWT auth
 
-# Example: review frontend code / 示例：审查前端代码
-/devkit.frontend-review src/components/UserProfile.tsx
+# Example: migrate frontend HTML/CSS / 示例：迁移原生前端
+/devkit.frontend-migrate temp/
 
 # Example: build an AI agent / 示例：构建 AI 智能体
 /devkit.agent Build a RAG pipeline for document Q&A using LlamaIndex
