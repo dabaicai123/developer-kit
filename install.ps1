@@ -44,6 +44,26 @@ else {
     $RepoRoot = $Tmp
 }
 
+function Install-ProjectInstructions {
+    $agentsSource = Join-Path $RepoRoot "AGENTS.md"
+    $agentsTarget = Join-Path $Target "AGENTS.md"
+    if ((Test-Path $agentsSource) -and -not (Test-Path $agentsTarget)) {
+        Copy-Item -Force $agentsSource $agentsTarget
+        Write-Host "Added AGENTS.md -> $agentsTarget"
+    }
+
+    $claudeTarget = Join-Path $Target "CLAUDE.md"
+    $claudeContent = @(
+        "# CLAUDE.md",
+        "",
+        "Project instructions live in [AGENTS.md](AGENTS.md).",
+        "",
+        "Read and follow AGENTS.md before making changes in this repository."
+    ) -join "`n"
+    [IO.File]::WriteAllText($claudeTarget, $claudeContent + "`n", [Text.UTF8Encoding]::new($false))
+    Write-Host "Updated CLAUDE.md -> $claudeTarget"
+}
+
 function Install-KitForPlatform($name, $platform) {
     $src = Join-Path $RepoRoot "kits\$name"
     if (-not (Test-Path $src)) {
@@ -85,6 +105,8 @@ if ($Kit -eq "all") {
 else {
     Install-Kit $Kit
 }
+
+Install-ProjectInstructions
 
 if ($Tmp) {
     Remove-Item -Recurse -Force $Tmp

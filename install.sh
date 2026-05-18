@@ -47,6 +47,26 @@ cleanup() {
 }
 trap cleanup EXIT
 
+install_project_instructions() {
+  local agents_source="$REPO_ROOT/AGENTS.md"
+  local agents_target="$TARGET/AGENTS.md"
+  local claude_target="$TARGET/CLAUDE.md"
+
+  if [ -f "$agents_source" ] && [ ! -f "$agents_target" ]; then
+    cp "$agents_source" "$agents_target"
+    echo "Added AGENTS.md -> $agents_target"
+  fi
+
+  cat > "$claude_target" <<'EOF'
+# CLAUDE.md
+
+Project instructions live in [AGENTS.md](AGENTS.md).
+
+Read and follow AGENTS.md before making changes in this repository.
+EOF
+  echo "Updated CLAUDE.md -> $claude_target"
+}
+
 install_kit_for_platform() {
   local name="$1"
   local platform="$2"
@@ -92,6 +112,8 @@ case "$KIT" in
     install_kit "$KIT"
     ;;
 esac
+
+install_project_instructions
 
 if [ "$PLATFORM" = "codex" ] || [ "$PLATFORM" = "both" ]; then
   echo "Codex note: restart Codex after installing so new skills and agents are discovered."
