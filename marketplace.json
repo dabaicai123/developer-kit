@@ -24,12 +24,12 @@
     {
       "name": "developer-kit-frontend",
       "displayName": "Developer Kit - Frontend",
-      "description": "Focused Next.js frontend toolkit for Supabase project setup, native HTML/CSS migration, TanStack Query API integration, API contracts, and quality gates",
+      "description": "Focused Next.js frontend toolkit for Supabase project setup, multi-app proxy templates, native HTML/CSS migration, TanStack Query API integration, API contracts, and quality gates",
       "version": "1.0.0",
       "path": "kits/frontend",
       "author": "Internal Team",
       "license": "MIT",
-      "keywords": ["nextjs", "supabase", "tanstack-query", "frontend", "api"]
+      "keywords": ["nextjs", "supabase", "multi-app", "reverse-proxy", "tanstack-query", "frontend", "api"]
     },
     {
       "name": "developer-kit-agent",

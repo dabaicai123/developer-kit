@@ -9,18 +9,18 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 | Kit | Description / 描述 | Skills | Agents | Commands | Rules |
 |-----|---------------------|--------|--------|----------|-------|
 | **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 39 | 6 | 6 | 6 |
-| **frontend** | Next.js + Supabase + TanStack Query frontend workflow / 前端迁移与接口对接 | 5 | 3 | 3 | 5 |
+| **frontend** | Next.js + Supabase + TanStack Query frontend workflow / 前端迁移、接口对接与多应用代理 | 6 | 3 | 3 | 5 |
 | **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 21 | 3 | 1 | 0 |
 | **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
 
-> **68 skills total / 共 68 个技能**
+> **69 skills total / 共 69 个技能**
 
 ## Tech Stack / 技术栈
 
 | Kit | Stack |
 |-----|-------|
 | java | Java 21, Spring Boot 3.5.x, MyBatis-Plus, PostgreSQL 18+, Spring Cloud Alibaba (Nacos / Sentinel / RocketMQ), OpenFeign, JetCache + Redisson, Spring Security 6.x + JWT (JJWT 0.12.6), SpringDoc OpenAPI 2.8.6, JUnit 5 + Mockito + MockMvc + Testcontainers + JaCoCo |
-| frontend | Next.js 15 (App Router), React 19, Supabase, TanStack Query, TypeScript, HTML/CSS migration, API contracts, frontend quality gates |
+| frontend | Next.js 15 (App Router), React 19, Supabase, TanStack Query, TypeScript, HTML/CSS migration, API contracts, multi-app reverse proxy, frontend quality gates |
 | agent | LangGraph, CrewAI, LlamaIndex, MCP (Model Context Protocol), Python 3.12+ |
 
 ## Installation / 安装
@@ -241,6 +241,7 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 |-------|---------------------|
 | `html-css-nextjs-migration` | Native HTML/CSS temp/ migration to reusable Next.js design system / 原生 HTML/CSS 迁移为 Next.js 组件体系 |
 | `nextjs-supabase-template` | Latest official Next.js with-supabase starter workflow / Next.js + Supabase 认证项目模板 |
+| `nextjs-multi-app-proxy-template` | Main web gateway with independent child app reverse proxy / 主 Web 统一入口与独立子工程反向代理模板 |
 | `tanstack-query` | TanStack Query v5 API integration, cache, mutations, infinite queries / TanStack Query 后端接口对接与缓存 |
 | `frontend-api-contracts` | OpenAPI, typed clients, validation, errors, env, mocks / 前端 API 合同与后端接口约定 |
 | `frontend-quality-gates` | Build, visual, responsive, accessibility, API-state checks / 前端交付质量门禁 |
