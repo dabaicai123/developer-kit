@@ -313,9 +313,8 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 
 | Agent | Description / 描述 |
 |-------|---------------------|
-| `devkit:agent:core` | General agent system builder / 通用智能体系统构建专家 |
-| `devkit:agent:crewai` | CrewAI system builder / CrewAI 系统构建专家 |
-| `devkit:agent:rag` | RAG pipeline builder / RAG 管线构建专家 |
+| `devkit:agent:langgraph` | LangGraph system and RAG builder / LangGraph 系统与 RAG 构建专家 |
+| `devkit:agent:crewai` | CrewAI system and RAG builder / CrewAI 系统与 RAG 构建专家 |
 
 ### Agent Command / 智能体命令
 
