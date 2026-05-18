@@ -200,7 +200,9 @@ if (Test-Path "$KitPath\commands") {
     Get-ChildItem "$KitPath\commands" -Filter "*.md" | Copy-Item -Force -Destination "$TargetPath\commands\"
 }
 if (Test-Path "$KitPath\rules") {
-    Get-ChildItem "$KitPath\rules" -Filter "*.md" | Copy-Item -Force -Destination "$TargetPath\rules\"
+    Get-ChildItem "$KitPath\rules" -File |
+        Where-Object { $_.Extension -in @(".md", ".mdc") } |
+        Copy-Item -Force -Destination "$TargetPath\rules\"
 }
 
 Ensure-CodexAgentConfig $TargetPath

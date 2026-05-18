@@ -16,4 +16,8 @@ mkdir -p "$TARGET_PATH/skills" "$TARGET_PATH/agents" "$TARGET_PATH/commands" "$T
 [ -d "$KIT_PATH/skills" ] && cp -rf "$KIT_PATH/skills/"* "$TARGET_PATH/skills/" 2>/dev/null || true
 [ -d "$KIT_PATH/agents" ] && cp -f "$KIT_PATH/agents/"*.md "$TARGET_PATH/agents/" 2>/dev/null || true
 [ -d "$KIT_PATH/commands" ] && cp -f "$KIT_PATH/commands/"*.md "$TARGET_PATH/commands/" 2>/dev/null || true
-[ -d "$KIT_PATH/rules" ] && cp -f "$KIT_PATH/rules/"*.md "$TARGET_PATH/rules/" 2>/dev/null || true
+if [ -d "$KIT_PATH/rules" ]; then
+  for rule in "$KIT_PATH/rules/"*.md "$KIT_PATH/rules/"*.mdc; do
+    [ -e "$rule" ] && cp -f "$rule" "$TARGET_PATH/rules/"
+  done
+fi

@@ -10,10 +10,10 @@ Comprehensive development toolkit for Claude Code — Spring Boot / Next.js / AI
 |-----|---------------------|--------|--------|----------|-------|
 | **java** | Spring Boot 3.5 + MyBatis-Plus + Cloud + DDD / Spring Boot 全栈 | 39 | 6 | 6 | 6 |
 | **frontend** | Next.js + Supabase + TanStack Query frontend workflow / 前端迁移、接口对接与多应用代理 | 6 | 3 | 3 | 5 |
-| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 13 | 3 | 1 | 0 |
-| **base** | Language-agnostic utilities / 语言无关基础工具 | 3 | — | — | — |
+| **agent** | AI Agent / LangGraph / CrewAI / RAG / MCP / 智能体开发 | 14 | 2 | 1 | 0 |
+| **base** | Language-agnostic utilities / 语言无关基础工具 | 4 | — | — | 1 |
 
-> **61 skills total / 共 61 个技能**
+> **63 skills total / 共 63 个技能**
 
 ## Tech Stack / 技术栈
 
@@ -196,7 +196,6 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | `ddd-event-driven` | Event-driven DDD patterns / 事件驱动 DDD 模式 |
 | `docker-expert` | Docker patterns / Docker 模式 |
 | `graalvm-native-image` | GraalVM Native Image builds / GraalVM Native Image 构建 |
-| `architecture-decision-records` | ADR drafting / 架构决策记录 |
 
 ### Java Agents / Java 智能体
 
@@ -276,38 +275,24 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 
 ## Agent Kit / 智能体工具包
 
-### Core Agent Patterns / 智能体核心模式
+### Agent Skills / 智能体技能
 
 | Skill | Description / 描述 |
 |-------|---------------------|
-| `agent-prompt-engineering` | Prompt templates, system prompts / 提示词工程 |
-| `mem0` | Persistent memory for AI agents and apps / 智能体持久记忆 |
-| `agent-human-interaction` | Human-in-the-loop, escalation, clarification dialogs / 智能体人机交互模式 |
-| `agent-error-recovery` | Circuit breakers, retry, self-healing, fallback / 智能体容错与恢复模式 |
-
-### Observability & Operations / 可观测性与运营
-
-| Skill | Description / 描述 |
-|-------|---------------------|
-| `agent-evaluation` | Benchmarks, scoring, regression testing / 智能体评估 |
-| `agent-cost-optimization` | Token budgeting, model routing, LLM caching / 智能体成本优化 |
-
-### Safety & Quality / 安全与质量
-
-| Skill | Description / 描述 |
-|-------|---------------------|
-| `agent-guardrails` | Safety, validation, output filtering / 智能体安全护栏 |
-| `agent-testing-debugging` | Unit/integration testing, trajectory replay, mock LLMs / 智能体测试与调试 |
-
-### Multi-Agent & Frameworks / 多智能体与框架
-
-| Skill | Description / 描述 |
-|-------|---------------------|
-| `langgraph-python-template` | Official LangGraph Python project scaffolding / LangGraph Python 项目脚手架 |
-| `langgraph-persistence` | Official LangGraph persistence and memory skill / LangGraph 官方持久化与记忆 |
-| `design-agent` | Official CrewAI agent design skill / CrewAI 官方 Agent 设计 |
-| `crewai-python-template` | Official CrewAI project scaffolding / CrewAI 官方项目脚手架 |
-| `llamaindex-rag-patterns` | LlamaIndex RAG pipelines, chunking, retrieval / LlamaIndex RAG 管线模式 |
+| `agent-context-engineering` | Context engineering and multi-agent architecture patterns / 上下文工程与多智能体架构 |
+| `agent-prompt-engineering` | Prompt optimization frameworks and templates / 提示词优化框架与模板 |
+| `agentic-eval` | Agent evaluation workflows and quality checks / 智能体评估工作流 |
+| `crewai-python-template` | Official CrewAI crew and flow scaffolding / CrewAI 项目脚手架 |
+| `design-agent` | CrewAI agent role, goal, tools, and runtime configuration / CrewAI Agent 设计 |
+| `design-task` | CrewAI task dependencies, outputs, guardrails, and execution / CrewAI Task 设计 |
+| `eval-driven-dev` | Eval-driven development loop for agent systems / 智能体评估驱动开发 |
+| `getting-started` | CrewAI architecture decisions and starter flows / CrewAI 入门与架构选择 |
+| `langgraph-fundamentals` | LangGraph StateGraph, nodes, edges, and commands / LangGraph 基础 |
+| `langgraph-human-in-the-loop` | LangGraph interrupt, approval, and resume patterns / LangGraph 人机协同 |
+| `langgraph-persistence` | LangGraph checkpointers, stores, memory, and time travel / LangGraph 持久化与记忆 |
+| `langgraph-python-template` | Official LangGraph Python project templates / LangGraph Python 项目模板 |
+| `llamaindex-rag-patterns` | LlamaIndex ingestion, retrieval, query engines, and evaluation / LlamaIndex RAG 模式 |
+| `mem0` | Persistent memory for AI agents and applications / 智能体持久记忆 |
 
 ### Agent Agents / 智能体专用智能体
 
@@ -331,6 +316,7 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 | `create-readme` | Generate comprehensive README files / 生成项目 README |
 | `documentation-writer` | Write technical documentation / 编写技术文档 |
 | `git-commit` | Generate well-structured commit messages / 生成规范的 Git 提交信息 |
+| `grill-me` | Stress-test plans and designs with relentless questioning / 通过连续追问压测计划和设计 |
 
 ---
 
