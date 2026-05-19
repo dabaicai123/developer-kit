@@ -38,6 +38,17 @@ langgraph new path/to/app --template new-langgraph-project-python
 5. Inspect generated `pyproject.toml`, `langgraph.json`, `.env.example`, `src/`, and `tests/` before adding custom code.
 6. Keep generated layout intact unless a user requirement conflicts with it.
 
+## Generated File Roles
+
+When the official scaffold includes these files, keep their responsibilities narrow:
+
+- `context.py`: Runtime context, configurable values, and dependency settings passed into the graph.
+- `graph.py`: Graph construction, node wiring, edge routing, and compiled graph export.
+- `prompts.py`: Prompt constants, prompt templates, and small prompt rendering helpers.
+- `state.py`: Graph state, reducers, and state-only type definitions.
+- `tools.py`: Tool definitions exposed to the graph or LLM.
+- `utils.py`: Small LangGraph or model-loading helpers used by the scaffold.
+
 ## Required Adjustments
 
 - Add project-specific environment variables to `.env.example`, never real secrets.
