@@ -1,5 +1,5 @@
 ---
-name: prompt-engineer
+name: agent-prompt-engineering
 description: "Transforms user prompts into optimized prompts using frameworks (RTF, RISEN, Chain of Thought, RODES, Chain of Density, RACE, RISE, STAR, SOAP, CLEAR, GROW)"
 category: automation
 risk: safe
