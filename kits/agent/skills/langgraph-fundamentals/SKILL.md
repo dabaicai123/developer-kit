@@ -29,6 +29,18 @@ Follow these 5 steps when building a new graph:
 
 </design-methodology>
 
+<graph-safety>
+
+### Graph safety rules
+
+For any graph that can loop, define an explicit termination condition before coding the loop. Use a state field such as `iteration_count`, `attempt_count`, or `no_progress_count` only when the workflow can naturally revisit a node.
+
+Set `recursion_limit` in the invoke/stream config for looping or agentic graphs. Treat it as a final safety net, not as the primary control flow.
+
+Human approval is not required for every graph. Add human-in-the-loop checkpoints when the graph performs irreversible side effects, writes to external systems, spends significant budget, or crosses a business/security approval boundary.
+
+</graph-safety>
+
 <when-to-use-langgraph>
 
 | Use LangGraph When | Use Alternatives When |

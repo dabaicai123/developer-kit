@@ -4,6 +4,7 @@ description: "LangGraph specialist for graph scaffolds, StateGraph implementatio
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 model: sonnet
 skills:
+  - agentic-ai-dev
   - langgraph-python-template
   - langgraph-fundamentals
   - langgraph-persistence
@@ -34,6 +35,7 @@ Build and review LangGraph agent systems. Own graph scaffolding, StateGraph desi
 
 | Need | Skill |
 |---|---|
+| Production Python agent service patterns | `agentic-ai-dev` |
 | New LangGraph Python project | `langgraph-python-template` |
 | StateGraph nodes, edges, routing, streaming | `langgraph-fundamentals` |
 | Checkpoints, Store, thread memory, time travel | `langgraph-persistence` |

@@ -24,6 +24,19 @@ Three things are required for interrupts to work:
 
 ---
 
+## When To Require Approval
+
+Use human approval checkpoints for operations that are hard to undo or expensive to retry:
+
+- Writing to external systems, databases, tickets, calendars, or customer-facing channels.
+- Deleting, sending, purchasing, deploying, or changing permissions.
+- Running tools with high cost, broad data access, or security impact.
+- Continuing after low-confidence classification, weak retrieval evidence, or policy ambiguity.
+
+Do not add approval steps to every graph by default. Low-risk read-only workflows can stay fully automated with ordinary routing and error handling.
+
+---
+
 ## Basic Interrupt + Resume
 
 `interrupt(value)` pauses the graph. The value surfaces in the result under `__interrupt__`. `Command(resume=value)` resumes — the resume value becomes the return value of `interrupt()`.

@@ -281,6 +281,7 @@ Remove-Item -Recurse -Force .codex\skills, .codex\agents, .codex\commands, .code
 |-------|---------------------|
 | `agent-context-engineering` | Context engineering and multi-agent architecture patterns / 上下文工程与多智能体架构 |
 | `agent-prompt-engineering` | Prompt optimization frameworks and templates / 提示词优化框架与模板 |
+| `agentic-ai-dev` | Production Python agent service patterns and templates / 生产级 Python 智能体服务模式 |
 | `agentic-eval` | Agent evaluation workflows and quality checks / 智能体评估工作流 |
 | `crewai-python-template` | Official CrewAI crew and flow scaffolding / CrewAI 项目脚手架 |
 | `design-agent` | CrewAI agent role, goal, tools, and runtime configuration / CrewAI Agent 设计 |

@@ -137,6 +137,14 @@ def llm_judge(output_a: str, output_b: str, criteria: str) -> str:
     return llm(f"Compare outputs A and B for {criteria}. Which is better and why?")
 ```
 
+For production or high-stakes judging, control common evaluator biases:
+
+- **Position bias**: In pairwise comparisons, evaluate both A/B and B/A orderings, then remap and compare the winners.
+- **Self-enhancement bias**: Avoid using the same model family as both generator and judge when model-specific quality differences matter.
+- **Length bias**: Give the judge a rubric that rewards evidence and completeness, not verbosity.
+- **Rubric drift**: Define observable pass/fail criteria before running evaluation; avoid generic dimensions like "quality" without project-specific meaning.
+- **Low confidence**: Use a second judge or human review when scores disagree, the rubric is ambiguous, or the decision affects users.
+
 ### Rubric-Based
 Score outputs against weighted dimensions.
 

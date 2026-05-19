@@ -13,6 +13,7 @@ Use this command for LangGraph workflows, CrewAI scaffolds, RAG pipelines, conte
 
 | Task signal | Primary agent | Required skills |
 |---|---|---|
+| Production Python agent service, FastAPI wrapper, deployment hardening | `devkit:agent:langgraph` | `agentic-ai-dev` |
 | New LangGraph Python project or graph scaffold | `devkit:agent:langgraph` | `langgraph-python-template`, `langgraph-fundamentals` |
 | LangGraph graph code, state, streaming, routing, errors | `devkit:agent:langgraph` | `langgraph-fundamentals` |
 | LangGraph persistence, memory, time travel, checkpointers | `devkit:agent:langgraph` | `langgraph-persistence` |
@@ -46,6 +47,7 @@ If a task spans categories, choose the agent that owns the runtime framework and
 
 | Concern | Skill |
 |---|---|
+| Production Python agent service patterns | `agentic-ai-dev` |
 | Agent architecture and context engineering | `agent-context-engineering` |
 | LangGraph agent and workflow owner | `devkit:agent:langgraph` |
 | LangGraph Python scaffold | `langgraph-python-template` |
