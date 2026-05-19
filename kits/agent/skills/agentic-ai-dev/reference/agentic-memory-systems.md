@@ -1,4 +1,4 @@
-﻿# Agentic AI Memory Systems
+# Agentic AI Memory Systems
 
 7-layer memory hierarchy for AI agents. Layers 1-3 are practical and should be implemented in most production agents. Layers 4-7 are advanced research patterns.
 
@@ -57,13 +57,13 @@ async def create_checkpointer(*, use_memory: bool = False):
 # Build graph with checkpointer
 graph = build_react_agent(provider_factory, checkpointer=checkpointer)
 
-# Invoke with thread_id  - state persists across calls
+# Invoke with thread_id  -  state persists across calls
 config = {"configurable": {"thread_id": "user-123-conv-456"}}
 
 # First turn
 result1 = await graph.ainvoke({"messages": [HumanMessage(content="Hello")]}, config=config)
 
-# Second turn  - agent remembers the first turn
+# Second turn  -  agent remembers the first turn
 result2 = await graph.ainvoke({"messages": [HumanMessage(content="What did I just say?")]}, config=config)
 ```
 
@@ -297,7 +297,7 @@ async def trim_or_summarize(
     return trim_conversation(messages, max_tokens)
 ```
 
-## Advanced Layers (4-7)  - Research Patterns
+## Advanced Layers (4-7)  -  Research Patterns
 
 ### Layer 4: Temporal Graph Memory
 
@@ -343,12 +343,12 @@ async def trim_or_summarize(
 
 ## Parallel Multi-Layer Retrieval Pattern
 
-When an agent retrieves from multiple memory layers (e.g., semantic + episodic), running them sequentially wastes time  - each layer is independent. Use `asyncio.gather()` to run all layers concurrently.
+When an agent retrieves from multiple memory layers (e.g., semantic + episodic), running them sequentially wastes time  -  each layer is independent. Use `asyncio.gather()` to run all layers concurrently.
 
 **Measured performance (from weather-agent `manager.py`):**
-- Sequential retrieval: 15 - 0s (each layer waits for previous)
-- Parallel retrieval: 6 - 0s (independent layers run concurrently)
-- Improvement: 2 - x faster at the same correctness
+- Sequential retrieval: 15-30s (each layer waits for previous)
+- Parallel retrieval: 6-10s (independent layers run concurrently)
+- Improvement: 2-3x faster at the same correctness
 
 ### Core Pattern
 
@@ -358,12 +358,12 @@ import asyncio
 async def get_memory_context(user_id: str, session_id: str) -> dict:
     """Retrieve from multiple memory layers in parallel."""
 
-    # Step 1: Short-term context MUST be sequential  - required before long-term
+    # Step 1: Short-term context MUST be sequential  -  required before long-term
     session_context = await short_term.get_context(user_id, session_id)
     if not session_context:
         session_context = await short_term.create_context(user_id, session_id)
 
-    # Step 2: Build parallel tasks  - only enabled layers
+    # Step 2: Build parallel tasks  -  only enabled layers
     parallel_tasks: list[tuple[str, any]] = []
 
     if config.ENABLE_SEMANTIC_MEMORY:
@@ -381,7 +381,7 @@ async def get_memory_context(user_id: str, session_id: str) -> dict:
     if not parallel_tasks:
         return {"session": session_context}
 
-    # Step 3: Run all layers concurrently  - return_exceptions=True is critical
+    # Step 3: Run all layers concurrently  -  return_exceptions=True is critical
     task_names = [name for name, _ in parallel_tasks]
     task_coros = [coro for _, coro in parallel_tasks]
 
@@ -391,7 +391,7 @@ async def get_memory_context(user_id: str, session_id: str) -> dict:
     response = {"session": session_context}
     for task_name, result in zip(task_names, results):
         if isinstance(result, Exception):
-            # One layer failed  - continue with partial context
+            # One layer failed  -  continue with partial context
             logger.warning(f"Layer '{task_name}' failed: {result}. Using safe default.")
             response[task_name] = [] if task_name == "episodes" else None
         else:
@@ -408,21 +408,21 @@ Each layer wraps its coroutine in `asyncio.wait_for()`. This prevents a slow vec
 async def _retrieve_with_timeout(coro, timeout: float = 5.0):
     """Wrap any memory retrieval coroutine with timeout protection.
 
-    Returns safe default on timeout  - never raises. The caller (asyncio.gather)
+    Returns safe default on timeout  -  never raises. The caller (asyncio.gather)
     receives None/[] instead of a TimeoutError bubbling up.
     """
     try:
         return await asyncio.wait_for(coro, timeout=timeout)
     except TimeoutError:
         logger.warning(f"Memory retrieval timed out after {timeout}s")
-        return None   # Caller checks isinstance(result, Exception)  - None is safe
+        return None   # Caller checks isinstance(result, Exception)  -  None is safe
     except Exception as e:
         logger.error(f"Memory retrieval failed: {e}")
         raise          # Re-raise so asyncio.gather catches it as an exception
 ```
 
 **Why `return_exceptions=True` is required:**
-Without it, the first layer to fail cancels all other layers and raises immediately. With it, all layers run to completion (or timeout), and failures are returned as exception objects in the results list  - the caller handles them individually.
+Without it, the first layer to fail cancels all other layers and raises immediately. With it, all layers run to completion (or timeout), and failures are returned as exception objects in the results list  -  the caller handles them individually.
 
 ### Handling Partial Failures
 
@@ -461,15 +461,15 @@ async def memory_retrieval_node(state: AgentState) -> dict:
     }
 ```
 
-State keys are set to `None`/`[]` rather than missing entirely  - downstream nodes can safely check truthiness without `KeyError`.
+State keys are set to `None`/`[]` rather than missing entirely  -  downstream nodes can safely check truthiness without `KeyError`.
 
 ### When to Use Parallel vs Sequential
 
 | Situation | Approach | Reason |
 |-----------|----------|--------|
 | Layers are independent (different stores) | Parallel | No data dependency between layers |
-| Layer B needs Layer A's output | Sequential | Dependency  - B cannot start until A completes |
-| Debugging  - isolate layer behavior | Sequential (feature flag) | Easier to trace which layer causes issues |
+| Layer B needs Layer A's output | Sequential | Dependency  -  B cannot start until A completes |
+| Debugging  -  isolate layer behavior | Sequential (feature flag) | Easier to trace which layer causes issues |
 | Single memory layer | No gather needed | `asyncio.gather` with one item adds overhead with no benefit |
 
 **Feature flag pattern (from weather-agent):** Keep a `MEMORY_PARALLEL_RETRIEVAL` config flag. Set to `False` in development to get clean sequential logs; `True` in production for performance. Fallback path must exist.
@@ -486,4 +486,4 @@ Never raise on timeout in a memory retrieval helper. Missing memory context degr
 "emotional"  -> None        # Agent uses neutral tone as default
 ```
 
-The agent's prompt template must handle `None`/empty gracefully  - check before interpolating memory context into the system prompt.
+The agent's prompt template must handle `None`/empty gracefully  -  check before interpolating memory context into the system prompt.

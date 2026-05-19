@@ -1,17 +1,17 @@
-﻿# Agentic AI Code Review Checklist
+# Agentic AI Code Review Checklist
 
 ## Issue Severity
 
 | Level | Criteria | Action |
 |-------|----------|--------|
-| P0  - Critical | Security vulnerability, data loss risk, infinite loop, production crash | BLOCK merge |
-| P1  - High | Missing error handling, no tests, cost risk, observability gap | REQUEST CHANGES |
-| P2  - Medium | Naming violation, missing docs, suboptimal pattern | REQUEST CHANGES |
-| P3  - Low | Style preference, minor optimization | COMMENT only |
+| P0  -  Critical | Security vulnerability, data loss risk, infinite loop, production crash | BLOCK merge |
+| P1  -  High | Missing error handling, no tests, cost risk, observability gap | REQUEST CHANGES |
+| P2  -  Medium | Naming violation, missing docs, suboptimal pattern | REQUEST CHANGES |
+| P3  -  Low | Style preference, minor optimization | COMMENT only |
 
 ## Review Areas
 
-### P0  - Critical
+### P0  -  Critical
 
 **1. Graph Correctness**
 - State uses `TypedDict` (not `dict[str, Any]`)
@@ -41,7 +41,7 @@
 
 **4. Error Handling**
 - Error counter in state + fallback node when budget exhausted
-- Provider fallback chain configured (primary  -> secondary  -> fast)
+- Provider fallback chain configured (primary -> secondary -> fast)
 - Structured error responses in API (no raw exception messages)
 - No empty `except: pass` blocks
 - No silent empty returns on error (e.g., `return []`)
@@ -53,7 +53,7 @@
 - `.env` file in `.gitignore`
 - Secrets loaded via pydantic-settings with validation
 
-### P1  - High
+### P1  -  High
 
 **6. Cost Management**
 - Model selection matches task complexity (not using opus for classification)
@@ -68,7 +68,7 @@
 - Iteration limit test exists (agent stops at max iterations)
 - Error recovery test exists (agent handles LLM/tool errors)
 - RAG tests exist if RAG is implemented (retrieval quality, groundedness)
-- All tests use `MemorySaver`  - none connect to real databases
+- All tests use `MemorySaver`  -  none connect to real databases
 - Test coverage >= 80% for agent graphs, >= 90% for guardrails
 
 **8. Observability**
@@ -77,14 +77,14 @@
 - Prometheus metrics for latency, token usage, errors, cost
 - Health check endpoint pings all dependencies
 
-### P2  - Medium
+### P2  -  Medium
 
 **9. Architecture**
-- Clean separation: routes  -> graphs  -> tools  -> services
+- Clean separation: routes -> graphs -> tools -> services
 - LLM instantiation via factory function (not inline)
 - Configuration via pydantic-settings (not `os.getenv()`)
 - All I/O operations are `async def`
-- Import order: stdlib  -> third-party  -> langchain  -> local
+- Import order: stdlib -> third-party -> langchain -> local
 
 **10. Documentation**
 - Agent purpose documented (what it does, when to use it)
@@ -131,11 +131,11 @@ For each issue found:
 ## Reference
 
 Consult the `agentic-ai-dev` skill reference files for expected patterns:
-- `agentic-templates-basic.md`  - ReAct, Multi-Agent patterns
-- `agentic-templates-advanced.md`  - Supervisor, Command, Sub-Graph patterns
-- `agentic-templates-resilience.md`  - Error Recovery, design decisions
-- `agentic-templates-tools.md`  - Tool patterns
-- `agentic-guardrails-security.md`  - Security patterns
-- `agentic-testing.md`  - Test patterns
-- `agentic-observability.md`  - Observability patterns
-- `agentic-standards-examples.md`  - Anti-pattern reference
+- `agentic-templates-basic.md`  -  ReAct, Multi-Agent patterns
+- `agentic-templates-advanced.md`  -  Supervisor, Command, Sub-Graph patterns
+- `agentic-templates-resilience.md`  -  Error Recovery, design decisions
+- `agentic-templates-tools.md`  -  Tool patterns
+- `agentic-guardrails-security.md`  -  Security patterns
+- `agentic-testing.md`  -  Test patterns
+- `agentic-observability.md`  -  Observability patterns
+- `agentic-standards-examples.md`  -  Anti-pattern reference

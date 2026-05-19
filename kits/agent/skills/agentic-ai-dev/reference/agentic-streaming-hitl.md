@@ -1,4 +1,4 @@
-﻿# Agentic AI Streaming & Human-in-the-Loop
+# Agentic AI Streaming & Human-in-the-Loop
 
 Patterns for real-time token streaming and human approval workflows in LangGraph agents.
 
@@ -68,7 +68,7 @@ async def stream_events(graph, message: str, thread_id: str):
 
 ## State Update Streaming
 
-Stream state updates as each node completes  - useful for progress tracking.
+Stream state updates as each node completes  -  useful for progress tracking.
 
 ```python
 async def stream_state_updates(graph, message: str, thread_id: str):
@@ -181,7 +181,7 @@ def build_hitl_agent(provider_factory, checkpointer):
         return {"messages": [response], "iteration_count": state["iteration_count"] + 1}
 
     async def approval_node(state: AgentState) -> dict:
-        """This node is interrupted  - execution pauses here for human input."""
+        """This node is interrupted  -  execution pauses here for human input."""
         # When resumed, the human's approval/rejection is in the latest message
         last_message = state["messages"][-1]
         if hasattr(last_message, 'content') and "approved" in last_message.content.lower():
@@ -198,7 +198,7 @@ def build_hitl_agent(provider_factory, checkpointer):
     graph.add_edge("approval", "tools")
     graph.add_edge("tools", "agent")
 
-    # Interrupt BEFORE the approval node  - graph pauses here
+    # Interrupt BEFORE the approval node  -  graph pauses here
     return graph.compile(
         checkpointer=checkpointer,
         interrupt_before=["approval"],
@@ -208,7 +208,7 @@ def build_hitl_agent(provider_factory, checkpointer):
 ### Resuming After Approval
 
 ```python
-# Step 1: Invoke  - graph pauses at approval node
+# Step 1: Invoke  -  graph pauses at approval node
 config = {"configurable": {"thread_id": "thread-123"}}
 result = await graph.ainvoke(
     {"messages": [HumanMessage(content="Delete all old records")]},
@@ -301,6 +301,6 @@ class ApprovalManager:
 | SSE format | Always use `data: {json}\n\n` format |
 | Error events | Stream errors as events, don't break the connection |
 | HITL | Use `interrupt_before` for approval, never `interrupt_after` |
-| Checkpointing | HITL requires a checkpointer  - state must persist while waiting |
-| Timeouts | Always set approval timeouts  - never block indefinitely |
+| Checkpointing | HITL requires a checkpointer  -  state must persist while waiting |
+| Timeouts | Always set approval timeouts  -  never block indefinitely |
 | Buffering | Disable proxy buffering (`X-Accel-Buffering: no`) |

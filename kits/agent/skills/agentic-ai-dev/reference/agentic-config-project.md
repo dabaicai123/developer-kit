@@ -1,4 +1,4 @@
-﻿# Agentic AI Project Configuration
+# Agentic AI Project Configuration
 
 ## pyproject.toml
 
@@ -145,7 +145,7 @@ class Settings(BaseSettings):
     """Application settings with fail-fast validation.
 
     All required fields MUST be set via environment variables or .env file.
-    Missing values cause immediate startup failure  - no silent defaults for secrets.
+    Missing values cause immediate startup failure  -  no silent defaults for secrets.
     """
 
     model_config = SettingsConfigDict(
@@ -180,6 +180,7 @@ class Settings(BaseSettings):
     max_iterations: int = 25
     token_budget: int = 4096
 
+
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, v: str) -> str:
@@ -195,7 +196,7 @@ class Settings(BaseSettings):
         return v
 
 
-# Singleton  - import this everywhere
+# Singleton  -  import this everywhere
 settings = Settings()  # type: ignore[call-arg]
 ```
 

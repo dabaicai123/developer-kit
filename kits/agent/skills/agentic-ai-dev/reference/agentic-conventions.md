@@ -1,4 +1,4 @@
-﻿# Agentic AI Conventions & Rules
+# Agentic AI Conventions & Rules
 
 ## Package Layout
 
@@ -53,11 +53,11 @@ src/<service_name>/
 
 ## FastAPI Integration Rules
 
-1. **All endpoints are `async def`**  - never block the event loop
-2. **Use `Depends()` for agent graph injection**  - configure in lifespan, inject via dependency
-3. **Use `StreamingResponse` with `text/event-stream`**  - for streaming agent responses
-4. **Include `/api/v1/health`**  - ping LLM providers, DB, vector store
-5. **Propagate `thread_id`** from request to graph config  - enables conversation continuity
+1. **All endpoints are `async def`**  -  never block the event loop
+2. **Use `Depends()` for agent graph injection**  -  configure in lifespan, inject via dependency
+3. **Use `StreamingResponse` with `text/event-stream`**  -  for streaming agent responses
+4. **Include `/api/v1/health`**  -  ping LLM providers, DB, vector store
+5. **Propagate `thread_id`** from request to graph config  -  enables conversation continuity
 
 ## LangGraph Agent Implementation Checklist
 

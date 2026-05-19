@@ -1,6 +1,6 @@
-﻿# Agentic AI Makefile Patterns
+# Agentic AI Makefile Patterns
 
-Makefile command reference for agentic AI services using `uv`, pytest, Docker Compose, and a full observability stack. Patterns sourced from weather-ai-agent-service. **Adapt command names and targets to your project  - these are from the weather-ai-agent-service reference.**
+Makefile command reference for agentic AI services using `uv`, pytest, Docker Compose, and a full observability stack. Patterns sourced from weather-ai-agent-service. **Adapt command names and targets to your project  -  these are from the weather-ai-agent-service reference.**
 
 ## Quick Start (5 Most Important Commands)
 
@@ -34,7 +34,7 @@ lock:         ## Generate/update uv.lock file without installing
     uv lock
 ```
 
-All script execution goes through `uv run`  - never call `python` directly in Makefiles. This ensures the correct virtual environment is always used:
+All script execution goes through `uv run`  -  never call `python` directly in Makefiles. This ensures the correct virtual environment is always used:
 
 ```makefile
 verify:
@@ -56,14 +56,14 @@ type-check:
 
 | Command | What It Does |
 |---------|-------------|
-| `make install` | `uv sync --no-dev`  - production deps only |
-| `make install-dev` | `uv sync`  - all deps including ruff, mypy, pytest |
+| `make install` | `uv sync --no-dev`  -  production deps only |
+| `make install-dev` | `uv sync`  -  all deps including ruff, mypy, pytest |
 | `make sync` | Re-sync deps after changing `pyproject.toml` |
-| `make update` | `uv lock --upgrade && uv sync`  - bump to latest compatible versions |
-| `make lock` | `uv lock`  - regenerate lockfile without installing |
-| `make verify` | `uv run python verify_setup.py`  - 8 automated checks |
+| `make update` | `uv lock --upgrade && uv sync`  -  bump to latest compatible versions |
+| `make lock` | `uv lock`  -  regenerate lockfile without installing |
+| `make verify` | `uv run python verify_setup.py`  -  8 automated checks |
 | `make version` | Print all installed library versions |
-| `make quickstart` | `install-dev + version + verify`  - new developer onboarding |
+| `make quickstart` | `install-dev + version + verify`  -  new developer onboarding |
 | `make dev` | Alias for `install-dev` + prints next steps |
 | `make clean` | Remove `__pycache__`, `.pyc`, `.pytest_cache`, `htmlcov`, `.coverage` |
 
@@ -106,7 +106,7 @@ uv run python scripts/run_batch_evaluation.py --category=hurricane
 | Command | What It Does |
 |---------|-------------|
 | `make rag-validate` | Validate datasets before loading (dry run) |
-| `make rag-load` | Full load: validate + curated docs + datasets  -> Qdrant |
+| `make rag-load` | Full load: validate + curated docs + datasets -> Qdrant |
 | `make rag-load-curated-only` | Load only curated docs, skip large datasets |
 | `make rag-load-skip-validation` | Load without pre-validation (faster, less safe) |
 | `make rag-test` | Run 3 similarity search tests against loaded knowledge base |
@@ -148,10 +148,10 @@ REDIS_CONTAINER=$$(docker ps --format '{{.Names}}' | grep 'weather-ai-redis' | h
 |---------|-------------|
 | `make eval-upload-dataset` | Upload golden dataset to LangSmith |
 | `make eval-run-batch` | Run full batch evaluation (all test cases) |
-| `make eval-check-gates` | Check quality gates: pass rate 鈮?5%, safety violations = 0 |
+| `make eval-check-gates` | Check quality gates: pass rate >=85%, safety violations = 0 |
 | `make eval-quick` | Quick smoke test: `--max-cases=10` |
 | `make eval-category CATEGORY=hurricane` | Run one category (simple/complex/hurricane/edge) |
-| `make eval-full` | Full pipeline: upload  -> run  -> check gates |
+| `make eval-full` | Full pipeline: upload -> run -> check gates |
 | `make eval-level6` | Run advanced evaluation (BLEU/ROUGE, Snapshot, Retrieval, RAGAS, AgentBench) |
 | `make eval-bleu-rouge` | BLEU/ROUGE evaluation only |
 | `make eval-ragas` | RAGAS Context Recall evaluation only |
@@ -165,10 +165,10 @@ eval-category:
 ```
 
 **Quality gate thresholds** (from `eval-check-gates` target):
-- Pass rate: 鈮?5%
-- Effectiveness: 鈮?5%
-- Efficiency: 鈮?0%
-- Robustness: 鈮?0%
+- Pass rate: >=85%
+- Effectiveness: >=85%
+- Efficiency: >=80%
+- Robustness: >=80%
 - Safety violations: 0 (zero tolerance)
 
 **Source:** Makefile lines 411-537.
@@ -252,7 +252,7 @@ sum(rate(agent_query_cost_dollars[1h]))
 
 | Command | What It Does |
 |---------|-------------|
-| `make cache-stats` | `GET /cache/stats`  - JSON stats for all tiers |
+| `make cache-stats` | `GET /cache/stats`  -  JSON stats for all tiers |
 | `make cache-metrics` | Query Prometheus for hit rate, miss rate, cost savings |
 | `make cache-clear` | Destructive: `POST /cache/clear` (prompts for confirmation) |
 | `make cache-test-semantic` | Send two similar queries, verify Q3 cache tier appears in response |

@@ -1,6 +1,6 @@
-﻿# Agentic AI  - Advanced Agent Patterns
+# Agentic AI  -  Advanced Agent Patterns
 
-Advanced LangGraph agent patterns  - hierarchical supervision, Command-based routing, and sub-graph composition.
+Advanced LangGraph agent patterns  -  hierarchical supervision, Command-based routing, and sub-graph composition.
 
 ## Pattern 3: Hierarchical Supervisor
 
@@ -69,7 +69,7 @@ def build_supervisor_agent(
         )
 
     async def researcher_node(state: MultiAgentState) -> Command:
-        """Research specialist  - returns to supervisor for review."""
+        """Research specialist  -  returns to supervisor for review."""
         response = await llm.ainvoke([
             SystemMessage(content="You are a research specialist. Provide thorough, factual research."),
             *state["messages"],
@@ -80,7 +80,7 @@ def build_supervisor_agent(
         )
 
     async def coder_node(state: MultiAgentState) -> Command:
-        """Coding specialist  - returns to supervisor for review."""
+        """Coding specialist  -  returns to supervisor for review."""
         response = await llm.ainvoke([
             SystemMessage(content="You are a coding specialist. Write clean, tested, production code."),
             *state["messages"],
@@ -91,7 +91,7 @@ def build_supervisor_agent(
         )
 
     async def reviewer_node(state: MultiAgentState) -> Command:
-        """Review specialist  - returns to supervisor with feedback."""
+        """Review specialist  -  returns to supervisor with feedback."""
         response = await llm.ainvoke([
             SystemMessage(content="You are a code reviewer. Review for correctness, security, and style."),
             *state["messages"],
@@ -110,7 +110,7 @@ def build_supervisor_agent(
     graph.add_node("reviewer", reviewer_node)
 
     graph.set_entry_point("supervisor")
-    # Edges are handled by Command returns  - no explicit conditional edges needed
+    # Edges are handled by Command returns  -  no explicit conditional edges needed
 
     return graph.compile(checkpointer=checkpointer)
 
@@ -128,7 +128,7 @@ class SupervisorDecision(BaseModel):
 
 ## Pattern 4: LangGraph Command Pattern
 
-The preferred routing pattern in LangGraph  - cleaner than conditional edges for complex flows.
+The preferred routing pattern in LangGraph  -  cleaner than conditional edges for complex flows.
 
 ```python
 from langgraph.types import Command
@@ -136,7 +136,7 @@ from langgraph.types import Command
 # Instead of conditional edges, nodes return Command objects
 
 async def triage_node(state: AgentState) -> Command:
-    """Route using Command pattern  - cleaner than conditional edges."""
+    """Route using Command pattern  -  cleaner than conditional edges."""
     analysis = await llm.ainvoke([
         SystemMessage(content="Classify this request: technical, billing, or general"),
         *state["messages"],
@@ -152,14 +152,14 @@ async def triage_node(state: AgentState) -> Command:
         },
     )
 
-# Graph setup  - no conditional edges needed
+# Graph setup  -  no conditional edges needed
 graph = StateGraph(AgentState)
 graph.add_node("triage", triage_node)
 graph.add_node("technical", technical_node)
 graph.add_node("billing", billing_node)
 graph.add_node("general", general_node)
 graph.set_entry_point("triage")
-# Command handles all routing  - just add edges back to triage if needed
+# Command handles all routing  -  just add edges back to triage if needed
 graph.add_edge("technical", END)
 graph.add_edge("billing", END)
 graph.add_edge("general", END)

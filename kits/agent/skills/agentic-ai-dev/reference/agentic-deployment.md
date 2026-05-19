@@ -1,4 +1,4 @@
-﻿# Agentic AI Deployment
+# Agentic AI Deployment
 
 Docker, docker-compose, production configuration, health checks, and operational patterns.
 
@@ -8,7 +8,7 @@ Docker, docker-compose, production configuration, health checks, and operational
 
 ```dockerfile
 # ============================================
-# Stage 1: Builder  - install dependencies
+# Stage 1: Builder  -  install dependencies
 # ============================================
 FROM python:3.12-slim AS builder
 
@@ -27,7 +27,7 @@ RUN uv sync --no-dev --frozen
 COPY src/ src/
 
 # ============================================
-# Stage 2: Runtime  - minimal production image
+# Stage 2: Runtime  -  minimal production image
 # ============================================
 FROM python:3.12-slim AS runtime
 
@@ -268,7 +268,7 @@ logger = get_logger(__name__)
 
 
 async def graceful_shutdown(app):
-    """Handle graceful shutdown  - drain connections, flush metrics."""
+    """Handle graceful shutdown  -  drain connections, flush metrics."""
     logger.info("shutdown_initiated")
 
     # 1. Stop accepting new requests (handled by gunicorn)
@@ -347,7 +347,7 @@ class SecretManager:
         return self._primary
 
     def rotate(self, new_key: str) -> None:
-        """Rotate to new key  - old key becomes secondary."""
+        """Rotate to new key  -  old key becomes secondary."""
         self._secondary = self._primary
         self._primary = new_key
         logger.info("api_key_rotated", key_prefix=new_key[:10] + "...")

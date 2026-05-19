@@ -1,4 +1,4 @@
-﻿# Agentic AI RAG Architectures
+# Agentic AI RAG Architectures
 
 Six production-ready RAG patterns from simple to advanced, plus document ingestion pipeline.
 
@@ -208,7 +208,7 @@ def build_self_rag(llm, retriever, checkpointer=None):
             return "retrieve"  # Re-retrieve and regenerate
         return "check_answer"
 
-    # Compose into graph with: retrieve  -> grade  -> generate  -> check_hallucination  -> check_answer  -> END
+    # Compose into graph with: retrieve -> grade -> generate -> check_hallucination -> check_answer -> END
 ```
 
 ## Pattern 4: Graph RAG
@@ -229,7 +229,7 @@ async def graph_rag_retrieve(query: str, graph_db, llm) -> list[dict]:
 
 ## Pattern 5: HyDE RAG
 
-Hypothetical Document Embeddings  - generate a hypothetical answer, embed it, use for retrieval.
+Hypothetical Document Embeddings  -  generate a hypothetical answer, embed it, use for retrieval.
 
 ```python
 async def hyde_retrieve(query: str, llm, embeddings, vector_store) -> list:
@@ -260,7 +260,7 @@ class QueryDecomposition(BaseModel):
 
 
 async def multi_step_retrieve(query: str, llm, retriever) -> list:
-    """Decompose query  -> parallel retrieval  -> merge results."""
+    """Decompose query -> parallel retrieval -> merge results."""
     import asyncio
 
     # Step 1: Decompose
@@ -302,7 +302,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 def build_ingestion_pipeline(embeddings, vector_store):
-    """Build a document ingestion pipeline: load  -> split  -> embed  -> index."""
+    """Build a document ingestion pipeline: load -> split -> embed -> index."""
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,

@@ -1,4 +1,4 @@
-﻿# Agentic AI Prompt Engineering
+# Agentic AI Prompt Engineering
 
 Advanced prompting techniques, structured output patterns, system prompt templates, and context engineering.
 
@@ -85,7 +85,7 @@ You have access to the following tools:
 
 ## Rules
 1. Always use tools when you need current or specific information.
-2. Never guess  - if you don't know, use a tool or say "I don't know."
+2. Never guess  -  if you don't know, use a tool or say "I don't know."
 3. Think step-by-step before acting.
 4. If a tool fails, explain what happened and try an alternative approach.
 5. Always cite your sources when providing information from tools.
@@ -131,7 +131,7 @@ ROUTER_SYSTEM_PROMPT = """You are a request classifier. Your job is to route use
 1. Analyze the user's intent, not just keywords.
 2. If the request spans multiple domains, choose the primary one.
 3. If you're uncertain, choose the most general specialist.
-4. NEVER try to answer the question yourself  - always route.
+4. NEVER try to answer the question yourself  -  always route.
 
 Respond with the specialist name only.
 """
@@ -304,7 +304,7 @@ def assemble_context(
 
 
 def estimate_tokens(text: str) -> int:
-    """Rough token estimate: 1 token 鈮?4 characters."""
+    """Rough token estimate: 1 token ~= 4 characters."""
     return len(text) // 4
 ```
 
@@ -322,17 +322,17 @@ def estimate_tokens(text: str) -> int:
 
 ---
 
-## Prompt Frameworks  - 11-Framework Selection Guide
+## Prompt Frameworks  -  11-Framework Selection Guide
 
 When writing system prompts or agent instructions, select the framework that matches the task type. These frameworks apply to both LangGraph `SystemMessage` content and Google ADK `instruction=` parameters.
 
 | Framework | Best For | Structure |
 |-----------|----------|-----------|
-| **RTF** (Role-Task-Format) | Role-based expert tasks | Role  -> Task  -> Output Format |
-| **Chain of Thought** | Step-by-step reasoning, debugging, math | Problem  -> Step 1  -> Step 2  -> ...  -> Conclusion |
+| **RTF** (Role-Task-Format) | Role-based expert tasks | Role -> Task -> Output Format |
+| **Chain of Thought** | Step-by-step reasoning, debugging, math | Problem -> Step 1 -> Step 2 -> ... -> Conclusion |
 | **RISEN** | Multi-phase projects with deliverables | Role, Instructions, Steps, End goal, Narrowing |
 | **RODES** | Complex design and system architecture | Role, Objective, Details, Examples, Sense check |
-| **Chain of Density** | Summarization and compression | Verbose  -> Iterative compression  -> Dense summary |
+| **Chain of Density** | Summarization and compression | Verbose -> Iterative compression -> Dense summary |
 | **RACE** | Communication, presentations, stakeholders | Role, Audience, Context, Expectation |
 | **RISE** | Analysis, investigation, research | Research, Investigate, Synthesize, Evaluate |
 | **STAR** | Problem-solving with rich context | Situation, Task, Action, Result |
@@ -352,7 +352,7 @@ Combine 2-3 frameworks when the task spans multiple types:
 | Incident investigation | RISE | SOAP | Systematic analysis + structured documentation |
 | Leadership decision | CLEAR | GROW | Measurable goals + action commitment |
 
-### RTF Example  - LangGraph
+### RTF Example  -  LangGraph
 
 ```python
 from langchain_core.messages import SystemMessage
@@ -363,13 +363,13 @@ Task: Review the provided code for correctness, performance, and security issues
 
 Format:
 **Issues Found:**
-- [Line X] [SEVERITY] Description  - Fix: suggested fix
+- [Line X] [SEVERITY] Description  -  Fix: suggested fix
 
 **Summary:** [Total issues: N critical, M warnings]
-**Recommendation:** [One sentence  - merge/revise/reject]""")
+**Recommendation:** [One sentence  -  merge/revise/reject]""")
 ```
 
-### RTF Example  - Google ADK
+### RTF Example  -  Google ADK
 
 ```python
 from google.adk.agents import LlmAgent
@@ -383,7 +383,7 @@ Format: Issues (line, severity, description, fix), Summary (N critical, M warnin
 )
 ```
 
-### RODES + CoT Example  - Complex Agent Design
+### RODES + CoT Example  -  Complex Agent Design
 
 ```python
 ARCHITECTURE_SYSTEM = SystemMessage(content="""Role: You are a distributed systems architect.
@@ -412,15 +412,15 @@ Sense Check: Validate that the design handles the stated load, meets latency tar
 
 ```
 What is the primary nature of the task?
-鈹溾攢鈹€ Expert role + specific output  -> RTF
-鈹溾攢鈹€ Step-by-step reasoning needed  -> Chain of Thought
-鈹溾攢鈹€ Multi-phase project  -> RISEN
-鈹溾攢鈹€ Complex design/architecture  -> RODES (+ CoT)
-鈹溾攢鈹€ Summarize/compress  -> Chain of Density
-鈹溾攢鈹€ Stakeholder communication  -> RACE
-鈹溾攢鈹€ Research/analysis  -> RISE
-鈹溾攢鈹€ Problem with rich context  -> STAR
-鈹溾攢鈹€ Structured documentation  -> SOAP
-鈹溾攢鈹€ Goal/OKR setting  -> CLEAR
-鈹斺攢鈹€ Coaching/development  -> GROW
++-- Expert role + specific output -> RTF
++-- Step-by-step reasoning needed -> Chain of Thought
++-- Multi-phase project -> RISEN
++-- Complex design/architecture -> RODES (+ CoT)
++-- Summarize/compress -> Chain of Density
++-- Stakeholder communication -> RACE
++-- Research/analysis -> RISE
++-- Problem with rich context -> STAR
++-- Structured documentation -> SOAP
++-- Goal/OKR setting -> CLEAR
+`-- Coaching/development -> GROW
 ```

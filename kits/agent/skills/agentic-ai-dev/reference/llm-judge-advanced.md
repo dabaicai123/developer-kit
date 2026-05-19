@@ -1,6 +1,6 @@
-﻿# LLM-as-Judge Advanced  - Production Reliability & Bias Mitigation
+# LLM-as-Judge Advanced  -  Production Reliability & Bias Mitigation
 
-> This file covers production-grade LLM-as-Judge techniques beyond the basic `evaluate_with_judge()` in `agentic-prompt-optimization.md`. Do NOT duplicate the basic judge  - this file is exclusively about reliability and bias mitigation.
+> This file covers production-grade LLM-as-Judge techniques beyond the basic `evaluate_with_judge()` in `agentic-prompt-optimization.md`. Do NOT duplicate the basic judge  -  this file is exclusively about reliability and bias mitigation.
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Bias Type | Description | Symptom | Mitigation |
 |-----------|-------------|---------|-----------|
-| Position Bias | First-position response preferred | Response A always "wins" in pairwise | Position swap protocol  - always evaluate twice |
+| Position Bias | First-position response preferred | Response A always "wins" in pairwise | Position swap protocol  -  always evaluate twice |
 | Length Bias | Longer responses rated higher | Verbose answers outscore concise ones | Explicit prompt: "Do NOT prefer based on length"; length-normalized scoring |
 | Self-Enhancement Bias | Model rates own outputs higher | Claude judge rates Claude outputs better | Use different model for generation vs evaluation |
 | Verbosity Bias | Detailed explanations score higher regardless of accuracy | Padded responses outperform terse correct ones | Criteria-specific rubrics that penalize irrelevant detail |
@@ -84,7 +84,7 @@ async def pairwise_with_swap(
         ))
     ])
 
-    # Pass 2: B first (swap positions  - note winner must be remapped)
+    # Pass 2: B first (swap positions  -  note winner must be remapped)
     pass2_raw = await judge_llm.ainvoke([
         SystemMessage(content=PAIRWISE_SYSTEM.format(
             criteria="\n".join(f"- {c}" for c in criteria),
@@ -107,7 +107,7 @@ async def pairwise_with_swap(
             per_criterion=pass1.per_criterion,
         )
     else:
-        # Inconsistent  - return tie with low confidence
+        # Inconsistent  -  return tie with low confidence
         return PairwiseResult(
             winner="tie",
             confidence=0.5,
@@ -248,7 +248,7 @@ from pydantic import BaseModel
 from langchain_anthropic import ChatAnthropic
 
 
-# Panel of LLMs (PoLL)  - use multiple models for high-stakes evaluation
+# Panel of LLMs (PoLL)  -  use multiple models for high-stakes evaluation
 async def panel_evaluation(
     llms: list,  # e.g., [claude_llm, gemini_llm, gpt4_llm]
     response: str,
@@ -279,7 +279,7 @@ async def panel_evaluation(
     }
 
 
-# Hierarchical evaluation  - cheap screener + expensive deep eval
+# Hierarchical evaluation  -  cheap screener + expensive deep eval
 async def hierarchical_eval(
     fast_llm,      # e.g., gemini-flash or haiku
     deep_llm,      # e.g., <anthropic-reasoning-model> or <google-reasoning-model>
@@ -306,7 +306,7 @@ async def hierarchical_eval(
 
 ---
 
-## Section 6: Decision Framework  - Direct vs Pairwise
+## Section 6: Decision Framework  -  Direct vs Pairwise
 
 ```
 Is there an objective ground truth or clear criteria?

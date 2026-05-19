@@ -1,4 +1,4 @@
-﻿# Agentic AI Tool Patterns
+# Agentic AI Tool Patterns
 
 Patterns for defining, validating, and managing tools in LangGraph agents.
 
@@ -50,7 +50,7 @@ def calculator(expression: str) -> str:
         The result as a string.
     """
     try:
-        # Use ast.literal_eval or a safe math parser  - never eval()
+        # Use ast.literal_eval or a safe math parser  -  never eval()
         import ast
         result = ast.literal_eval(expression)
         return str(result)
@@ -108,7 +108,7 @@ async def call_external_api(endpoint: str, method: str = "GET", payload: str = "
 
     Args:
         endpoint: The API endpoint path (e.g., '/users/123').
-        method: HTTP method  - GET or POST only.
+        method: HTTP method  -  GET or POST only.
         payload: JSON string payload for POST requests.
 
     Returns:
@@ -291,9 +291,9 @@ INTEGRATION_TOOLS = [call_external_api]
 
 | Rule | Standard |
 |------|----------|
-| Docstrings | Every `@tool` MUST have a descriptive docstring  - LLMs read these to decide when to use tools |
-| Error handling | Every tool MUST have try/except  - return error string, never raise |
-| Return type | Always return `str`  - LLMs consume text |
+| Docstrings | Every `@tool` MUST have a descriptive docstring  -  LLMs read these to decide when to use tools |
+| Error handling | Every tool MUST have try/except  -  return error string, never raise |
+| Return type | Always return `str`  -  LLMs consume text |
 | Logging | Log every tool invocation and error with context |
 | Validation | Use `args_schema` for complex inputs |
 | Side effects | Tools that modify data MUST require HITL approval |

@@ -1,4 +1,4 @@
-﻿# Agentic AI Testing Patterns
+# Agentic AI Testing Patterns
 
 Comprehensive testing patterns for LangGraph agents, RAG systems, and FastAPI endpoints.
 
@@ -66,7 +66,7 @@ def mock_provider_factory(mock_llm):
 
 @pytest.fixture
 def memory_checkpointer():
-    """In-memory checkpointer for tests  - never use in production."""
+    """In-memory checkpointer for tests  -  never use in production."""
     return MemorySaver()
 
 
@@ -238,7 +238,7 @@ class TestResilience:
 
     async def test_agent_handles_tool_error(self, mock_provider_factory, memory_checkpointer, thread_id):
         """Agent should handle tool execution errors."""
-        # Tool returns error string (not exception  - tools should catch)
+        # Tool returns error string (not exception  -  tools should catch)
         mock_llm = mock_provider_factory.get_default()
         mock_llm.ainvoke.side_effect = [
             AIMessage(
@@ -278,7 +278,7 @@ class TestResilience:
             config=config,
         )
 
-        # Second turn  - should see previous messages
+        # Second turn  -  should see previous messages
         result = await graph.ainvoke(
             {"messages": [HumanMessage(content="What is my name?")]},
             config=config,
@@ -394,8 +394,8 @@ def mock_embeddings():
 
 | Rule | Standard |
 |------|----------|
-| Checkpointer | Always use `MemorySaver` in tests  - never connect to real DB |
-| LLM | Always mock LLM in unit tests  - use real LLM only in integration tests |
+| Checkpointer | Always use `MemorySaver` in tests  -  never connect to real DB |
+| LLM | Always mock LLM in unit tests  -  use real LLM only in integration tests |
 | Async | Use `pytest-asyncio` with `asyncio_mode = "auto"` |
 | Coverage | Minimum 80% for agent graphs, 90% for guardrails |
 | Required tests | invoke, tool usage, iteration limit, error recovery |

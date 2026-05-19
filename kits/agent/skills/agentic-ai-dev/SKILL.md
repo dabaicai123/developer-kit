@@ -1,4 +1,4 @@
-﻿---
+---
 name: agentic-ai-dev
 description: "This skill provides patterns and templates for building production AI agents with Python 3.12+, LangChain Core 1.4.0, LangGraph 1.2.0, and FastAPI 0.136.1. Use when creating AI agents, RAG systems, graph workflows, tools, memory systems, or agent tests."
 version: "1.0.0"
@@ -20,7 +20,7 @@ metadata:
 
 Do not ship agent graphs with unbounded loops. Add explicit iteration or progress limits to looping graphs, and add human approval checkpoints for irreversible, high-cost, or security-sensitive actions.
 
-# Agentic AI Development Skill  - Python 3.12+ + LangChain + LangGraph + FastAPI
+# Agentic AI Development Skill  -  Python 3.12+ + LangChain + LangGraph + FastAPI
 
 ## Quick Scaffold
 
@@ -35,16 +35,16 @@ uv add --dev pytest pytest-asyncio httpx ruff mypy
 
 ## Process
 
-1. **Scaffold**  - `uv init` + install dependencies
-2. **Configure**  - `core/config.py` with pydantic-settings, `.env`, structured logging
-3. **Define State**  - `TypedDict` with `Annotated[list, add_messages]` for each agent
-4. **Build Graph**  - `StateGraph` with typed nodes, conditional edges, checkpointing
-5. **Define Tools**  - `@tool` with docstrings, Pydantic input schemas, error handling
-6. **Add Memory**  - Checkpointing (PostgresSaver), semantic memory (vector store)
-7. **Add Guardrails**  - Input validation, prompt injection detection, output validation
-8. **Expose API**  - FastAPI routes for invoke/stream with `thread_id` propagation
-9. **Write Tests**  - Basic invoke, tool usage, iteration limit, error recovery, RAG quality
-10. **Deploy**  - Docker multi-stage, gunicorn + uvicorn, health checks, Prometheus
+1. **Scaffold**  -  `uv init` + install dependencies
+2. **Configure**  -  `core/config.py` with pydantic-settings, `.env`, structured logging
+3. **Define State**  -  `TypedDict` with `Annotated[list, add_messages]` for each agent
+4. **Build Graph**  -  `StateGraph` with typed nodes, conditional edges, checkpointing
+5. **Define Tools**  -  `@tool` with docstrings, Pydantic input schemas, error handling
+6. **Add Memory**  -  Checkpointing (PostgresSaver), semantic memory (vector store)
+7. **Add Guardrails**  -  Input validation, prompt injection detection, output validation
+8. **Expose API**  -  FastAPI routes for invoke/stream with `thread_id` propagation
+9. **Write Tests**  -  Basic invoke, tool usage, iteration limit, error recovery, RAG quality
+10. **Deploy**  -  Docker multi-stage, gunicorn + uvicorn, health checks, Prometheus
 
 ## Key Patterns
 
@@ -57,12 +57,12 @@ uv add --dev pytest pytest-asyncio httpx ruff mypy
 | Checkpointing | `PostgresSaver` (prod) / `MemorySaver` (test) | `agentic-memory-systems.md` |
 | Streaming | `astream()` + `stream_mode` + FastAPI SSE | `agentic-streaming-hitl.md` |
 | Human-in-the-Loop | `interrupt_before` + approval node | `agentic-streaming-hitl.md` |
-| RAG | Embeddings  -> Vector Store  -> Retriever  -> Reranker | `agentic-templates-rag.md` |
-| Guardrails | 12-layer pipeline: input  -> process  -> output | `agentic-guardrails-security.md` |
+| RAG | Embeddings -> Vector Store -> Retriever -> Reranker | `agentic-templates-rag.md` |
+| Guardrails | 12-layer pipeline: input -> process -> output | `agentic-guardrails-security.md` |
 | Structured Output | `.with_structured_output(PydanticModel)` | `agentic-prompt-engineering.md` |
 | Error Recovery | Retry node + fallback model + graceful degradation | `agentic-templates-resilience.md` |
 | Config | pydantic-settings + fail-fast validators | `agentic-config-project.md` |
-| Caching | 4-tier Q1 -> Q2 -> Q3 -> L3 with backfill; @cached_tool decorator | `agentic-caching-patterns.md` |
+| Caching | 4-tier Q1->Q2->Q3->L3 with backfill; @cached_tool decorator | `agentic-caching-patterns.md` |
 
 ## Conventions & Rules
 
@@ -100,11 +100,11 @@ Before generating code, consult these sources for current syntax and APIs:
 | `agentic-cost-optimization.md` | Cost management, budget caps, prompt optimization | Reducing LLM costs |
 | `agentic-prompt-engineering.md` | Advanced prompting, structured output, templates | Writing better prompts |
 | `agentic-error-handling.md` | Agent, tool, LLM provider, and API error handling patterns | Error handling in agents |
-| `agentic-review-checklist.md` | Agentic AI review checklist | Code reviews |
+| `agentic-review-checklist.md` | Agentic AI review checklist  | Code reviews |
 | `agentic-prompt-optimization.md` | Constitutional AI, Tree-of-Thoughts, model-specific templates (Claude/Gemini/GPT), prompt versioning registry, canary rollout, LLM-as-judge | Optimizing prompt quality; multi-model deployments; production prompt lifecycle |
 | `llm-judge-advanced.md` | Production LLM-as-Judge: bias taxonomy (position, length, self-enhancement), position swap protocol, rubric generation, PoLL ensemble, hierarchical eval | Evaluating agent outputs with reliability; high-stakes eval decisions |
-| `agentic-caching-patterns.md` | 4-tier cache (Q1 LRU -> Q2 Redis -> Q3 semantic -> L3 provider cache), backfill, @cached_tool decorator, cache key generation, Prometheus metrics | Adding caching to LangGraph agents |
-| `agentic-makefile-patterns.md` | 40+ Makefile commands for setup, testing, RAG, memory, evaluation, Docker, observability  - reference patterns for agentic AI services | Setting up developer workflow automation |
+| `agentic-caching-patterns.md` | 4-tier cache (Q1 LRU->Q2 Redis->Q3 semantic->L3 Anthropic), backfill, @cached_tool decorator, cache key generation, Prometheus metrics | Adding caching to LangGraph agents |
+| `agentic-makefile-patterns.md` | 40+ Makefile commands for setup, testing, RAG, memory, evaluation, Docker, observability  -  reference patterns for agentic AI services | Setting up developer workflow automation |
 
 ## Common Commands
 

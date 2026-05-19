@@ -178,7 +178,7 @@ class ValidationPipeline:
 
     def _check_token_budget(self, text: str, context: dict | None) -> GuardrailResult:
         """Layer 7: Enforce token budget limits."""
-        # Rough estimate: 1 token ≈ 4 chars
+        # Rough estimate: 1 token ~= 4 chars
         estimated_tokens = len(text) // 4
         budget = (context or {}).get("token_budget", 4096)
 

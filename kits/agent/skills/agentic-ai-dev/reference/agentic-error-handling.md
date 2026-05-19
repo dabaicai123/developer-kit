@@ -1,8 +1,8 @@
-﻿# Error Handling Patterns
+# Error Handling Patterns
 
 ## Agent Errors
 ```python
-# In graph nodes  - return error state, never raise
+# In graph nodes  -  return error state, never raise
 def agent_node(state: AgentState) -> AgentState:
     try:
         response = llm.invoke(state["messages"])

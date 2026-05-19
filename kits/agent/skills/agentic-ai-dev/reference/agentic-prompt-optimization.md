@@ -1,4 +1,4 @@
-﻿# Agentic AI Prompt Optimization
+# Agentic AI Prompt Optimization
 
 Advanced prompt optimization techniques for production LangGraph/LangChain agents. Extends `agentic-prompt-engineering.md` with techniques for constitutional AI, tree-of-thoughts, multi-model templates, and production prompt lifecycle management.
 
@@ -6,7 +6,7 @@ Advanced prompt optimization techniques for production LangGraph/LangChain agent
 
 ## 1. Constitutional AI Self-Critique Loop
 
-A 3-pass generate  -> critique  -> refine pattern. Use inside a LangGraph node when output quality must be validated before returning to the user.
+A 3-pass generate -> critique -> refine pattern. Use inside a LangGraph node when output quality must be validated before returning to the user.
 
 ```python
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -19,7 +19,7 @@ class ConstitutionalState(TypedDict):
     draft_response: str
     critique: str
     final_response: str
-    iteration_count: int  # REQUIRED  - prevents runaway loops
+    iteration_count: int  # REQUIRED  -  prevents runaway loops
 
 CRITIQUE_SYSTEM = """Review the response against these principles:
 1. ACCURACY: Are all claims verifiable? Flag uncertainties with "I'm not certain that..."
@@ -27,8 +27,8 @@ CRITIQUE_SYSTEM = """Review the response against these principles:
 3. QUALITY: Is it clear, consistent, and complete?
 
 Output format:
-- PASS: [brief reason]  - if response meets all 3 criteria
-- REVISE: [specific issue and correction needed]  - if any criterion fails"""
+- PASS: [brief reason]  -  if response meets all 3 criteria
+- REVISE: [specific issue and correction needed]  -  if any criterion fails"""
 
 REFINE_SYSTEM = """You are revising a response based on critique feedback.
 Apply the critique exactly. Do not introduce new content beyond what the critique requires."""
@@ -67,7 +67,7 @@ async def constitutional_node(state: ConstitutionalState) -> ConstitutionalState
 
 **When to use:** Customer-facing responses, medical/legal/financial content, any output where hallucinations have high cost.
 
-**Cost:** 2 - 脳 LLM calls per request. Use for high-stakes paths only  - not on every node.
+**Cost:** 2-3x LLM calls per request. Use for high-stakes paths only  -  not on every node.
 
 ---
 
@@ -80,25 +80,25 @@ TOT_TEMPLATE = """Explore multiple solution paths for this problem.
 
 Problem: {problem}
 
-**Approach A:** [Describe path 1  - most straightforward]
+**Approach A:** [Describe path 1  -  most straightforward]
 - Feasibility: [1-10]
 - Completeness: [1-10]
 - Efficiency: [1-10]
 - Verdict: [proceed / abandon]
 
-**Approach B:** [Describe path 2  - alternative angle]
+**Approach B:** [Describe path 2  -  alternative angle]
 - Feasibility: [1-10]
 - Completeness: [1-10]
 - Efficiency: [1-10]
 - Verdict: [proceed / abandon]
 
-**Approach C:** [Describe path 3  - unconventional]
+**Approach C:** [Describe path 3  -  unconventional]
 - Feasibility: [1-10]
 - Completeness: [1-10]
 - Efficiency: [1-10]
 - Verdict: [proceed / abandon]
 
-**Selected Approach:** [A / B / C  - highest combined score]
+**Selected Approach:** [A / B / C  -  highest combined score]
 **Rationale:** [Why this path wins]
 
 **Implementation:**
@@ -148,7 +148,7 @@ Work through this step by step before answering.
 {specify_expected_structure}
 </output_format>"""
 
-# In LangGraph  - use as system message
+# In LangGraph  -  use as system message
 claude_system = SystemMessage(content=CLAUDE_TEMPLATE.format(
     background_information=context,
     clear_objective=task,
@@ -224,7 +224,7 @@ def get_prompt_template(provider: str) -> str:
         "openai": GPT_TEMPLATE,
     }.get(provider, CLAUDE_TEMPLATE)  # default to Claude
 
-# In agentic-llm-routing.md  - the factory already knows the provider
+# In agentic-llm-routing.md  -  the factory already knows the provider
 ```
 
 ---
@@ -345,7 +345,7 @@ JUDGE_PROMPT = """Evaluate the quality of this AI response.
 ## AI Response
 {response}
 
-## Rate each dimension 1 - 0 with one-sentence justification:
+## Rate each dimension 1-10 with one-sentence justification:
 1. TASK_COMPLETION: Did the response fully address the task?
 2. ACCURACY: Is the response factually correct and well-reasoned?
 3. FORMAT: Does the output match the required format?
@@ -364,7 +364,7 @@ async def evaluate_with_judge(
     result = await judge.ainvoke([
         HumanMessage(content=JUDGE_PROMPT.format(task=task, response=response))
     ])
-    # Parse scores  - in production, use .with_structured_output(JudgeResult)
+    # Parse scores  -  in production, use .with_structured_output(JudgeResult)
     return {"raw": result.content, "response_evaluated": response[:100]}
 
 # Integration with LangSmith (from agentic-observability.md):

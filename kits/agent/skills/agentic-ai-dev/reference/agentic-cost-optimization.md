@@ -1,4 +1,4 @@
-﻿# Agentic AI Cost Optimization
+# Agentic AI Cost Optimization
 
 Strategies for managing and reducing LLM costs in production agent systems.
 
@@ -39,7 +39,7 @@ Rules: Use tools for facts. Say "I don't know" if unsure."""  # 30 words
 ```python
 from langchain_core.messages import SystemMessage
 
-# Cache long prompts  - 90% cost reduction on cached portion
+# Cache long prompts  -  90% cost reduction on cached portion
 cached_prompt = SystemMessage(content=[{
     "type": "text",
     "text": LONG_SYSTEM_PROMPT,  # Only pay full price once
@@ -104,7 +104,7 @@ class ResponseCache:
     """Cache LLM responses for identical inputs.
 
     Useful for:
-    - Classification tasks (same input  -> same output)
+    - Classification tasks (same input -> same output)
     - FAQ-style questions
     - Deterministic operations (temperature=0)
     """
@@ -299,12 +299,12 @@ class BudgetManager:
 | Budget | Set per-request, per-session, and daily limits |
 | Monitoring | Track `llm_cost_usd_total` metric, alert on budget |
 | Prompt caching | Use Anthropic `cache_control` for long system prompts |
-| Dashboard budgets | Set spending alerts in provider dashboards (Anthropic Console, OpenAI Usage, GCP Billing)  - code-level `BudgetManager` is defense-in-depth, not a replacement for provider-level hard caps and email/PagerDuty alerts |
+| Dashboard budgets | Set spending alerts in provider dashboards (Anthropic Console, OpenAI Usage, GCP Billing)  -  code-level `BudgetManager` is defense-in-depth, not a replacement for provider-level hard caps and email/PagerDuty alerts |
 | Quota limits | Configure per-project rate limits and monthly spend caps in each provider's console before deploying to production |
 
 ---
 
-## CAG  - Cache Augmented Generation
+## CAG  -  Cache Augmented Generation
 
 **CAG** pre-loads documents into the prompt context once (with Anthropic prompt caching) instead of retrieving them dynamically on every query. Use when your document set is fixed, small enough to fit in context (<200K tokens), and queried repeatedly.
 
@@ -312,11 +312,11 @@ class BudgetManager:
 
 ```
 Document set size?
-鈹溾攢鈹€ Small (< 200K tokens, fits in one prompt)
-鈹?  鈹溾攢鈹€ Queried repeatedly?  -> CAG (cache the full set once)
-鈹?  鈹斺攢鈹€ Queried once/rarely?  -> Direct context (no caching needed)
-鈹斺攢鈹€ Large (> 200K tokens, does not fit)
-    鈹斺攢鈹€  -> RAG (embedding retrieval)
++-- Small (< 200K tokens, fits in one prompt)
+|   +-- Queried repeatedly? -> CAG (cache the full set once)
+|   `-- Queried once/rarely? -> Direct context (no caching needed)
+`-- Large (> 200K tokens, does not fit)
+    `-- -> RAG (embedding retrieval)
 ```
 
 **CAG advantages over RAG:**
@@ -332,7 +332,7 @@ Document set size?
 
 ---
 
-### CAG Implementation  - LangGraph
+### CAG Implementation  -  LangGraph
 
 ```python
 from pathlib import Path
@@ -351,7 +351,7 @@ def load_documents_as_cached_context(doc_paths: list[str]) -> str:
 def build_cag_messages(documents_context: str, question: str) -> list:
     """
     Structure: system (cached role) + human (cached docs) + human (question)
-    Anthropic caches the first two blocks  - question varies each call.
+    Anthropic caches the first two blocks  -  question varies each call.
     """
     return [
         # Block 1: cached system prompt
@@ -360,18 +360,18 @@ def build_cag_messages(documents_context: str, question: str) -> list:
             "text": "You are a precise document analyst. Answer questions based ONLY on the provided documents. If the answer is not in the documents, say 'Not found in documents.'",
             "cache_control": {"type": "ephemeral"}
         }),
-        # Block 2: cached document context (largest block  - highest cache value)
+        # Block 2: cached document context (largest block  -  highest cache value)
         HumanMessage(content=[{
             "type": "text",
             "text": f"Documents:\n\n{documents_context}",
             "cache_control": {"type": "ephemeral"}
         }]),
-        # Block 3: NOT cached  - varies per query
+        # Block 3: NOT cached  -  varies per query
         HumanMessage(content=f"Question: {question}")
     ]
 
 
-# Initialize once at startup  - reuse across requests
+# Initialize once at startup  -  reuse across requests
 DOCS_CONTEXT = load_documents_as_cached_context([
     "docs/api-reference.md",
     "docs/architecture.md",
@@ -381,7 +381,7 @@ DOCS_CONTEXT = load_documents_as_cached_context([
 llm = ChatAnthropic(model="<anthropic-balanced-model>")
 
 def cag_node(state: AgentState) -> AgentState:
-    """CAG node  - documents cached, only question varies."""
+    """CAG node  -  documents cached, only question varies."""
     messages = build_cag_messages(DOCS_CONTEXT, state["question"])
     response = llm.invoke(messages)
     return {"answer": response.content}
@@ -390,11 +390,11 @@ def cag_node(state: AgentState) -> AgentState:
 **Cost profile:**
 - First query: full document tokens billed (cache population)
 - Subsequent queries: ~90% reduction (only question tokens billed at full rate)
-- Cache TTL: 5 minutes (Anthropic ephemeral)  - reset with each query within TTL
+- Cache TTL: 5 minutes (Anthropic ephemeral)  -  reset with each query within TTL
 
 ---
 
-### CAG Implementation  - Google ADK
+### CAG Implementation  -  Google ADK
 
 ```python
 from google.adk.agents import LlmAgent
@@ -413,7 +413,7 @@ def build_cag_agent(doc_paths: list[str]) -> LlmAgent:
     # docs: https://ai.google.dev/gemini-api/docs/caching
     return LlmAgent(
         name="cag_agent",
-        model="<google-fast-model>",  # 1M token context  - fits large document sets
+        model="<google-fast-model>",  # 1M token context  -  fits large document sets
         instruction=f"""You are a precise document analyst.
 Answer questions based ONLY on the documents below.
 If the answer is not in the documents, respond: "Not found in documents."
@@ -423,7 +423,7 @@ DOCUMENTS:
     )
 
 
-# Initialize once  - reuse agent across requests
+# Initialize once  -  reuse agent across requests
 cag_agent = build_cag_agent([
     "docs/api-reference.md",
     "docs/architecture.md",
@@ -435,13 +435,13 @@ cag_agent = build_cag_agent([
 
 ---
 
-### When CAG Fails  - Fall Back to RAG
+### When CAG Fails  -  Fall Back to RAG
 
 ```python
 def should_use_cag(doc_paths: list[str], token_limit: int = 180_000) -> bool:
     """Check if documents fit in context for CAG."""
     total_chars = sum(len(Path(p).read_text()) for p in doc_paths)
-    # Rough estimate: 1 token 鈮?4 characters
+    # Rough estimate: 1 token ~= 4 characters
     estimated_tokens = total_chars // 4
     return estimated_tokens <= token_limit
 

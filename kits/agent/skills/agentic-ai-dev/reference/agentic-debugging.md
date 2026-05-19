@@ -1,4 +1,4 @@
-﻿# Agentic AI Debugging Playbook
+# Agentic AI Debugging Playbook
 
 Common issues, diagnostic tools, and resolution patterns for LangGraph agents.
 
@@ -9,7 +9,7 @@ Common issues, diagnostic tools, and resolution patterns for LangGraph agents.
 **Symptoms:** Agent hits `recursion_limit`, high iteration count, never produces final answer.
 
 **Root Causes:**
-- Missing or broken routing condition  - agent always routes back to itself
+- Missing or broken routing condition  -  agent always routes back to itself
 - Tool always returns an error, causing agent to retry indefinitely
 - LLM always produces tool calls, never a final response
 
@@ -30,7 +30,7 @@ async for update in graph.astream(
 
 **Fixes:**
 1. Add iteration counter check in routing function
-2. Add max error counter  - after N tool errors, force END
+2. Add max error counter  -  after N tool errors, force END
 3. Verify routing function returns END for non-tool-call responses
 4. Check that tool results satisfy the agent's query
 
@@ -39,7 +39,7 @@ async for update in graph.astream(
 **Symptoms:** Agent confidently states incorrect facts, makes up data not in context.
 
 **Root Causes:**
-- No RAG grounding  - relying on training data
+- No RAG grounding  -  relying on training data
 - Retrieved documents are irrelevant
 - System prompt doesn't enforce grounding
 - Temperature too high
@@ -71,7 +71,7 @@ print(f"\nGrounded: Check if generation references document content")
 **Root Causes:**
 - Too many LLM calls per invocation
 - Using expensive model for simple tasks
-- No streaming  - waiting for full response
+- No streaming  -  waiting for full response
 - Slow tools (database, API calls without timeout)
 
 **Diagnosis:**
@@ -91,7 +91,7 @@ async for event in graph.astream_events(input, config, version="v2"):
 ```
 
 **Fixes:**
-1. Use model routing  - cheap model for simple tasks, expensive for complex
+1. Use model routing  -  cheap model for simple tasks, expensive for complex
 2. Enable streaming for user-facing responses
 3. Add timeouts to all tool calls
 4. Use prompt caching for long system prompts
@@ -121,7 +121,7 @@ print(f"Length: {len(result)}")
 **Fixes:**
 1. Add retry with exponential backoff to tools
 2. Add timeout to all I/O operations
-3. Improve tool docstrings  - LLM uses these to generate arguments
+3. Improve tool docstrings  -  LLM uses these to generate arguments
 4. Add input validation with Pydantic `args_schema`
 5. Return helpful error strings instead of empty results
 
@@ -132,7 +132,7 @@ print(f"Length: {len(result)}")
 **Root Causes:**
 - Not using checkpointer
 - Using `MemorySaver` in production (not persistent)
-- Wrong `thread_id`  - each thread has separate state
+- Wrong `thread_id`  -  each thread has separate state
 - Message list not using `add_messages` annotation
 
 **Diagnosis:**
@@ -177,7 +177,7 @@ logger = get_logger("debug")
 class DebugCallbackHandler(AsyncCallbackHandler):
     """Verbose callback handler for debugging agent execution.
 
-    Enable in development only  - too noisy for production.
+    Enable in development only  -  too noisy for production.
     """
 
     async def on_llm_start(self, serialized: dict, prompts: list[str], **kwargs: Any) -> None:
@@ -266,10 +266,10 @@ def analyze_trace(run_id: str) -> None:
 
 ## Quick Debugging Checklist
 
-1. **Check the graph structure**  - `graph.get_graph().draw_mermaid()` to visualize
-2. **Stream updates**  - `stream_mode="updates"` to see node-by-node execution
-3. **Check state**  - `inspect_state(result)` after invocation
-4. **Check logs**  - `LOG_LEVEL=debug` to see all structured log events
-5. **Check LangSmith**  - View trace for full execution timeline
-6. **Test tools in isolation**  - `tool.invoke({"arg": "value"})` directly
-7. **Check checkpointer**  - Verify state persistence with `aget()`
+1. **Check the graph structure**  -  `graph.get_graph().draw_mermaid()` to visualize
+2. **Stream updates**  -  `stream_mode="updates"` to see node-by-node execution
+3. **Check state**  -  `inspect_state(result)` after invocation
+4. **Check logs**  -  `LOG_LEVEL=debug` to see all structured log events
+5. **Check LangSmith**  -  View trace for full execution timeline
+6. **Test tools in isolation**  -  `tool.invoke({"arg": "value"})` directly
+7. **Check checkpointer**  -  Verify state persistence with `aget()`

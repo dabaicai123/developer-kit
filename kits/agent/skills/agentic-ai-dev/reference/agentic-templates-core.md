@@ -1,4 +1,4 @@
-﻿# Agentic AI Core Templates
+# Agentic AI Core Templates
 
 ## FastAPI Application Entry Point
 
@@ -191,7 +191,7 @@ router = APIRouter(tags=["health"])
 
 @router.get("/health")
 async def health_check(request: Request) -> dict:
-    """Health check endpoint  - verify all dependencies are reachable."""
+    """Health check endpoint  -  verify all dependencies are reachable."""
     checks: dict[str, str] = {}
 
     # Check LLM provider
@@ -231,7 +231,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
-# Context variable for correlation ID  - accessible anywhere in the async call chain
+# Context variable for correlation ID  -  accessible anywhere in the async call chain
 correlation_id_var: ContextVar[str] = ContextVar("correlation_id", default="")
 
 
@@ -274,7 +274,7 @@ class AgentState(TypedDict):
 
     Fields:
         messages: Conversation history with automatic message merging.
-        iteration_count: Loop counter  - checked in routing to prevent infinite loops.
+        iteration_count: Loop counter  -  checked in routing to prevent infinite loops.
         error_count: Tracks consecutive errors for fallback decisions.
         thread_id: Conversation thread identifier for checkpointing.
     """

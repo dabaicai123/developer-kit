@@ -1,4 +1,4 @@
-﻿# Agentic AI LLM Routing & Multi-Provider Management
+# Agentic AI LLM Routing & Multi-Provider Management
 
 Multi-provider routing, cost calculation, fallback chains, and prompt caching.
 
@@ -146,7 +146,7 @@ class LLMProviderFactory:
     def get_fallback_chain(self, tiers: list[tuple[ProviderName, ModelTier]] | None = None) -> BaseChatModel:
         """Create a model with fallback chain.
 
-        Default chain: anthropic/balanced  -> openai/balanced  -> anthropic/fast
+        Default chain: anthropic/balanced -> openai/balanced -> anthropic/fast
         """
         if tiers is None:
             tiers = [("anthropic", "balanced"), ("openai", "balanced"), ("anthropic", "fast")]
@@ -322,5 +322,5 @@ class CircuitBreaker:
 | Fallbacks | Always configure at least one fallback provider |
 | Cost tracking | Log token usage for every LLM call |
 | Caching | Use prompt caching for long system prompts |
-| Instantiation | Factory function only  - never `ChatAnthropic()` inline in nodes |
+| Instantiation | Factory function only  -  never `ChatAnthropic()` inline in nodes |
 | Circuit breaker | Use for all external LLM calls |

@@ -1,10 +1,10 @@
-﻿# Agentic AI  - Basic Agent Patterns
+# Agentic AI  -  Basic Agent Patterns
 
 Foundational LangGraph agent patterns with typed state, proper error handling, iteration limits, and checkpointing.
 
 ## Pattern 1: ReAct Agent
 
-The foundational agent pattern  - reason and act in a loop with tool use.
+The foundational agent pattern  -  reason and act in a loop with tool use.
 
 **File:** `src/<service>/agents/graphs/react_agent.py`
 
@@ -46,7 +46,7 @@ def build_react_agent(
     # --- Nodes ---
 
     async def agent_node(state: AgentState) -> dict:
-        """Core reasoning node  - invoke LLM with current state."""
+        """Core reasoning node  -  invoke LLM with current state."""
         logger.info("agent_reasoning", iteration=state["iteration_count"])
         response = await llm.ainvoke(state["messages"])
         return {
@@ -134,7 +134,7 @@ def build_multi_agent(
         }
 
     async def researcher_node(state: MultiAgentState) -> dict:
-        """Research specialist  - gathers information and facts."""
+        """Research specialist  -  gathers information and facts."""
         response = await llm.ainvoke([
             SystemMessage(content="You are a research specialist. Gather relevant facts and information."),
             *state["messages"],
@@ -149,7 +149,7 @@ def build_multi_agent(
         }
 
     async def analyst_node(state: MultiAgentState) -> dict:
-        """Analysis specialist  - identifies patterns and insights."""
+        """Analysis specialist  -  identifies patterns and insights."""
         context = state.get("agent_outputs", {}).get("researcher", "")
         response = await llm.ainvoke([
             SystemMessage(content=f"You are an analysis specialist. Research context:\n{context}"),
@@ -165,7 +165,7 @@ def build_multi_agent(
         }
 
     async def writer_node(state: MultiAgentState) -> dict:
-        """Writing specialist  - produces the final written output."""
+        """Writing specialist  -  produces the final written output."""
         research = state.get("agent_outputs", {}).get("researcher", "")
         analysis = state.get("agent_outputs", {}).get("analyst", "")
         response = await llm.ainvoke([

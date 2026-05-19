@@ -1,4 +1,4 @@
-﻿# Agentic AI  - Error Recovery & Design Decisions
+# Agentic AI  -  Error Recovery & Design Decisions
 
 Error recovery patterns and architectural design decisions for LangGraph agents.
 
@@ -61,7 +61,7 @@ def build_resilient_agent(provider_factory, checkpointer=None) -> StateGraph:
         return END
 
     async def fallback_node(state: AgentState) -> dict:
-        """Graceful degradation  - return a helpful error message."""
+        """Graceful degradation  -  return a helpful error message."""
         return {
             "messages": [AIMessage(
                 content="I'm experiencing technical difficulties. "
