@@ -412,15 +412,15 @@ Sense Check: Validate that the design handles the stated load, meets latency tar
 
 ```
 What is the primary nature of the task?
-+-- Expert role + specific output -> RTF
-+-- Step-by-step reasoning needed -> Chain of Thought
-+-- Multi-phase project -> RISEN
-+-- Complex design/architecture -> RODES (+ CoT)
-+-- Summarize/compress -> Chain of Density
-+-- Stakeholder communication -> RACE
-+-- Research/analysis -> RISE
-+-- Problem with rich context -> STAR
-+-- Structured documentation -> SOAP
-+-- Goal/OKR setting -> CLEAR
-`-- Coaching/development -> GROW
+├── Expert role + specific output → RTF
+├── Step-by-step reasoning needed → Chain of Thought
+├── Multi-phase project → RISEN
+├── Complex design/architecture → RODES (+ CoT)
+├── Summarize/compress → Chain of Density
+├── Stakeholder communication → RACE
+├── Research/analysis → RISE
+├── Problem with rich context → STAR
+├── Structured documentation → SOAP
+├── Goal/OKR setting → CLEAR
+└── Coaching/development → GROW
 ```
